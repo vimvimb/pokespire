@@ -1,101 +1,104 @@
-import type { BattleState, PokemonCombatState, Action } from './types';
-import { getCardDefinition } from '../config/cards';
-import type { CardDefinition } from '../config/cards';
+import type { CombatState, BattleAction } from './types';
+import { getCurrentCombatant } from './combat';
+import { getMove } from '../data/loaders';
+import { getValidTargets } from './position';
 
-function getCardPriority(card: CardDefinition): number {
-  // Priority: 1 = highest (damage), 2 = medium (status/debuff), 3 = lowest (defensive/other)
-  if (card.effect.type === 'damage') {
-    return 1;
-  } else if (card.effect.type === 'status') {
-    return 2;
-  } else {
-    return 3;
+// ============================================================
+// Enemy AI — Section 10 of spec
+// ============================================================
+
+/**
+ * Choose an action for the current enemy combatant.
+ * Simple greedy AI:
+ * 1. Play cheapest affordable damage card → valid target (prioritize low HP)
+ * 2. If no damage card, play cheapest affordable defense card → self
+ * 3. If nothing affordable, end turn
+ * Max 2 cards per turn for MVP.
+ */
+export function chooseEnemyAction(
+  state: CombatState,
+  cardsPlayedThisTurn: number,
+): BattleAction {
+  const combatant = getCurrentCombatant(state);
+
+  // Stop after 2 cards
+  if (cardsPlayedThisTurn >= 2) {
+    return { type: 'end_turn' };
   }
-}
 
-function getAffordableCards(
-  pokemon: PokemonCombatState
-): Array<{ card: CardDefinition; cardId: string }> {
-  return pokemon.hand
-    .map(cardId => {
-      const card = getCardDefinition(cardId);
-      return card ? { card, cardId } : null;
-    })
-    .filter((item): item is { card: CardDefinition; cardId: string } => 
-      item !== null && item.card.cost <= pokemon.currentMana
+  const hand = combatant.hand;
+  const energy = combatant.energy;
+
+  // Find affordable damage cards with valid targets (sorted by cost ascending)
+  const damageCards = hand
+    .map(id => ({ id, card: getMove(id) }))
+    .filter(({ card }) =>
+      card.cost <= energy &&
+      card.effects.some(e => e.type === 'damage')
     )
-    .sort((a, b) => getCardPriority(a.card) - getCardPriority(b.card));
-}
+    .map(({ id, card }) => ({
+      id,
+      card,
+      validTargets: getValidTargets(state, combatant, card.range),
+    }))
+    .filter(({ validTargets }) => validTargets.length > 0)
+    .sort((a, b) => a.card.cost - b.card.cost);
 
-function getFrontMostAlivePlayer(battleState: BattleState): PokemonCombatState | undefined {
-  return battleState.playerParty.find(p => p.currentHp > 0);
-}
-
-export function chooseEnemyAction(battleState: BattleState, enemy: PokemonCombatState): Action[] {
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/052177c7-b559-47bb-b50f-ee17a791e993',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ai.ts:34',message:'chooseEnemyAction entry',data:{enemyId:enemy.pokemonId,enemyMana:enemy.currentMana,enemyHand:enemy.hand,enemyHandLength:enemy.hand.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'F'})}).catch(()=>{});
-  // #endregion
-  const actions: Action[] = [];
-  let remainingMana = enemy.currentMana;
-  const affordableCards = getAffordableCards(enemy);
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/052177c7-b559-47bb-b50f-ee17a791e993',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ai.ts:37',message:'Affordable cards found',data:{affordableCount:affordableCards.length,affordableCardIds:affordableCards.map(c => c.cardId)},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'G'})}).catch(()=>{});
-  // #endregion
-
-  // Greedily play cards in priority order
-  for (const { card, cardId } of affordableCards) {
-    if (remainingMana < card.cost) {
-      continue;
-    }
-
-    // Determine target
-    let targetIds: string[] | undefined;
-    
-    if (card.effect.type === 'damage' || card.effect.type === 'status') {
-      if (card.effect.target === 'all') {
-        // Multi-target, no explicit targets needed
-        targetIds = undefined;
-      } else {
-        // Single target - front-most alive player
-        const target = getFrontMostAlivePlayer(battleState);
-        if (target) {
-          targetIds = [target.pokemonId];
-        } else {
-          continue; // No valid target
-        }
-      }
-    } else if (card.effect.type === 'heal' || card.effect.type === 'block') {
-      if (card.effect.target === 'all') {
-        targetIds = undefined;
-      } else {
-        // Single target - self for heals/blocks
-        targetIds = [enemy.pokemonId];
-      }
-    } else if (card.effect.type === 'buff') {
-      if (card.effect.target === 'all') {
-        targetIds = undefined;
-      } else {
-        targetIds = [enemy.pokemonId];
-      }
-    }
-
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/052177c7-b559-47bb-b50f-ee17a791e993',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ai.ts:76',message:'Adding playCard action',data:{cardId,cardName:card.name,cardCost:card.cost,remainingMana,enemyHand:enemy.hand,cardInHand:enemy.hand.includes(cardId)},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'H'})}).catch(()=>{});
-    // #endregion
-    actions.push({
-      type: 'playCard',
-      cardId,
-      casterId: enemy.pokemonId,
-      targetIds,
-    });
-
-    remainingMana -= card.cost;
+  if (damageCards.length > 0) {
+    const chosen = damageCards[0];
+    // Prioritize low HP targets
+    const sortedTargets = [...chosen.validTargets].sort((a, b) => a.hp - b.hp);
+    return {
+      type: 'play_card',
+      cardInstanceId: chosen.id,
+      targetId: sortedTargets[0].id,
+    };
   }
 
-  // Always end turn after playing cards
-  actions.push({
-    type: 'endTurn',
-  });
+  // Find affordable defense/self-targeting cards
+  const defenseCards = hand
+    .map(id => ({ id, card: getMove(id) }))
+    .filter(({ card }) =>
+      card.cost <= energy &&
+      (card.range === 'self' || card.effects.some(e => e.type === 'block'))
+    )
+    .sort((a, b) => a.card.cost - b.card.cost);
 
-  return actions;
+  if (defenseCards.length > 0) {
+    return {
+      type: 'play_card',
+      cardInstanceId: defenseCards[0].id,
+    };
+  }
+
+  // Try any affordable card with valid targets
+  const anyCard = hand
+    .map(id => ({ id, card: getMove(id) }))
+    .filter(({ card }) => card.cost <= energy)
+    .map(({ id, card }) => ({
+      id,
+      card,
+      validTargets: getValidTargets(state, combatant, card.range),
+    }))
+    .filter(({ validTargets }) => validTargets.length > 0)
+    .sort((a, b) => a.card.cost - b.card.cost);
+
+  if (anyCard.length > 0) {
+    const chosen = anyCard[0];
+    if (chosen.card.range === 'self') {
+      return {
+        type: 'play_card',
+        cardInstanceId: chosen.id,
+      };
+    }
+    // Pick target (prioritize low HP)
+    const sortedTargets = [...chosen.validTargets].sort((a, b) => a.hp - b.hp);
+    return {
+      type: 'play_card',
+      cardInstanceId: chosen.id,
+      targetId: sortedTargets[0].id,
+    };
+  }
+
+  return { type: 'end_turn' };
 }

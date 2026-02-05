@@ -1,0 +1,374 @@
+import { useState, useCallback, useRef, useEffect } from 'react';
+import type {
+  CombatState, LogEntry,
+  PokemonData, Position, Combatant,
+} from '../../engine/types';
+import {
+  createCombatState, getCurrentCombatant,
+} from '../../engine/combat';
+import { startTurn, processAction, endTurn, skipTurnAndAdvance } from '../../engine/turns';
+import { chooseEnemyAction } from '../../engine/ai';
+import type { RunState, BattleNode as MapBattleNode } from '../../run/types';
+import { getRunPokemonData, getRunPositions } from '../../run/state';
+import { getPokemon } from '../../data/loaders';
+
+export type BattlePhase = 'selecting' | 'player_turn' | 'enemy_turn' | 'animating' | 'victory' | 'defeat';
+
+export interface BattleHook {
+  state: CombatState | null;
+  phase: BattlePhase;
+  logs: LogEntry[];
+  startBattle: (players: PokemonData[], enemies: PokemonData[], playerPositions?: Position[], enemyPositions?: Position[]) => void;
+  startBattleFromRun: (run: RunState, node: MapBattleNode) => void;
+  startSandboxBattle: () => void;
+  playCard: (cardIndex: number, targetId?: string) => void;
+  endPlayerTurn: () => void;
+  needsTarget: boolean;
+  pendingCardIndex: number | null;
+  setPendingCardIndex: (index: number | null) => void;
+  getCombatants: () => Combatant[];
+}
+
+export function useBattle(): BattleHook {
+  const [state, setState] = useState<CombatState | null>(null);
+  const [phase, setPhase] = useState<BattlePhase>('selecting');
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [pendingCardIndex, setPendingCardIndex] = useState<number | null>(null);
+  const enemyTimerRef = useRef<number | null>(null);
+
+  // Use refs to break circular dependency between callbacks
+  const processNextTurnRef = useRef<(s: CombatState) => void>(() => {});
+  const scheduleEnemyTurnRef = useRef<(s: CombatState) => void>(() => {});
+
+  const addLogs = useCallback((newLogs: LogEntry[]) => {
+    setLogs(prev => [...prev, ...newLogs]);
+  }, []);
+
+  const processNextTurn = useCallback((s: CombatState) => {
+    if (s.phase !== 'ongoing') {
+      setPhase(s.phase === 'victory' ? 'victory' : 'defeat');
+      setState({ ...s });
+      return;
+    }
+
+    const { logs: turnLogs, skipped } = startTurn(s);
+    addLogs(turnLogs);
+
+    if (s.phase !== 'ongoing') {
+      setPhase(s.phase === 'victory' ? 'victory' : 'defeat');
+      setState({ ...s });
+      return;
+    }
+
+    if (skipped) {
+      const advLogs = skipTurnAndAdvance(s);
+      addLogs(advLogs);
+      setState({ ...s });
+      // Recurse with delay to avoid blocking
+      setTimeout(() => processNextTurnRef.current(s), 300);
+      return;
+    }
+
+    const current = getCurrentCombatant(s);
+    setPhase(current.side === 'player' ? 'player_turn' : 'enemy_turn');
+    setState({ ...s });
+
+    if (current.side === 'enemy') {
+      scheduleEnemyTurnRef.current(s);
+    }
+  }, [addLogs]);
+
+  const scheduleEnemyTurn = useCallback((s: CombatState) => {
+    let cardsPlayed = 0;
+
+    const playNext = () => {
+      try {
+        if (s.phase !== 'ongoing') {
+          setPhase(s.phase === 'victory' ? 'victory' : 'defeat');
+          setState({ ...s });
+          return;
+        }
+
+        const action = chooseEnemyAction(s, cardsPlayed);
+
+        if (action.type === 'end_turn') {
+          // End enemy turn
+          const endLogs = endTurn(s);
+          addLogs(endLogs);
+          setState({ ...s });
+          // Next combatant
+          setTimeout(() => processNextTurnRef.current(s), 500);
+          return;
+        }
+
+        const actionLogs = processAction(s, action);
+        addLogs(actionLogs);
+        cardsPlayed++;
+
+        if (s.phase !== 'ongoing') {
+          setPhase(s.phase === 'victory' ? 'victory' : 'defeat');
+          setState({ ...s });
+          return;
+        }
+
+        setState({ ...s });
+        enemyTimerRef.current = window.setTimeout(playNext, 600);
+      } catch (error) {
+        console.error('Error during enemy turn:', error);
+        // Try to recover by ending the enemy's turn
+        try {
+          const endLogs = endTurn(s);
+          addLogs(endLogs);
+          setState({ ...s });
+          setTimeout(() => processNextTurnRef.current(s), 500);
+        } catch (e) {
+          console.error('Failed to recover from enemy turn error:', e);
+        }
+      }
+    };
+
+    enemyTimerRef.current = window.setTimeout(playNext, 600);
+  }, [addLogs]);
+
+  // Update refs when callbacks change
+  useEffect(() => {
+    processNextTurnRef.current = processNextTurn;
+    scheduleEnemyTurnRef.current = scheduleEnemyTurn;
+  }, [processNextTurn, scheduleEnemyTurn]);
+
+  const initializeBattle = useCallback((
+    s: CombatState,
+    runHpOverrides?: Map<number, number>,
+    runPassiveOverrides?: Map<number, string[]>
+  ) => {
+    // Apply HP overrides from run state (for HP persistence)
+    if (runHpOverrides) {
+      const playerCombatants = s.combatants.filter(c => c.side === 'player');
+      runHpOverrides.forEach((hp, slotIndex) => {
+        const combatant = playerCombatants.find(c => c.slotIndex === slotIndex);
+        if (combatant) {
+          combatant.hp = hp;
+        }
+      });
+    }
+
+    // Apply passive ability overrides from run state
+    if (runPassiveOverrides) {
+      const playerCombatants = s.combatants.filter(c => c.side === 'player');
+      runPassiveOverrides.forEach((passiveIds, slotIndex) => {
+        const combatant = playerCombatants.find(c => c.slotIndex === slotIndex);
+        if (combatant) {
+          combatant.passiveIds = passiveIds;
+        }
+      });
+    }
+
+    setState(s);
+    setLogs([{ round: 1, combatantId: '', message: '--- Battle Start! ---' }]);
+    setPhase('selecting');
+
+    // Start first turn
+    const { logs: turnLogs, skipped } = startTurn(s);
+    setLogs(prev => [...prev, ...turnLogs]);
+
+    if (s.phase !== 'ongoing') {
+      setPhase(s.phase === 'victory' ? 'victory' : 'defeat');
+      setState({ ...s });
+      return;
+    }
+
+    if (skipped) {
+      const advLogs = skipTurnAndAdvance(s);
+      setLogs(prev => [...prev, ...advLogs]);
+      setState({ ...s });
+      // Continue to next turn
+      processNextTurnRef.current(s);
+      return;
+    }
+
+    const current = getCurrentCombatant(s);
+    setPhase(current.side === 'player' ? 'player_turn' : 'enemy_turn');
+    setState({ ...s });
+
+    if (current.side === 'enemy') {
+      scheduleEnemyTurnRef.current(s);
+    }
+  }, []);
+
+  const startBattle = useCallback((players: PokemonData[], enemies: PokemonData[], playerPositions?: Position[], enemyPositions?: Position[]) => {
+    const s = createCombatState(players, enemies, playerPositions, enemyPositions);
+    initializeBattle(s);
+  }, [initializeBattle]);
+
+  const startBattleFromRun = useCallback((run: RunState, node: MapBattleNode) => {
+    // Convert RunPokemon to PokemonData (with modified maxHp/deck)
+    const players = run.party.map(rp => getRunPokemonData(rp));
+    const playerPositions = getRunPositions(run);
+
+    // Get enemy Pokemon data
+    const enemies = node.enemies.map(id => getPokemon(id));
+    const enemyPositions = node.enemyPositions;
+
+    // Create combat state
+    const s = createCombatState(players, enemies, playerPositions, enemyPositions);
+
+    // Build HP overrides from run state
+    const hpOverrides = new Map<number, number>();
+    run.party.forEach((rp, i) => {
+      hpOverrides.set(i, rp.currentHp);
+    });
+
+    // Build passive ability overrides from run state
+    const passiveOverrides = new Map<number, string[]>();
+    run.party.forEach((rp, i) => {
+      passiveOverrides.set(i, rp.passiveIds);
+    });
+
+    initializeBattle(s, hpOverrides, passiveOverrides);
+  }, [initializeBattle]);
+
+  // Sandbox battle for testing targeting mechanics
+  // Player: Snorlax (back-right) with 999 HP and test moves
+  // Enemies: Blastoise, Charmander (front), Bulbasaur, Pikachu (back) - all 999 HP, deck of splash
+  const startSandboxBattle = useCallback(() => {
+    // Get base Pokemon data
+    const snorlaxData = getPokemon('snorlax');
+    const blastoiseData = getPokemon('blastoise');
+    const charmanderData = getPokemon('charmander');
+    const bulbasaurData = getPokemon('bulbasaur');
+    const pikachuData = getPokemon('pikachu');
+
+    // Create splash deck (10 splashes)
+    const splashDeck = Array(10).fill('splash');
+
+    // Test deck with all new effect types
+    const testDeck = [
+      'comet-punch',    // multi_hit - 2×4 damage (Strength procs twice)
+      'dream-eater',    // heal_on_hit - 12 dmg, heal 50% of damage dealt
+      'double-edge',    // recoil - 20 dmg, take 33% recoil
+      'dragon-rage',    // set_damage - 40 fixed damage (ignores modifiers)
+      'super-fang',     // percent_hp - 50% of target's current HP
+      'explosion',      // self_ko - 50 dmg to all enemies, user faints
+      'haze',           // cleanse - remove 2 highest debuffs (cost 0, vanish)
+      'metronome',      // gain_energy + draw_cards - draw 2, gain 1 energy (vanish)
+      'swords-dance',   // apply_status_self - gain Strength 3
+    ];
+
+    // Override HP to 999, deck, and energy for Snorlax
+    const sandboxSnorlax: PokemonData = {
+      ...snorlaxData,
+      maxHp: 999,
+      energyPerTurn: 10,
+      deck: testDeck,
+    };
+    const sandboxBlastoise: PokemonData = {
+      ...blastoiseData,
+      maxHp: 999,
+      deck: splashDeck,
+    };
+    const sandboxCharmander: PokemonData = {
+      ...charmanderData,
+      maxHp: 999,
+      deck: splashDeck,
+    };
+    const sandboxBulbasaur: PokemonData = {
+      ...bulbasaurData,
+      maxHp: 999,
+      deck: splashDeck,
+    };
+    const sandboxPikachu: PokemonData = {
+      ...pikachuData,
+      maxHp: 999,
+      deck: splashDeck,
+    };
+
+    // Positions:
+    // Player: Snorlax back-right (col 2)
+    // Enemies: Blastoise front-left (col 0), Charmander front-middle (col 1)
+    //          Bulbasaur back-middle (col 1, behind Charmander), Pikachu back-right (col 2)
+    const playerPositions: Position[] = [{ row: 'back', column: 2 }];
+    const enemyPositions: Position[] = [
+      { row: 'front', column: 0 },  // Blastoise
+      { row: 'front', column: 1 },  // Charmander
+      { row: 'back', column: 1 },   // Bulbasaur (behind Charmander)
+      { row: 'back', column: 2 },   // Pikachu (own column)
+    ];
+
+    // Create combat state with custom positions
+    const enemies = [sandboxBlastoise, sandboxCharmander, sandboxBulbasaur, sandboxPikachu];
+    const s = createCombatState([sandboxSnorlax], enemies, playerPositions, enemyPositions);
+
+    // Add debuffs to Snorlax for testing cleanse
+    const snorlaxCombatant = s.combatants.find(c => c.side === 'player');
+    if (snorlaxCombatant) {
+      snorlaxCombatant.statuses.push(
+        { type: 'burn', stacks: 6, appliedOrder: 0 },
+        { type: 'paralysis', stacks: 6, appliedOrder: 1 },
+        { type: 'weak', stacks: 6, appliedOrder: 2 },
+        { type: 'poison', stacks: 4, appliedOrder: 3 },
+      );
+    }
+
+    initializeBattle(s);
+  }, [initializeBattle]);
+
+  const playCard = useCallback((cardIndex: number, targetId?: string) => {
+    if (!state || phase !== 'player_turn') return;
+
+    const combatant = getCurrentCombatant(state);
+    const cardId = combatant.hand[cardIndex];
+    if (!cardId) return;
+
+    const actionLogs = processAction(state, {
+      type: 'play_card',
+      cardInstanceId: cardId,
+      targetId,
+    });
+    addLogs(actionLogs);
+    setPendingCardIndex(null);
+
+    if (state.phase !== 'ongoing') {
+      setPhase(state.phase === 'victory' ? 'victory' : 'defeat');
+    }
+    setState({ ...state });
+  }, [state, phase, addLogs]);
+
+  const endPlayerTurn = useCallback(() => {
+    if (!state || phase !== 'player_turn') return;
+
+    const endLogs = endTurn(state);
+    addLogs(endLogs);
+    setPendingCardIndex(null);
+
+    setState({ ...state });
+    setTimeout(() => processNextTurnRef.current(state), 500);
+  }, [state, phase, addLogs]);
+
+  // Cleanup timers
+  useEffect(() => {
+    return () => {
+      if (enemyTimerRef.current) clearTimeout(enemyTimerRef.current);
+    };
+  }, []);
+
+  const needsTarget = pendingCardIndex !== null;
+
+  const getCombatants = useCallback((): Combatant[] => {
+    return state?.combatants ?? [];
+  }, [state]);
+
+  return {
+    state,
+    phase,
+    logs,
+    startBattle,
+    startBattleFromRun,
+    startSandboxBattle,
+    playCard,
+    endPlayerTurn,
+    needsTarget,
+    pendingCardIndex,
+    setPendingCardIndex,
+    getCombatants,
+  };
+}

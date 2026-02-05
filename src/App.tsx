@@ -1,239 +1,351 @@
-import { useState, useEffect } from 'react';
-import { IntroScreen } from './ui/screens/IntroScreen';
-import { PlayerSetupScreen } from './ui/screens/PlayerSetupScreen';
-import { StarterSelectionScreen } from './ui/screens/StarterSelectionScreen';
+import { useState, useCallback } from 'react';
+import type { PokemonData, Position, Combatant } from './engine/types';
+import { useBattle } from './ui/hooks/useBattle';
+import { PartySelectScreen } from './ui/screens/PartySelectScreen';
+import { BattleScreen } from './ui/screens/BattleScreen';
+import type { BattleResult } from './ui/screens/BattleScreen';
 import { MapScreen } from './ui/screens/MapScreen';
-import { CombatScreen } from './ui/screens/CombatScreen';
-import { VictoryScreen } from './ui/screens/VictoryScreen';
-import { DefeatScreen } from './ui/screens/DefeatScreen';
-import { useGameState } from './ui/hooks/useGameState';
-import type { PokemonId } from './config/pokemon';
-import './App.css';
+import { RestScreen } from './ui/screens/RestScreen';
+import { CardDraftScreen } from './ui/screens/CardDraftScreen';
+import { RunVictoryScreen } from './ui/screens/RunVictoryScreen';
+import { CardDexScreen } from './ui/screens/CardDexScreen';
+import type { RunState, BattleNode } from './run/types';
+import {
+  createRunState,
+  applyPercentHeal,
+  applyMaxHpBoost,
+  addCardToDeck,
+  syncBattleResults,
+  moveToNode,
+  isRunComplete,
+  getCurrentNode,
+  applyLevelUp,
+} from './run/state';
 
-function App() {
-  const gameState = useGameState();
-  const [screen, setScreen] = useState<'intro' | 'playerSetup' | 'starterSelection' | 'game'>(() => {
-    // If there's a saved game, start in game mode
-    if (gameState.gameState.screen === 'map' || gameState.gameState.screen === 'combat' || 
-        gameState.gameState.screen === 'victory' || gameState.gameState.screen === 'defeat') {
-      return 'game';
+type Screen = 'main_menu' | 'select' | 'map' | 'rest' | 'card_draft' | 'battle' | 'run_victory' | 'run_defeat' | 'card_dex';
+
+export default function App() {
+  const [screen, setScreen] = useState<Screen>('main_menu');
+  const [runState, setRunState] = useState<RunState | null>(null);
+  const battle = useBattle();
+
+  // Start a new run after party selection
+  const handleStart = useCallback((party: PokemonData[], positions: Position[]) => {
+    const run = createRunState(party, positions, Date.now());
+    setRunState(run);
+    setScreen('map');
+  }, []);
+
+  // Handle node selection on the map
+  const handleSelectNode = useCallback((nodeId: string) => {
+    if (!runState) return;
+
+    // Move to the selected node (grants EXP, marks completed)
+    const newRun = moveToNode(runState, nodeId);
+    setRunState(newRun);
+
+    // Get the node type to determine next screen
+    const node = getCurrentNode(newRun);
+    if (!node) return;
+
+    if (node.type === 'rest') {
+      setScreen('rest');
+    } else if (node.type === 'battle') {
+      battle.startBattleFromRun(newRun, node as BattleNode);
+      setScreen('battle');
     }
-    return 'intro';
-  });
-  const [players, setPlayers] = useState<Array<{ id: string; name: string }>>([]);
+    // spawn nodes don't do anything special, just stay on map
+  }, [runState, battle]);
 
-  // Check if there's a saved game
-  const hasSavedGame = gameState.gameState.screen !== 'intro' && 
-    (gameState.gameState.campaign !== undefined || gameState.gameState.battle !== undefined);
+  // Handle rest choice: heal 30%
+  const handleRestHeal = useCallback((pokemonIndex: number) => {
+    if (!runState) return;
 
-  const handleStart = () => {
-    // If there's a saved game, resume it
-    if (hasSavedGame) {
-      setScreen('game');
+    const newRun = applyPercentHeal(runState, pokemonIndex, 0.3);
+    setRunState(newRun);
+    setScreen('map');
+  }, [runState]);
+
+  // Handle rest choice: +10 max HP
+  const handleRestMaxHpBoost = useCallback((pokemonIndex: number) => {
+    if (!runState) return;
+
+    const newRun = applyMaxHpBoost(runState, pokemonIndex, 10);
+    setRunState(newRun);
+    setScreen('map');
+  }, [runState]);
+
+  // Handle card draft completion (happens after battles)
+  const handleDraftComplete = useCallback((drafts: Map<number, string | null>) => {
+    if (!runState) return;
+
+    // Add drafted cards to decks
+    let newRun = runState;
+    drafts.forEach((cardId, pokemonIndex) => {
+      if (cardId !== null) {
+        newRun = addCardToDeck(newRun, pokemonIndex, cardId);
+      }
+    });
+
+    setRunState(newRun);
+
+    // Check if run is complete
+    if (isRunComplete(newRun)) {
+      setScreen('run_victory');
     } else {
-      setScreen('playerSetup');
+      setScreen('map');
     }
-  };
+  }, [runState]);
 
-  const handleReset = () => {
-    gameState.handleResetGame();
-    setScreen('intro');
-    setPlayers([]);
-  };
+  // Handle battle end
+  const handleBattleEnd = useCallback((result: BattleResult, combatants: Combatant[]) => {
+    if (!runState) return;
 
-  const handlePlayerSetupContinue = (setupPlayers: Array<{ id: string; name: string }>) => {
-    setPlayers(setupPlayers);
-    setScreen('starterSelection');
-  };
-
-  const handleStarterSelection = (selections: Record<string, PokemonId>) => {
-    const playersWithPokemon = players.map(p => ({
-      id: p.id,
-      name: p.name,
-      pokemonId: selections[p.id],
-    }));
-    gameState.handleStartCampaign(playersWithPokemon);
-    setScreen('game');
-  };
-
-  const handleBack = () => {
-    if (screen === 'playerSetup') {
-      setScreen('intro');
-    } else if (screen === 'starterSelection') {
-      setScreen('playerSetup');
+    if (result === 'defeat') {
+      setScreen('run_defeat');
+      return;
     }
-  };
 
-  if (screen === 'intro') {
+    // Sync HP from battle back to run state
+    const newRun = syncBattleResults(runState, combatants);
+    setRunState(newRun);
+
+    // Check if this was the final boss
+    if (isRunComplete(newRun)) {
+      setScreen('run_victory');
+    } else {
+      // Go to card draft after battle
+      setScreen('card_draft');
+    }
+  }, [runState]);
+
+  // Handle card selection during battle
+  const handleSelectCard = useCallback((cardIndex: number | null) => {
+    if (cardIndex === null || !battle.state) {
+      battle.setPendingCardIndex(null);
+      return;
+    }
+    battle.setPendingCardIndex(cardIndex);
+  }, [battle]);
+
+  // Handle target selection during battle
+  const handleSelectTarget = useCallback((targetId: string) => {
+    if (battle.pendingCardIndex !== null) {
+      battle.playCard(battle.pendingCardIndex, targetId || undefined);
+    }
+  }, [battle]);
+
+  // Handle level-up from map screen
+  const handleLevelUp = useCallback((pokemonIndex: number) => {
+    if (!runState) return;
+    const newRun = applyLevelUp(runState, pokemonIndex);
+    setRunState(newRun);
+  }, [runState]);
+
+  // Restart to main menu
+  const handleRestart = useCallback(() => {
+    setRunState(null);
+    setScreen('main_menu');
+  }, []);
+
+  // Start sandbox battle for testing
+  const handleStartSandbox = useCallback(() => {
+    battle.startSandboxBattle();
+    setScreen('battle');
+  }, [battle]);
+
+  // Render based on current screen
+  if (screen === 'main_menu') {
     return (
-      <IntroScreen
-        onStart={handleStart}
-        onReset={handleReset}
-        hasSavedGame={hasSavedGame}
-      />
-    );
-  }
-
-  if (screen === 'playerSetup') {
-    return (
-      <PlayerSetupScreen
-        onContinue={handlePlayerSetupContinue}
-        onBack={handleBack}
-      />
-    );
-  }
-
-  if (screen === 'starterSelection') {
-    return (
-      <StarterSelectionScreen
-        players={players}
-        onStart={handleStarterSelection}
-        onBack={handleBack}
-      />
-    );
-  }
-
-  // Game screens
-  if (screen === 'game') {
-    const { gameState: state } = gameState;
-
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/052177c7-b559-47bb-b50f-ee17a791e993',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:97',message:'App render - game screen routing',data:{screen:state.screen,hasBattle:!!state.battle,hasCampaign:!!state.campaign,battleResult:state.battle?.result,hasError:!!state.error},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-    // #endregion
-
-    // Error modal
-    if (state.error) {
-      return (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 10000,
-          }}
-        >
-          <div
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 32,
+        padding: 32,
+        color: '#e2e8f0',
+        minHeight: '100vh',
+        background: '#0f0f17',
+      }}>
+        <div style={{
+          fontSize: 64,
+          fontWeight: 'bold',
+          color: '#facc15',
+          textShadow: '0 0 20px rgba(250, 204, 21, 0.5)',
+        }}>
+          POKESPIRE
+        </div>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+          marginTop: 32,
+        }}>
+          <button
+            onClick={() => setScreen('select')}
             style={{
-              backgroundColor: '#1e293b',
-              padding: '32px',
-              borderRadius: '12px',
-              maxWidth: '600px',
-              color: 'white',
-              border: '2px solid #ef4444',
+              padding: '16px 64px',
+              fontSize: 20,
+              fontWeight: 'bold',
+              borderRadius: 8,
+              border: 'none',
+              background: '#facc15',
+              color: '#000',
+              cursor: 'pointer',
+              minWidth: 200,
             }}
           >
-            <h2 style={{ fontSize: '24px', marginBottom: '16px', color: '#ef4444' }}>
-              Game Error
-            </h2>
-            <p style={{ marginBottom: '16px', lineHeight: '1.6' }}>
-              An error occurred while processing your action. The game state has not been changed.
-            </p>
-            <p style={{ marginBottom: '24px', fontSize: '14px', color: '#9ca3af', fontFamily: 'monospace', backgroundColor: '#111827', padding: '12px', borderRadius: '6px' }}>
-              {state.error}
-            </p>
-            <p style={{ marginBottom: '24px', fontSize: '14px', color: '#9ca3af' }}>
-              Please check the browser console for more details.
-            </p>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                onClick={() => {
-                  // Clear error and continue
-                  gameState.handleClearError?.();
-                }}
-                style={{
-                  padding: '12px 24px',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  flex: 1,
-                }}
-              >
-                Dismiss
-              </button>
-              <button
-                onClick={() => {
-                  // Clear error by resetting game state
-                  gameState.handleResetGame();
-                  setScreen('intro');
-                  setPlayers([]);
-                }}
-                style={{
-                  padding: '12px 24px',
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  flex: 1,
-                }}
-              >
-                Reset Game
-              </button>
-            </div>
-          </div>
+            Campaign
+          </button>
+          <button
+            onClick={handleStartSandbox}
+            style={{
+              padding: '16px 64px',
+              fontSize: 20,
+              fontWeight: 'bold',
+              borderRadius: 8,
+              border: '2px solid #64748b',
+              background: 'transparent',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              minWidth: 200,
+            }}
+          >
+            Sandbox
+          </button>
+          <button
+            onClick={() => setScreen('card_dex')}
+            style={{
+              padding: '16px 64px',
+              fontSize: 20,
+              fontWeight: 'bold',
+              borderRadius: 8,
+              border: '2px solid #64748b',
+              background: 'transparent',
+              color: '#94a3b8',
+              cursor: 'pointer',
+              minWidth: 200,
+            }}
+          >
+            Card Dex
+          </button>
         </div>
-      );
-    }
-
-    if (state.screen === 'map' && state.campaign) {
-      return (
-        <MapScreen
-          campaignState={state.campaign}
-          onNodeClick={gameState.handleNodeClick}
-        />
-      );
-    }
-
-    if (state.screen === 'combat' && state.battle) {
-      return (
-        <CombatScreen
-          battleState={state.battle}
-          onAction={gameState.handleBattleAction}
-          onBattleEnd={gameState.handleBattleEnd}
-          onResetGame={() => {
-            gameState.handleResetGame();
-            setScreen('intro');
-            setPlayers([]);
-          }}
-        />
-      );
-    }
-
-    if (state.screen === 'combat' && !state.battle) {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/052177c7-b559-47bb-b50f-ee17a791e993',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.tsx:115',message:'CRITICAL: combat screen but no battle state',data:{screen:state.screen},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
-      return <div style={{padding:'20px',color:'white'}}>Error: Combat screen but no battle state</div>;
-    }
-
-    if (state.screen === 'victory') {
-      return (
-        <VictoryScreen
-          isFinalVictory={state.isFinalVictory || false}
-          evolutions={state.evolutions}
-          onContinue={gameState.handleContinueFromVictory}
-        />
-      );
-    }
-
-    if (state.screen === 'defeat') {
-      return <DefeatScreen onReturnToMenu={gameState.handleReturnToMenu} />;
-    }
+        <div style={{
+          fontSize: 14,
+          color: '#64748b',
+          marginTop: 16,
+          textAlign: 'center',
+        }}>
+          Sandbox: Test battle with all new card mechanics
+        </div>
+      </div>
+    );
   }
 
-  return <div>Unknown screen state</div>;
-}
+  if (screen === 'card_dex') {
+    return <CardDexScreen onBack={() => setScreen('main_menu')} />;
+  }
 
-export default App;
+  if (screen === 'select') {
+    return <PartySelectScreen onStart={handleStart} />;
+  }
+
+  if (screen === 'map' && runState) {
+    return (
+      <MapScreen
+        run={runState}
+        onSelectNode={handleSelectNode}
+        onLevelUp={handleLevelUp}
+      />
+    );
+  }
+
+  if (screen === 'rest' && runState) {
+    return (
+      <RestScreen
+        run={runState}
+        onHeal={handleRestHeal}
+        onMaxHpBoost={handleRestMaxHpBoost}
+      />
+    );
+  }
+
+  if (screen === 'card_draft' && runState) {
+    return (
+      <CardDraftScreen
+        run={runState}
+        onDraftComplete={handleDraftComplete}
+      />
+    );
+  }
+
+  if (screen === 'battle' && battle.state) {
+    return (
+      <BattleScreen
+        state={battle.state}
+        phase={battle.phase}
+        logs={battle.logs}
+        pendingCardIndex={battle.pendingCardIndex}
+        onSelectCard={handleSelectCard}
+        onSelectTarget={handleSelectTarget}
+        onEndTurn={battle.endPlayerTurn}
+        onRestart={handleRestart}
+        onBattleEnd={handleBattleEnd}
+        runState={runState ?? undefined}
+      />
+    );
+  }
+
+  if (screen === 'run_victory' && runState) {
+    return <RunVictoryScreen run={runState} onNewRun={handleRestart} />;
+  }
+
+  if (screen === 'run_defeat') {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 32,
+        padding: 32,
+        color: '#e2e8f0',
+        minHeight: '100vh',
+        background: '#0f0f17',
+      }}>
+        <div style={{
+          fontSize: 64,
+          fontWeight: 'bold',
+          color: '#ef4444',
+        }}>
+          RUN OVER
+        </div>
+        <div style={{
+          fontSize: 24,
+          color: '#94a3b8',
+          textAlign: 'center',
+        }}>
+          Your party was defeated...
+        </div>
+        <button
+          onClick={handleRestart}
+          style={{
+            padding: '16px 48px',
+            fontSize: 18,
+            fontWeight: 'bold',
+            borderRadius: 8,
+            border: 'none',
+            background: '#facc15',
+            color: '#000',
+            cursor: 'pointer',
+          }}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  return null;
+}

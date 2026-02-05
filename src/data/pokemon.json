@@ -1,0 +1,386 @@
+{
+  "bulbasaur": {
+    "name": "Bulbasaur",
+    "types": ["grass", "poison"],
+    "maxHp": 36,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "vine-whip", "vine-whip",
+      "leech-seed",
+      "growth",
+      "poison-powder"
+    ],
+    "abilities": []
+  },
+  "ivysaur": {
+    "name": "Ivysaur",
+    "types": ["grass", "poison"],
+    "maxHp": 46,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "vine-whip", "vine-whip",
+      "leech-seed",
+      "growth",
+      "poison-powder"
+    ],
+    "abilities": []
+  },
+  "venusaur": {
+    "name": "Venusaur",
+    "types": ["grass", "poison"],
+    "maxHp": 56,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "vine-whip", "vine-whip",
+      "leech-seed",
+      "growth",
+      "poison-powder"
+    ],
+    "abilities": []
+  },
+  "squirtle": {
+    "name": "Squirtle",
+    "types": ["water"],
+    "maxHp": 38,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "water-gun", "water-gun",
+      "withdraw",
+      "bubble",
+      "tail-whip"
+    ],
+    "abilities": []
+  },
+  "wartortle": {
+    "name": "Wartortle",
+    "types": ["water"],
+    "maxHp": 48,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "water-gun", "water-gun",
+      "withdraw",
+      "bubble",
+      "tail-whip"
+    ],
+    "abilities": []
+  },
+  "blastoise": {
+    "name": "Blastoise",
+    "types": ["water"],
+    "maxHp": 58,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "water-gun", "water-gun",
+      "withdraw",
+      "bubble",
+      "tail-whip"
+    ],
+    "abilities": []
+  },
+  "charmander": {
+    "name": "Charmander",
+    "types": ["fire"],
+    "maxHp": 30,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "scratch", "scratch", "scratch",
+      "defend", "defend",
+      "ember", "ember",
+      "metal-claw",
+      "smokescreen",
+      "growl"
+    ],
+    "abilities": []
+  },
+  "charmeleon": {
+    "name": "Charmeleon",
+    "types": ["fire"],
+    "maxHp": 40,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "scratch", "scratch", "scratch",
+      "defend", "defend",
+      "ember", "ember",
+      "metal-claw",
+      "smokescreen",
+      "growl"
+    ],
+    "abilities": []
+  },
+  "charizard": {
+    "name": "Charizard",
+    "types": ["fire", "flying"],
+    "maxHp": 50,
+    "baseSpeed": 8,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "scratch", "scratch", "scratch",
+      "defend", "defend",
+      "ember", "ember",
+      "metal-claw",
+      "smokescreen",
+      "growl"
+    ],
+    "abilities": []
+  },
+  "pikachu": {
+    "name": "Pikachu",
+    "types": ["electric"],
+    "maxHp": 28,
+    "baseSpeed": 8,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "quick-attack", "quick-attack", "quick-attack",
+      "defend", "defend",
+      "thunder-shock", "thunder-shock",
+      "thunder-wave",
+      "double-team",
+      "tail-whip"
+    ],
+    "abilities": []
+  },
+  "raichu": {
+    "name": "Raichu",
+    "types": ["electric"],
+    "maxHp": 48,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "quick-attack", "quick-attack", "quick-attack",
+      "defend", "defend",
+      "thunder-shock", "thunder-shock",
+      "thunder-wave",
+      "double-team",
+      "tail-whip"
+    ],
+    "abilities": []
+  },
+  "rattata": {
+    "name": "Rattata",
+    "types": ["normal"],
+    "maxHp": 25,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch",
+      "tail-whip"
+    ],
+    "abilities": []
+  },
+  "pidgey": {
+    "name": "Pidgey",
+    "types": ["normal", "flying"],
+    "maxHp": 22,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "peck", "peck", "peck",
+      "wing-attack", "wing-attack",
+      "sand-attack"
+    ],
+    "abilities": []
+  },
+  "ekans": {
+    "name": "Ekans",
+    "types": ["poison"],
+    "maxHp": 30,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "bite", "bite", "bite",
+      "poison-sting", "poison-sting",
+      "wrap",
+      "hiss"
+    ],
+    "abilities": []
+  },
+  "snorlax": {
+    "name": "Snorlax",
+    "types": ["normal"],
+    "maxHp": 100,
+    "baseSpeed": 2,
+    "energyPerTurn": 4,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "headbutt", "headbutt",
+      "body-slam", "body-slam",
+      "rest",
+      "defend", "defend",
+      "sing"
+    ],
+    "abilities": []
+  },
+  "raticate": {
+    "name": "Raticate",
+    "types": ["normal"],
+    "maxHp": 45,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "quick-attack", "quick-attack",
+      "bite", "bite",
+      "hyper-fang",
+      "focus-energy"
+    ],
+    "abilities": []
+  },
+  "arbok": {
+    "name": "Arbok",
+    "types": ["poison"],
+    "maxHp": 55,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "bite", "bite",
+      "poison-sting", "poison-sting",
+      "acid", "acid",
+      "wrap",
+      "glare"
+    ],
+    "abilities": []
+  },
+  "pidgeotto": {
+    "name": "Pidgeotto",
+    "types": ["normal", "flying"],
+    "maxHp": 40,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "peck", "peck",
+      "wing-attack", "wing-attack",
+      "gust", "gust",
+      "sand-attack",
+      "quick-attack"
+    ],
+    "abilities": []
+  },
+  "pidgeot": {
+    "name": "Pidgeot",
+    "types": ["normal", "flying"],
+    "maxHp": 60,
+    "baseSpeed": 8,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "wing-attack", "wing-attack",
+      "gust", "gust",
+      "quick-attack", "quick-attack",
+      "mirror-move",
+      "fly"
+    ],
+    "abilities": []
+  },
+  "tauros": {
+    "name": "Tauros",
+    "types": ["normal"],
+    "maxHp": 65,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "stomp", "stomp",
+      "take-down",
+      "thrash",
+      "rage",
+      "horn-attack"
+    ],
+    "abilities": []
+  },
+  "kangaskhan": {
+    "name": "Kangaskhan",
+    "types": ["normal"],
+    "maxHp": 70,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "comet-punch", "comet-punch",
+      "mega-punch",
+      "dizzy-punch",
+      "bite", "bite",
+      "counter",
+      "rage"
+    ],
+    "abilities": []
+  },
+  "mewtwo": {
+    "name": "Mewtwo",
+    "types": ["psychic"],
+    "maxHp": 130,
+    "baseSpeed": 9,
+    "energyPerTurn": 4,
+    "energyCap": 12,
+    "handSize": 6,
+    "deck": [
+      "confusion", "confusion",
+      "psybeam", "psybeam",
+      "psychic", "psychic",
+      "barrier", "barrier",
+      "recover",
+      "amnesia"
+    ],
+    "abilities": []
+  }
+}

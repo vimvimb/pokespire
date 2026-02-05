@@ -3,14 +3,13 @@ interface Props {
   max: number;
 }
 
-export function HealthBar({ current, max }: Props) {
+export function EnergyBar({ current, max }: Props) {
   const pct = Math.max(0, (current / max) * 100);
-  const color = pct > 50 ? '#4ade80' : pct > 25 ? '#facc15' : '#ef4444';
 
   return (
     <div style={{
       width: '100%',
-      height: 22,
+      height: 20,
       background: '#1e1e2e',
       borderRadius: 6,
       overflow: 'hidden',
@@ -20,7 +19,7 @@ export function HealthBar({ current, max }: Props) {
       <div style={{
         width: `${pct}%`,
         height: '100%',
-        background: color,
+        background: '#60a5fa',
         transition: 'width 0.3s ease',
       }} />
       <span style={{
@@ -29,13 +28,13 @@ export function HealthBar({ current, max }: Props) {
         left: 0,
         right: 0,
         textAlign: 'center',
-        fontSize: 15,
-        lineHeight: '22px',
+        fontSize: 14,
+        lineHeight: '20px',
         color: '#fff',
         fontWeight: 'bold',
         textShadow: '0 1px 2px rgba(0,0,0,0.8)',
       }}>
-        {current}/{max}
+        ⚡ {current}/{max}
       </span>
     </div>
   );

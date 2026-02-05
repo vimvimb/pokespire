@@ -1,104 +1,328 @@
-import type { PokemonId } from '../config/pokemon';
-import type { StatusType, BuffType } from '../config/cards';
+// ============================================================
+// Battle Engine Types — Single source of truth
+// ============================================================
 
-export type BattleResult = 'ongoing' | 'victory' | 'defeat';
+// --- Positioning ---
 
-export interface StatusEffect {
+export type Row = 'front' | 'back';
+export type Column = 0 | 1 | 2;
+
+export interface Position {
+  row: Row;
+  column: Column;
+}
+
+// --- Move Range (targeting system) ---
+
+export type MoveRange =
+  | 'front_enemy'   // single target in front row only
+  | 'back_enemy'    // single target in back row only
+  | 'any_enemy'     // single target, either row
+  | 'front_row'     // AoE all enemies in front row
+  | 'back_row'      // AoE all enemies in back row
+  | 'any_row'       // player picks front or back row, hits all in that row
+  | 'column'        // hits all enemies in a column (front + back)
+  | 'all_enemies'   // AoE all enemies
+  | 'self';         // self-targeting
+
+// --- Legacy Targeting (deprecated) ---
+
+/** @deprecated Use MoveRange instead */
+export type TargetType =
+  | 'single_enemy'
+  | 'all_enemies'
+  | 'random_enemy'
+  | 'self'
+  | 'ally';
+
+// --- Card Effects ---
+
+export type CardEffectType =
+  | 'damage'
+  | 'block'
+  | 'heal'
+  | 'apply_status'
+  | 'multi_hit'
+  | 'heal_on_hit'
+  | 'recoil'
+  | 'set_damage'
+  | 'percent_hp'
+  | 'self_ko'
+  | 'draw_cards'
+  | 'gain_energy'
+  | 'apply_status_self'
+  | 'cleanse';
+
+export interface DamageEffect {
+  type: 'damage';
+  value: number;
+}
+
+export interface BlockEffect {
+  type: 'block';
+  value: number;
+}
+
+export interface HealEffect {
+  type: 'heal';
+  value: number;
+}
+
+export interface ApplyStatusEffect {
+  type: 'apply_status';
+  status: StatusType;
+  stacks: number;
+}
+
+/** Multiple damage instances - each hit triggers Strength separately */
+export interface MultiHitEffect {
+  type: 'multi_hit';
+  value: number;  // damage per hit
+  hits: number;   // number of hits
+}
+
+/** Lifesteal attack - heal a percentage of damage dealt */
+export interface HealOnHitEffect {
+  type: 'heal_on_hit';
+  value: number;        // damage dealt
+  healPercent: number;  // 0.5 = heal 50% of damage dealt
+}
+
+/** Recoil attack - damage self after attacking */
+export interface RecoilEffect {
+  type: 'recoil';
+  value: number;        // damage dealt
+  recoilPercent: number; // 0.5 = take 50% of damage dealt
+}
+
+/** Fixed damage - ignores Strength, Weak, Block, and Evasion */
+export interface SetDamageEffect {
+  type: 'set_damage';
+  value: number;  // exact damage dealt
+}
+
+/** Percentage HP damage - deals % of target's HP */
+export interface PercentHpEffect {
+  type: 'percent_hp';
+  percent: number;  // 0.5 = 50% of HP
+  ofMax: boolean;   // true = max HP, false = current HP
+}
+
+/** Self-KO - user faints after attack */
+export interface SelfKoEffect {
+  type: 'self_ko';
+  value: number;  // damage dealt before user dies
+}
+
+/** Draw additional cards */
+export interface DrawCardsEffect {
+  type: 'draw_cards';
+  count: number;
+}
+
+/** Gain bonus energy */
+export interface GainEnergyEffect {
+  type: 'gain_energy';
+  amount: number;
+}
+
+/** Apply status to self (not target) */
+export interface ApplyStatusSelfEffect {
+  type: 'apply_status_self';
+  status: StatusType;
+  stacks: number;
+}
+
+/** Remove debuffs from self */
+export interface CleanseEffect {
+  type: 'cleanse';
+  count: number;  // number of debuffs to remove (highest stacks first)
+}
+
+export type CardEffect =
+  | DamageEffect
+  | BlockEffect
+  | HealEffect
+  | ApplyStatusEffect
+  | MultiHitEffect
+  | HealOnHitEffect
+  | RecoilEffect
+  | SetDamageEffect
+  | PercentHpEffect
+  | SelfKoEffect
+  | DrawCardsEffect
+  | GainEnergyEffect
+  | ApplyStatusSelfEffect
+  | CleanseEffect;
+
+// --- Move Types (elemental) ---
+
+export type MoveType =
+  | 'normal'
+  | 'fire'
+  | 'water'
+  | 'grass'
+  | 'electric'
+  | 'poison'
+  | 'flying'
+  | 'psychic'
+  | 'dark'
+  | 'fighting'
+  | 'ice'
+  | 'bug'
+  | 'dragon'
+  | 'ghost'
+  | 'rock'
+  | 'ground';
+
+// --- Cards / Moves ---
+
+/** @deprecated Use MoveDefinition instead */
+export interface CardDefinition {
+  id: string;
+  name: string;
+  cost: number;
+  target: TargetType;
+  vanish: boolean;
+  effects: CardEffect[];
+  description: string;
+}
+
+// --- Card Rarity ---
+
+export type CardRarity = 'basic' | 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+
+/** Move is the baseline definition (from JSON) */
+export interface MoveDefinition {
+  id: string;
+  name: string;
+  type: MoveType;
+  cost: number;
+  range: MoveRange;
+  vanish: boolean;
+  effects: CardEffect[];
+  description: string;
+  rarity?: CardRarity;
+}
+
+// --- Status Effects ---
+
+export type StatusType =
+  | 'burn'
+  | 'poison'
+  | 'paralysis'
+  | 'slow'
+  | 'weak'
+  | 'sleep'
+  | 'leech'
+  | 'evasion'
+  | 'strength';
+
+export interface StatusInstance {
   type: StatusType;
   stacks: number;
+  /** For slow: rounds remaining. For leech: rounds remaining. */
+  duration?: number;
+  /** For leech: the combatant ID that applied it and receives healing. */
+  sourceId?: string;
+  /** Tick counter: order in which this was applied (for processing order). */
+  appliedOrder: number;
 }
 
-export interface BuffEffect {
-  type: BuffType;
-  stacks: number;
+// --- Combatant ---
+
+export type CombatantSide = 'player' | 'enemy';
+
+/** Per-turn flags for passive abilities */
+export interface CombatantTurnFlags {
+  blazeStrikeUsedThisTurn: boolean;
+  infernoMomentumReducedIndex: number | null;  // Index of card with cost reduced by Inferno Momentum
 }
 
-export interface PokemonCombatState {
-  pokemonId: PokemonId;
-  playerId?: string; // If controlled by a player
-  currentHp: number;
+export interface Combatant {
+  id: string;               // unique: e.g. "bulbasaur-0", "rattata-1"
+  pokemonId: string;         // species: "bulbasaur", "rattata"
+  name: string;              // display name
+  types: MoveType[];         // pokemon types for STAB calculation
+  side: CombatantSide;
+  slotIndex: number;         // linear index in party (0-based, for turn order)
+  position: Position;        // grid position (row + column)
+
+  hp: number;
   maxHp: number;
-  currentMana: number;
-  maxMana: number;
-  manaRegen: number;
   speed: number;
-  block: number; // Temporary defense, resets at end of round
-  statuses: StatusEffect[];
-  buffs: BuffEffect[];
-  hand: string[]; // Card IDs
-  deck: string[]; // Card IDs
-  discard: string[]; // Card IDs
-  hasActedThisRound: boolean;
+  baseSpeed: number;
+
+  energy: number;
+  energyPerTurn: number;
+  energyCap: number;
+
+  block: number;
+
+  statuses: StatusInstance[];
+
+  drawPile: string[];        // card definition IDs
+  discardPile: string[];
+  hand: string[];
+  vanishedPile: string[];    // cards removed from game by Vanish
+  handSize: number;          // max hand size (4)
+
+  alive: boolean;
+
+  // Passive ability system
+  passiveIds: string[];      // IDs of all passive abilities (e.g., ["kindling", "spreading_flames"])
+  turnFlags: CombatantTurnFlags;  // Per-turn flags, reset at turn start
+  costModifiers: Record<number, number>;  // Temporary cost modifiers by hand index
 }
 
-export interface BattleState {
-  playerParty: PokemonCombatState[];
-  enemies: PokemonCombatState[];
-  turnOrder: PokemonCombatState[]; // All combatants sorted by speed
-  currentTurnIndex: number; // Index in turnOrder
-  currentRound: number;
-  roundActed: Set<string>; // Pokemon IDs that have acted this round
-  result: BattleResult;
+// --- Combat State ---
+
+export interface TurnQueueEntry {
+  combatantId: string;
+  hasActed: boolean;
 }
 
-export type Action = 
-  | PlayCardAction
-  | EndTurnAction
-  | ChoosePathAction
-  | StartBattleAction
-  | StartCampaignAction;
+export interface CombatState {
+  combatants: Combatant[];
+  turnOrder: TurnQueueEntry[];
+  currentTurnIndex: number;
+  round: number;
+  phase: 'ongoing' | 'victory' | 'defeat';
+  log: LogEntry[];
+  statusApplyCounter: number;  // monotonic counter for appliedOrder
+}
+
+export interface LogEntry {
+  round: number;
+  combatantId: string;
+  message: string;
+}
+
+// --- Actions (player input) ---
 
 export interface PlayCardAction {
-  type: 'playCard';
-  cardId: string;
-  casterId: string; // Pokemon ID
-  targetIds?: string[]; // Pokemon IDs (for single-target or multi-target effects)
+  type: 'play_card';
+  cardInstanceId: string;     // the card ID in hand
+  targetId?: string;          // combatant ID for single_enemy / ally
 }
 
 export interface EndTurnAction {
-  type: 'endTurn';
+  type: 'end_turn';
 }
 
-export interface ChoosePathAction {
-  type: 'choosePath';
-  nodeId: string;
-}
+export type BattleAction = PlayCardAction | EndTurnAction;
 
-export interface StartBattleAction {
-  type: 'startBattle';
-  encounterId: string;
-}
+// --- Pokemon Data (config) ---
 
-export interface StartCampaignAction {
-  type: 'startCampaign';
-  players: Array<{
-    id: string;
-    name: string;
-    pokemonId: PokemonId;
-  }>;
-}
-
-export interface CampaignState {
-  currentNodeId: string;
-  completedNodes: Set<string>;
-  party: Array<{
-    playerId?: string;
-    playerName?: string;
-    pokemonId: PokemonId;
-  }>;
-}
-
-export interface GameState {
-  screen: 'intro' | 'playerSetup' | 'starterSelection' | 'map' | 'combat' | 'victory' | 'defeat';
-  campaign?: CampaignState;
-  battle?: BattleState;
-  lastBattleResult?: BattleResult;
-  evolutions?: Array<{ from: PokemonId; to: PokemonId }>;
-  isFinalVictory?: boolean;
-  players?: Array<{
-    id: string;
-    name: string;
-    pokemonId?: PokemonId;
-  }>;
-  error?: string; // Error message if an error occurred
+export interface PokemonData {
+  id: string;
+  name: string;
+  types: MoveType[];  // one or two types
+  maxHp: number;
+  baseSpeed: number;
+  energyPerTurn: number;
+  energyCap: number;
+  handSize: number;
+  deck: string[];  // move definition IDs
+  abilities: string[];  // ability IDs (stubbed for future expansion)
 }

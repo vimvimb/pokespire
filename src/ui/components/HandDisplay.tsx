@@ -1,39 +1,38 @@
-import type { PokemonCombatState } from '../../engine/types';
-import { getCardDefinition } from '../../config/cards';
+import type { Combatant } from '../../engine/types';
+import { getMove } from '../../data/loaders';
 import { CardDisplay } from './CardDisplay';
 
-interface HandDisplayProps {
-  pokemon: PokemonCombatState;
-  selectedCardIndex?: number;
-  onCardClick?: (cardIndex: number) => void;
+interface Props {
+  combatant: Combatant;
+  selectedIndex: number | null;
+  onSelectCard: (index: number) => void;
 }
 
-export function HandDisplay({ pokemon, selectedCardIndex, onCardClick }: HandDisplayProps) {
+export function HandDisplay({ combatant, selectedIndex, onSelectCard }: Props) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: '12px',
-        flexWrap: 'nowrap',
-        justifyContent: 'flex-start',
-        overflowX: 'auto',
-        overflowY: 'hidden',
-        padding: '4px 0',
-        minHeight: '120px',
-      }}
-    >
-      {pokemon.hand.map((cardId, index) => {
-        const card = getCardDefinition(cardId);
-        if (!card) return null;
-        
-        const canAfford = pokemon.currentMana >= card.cost;
+    <div style={{
+      display: 'flex',
+      gap: 12,
+      justifyContent: 'center',
+      flexWrap: 'wrap',
+    }}>
+      {combatant.hand.map((cardId, idx) => {
+        const card = getMove(cardId);
+        // Calculate effective cost with Inferno Momentum reduction
+        const hasInfernoReduction = combatant.turnFlags.infernoMomentumReducedIndex === idx;
+        const effectiveCost = Math.max(0, card.cost + (hasInfernoReduction ? -3 : 0));
+        const canAfford = combatant.energy >= effectiveCost;
+
         return (
           <CardDisplay
-            key={`${cardId}-${index}`}
+            key={`${cardId}-${idx}`}
+            cardId={cardId}
+            handIndex={idx}
             card={card}
+            combatant={combatant}
             canAfford={canAfford}
-            isSelected={selectedCardIndex === index}
-            onClick={() => onCardClick?.(index)}
+            isSelected={selectedIndex === idx}
+            onClick={() => onSelectCard(idx)}
           />
         );
       })}

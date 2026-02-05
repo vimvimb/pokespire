@@ -1,49 +1,52 @@
-import type { PokemonCombatState } from '../../engine/types';
-import { getPokemonStats } from '../../config/pokemon';
+import type { CombatState } from '../../engine/types';
+import { getCombatant } from '../../engine/combat';
+import { getEffectiveSpeed } from '../../engine/status';
 
-interface TurnOrderBarProps {
-  turnOrder: PokemonCombatState[];
-  currentTurnIndex: number;
+interface Props {
+  state: CombatState;
 }
 
-export function TurnOrderBar({ turnOrder, currentTurnIndex }: TurnOrderBarProps) {
+export function TurnOrderBar({ state }: Props) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: '6px',
-        padding: '8px',
-        backgroundColor: '#1f2937',
-        borderRadius: '6px',
-        overflowX: 'auto',
-      }}
-    >
-      {turnOrder.map((pokemon, index) => {
-        const stats = getPokemonStats(pokemon.pokemonId);
-        const isCurrent = index === currentTurnIndex;
-        const isDead = pokemon.currentHp <= 0;
-        
+    <div style={{
+      display: 'flex',
+      gap: 4,
+      justifyContent: 'center',
+      padding: '8px 16px',
+      background: 'transparent',
+      borderRadius: 8,
+      flexWrap: 'wrap',
+    }}>
+      <span style={{ fontSize: 12, color: '#64748b', alignSelf: 'center', marginRight: 8 }}>
+        Round {state.round}
+      </span>
+      {state.turnOrder.map((entry, idx) => {
+        const c = getCombatant(state, entry.combatantId);
+        const isCurrent = idx === state.currentTurnIndex;
+        const hasActed = entry.hasActed;
+
         return (
           <div
-            key={`${pokemon.pokemonId}-${index}`}
+            key={entry.combatantId}
             style={{
-              padding: '6px 10px',
-              backgroundColor: isCurrent ? '#fbbf24' : isDead ? '#6b7280' : '#374151',
-              borderRadius: '4px',
-              minWidth: '90px',
-              textAlign: 'center',
-              border: isCurrent ? '2px solid #f59e0b' : '1px solid #4b5563',
-              opacity: isDead ? 0.5 : 1,
+              padding: '4px 8px',
+              borderRadius: 4,
+              fontSize: 14,
+              fontWeight: isCurrent ? 'bold' : 'normal',
+              background: isCurrent
+                ? '#facc15'
+                : hasActed
+                  ? '#1e1e2e'
+                  : c.side === 'player'
+                    ? '#1e3a5f'
+                    : '#5f1e1e',
+              color: isCurrent ? '#000' : hasActed ? '#555' : '#e2e8f0',
+              opacity: hasActed ? 0.5 : 1,
+              border: isCurrent ? '1px solid #facc15' : '1px solid transparent',
             }}
           >
-            <div style={{ fontWeight: 'bold', fontSize: '11px' }}>{stats.name}</div>
-            <div style={{ fontSize: '9px', color: '#9ca3af' }}>
-              {pokemon.playerId ? `P${pokemon.playerId}` : 'Enemy'}
-            </div>
-            <div style={{ fontSize: '8px', color: '#9ca3af', marginTop: '1px' }}>
-              Spd: {pokemon.speed}
-            </div>
-            {isCurrent && <div style={{ fontSize: '9px', marginTop: '2px' }}>→</div>}
+            <span style={{ fontSize: 12, opacity: 0.6 }}>{getEffectiveSpeed(c)}</span>
+            {' '}{c.name}
           </div>
         );
       })}

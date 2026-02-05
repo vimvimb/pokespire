@@ -1,213 +1,726 @@
-import type { BattleState, PokemonCombatState } from './types';
-import type { CardDefinition, CardEffect } from '../config/cards';
-import { getCardDefinition } from '../config/cards';
-import { applyStatus, applyBuff, getAttackUpBonus } from './status';
+import type { Combatant, CombatState, LogEntry, PlayCardAction, MoveDefinition, MoveRange } from './types';
+import { getMove } from '../data/loaders';
+import { getCombatant, rebuildTurnOrderMidRound } from './combat';
+import { applyCardDamage, applyHeal, applyBypassDamage, getBloomingCycleReduction } from './damage';
+import { applyStatus, isSpeedStatus } from './status';
+import { getEffectiveFrontRow } from './position';
+import { checkBlazeStrike, checkBastionBarrage, checkCounterCurrent, checkStaticField, onDamageDealt, onStatusApplied } from './passives';
+import { shuffle } from './deck';
 
-export function resolveCardEffect(
-  card: CardDefinition,
-  caster: PokemonCombatState,
-  targets: PokemonCombatState[],
-  battleState: BattleState
-): BattleState {
-  let newBattleState = { ...battleState };
-  let newPlayerParty = [...battleState.playerParty];
-  let newEnemies = [...battleState.enemies];
+// ============================================================
+// Card Play & Effect Resolution — Section 6
+// ============================================================
 
-  const attackBonus = getAttackUpBonus(caster);
+/**
+ * Validate and play a card from a combatant's hand.
+ * Returns log entries describing what happened.
+ */
+export function playCard(
+  state: CombatState,
+  combatant: Combatant,
+  action: PlayCardAction,
+): LogEntry[] {
+  const logs: LogEntry[] = [];
+  const cardId = action.cardInstanceId;
 
-  switch (card.effect.type) {
-    case 'damage': {
-      const amount = card.effect.amount + attackBonus;
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/052177c7-b559-47bb-b50f-ee17a791e993',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'cards.ts:20',message:'Applying damage',data:{amount,attackBonus,targetsCount:targets.length,targetIds:targets.map(t=>t.pokemonId)},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
-      for (const target of targets) {
-        const targetParty = target.playerId ? newPlayerParty : newEnemies;
-        const targetIndex = targetParty.findIndex(p => p.pokemonId === target.pokemonId);
-        if (targetIndex >= 0) {
-          const targetPokemon = targetParty[targetIndex];
-          const damageAfterBlock = Math.max(0, amount - targetPokemon.block);
-          const newBlock = Math.max(0, targetPokemon.block - amount);
-          const newHp = Math.max(0, targetPokemon.currentHp - damageAfterBlock);
-          // #region agent log
-          fetch('http://127.0.0.1:7244/ingest/052177c7-b559-47bb-b50f-ee17a791e993',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'cards.ts:28',message:'Damage calculation',data:{targetId:target.pokemonId,oldHp:targetPokemon.currentHp,oldBlock:targetPokemon.block,damageAmount:amount,damageAfterBlock,newBlock,newHp},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
-          // #endregion
-          targetParty[targetIndex] = {
-            ...targetPokemon,
-            currentHp: newHp,
-            block: newBlock,
-          };
-        }
-      }
-      break;
-    }
-    case 'heal': {
-      for (const target of targets) {
-        const targetParty = target.playerId ? newPlayerParty : newEnemies;
-        const targetIndex = targetParty.findIndex(p => p.pokemonId === target.pokemonId);
-        if (targetIndex >= 0) {
-          const targetPokemon = targetParty[targetIndex];
-          const newHp = Math.min(targetPokemon.maxHp, targetPokemon.currentHp + card.effect.amount);
-          
-          targetParty[targetIndex] = {
-            ...targetPokemon,
-            currentHp: newHp,
-          };
-        }
-      }
-      break;
-    }
-    case 'block': {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/052177c7-b559-47bb-b50f-ee17a791e993',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'cards.ts:52',message:'Applying block',data:{target:card.effect.target,amount:card.effect.amount,casterId:caster.pokemonId},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
-      if (card.effect.target === 'self') {
-        const casterParty = caster.playerId ? newPlayerParty : newEnemies;
-        const casterIndex = casterParty.findIndex(p => p.pokemonId === caster.pokemonId);
-        if (casterIndex >= 0) {
-          const oldBlock = casterParty[casterIndex].block;
-          const newBlock = oldBlock + card.effect.amount;
-          // #region agent log
-          fetch('http://127.0.0.1:7244/ingest/052177c7-b559-47bb-b50f-ee17a791e993',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'cards.ts:58',message:'Block applied to self',data:{casterId:caster.pokemonId,oldBlock,newBlock,amount:card.effect.amount},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'D'})}).catch(()=>{});
-          // #endregion
-          casterParty[casterIndex] = {
-            ...casterParty[casterIndex],
-            block: newBlock,
-          };
-        }
-      } else if (card.effect.target === 'all') {
-        // Apply to all allies
-        for (let i = 0; i < newPlayerParty.length; i++) {
-          const oldBlock = newPlayerParty[i].block;
-          const newBlock = oldBlock + card.effect.amount;
-          // #region agent log
-          fetch('http://127.0.0.1:7244/ingest/052177c7-b559-47bb-b50f-ee17a791e993',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'cards.ts:70',message:'Block applied to all',data:{pokemonId:newPlayerParty[i].pokemonId,oldBlock,newBlock,amount:card.effect.amount},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'D'})}).catch(()=>{});
-          // #endregion
-          newPlayerParty[i] = {
-            ...newPlayerParty[i],
-            block: newBlock,
-          };
-        }
-      }
-      break;
-    }
-    case 'status': {
-      for (const target of targets) {
-        const targetParty = target.playerId ? newPlayerParty : newEnemies;
-        const targetIndex = targetParty.findIndex(p => p.pokemonId === target.pokemonId);
-        if (targetIndex >= 0) {
-          targetParty[targetIndex] = applyStatus(
-            targetParty[targetIndex],
-            card.effect.status,
-            card.effect.stacks
-          );
-        }
-      }
-      break;
-    }
-    case 'buff': {
-      if (card.effect.target === 'self') {
-        const casterParty = caster.playerId ? newPlayerParty : newEnemies;
-        const casterIndex = casterParty.findIndex(p => p.pokemonId === caster.pokemonId);
-        if (casterIndex >= 0) {
-          casterParty[casterIndex] = applyBuff(
-            casterParty[casterIndex],
-            card.effect.buff,
-            card.effect.stacks
-          );
-        }
-      } else if (card.effect.target === 'all') {
-        // Apply to all allies
-        for (let i = 0; i < newPlayerParty.length; i++) {
-          newPlayerParty[i] = applyBuff(
-            newPlayerParty[i],
-            card.effect.buff,
-            card.effect.stacks
-          );
-        }
-      }
-      break;
-    }
+  // Validate card is in hand
+  const handIndex = combatant.hand.indexOf(cardId);
+  if (handIndex === -1) {
+    throw new Error(`Card ${cardId} not in hand of ${combatant.id}`);
   }
 
-  return {
-    ...newBattleState,
-    playerParty: newPlayerParty,
-    enemies: newEnemies,
-  };
+  const card = getMove(cardId);
+
+  // Calculate effective cost (accounting for Inferno Momentum)
+  const hasInfernoReduction = combatant.turnFlags.infernoMomentumReducedIndex === handIndex;
+  const effectiveCost = Math.max(0, card.cost + (hasInfernoReduction ? -3 : 0));
+
+  // Validate energy
+  if (combatant.energy < effectiveCost) {
+    throw new Error(`Not enough energy. Have ${combatant.energy}, need ${effectiveCost}`);
+  }
+
+  // Spend energy
+  combatant.energy -= effectiveCost;
+
+  // Update Inferno Momentum tracking when a card is removed
+  const reducedIdx = combatant.turnFlags.infernoMomentumReducedIndex;
+  if (reducedIdx !== null) {
+    if (handIndex === reducedIdx) {
+      // The reduced card was played, clear the flag
+      combatant.turnFlags.infernoMomentumReducedIndex = null;
+    } else if (handIndex < reducedIdx) {
+      // A card before the reduced card was played, shift the index down
+      combatant.turnFlags.infernoMomentumReducedIndex = reducedIdx - 1;
+    }
+    // If handIndex > reducedIdx, no change needed
+  }
+
+  // Remove from hand
+  combatant.hand.splice(handIndex, 1);
+
+  // Resolve targets
+  const targets = resolveTargets(state, combatant, card.range, action.targetId);
+
+  logs.push({
+    round: state.round,
+    combatantId: combatant.id,
+    message: `${combatant.name} plays ${card.name} (cost ${effectiveCost}).`,
+  });
+
+  // Resolve effects on each target
+  for (const target of targets) {
+    const effectLogs = resolveEffects(state, combatant, target, card);
+    logs.push(...effectLogs);
+  }
+
+  // Vanish or discard
+  if (card.vanish) {
+    // Card is removed from the game — track in vanished pile
+    combatant.vanishedPile.push(cardId);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `${card.name} vanishes!`,
+    });
+  } else {
+    combatant.discardPile.push(cardId);
+  }
+
+  return logs;
 }
 
-export function getCardTargets(
-  card: CardDefinition,
-  caster: PokemonCombatState,
-  battleState: BattleState,
-  explicitTargetIds?: string[]
-): PokemonCombatState[] {
-  const effect = card.effect;
+/**
+ * Resolve the targets for a card based on move range.
+ */
+function resolveTargets(
+  state: CombatState,
+  source: Combatant,
+  range: MoveRange,
+  targetId?: string,
+): Combatant[] {
+  const enemies = state.combatants.filter(c => c.alive && c.side !== source.side);
 
-  // If explicit targets provided, use them
-  if (explicitTargetIds && explicitTargetIds.length > 0) {
-    // Check if targets are in uniqueId format (pokemonId-index) or just pokemonId
-    const targets: PokemonCombatState[] = [];
-    for (const id of explicitTargetIds) {
-      if (id.includes('-')) {
-        // Unique ID format: "pokemonId-index"
-        const [pokemonId, indexStr] = id.split('-');
-        const index = parseInt(indexStr, 10);
-        
-        // Find in appropriate array based on card effect
-        if (effect.type === 'heal') {
-          // Heal targets allies (player party)
-          if (index >= 0 && index < battleState.playerParty.length && battleState.playerParty[index].pokemonId === pokemonId) {
-            targets.push(battleState.playerParty[index]);
-          }
-        } else if (effect.side === 'enemy') {
-          // Look in enemies
-          if (index >= 0 && index < battleState.enemies.length && battleState.enemies[index].pokemonId === pokemonId) {
-            targets.push(battleState.enemies[index]);
-          }
-        } else if (effect.side === 'ally') {
-          // Look in player party
-          if (index >= 0 && index < battleState.playerParty.length && battleState.playerParty[index].pokemonId === pokemonId) {
-            targets.push(battleState.playerParty[index]);
+  if (enemies.length === 0 && range !== 'self') {
+    return [];
+  }
+
+  const effectiveFrontRow = enemies.length > 0
+    ? getEffectiveFrontRow(state, enemies[0].side)
+    : 'front';
+
+  switch (range) {
+    case 'self':
+      return [source];
+
+    case 'front_enemy': {
+      // Single target in front row
+      const validTargets = enemies.filter(c => c.position.row === effectiveFrontRow);
+      if (targetId) {
+        const target = getCombatant(state, targetId);
+        if (!validTargets.some(t => t.id === target.id)) {
+          throw new Error(`Target ${targetId} is not in front row`);
+        }
+        return [target];
+      }
+      if (validTargets.length === 1) return [validTargets[0]];
+      if (validTargets.length === 0) return [];
+      throw new Error('front_enemy requires targetId when multiple front targets exist');
+    }
+
+    case 'back_enemy': {
+      // Single target in back row
+      if (effectiveFrontRow === 'back') {
+        // Row collapsed - no valid back row targets
+        return [];
+      }
+      const validTargets = enemies.filter(c => c.position.row === 'back');
+      if (targetId) {
+        const target = getCombatant(state, targetId);
+        if (!validTargets.some(t => t.id === target.id)) {
+          throw new Error(`Target ${targetId} is not in back row`);
+        }
+        return [target];
+      }
+      if (validTargets.length === 1) return [validTargets[0]];
+      if (validTargets.length === 0) return [];
+      throw new Error('back_enemy requires targetId when multiple back targets exist');
+    }
+
+    case 'any_enemy': {
+      // Single target, any row
+      if (targetId) {
+        return [getCombatant(state, targetId)];
+      }
+      if (enemies.length === 1) return [enemies[0]];
+      throw new Error('any_enemy requires targetId when multiple enemies exist');
+    }
+
+    case 'front_row':
+      // AoE: all enemies in effective front row
+      return enemies.filter(c => c.position.row === effectiveFrontRow);
+
+    case 'back_row':
+      // AoE: all enemies in back row (empty if row collapsed)
+      if (effectiveFrontRow === 'back') return [];
+      return enemies.filter(c => c.position.row === 'back');
+
+    case 'any_row': {
+      // Player picks a row (front or back), hits all enemies in that row
+      // targetId should be any enemy in the desired row
+      if (!targetId) {
+        // If only one row has enemies, target that row
+        const frontEnemies = enemies.filter(c => c.position.row === effectiveFrontRow);
+        const backEnemies = effectiveFrontRow === 'back' ? [] : enemies.filter(c => c.position.row === 'back');
+        if (frontEnemies.length > 0 && backEnemies.length === 0) return frontEnemies;
+        if (backEnemies.length > 0 && frontEnemies.length === 0) return backEnemies;
+        throw new Error('any_row requires targetId to select which row');
+      }
+      const target = getCombatant(state, targetId);
+      const targetRow = target.position.row;
+      return enemies.filter(c => c.position.row === targetRow);
+    }
+
+    case 'column': {
+      // Hits all enemies in a column (target any enemy, hits all in that column)
+      if (!targetId) {
+        // If only one column has enemies, target that
+        const columns = new Set(enemies.map(e => e.position.column));
+        if (columns.size === 1) {
+          const col = enemies[0].position.column;
+          return enemies.filter(c => c.position.column === col);
+        }
+        throw new Error('column requires targetId to select which column');
+      }
+      const target = getCombatant(state, targetId);
+      const targetColumn = target.position.column;
+      return enemies.filter(c => c.position.column === targetColumn);
+    }
+
+    case 'all_enemies':
+      // AoE: all enemies
+      return enemies;
+
+    default:
+      throw new Error(`Unknown range type: ${range}`);
+  }
+}
+
+/**
+ * Resolve an ordered list of effects against a target.
+ */
+function resolveEffects(
+  state: CombatState,
+  source: Combatant,
+  target: Combatant,
+  card: MoveDefinition,
+): LogEntry[] {
+  const logs: LogEntry[] = [];
+
+  for (const effect of card.effects) {
+    if (!target.alive && effect.type !== 'apply_status_self' && effect.type !== 'draw_cards' && effect.type !== 'gain_energy') break;
+
+    switch (effect.type) {
+      case 'damage': {
+        // Check for Blaze Strike (multiplier applied after STAB in applyCardDamage)
+        const { shouldApply: isBlazeStrike, logs: blazeLogs } = checkBlazeStrike(
+          state, source, card
+        );
+        logs.push(...blazeLogs);
+
+        // Check for Bastion Barrage (bonus damage from Block for Water attacks)
+        const { bonusDamage: bastionBonus, logs: bastionLogs } = checkBastionBarrage(
+          state, source, card
+        );
+        logs.push(...bastionLogs);
+
+        // Check for Blooming Cycle reduction (enemy has Leech)
+        const bloomingReduction = getBloomingCycleReduction(state, source);
+
+        // Check for Counter-Current (offensive bonus from speed difference)
+        const { bonusDamage: counterBonus, logs: counterLogs } = checkCounterCurrent(
+          state, source, target
+        );
+        logs.push(...counterLogs);
+
+        // Check for Static Field (defensive reduction from speed difference)
+        const { reduction: staticReduction, logs: staticLogs } = checkStaticField(
+          state, source, target
+        );
+        logs.push(...staticLogs);
+
+        const r = applyCardDamage(
+          source, target, effect.value, card.type,
+          isBlazeStrike, bastionBonus, bloomingReduction,
+          counterBonus, staticReduction
+        );
+
+        // Build a concise breakdown string
+        const parts: string[] = [];
+        if (r.stab > 0) parts.push(`+${r.stab} STAB`);
+        if (r.strength > 0) parts.push(`+${r.strength} Str`);
+        if (r.bastionBarrageBonus > 0) parts.push(`+${r.bastionBarrageBonus} Bastion`);
+        if (r.counterCurrentBonus > 0) parts.push(`+${r.counterCurrentBonus} Current`);
+        if (r.weak > 0) parts.push(`-${r.weak} Weak`);
+        if (r.blazeStrikeMultiplier > 1) parts.push(`x${r.blazeStrikeMultiplier} Blaze`);
+        if (r.bloomingCycleReduction > 0) parts.push(`-${r.bloomingCycleReduction} Blooming`);
+        if (r.staticFieldReduction > 0) parts.push(`-${r.staticFieldReduction} Static`);
+        if (r.evasion > 0) parts.push(`-${r.evasion} Evasion`);
+        if (r.blockedAmount > 0) parts.push(`${r.blockedAmount} blocked`);
+        const breakdown = parts.length > 0 ? ` (${r.baseDamage} base${parts.map(p => ', ' + p).join('')})` : '';
+        const dmgMsg = r.hpDamage === 0 && r.blockedAmount > 0
+          ? `${target.name} takes 0 damage — fully blocked!${breakdown}`
+          : `${target.name} takes ${r.hpDamage} damage.${breakdown} (HP: ${target.hp}/${target.maxHp})`;
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: dmgMsg,
+        });
+
+        // Trigger post-damage passive effects (e.g., Kindling)
+        if (r.hpDamage > 0) {
+          const postDmgLogs = onDamageDealt(state, source, target, card, r.hpDamage);
+          logs.push(...postDmgLogs);
+        }
+
+        if (!target.alive) {
+          logs.push({
+            round: state.round,
+            combatantId: target.id,
+            message: `${target.name} is defeated!`,
+          });
+        }
+        break;
+      }
+
+      case 'multi_hit': {
+        // Multiple damage instances - each hit triggers Strength separately
+        let totalDamage = 0;
+        for (let i = 0; i < effect.hits; i++) {
+          if (!target.alive) break;
+
+          const { shouldApply: isBlazeStrike, logs: blazeLogs } = checkBlazeStrike(state, source, card);
+          logs.push(...blazeLogs);
+          const { bonusDamage: bastionBonus, logs: bastionLogs } = checkBastionBarrage(state, source, card);
+          logs.push(...bastionLogs);
+          const bloomingReduction = getBloomingCycleReduction(state, source);
+          const { bonusDamage: counterBonus, logs: counterLogs } = checkCounterCurrent(state, source, target);
+          logs.push(...counterLogs);
+          const { reduction: staticReduction, logs: staticLogs } = checkStaticField(state, source, target);
+          logs.push(...staticLogs);
+
+          const r = applyCardDamage(
+            source, target, effect.value, card.type,
+            isBlazeStrike, bastionBonus, bloomingReduction,
+            counterBonus, staticReduction
+          );
+          totalDamage += r.hpDamage;
+
+          if (r.hpDamage > 0) {
+            const postDmgLogs = onDamageDealt(state, source, target, card, r.hpDamage);
+            logs.push(...postDmgLogs);
           }
         }
-      } else {
-        // Just pokemonId - find first matching (legacy behavior)
-        const allCombatants = [...battleState.playerParty, ...battleState.enemies];
-        const found = allCombatants.find(p => p.pokemonId === id);
-        if (found) {
-          targets.push(found);
+
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: `${target.name} is hit ${effect.hits} times for ${totalDamage} total damage. (HP: ${target.hp}/${target.maxHp})`,
+        });
+
+        if (!target.alive) {
+          logs.push({
+            round: state.round,
+            combatantId: target.id,
+            message: `${target.name} is defeated!`,
+          });
         }
+        break;
+      }
+
+      case 'heal_on_hit': {
+        // Lifesteal attack - deal damage then heal based on damage dealt
+        const { shouldApply: isBlazeStrike, logs: blazeLogs } = checkBlazeStrike(state, source, card);
+        logs.push(...blazeLogs);
+        const { bonusDamage: bastionBonus, logs: bastionLogs } = checkBastionBarrage(state, source, card);
+        logs.push(...bastionLogs);
+        const bloomingReduction = getBloomingCycleReduction(state, source);
+        const { bonusDamage: counterBonus, logs: counterLogs } = checkCounterCurrent(state, source, target);
+        logs.push(...counterLogs);
+        const { reduction: staticReduction, logs: staticLogs } = checkStaticField(state, source, target);
+        logs.push(...staticLogs);
+
+        const r = applyCardDamage(
+          source, target, effect.value, card.type,
+          isBlazeStrike, bastionBonus, bloomingReduction,
+          counterBonus, staticReduction
+        );
+
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: `${target.name} takes ${r.hpDamage} damage. (HP: ${target.hp}/${target.maxHp})`,
+        });
+
+        // Heal the source based on damage dealt (after block)
+        const healAmount = Math.floor(r.hpDamage * effect.healPercent);
+        if (healAmount > 0 && source.alive) {
+          const healed = applyHeal(source, healAmount);
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${source.name} drains ${healed} HP. (HP: ${source.hp}/${source.maxHp})`,
+          });
+        }
+
+        if (r.hpDamage > 0) {
+          const postDmgLogs = onDamageDealt(state, source, target, card, r.hpDamage);
+          logs.push(...postDmgLogs);
+        }
+
+        if (!target.alive) {
+          logs.push({
+            round: state.round,
+            combatantId: target.id,
+            message: `${target.name} is defeated!`,
+          });
+        }
+        break;
+      }
+
+      case 'recoil': {
+        // Deal damage then take recoil damage
+        const { shouldApply: isBlazeStrike, logs: blazeLogs } = checkBlazeStrike(state, source, card);
+        logs.push(...blazeLogs);
+        const { bonusDamage: bastionBonus, logs: bastionLogs } = checkBastionBarrage(state, source, card);
+        logs.push(...bastionLogs);
+        const bloomingReduction = getBloomingCycleReduction(state, source);
+        const { bonusDamage: counterBonus, logs: counterLogs } = checkCounterCurrent(state, source, target);
+        logs.push(...counterLogs);
+        const { reduction: staticReduction, logs: staticLogs } = checkStaticField(state, source, target);
+        logs.push(...staticLogs);
+
+        const r = applyCardDamage(
+          source, target, effect.value, card.type,
+          isBlazeStrike, bastionBonus, bloomingReduction,
+          counterBonus, staticReduction
+        );
+
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: `${target.name} takes ${r.hpDamage} damage. (HP: ${target.hp}/${target.maxHp})`,
+        });
+
+        if (r.hpDamage > 0) {
+          const postDmgLogs = onDamageDealt(state, source, target, card, r.hpDamage);
+          logs.push(...postDmgLogs);
+        }
+
+        if (!target.alive) {
+          logs.push({
+            round: state.round,
+            combatantId: target.id,
+            message: `${target.name} is defeated!`,
+          });
+        }
+
+        // Apply recoil damage to source (bypasses block/evasion)
+        const recoilDamage = Math.floor(r.rawDamage * effect.recoilPercent);
+        if (recoilDamage > 0 && source.alive) {
+          applyBypassDamage(source, recoilDamage);
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${source.name} takes ${recoilDamage} recoil damage! (HP: ${source.hp}/${source.maxHp})`,
+          });
+
+          if (!source.alive) {
+            logs.push({
+              round: state.round,
+              combatantId: source.id,
+              message: `${source.name} is defeated by recoil!`,
+            });
+          }
+        }
+        break;
+      }
+
+      case 'set_damage': {
+        // Fixed damage - ignores Strength, Weak, Block, and Evasion
+        const damage = effect.value;
+        const hpBefore = target.hp;
+        target.hp -= damage;
+        if (target.hp <= 0) {
+          target.hp = 0;
+          target.alive = false;
+        }
+        const actualDamage = hpBefore - target.hp;
+
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: `${target.name} takes ${actualDamage} fixed damage. (HP: ${target.hp}/${target.maxHp})`,
+        });
+
+        if (!target.alive) {
+          logs.push({
+            round: state.round,
+            combatantId: target.id,
+            message: `${target.name} is defeated!`,
+          });
+        }
+        break;
+      }
+
+      case 'percent_hp': {
+        // Deal percentage of target's HP
+        const baseHp = effect.ofMax ? target.maxHp : target.hp;
+        const damage = Math.floor(baseHp * effect.percent);
+        const hpBefore = target.hp;
+        target.hp -= damage;
+        if (target.hp <= 0) {
+          target.hp = 0;
+          target.alive = false;
+        }
+        const actualDamage = hpBefore - target.hp;
+
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: `${target.name} takes ${actualDamage} damage (${Math.round(effect.percent * 100)}% of ${effect.ofMax ? 'max' : 'current'} HP). (HP: ${target.hp}/${target.maxHp})`,
+        });
+
+        if (!target.alive) {
+          logs.push({
+            round: state.round,
+            combatantId: target.id,
+            message: `${target.name} is defeated!`,
+          });
+        }
+        break;
+      }
+
+      case 'self_ko': {
+        // Deal massive damage, then user dies
+        const { shouldApply: isBlazeStrike, logs: blazeLogs } = checkBlazeStrike(state, source, card);
+        logs.push(...blazeLogs);
+        const { bonusDamage: bastionBonus, logs: bastionLogs } = checkBastionBarrage(state, source, card);
+        logs.push(...bastionLogs);
+        const bloomingReduction = getBloomingCycleReduction(state, source);
+        const { bonusDamage: counterBonus, logs: counterLogs } = checkCounterCurrent(state, source, target);
+        logs.push(...counterLogs);
+        const { reduction: staticReduction, logs: staticLogs } = checkStaticField(state, source, target);
+        logs.push(...staticLogs);
+
+        const r = applyCardDamage(
+          source, target, effect.value, card.type,
+          isBlazeStrike, bastionBonus, bloomingReduction,
+          counterBonus, staticReduction
+        );
+
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: `${target.name} takes ${r.hpDamage} damage. (HP: ${target.hp}/${target.maxHp})`,
+        });
+
+        if (r.hpDamage > 0) {
+          const postDmgLogs = onDamageDealt(state, source, target, card, r.hpDamage);
+          logs.push(...postDmgLogs);
+        }
+
+        if (!target.alive) {
+          logs.push({
+            round: state.round,
+            combatantId: target.id,
+            message: `${target.name} is defeated!`,
+          });
+        }
+
+        // User faints
+        source.hp = 0;
+        source.alive = false;
+        logs.push({
+          round: state.round,
+          combatantId: source.id,
+          message: `${source.name} faints from the attack!`,
+        });
+        break;
+      }
+
+      case 'draw_cards': {
+        // Draw additional cards
+        let actualDrawn = 0;
+        for (let i = 0; i < effect.count; i++) {
+          if (source.hand.length >= source.handSize + effect.count) break;
+          if (source.drawPile.length === 0 && source.discardPile.length === 0) break;
+
+          if (source.drawPile.length === 0) {
+            source.drawPile = shuffle([...source.discardPile]);
+            source.discardPile = [];
+          }
+
+          const card = source.drawPile.pop();
+          if (card) {
+            source.hand.push(card);
+            actualDrawn++;
+          }
+        }
+
+        if (actualDrawn > 0) {
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${source.name} draws ${actualDrawn} card${actualDrawn > 1 ? 's' : ''}.`,
+          });
+        }
+        break;
+      }
+
+      case 'gain_energy': {
+        // Gain bonus energy
+        const energyGained = Math.min(effect.amount, source.energyCap - source.energy);
+        source.energy += energyGained;
+
+        if (energyGained > 0) {
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${source.name} gains ${energyGained} energy. (Energy: ${source.energy}/${source.energyCap})`,
+          });
+        }
+        break;
+      }
+
+      case 'apply_status_self': {
+        // Apply status to self (source), not target
+        applyStatus(state, source, effect.status, effect.stacks, source.id);
+        logs.push({
+          round: state.round,
+          combatantId: source.id,
+          message: `${effect.status} ${effect.stacks} applied to ${source.name}.`,
+        });
+
+        // Trigger passive effects for status application
+        const statusPassiveLogs = onStatusApplied(
+          state, source, source, effect.status, effect.stacks
+        );
+        logs.push(...statusPassiveLogs);
+
+        // Rebuild turn order mid-round if speed was affected
+        if (isSpeedStatus(effect.status)) {
+          const reorderLogs = rebuildTurnOrderMidRound(state);
+          logs.push(...reorderLogs);
+        }
+        break;
+      }
+
+      case 'cleanse': {
+        // Remove debuffs from self (highest stacks first)
+        const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'weak', 'sleep', 'leech'];
+        const debuffs = source.statuses
+          .filter(s => debuffTypes.includes(s.type))
+          .sort((a, b) => b.stacks - a.stacks);
+
+        const toRemove = debuffs.slice(0, effect.count);
+        const removedNames: string[] = [];
+
+        for (const debuff of toRemove) {
+          const idx = source.statuses.findIndex(s => s.type === debuff.type);
+          if (idx !== -1) {
+            source.statuses.splice(idx, 1);
+            removedNames.push(`${debuff.type} ${debuff.stacks}`);
+          }
+        }
+
+        if (removedNames.length > 0) {
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${source.name} cleanses ${removedNames.join(', ')}!`,
+          });
+
+          // Rebuild turn order if speed-affecting debuffs were removed
+          const speedDebuffs = ['paralysis', 'slow'];
+          if (toRemove.some(d => speedDebuffs.includes(d.type))) {
+            const reorderLogs = rebuildTurnOrderMidRound(state);
+            logs.push(...reorderLogs);
+          }
+        } else {
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${source.name} has no debuffs to cleanse.`,
+          });
+        }
+        break;
+      }
+
+      case 'block': {
+        target.block += effect.value;
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: `${target.name} gains ${effect.value} Block. (Block: ${target.block})`,
+        });
+        break;
+      }
+      case 'heal': {
+        const healed = applyHeal(target, effect.value);
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: `${target.name} heals ${healed} HP. (HP: ${target.hp}/${target.maxHp})`,
+        });
+        break;
+      }
+      case 'apply_status': {
+        applyStatus(state, target, effect.status, effect.stacks, source.id);
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: `${effect.status} ${effect.stacks} applied to ${target.name}.`,
+        });
+
+        // Trigger passive effects for status application (e.g., Spreading Flames)
+        const statusPassiveLogs = onStatusApplied(
+          state, source, target, effect.status, effect.stacks
+        );
+        logs.push(...statusPassiveLogs);
+
+        // Rebuild turn order mid-round if speed was affected
+        if (isSpeedStatus(effect.status)) {
+          const reorderLogs = rebuildTurnOrderMidRound(state);
+          logs.push(...reorderLogs);
+        }
+        break;
       }
     }
-    return targets;
   }
 
-  // Determine targets based on effect
-  if (effect.type === 'damage' || effect.type === 'status') {
-    if (effect.target === 'all') {
-      return effect.side === 'enemy' ? battleState.enemies : battleState.playerParty;
-    } else {
-      // Single target - should be provided explicitly, but fallback to first enemy
-      return effect.side === 'enemy' 
-        ? battleState.enemies.filter(e => e.currentHp > 0).slice(0, 1)
-        : battleState.playerParty.filter(p => p.currentHp > 0).slice(0, 1);
-    }
-  } else if (effect.type === 'heal' || effect.type === 'block') {
-    if (effect.target === 'all') {
-      return battleState.playerParty;
-    } else {
-      // Single target - should be provided explicitly
-      return battleState.playerParty.filter(p => p.currentHp > 0).slice(0, 1);
-    }
-  } else if (effect.type === 'buff') {
-    if (effect.target === 'all') {
-      return battleState.playerParty;
-    } else {
-      return [caster];
-    }
-  }
+  return logs;
+}
 
-  return [];
+/**
+ * Get playable cards from a combatant's hand (cards they can afford).
+ */
+export function getPlayableCards(combatant: Combatant): string[] {
+  return combatant.hand.filter((cardId, idx) => {
+    const card = getMove(cardId);
+    const hasInfernoReduction = combatant.turnFlags.infernoMomentumReducedIndex === idx;
+    const effectiveCost = Math.max(0, card.cost + (hasInfernoReduction ? -3 : 0));
+    return combatant.energy >= effectiveCost;
+  });
+}
+
+/**
+ * Get the effective cost of a card at a specific hand index.
+ */
+export function getEffectiveCost(combatant: Combatant, handIndex: number): number {
+  const cardId = combatant.hand[handIndex];
+  if (!cardId) return 0;
+  const card = getMove(cardId);
+  const hasInfernoReduction = combatant.turnFlags.infernoMomentumReducedIndex === handIndex;
+  return Math.max(0, card.cost + (hasInfernoReduction ? -3 : 0));
 }

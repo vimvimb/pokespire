@@ -1,16 +1,11 @@
 import { useState } from 'react';
-import type { MoveDefinition, Combatant, MoveType, CardRarity } from '../../engine/types';
-import { getStatusStacks } from '../../engine/status';
-import { hasSTAB, STAB_BONUS } from '../../engine/damage';
+import type { MoveDefinition, MoveType, CardRarity } from '../../engine/types';
 
 interface Props {
-  cardId?: string;
-  handIndex?: number;
   card: MoveDefinition;
-  combatant: Combatant;
-  canAfford: boolean;
-  isSelected: boolean;
-  onClick: () => void;
+  onClick?: () => void;
+  isSelected?: boolean;
+  showHoverEffect?: boolean;
 }
 
 const EFFECT_COLORS: Record<string, string> = {
@@ -62,60 +57,23 @@ const RANGE_LABELS: Record<string, string> = {
 };
 
 const RARITY_COLORS: Record<CardRarity, string | null> = {
-  basic: null,       // No indicator
-  common: '#9ca3af', // Grey
-  uncommon: '#4ade80', // Green
-  rare: '#60a5fa',   // Blue
-  epic: '#a855f7',   // Purple
-  legendary: '#fbbf24', // Gold
+  basic: null,
+  common: '#9ca3af',
+  uncommon: '#4ade80',
+  rare: '#60a5fa',
+  epic: '#a855f7',
+  legendary: '#fbbf24',
 };
 
-/** Build a live description reflecting current Strength/Weak/STAB/Blaze Strike/Bastion Barrage. */
-function buildDescription(card: MoveDefinition, combatant: Combatant): React.ReactNode {
-  const strength = getStatusStacks(combatant, 'strength');
-  const weak = getStatusStacks(combatant, 'weak');
-  const stab = hasSTAB(combatant, card.type) ? STAB_BONUS : 0;
-
-  // Check for Bastion Barrage bonus (water attacks gain +25% of current block)
-  const hasBastionBarrage = combatant.passiveIds.includes('bastion_barrage');
-  const bastionBonus = (hasBastionBarrage && card.type === 'water' && combatant.block > 0)
-    ? Math.floor(combatant.block * 0.25)
-    : 0;
-
-  const additiveMod = strength + stab + bastionBonus - weak;
-
-  // Check for Blaze Strike multiplier (first fire attack of the turn)
-  const hasBlazeStrike = combatant.passiveIds.includes('blaze_strike');
-  const blazeStrikeActive = hasBlazeStrike && card.type === 'fire' && !combatant.turnFlags.blazeStrikeUsedThisTurn;
-  const multiplier = blazeStrikeActive ? 2 : 1;
-
+/** Build a static description (no combat modifiers). */
+function buildDescription(card: MoveDefinition): React.ReactNode {
   const parts: React.ReactNode[] = [];
+
   for (const effect of card.effects) {
     switch (effect.type) {
-      case 'damage': {
-        const afterAdditive = Math.max(effect.value + additiveMod, 1);
-        const effective = afterAdditive * multiplier;
-        const changed = additiveMod !== 0 || multiplier > 1;
-        parts.push(
-          <span key={parts.length}>
-            Deal{' '}
-            {changed ? (
-              <span style={{ color: effective > effect.value ? '#4ade80' : '#ef4444', fontWeight: 'bold' }}>
-                {effective}
-              </span>
-            ) : (
-              <>{effective}</>
-            )}
-            {' '}damage.
-            {changed && (
-              <span style={{ fontSize: 11, color: '#64748b' }}>
-                {' '}({effect.value}{additiveMod > 0 ? `+${additiveMod}` : additiveMod !== 0 ? additiveMod : ''}{multiplier > 1 ? ` x${multiplier}` : ''})
-              </span>
-            )}
-          </span>
-        );
+      case 'damage':
+        parts.push(<span key={parts.length}>Deal {effect.value} damage.</span>);
         break;
-      }
       case 'block':
         parts.push(<span key={parts.length}>Gain {effect.value} Block.</span>);
         break;
@@ -126,40 +84,28 @@ function buildDescription(card: MoveDefinition, combatant: Combatant): React.Rea
         parts.push(<span key={parts.length}>Apply {effect.status} {effect.stacks}.</span>);
         break;
       case 'multi_hit': {
-        const perHit = Math.max(effect.value + additiveMod, 1) * multiplier;
-        const total = perHit * effect.hits;
-        const changed = additiveMod !== 0 || multiplier > 1;
+        const total = effect.value * effect.hits;
         parts.push(
           <span key={parts.length}>
-            Hit {effect.hits}× for{' '}
-            {changed ? (
-              <span style={{ color: '#4ade80', fontWeight: 'bold' }}>{perHit}</span>
-            ) : (
-              <>{perHit}</>
-            )}
-            {' '}each ({total} total).
+            Hit {effect.hits}× for {effect.value} each ({total} total).
           </span>
         );
         break;
       }
       case 'heal_on_hit': {
-        const afterAdditive = Math.max(effect.value + additiveMod, 1);
-        const effective = afterAdditive * multiplier;
         const healPct = Math.round(effect.healPercent * 100);
         parts.push(
           <span key={parts.length}>
-            Deal {effective} damage. Heal {healPct}% dealt.
+            Deal {effect.value} damage. Heal {healPct}% dealt.
           </span>
         );
         break;
       }
       case 'recoil': {
-        const afterAdditive = Math.max(effect.value + additiveMod, 1);
-        const effective = afterAdditive * multiplier;
         const recoilPct = Math.round(effect.recoilPercent * 100);
         parts.push(
           <span key={parts.length}>
-            Deal {effective} damage. Take {recoilPct}% recoil.
+            Deal {effect.value} damage. Take {recoilPct}% recoil.
           </span>
         );
         break;
@@ -167,7 +113,7 @@ function buildDescription(card: MoveDefinition, combatant: Combatant): React.Rea
       case 'set_damage':
         parts.push(
           <span key={parts.length} style={{ color: '#fbbf24' }}>
-            Deal {effect.value} fixed damage (ignores modifiers).
+            Deal {effect.value} fixed damage.
           </span>
         );
         break;
@@ -181,16 +127,13 @@ function buildDescription(card: MoveDefinition, combatant: Combatant): React.Rea
         );
         break;
       }
-      case 'self_ko': {
-        const afterAdditive = Math.max(effect.value + additiveMod, 1);
-        const effective = afterAdditive * multiplier;
+      case 'self_ko':
         parts.push(
           <span key={parts.length} style={{ color: '#ef4444' }}>
-            Deal {effective} damage. <b>User faints.</b>
+            Deal {effect.value} damage. <b>User faints.</b>
           </span>
         );
         break;
-      }
       case 'draw_cards':
         parts.push(
           <span key={parts.length} style={{ color: '#60a5fa' }}>
@@ -231,49 +174,37 @@ function buildDescription(card: MoveDefinition, combatant: Combatant): React.Rea
   );
 }
 
-export function CardDisplay({ cardId: _cardId, handIndex, card, combatant, canAfford, isSelected, onClick }: Props) {
+export function CardPreview({ card, onClick, isSelected = false, showHoverEffect = true }: Props) {
   const [isHovered, setIsHovered] = useState(false);
   const primaryEffect = card.effects[0]?.type || 'damage';
   const effectColor = EFFECT_COLORS[primaryEffect] || '#888';
   const moveTypeColor = MOVE_TYPE_COLORS[card.type] || MOVE_TYPE_COLORS.normal;
-  const isSTAB = hasSTAB(combatant, card.type);
 
-  // Calculate effective cost with Inferno Momentum reduction
-  const hasInfernoReduction = combatant.turnFlags.infernoMomentumReducedIndex === handIndex;
-  const effectiveCost = Math.max(0, card.cost + (hasInfernoReduction ? -3 : 0));
-  const costReduced = hasInfernoReduction;
-
-  // Hover glow for playable cards
-  const showHoverGlow = canAfford && isHovered && !isSelected;
+  const isClickable = !!onClick;
+  const showHoverGlow = showHoverEffect && isClickable && isHovered && !isSelected;
 
   return (
     <div
-      onClick={canAfford ? onClick : undefined}
+      onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        width: 130,
-        minHeight: 160,
-        background: isSelected
-          ? '#3b3b5c'
-          : canAfford
-            ? '#1e1e2e'
-            : '#111118',
+        width: 140,
+        minHeight: 180,
+        background: isSelected ? '#3b3b5c' : '#1e1e2e',
         border: isSelected
           ? `2px solid ${effectColor}`
-          : canAfford
-            ? '2px solid #444'
-            : '2px solid #222',
+          : '2px solid #444',
         borderRadius: 8,
         padding: 10,
         display: 'flex',
         flexDirection: 'column',
         gap: 5,
-        cursor: canAfford ? 'pointer' : 'not-allowed',
-        opacity: canAfford ? 1 : 0.5,
+        cursor: isClickable ? 'pointer' : 'default',
         transition: 'all 0.15s',
         position: 'relative',
         boxShadow: showHoverGlow ? `0 0 16px 4px ${effectColor}66` : 'none',
+        transform: isHovered && isClickable ? 'translateY(-4px)' : 'none',
       }}
     >
       {/* Cost badge */}
@@ -284,7 +215,7 @@ export function CardDisplay({ cardId: _cardId, handIndex, card, combatant, canAf
         width: 26,
         height: 26,
         borderRadius: '50%',
-        background: costReduced ? '#4ade80' : '#60a5fa',
+        background: '#60a5fa',
         color: '#fff',
         display: 'flex',
         alignItems: 'center',
@@ -293,12 +224,12 @@ export function CardDisplay({ cardId: _cardId, handIndex, card, combatant, canAf
         fontWeight: 'bold',
         border: '2px solid #1e1e2e',
       }}>
-        {effectiveCost}
+        {card.cost}
       </div>
 
       {/* Name */}
       <div style={{
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: 'bold',
         color: '#e2e8f0',
         borderBottom: `2px solid ${moveTypeColor}`,
@@ -319,11 +250,12 @@ export function CardDisplay({ cardId: _cardId, handIndex, card, combatant, canAf
 
       {/* Description */}
       <div style={{
-        fontSize: 13,
+        fontSize: 12,
         color: '#94a3b8',
         flex: 1,
+        lineHeight: 1.4,
       }}>
-        {buildDescription(card, combatant)}
+        {buildDescription(card)}
       </div>
 
       {/* Vanish badge */}
@@ -348,9 +280,8 @@ export function CardDisplay({ cardId: _cardId, handIndex, card, combatant, canAf
         background: moveTypeColor + '33',
         color: moveTypeColor,
         textTransform: 'uppercase',
-        border: isSTAB ? `1px solid ${moveTypeColor}` : '1px solid transparent',
       }}>
-        {card.type}{isSTAB && ' (STAB)'}
+        {card.type}
       </div>
 
       {/* Rarity gem indicator */}
