@@ -20,6 +20,10 @@ export function PartySelectScreen({ onStart }: Props) {
   const [formation, setFormation] = useState<Map<SlotKey, string>>(new Map());
   // Pokemon waiting to be placed
   const [unplacedPokemon, setUnplacedPokemon] = useState<string[]>([]);
+  // Drag state
+  const [draggedPokemonId, setDraggedPokemonId] = useState<string | null>(null);
+  const [dragSource, setDragSource] = useState<SlotKey | 'unplaced' | null>(null);
+  const [dragOverTarget, setDragOverTarget] = useState<SlotKey | 'unplaced' | null>(null);
 
   const toggle = (id: string) => {
     setSelected(prev => {
@@ -48,44 +52,92 @@ export function PartySelectScreen({ onStart }: Props) {
     setUnplacedPokemon([]);
   };
 
-  const handleSlotClick = (row: Row, col: Column) => {
-    const key: SlotKey = `${row}-${col}`;
-    const currentPokemon = formation.get(key);
-
-    if (currentPokemon) {
-      // Remove pokemon from slot, add back to unplaced
-      setFormation(prev => {
-        const next = new Map(prev);
-        next.delete(key);
-        return next;
-      });
-      setUnplacedPokemon(prev => [...prev, currentPokemon]);
-    } else if (unplacedPokemon.length > 0) {
-      // Place first unplaced pokemon in this slot
-      const pokemonToPlace = unplacedPokemon[0];
-      setFormation(prev => {
-        const next = new Map(prev);
-        next.set(key, pokemonToPlace);
-        return next;
-      });
-      setUnplacedPokemon(prev => prev.slice(1));
+  // Drag handlers
+  const handleDragStart = (e: React.DragEvent, pokemonId: string, source: SlotKey | 'unplaced') => {
+    setDraggedPokemonId(pokemonId);
+    setDragSource(source);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('pokemonId', pokemonId);
+    e.dataTransfer.setData('source', source);
+    // Reduce opacity of dragged element
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '0.5';
     }
   };
 
-  const handleUnplacedClick = (pokemonId: string) => {
-    // Find first empty slot and place there
-    const slots: SlotKey[] = ['front-0', 'front-1', 'front-2', 'back-0', 'back-1', 'back-2'];
-    for (const slot of slots) {
-      if (!formation.has(slot)) {
+  const handleDragEnd = (e: React.DragEvent) => {
+    // Restore opacity
+    if (e.currentTarget instanceof HTMLElement) {
+      e.currentTarget.style.opacity = '1';
+    }
+    setDraggedPokemonId(null);
+    setDragSource(null);
+    setDragOverTarget(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, target: SlotKey | 'unplaced') => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverTarget(target);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverTarget(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, target: SlotKey | 'unplaced') => {
+    e.preventDefault();
+    setDragOverTarget(null);
+
+    const pokemonId = e.dataTransfer.getData('pokemonId');
+    const source = e.dataTransfer.getData('source') as SlotKey | 'unplaced';
+
+    if (!pokemonId || !source) return;
+    if (source === target) return; // Dropping on same location
+
+    // Handle drop logic
+    if (target === 'unplaced') {
+      // Moving to unplaced area
+      setUnplacedPokemon(prev => [...prev, pokemonId]);
+      if (source !== 'unplaced') {
+        // Remove from slot
         setFormation(prev => {
           const next = new Map(prev);
-          next.set(slot, pokemonId);
+          next.delete(source);
           return next;
         });
+      } else {
+        // Remove from unplaced array (shouldn't happen, but handle it)
         setUnplacedPokemon(prev => prev.filter(id => id !== pokemonId));
-        return;
+      }
+    } else {
+      // Moving to a slot
+      const currentPokemonInSlot = formation.get(target);
+      
+      setFormation(prev => {
+        const next = new Map(prev);
+        // Place dragged Pokemon in target slot
+        next.set(target, pokemonId);
+        // Remove from source if it was a slot
+        if (source !== 'unplaced') {
+          next.delete(source);
+        }
+        return next;
+      });
+
+      // If slot was occupied, move that Pokemon to unplaced
+      if (currentPokemonInSlot) {
+        setUnplacedPokemon(prev => [...prev, currentPokemonInSlot]);
+      }
+
+      // Remove from unplaced if source was unplaced
+      if (source === 'unplaced') {
+        setUnplacedPokemon(prev => prev.filter(id => id !== pokemonId));
       }
     }
+
+    setDraggedPokemonId(null);
+    setDragSource(null);
   };
 
   const startBattle = () => {
@@ -202,7 +254,7 @@ export function PartySelectScreen({ onStart }: Props) {
         Set Formation
       </h1>
       <p style={{ color: '#94a3b8', margin: 0 }}>
-        Click slots to place your Pokemon (Back row is protected by Front row)
+        Drag and drop Pokemon to set your formation (Back row is protected by Front row)
       </p>
 
       {/* Formation Grid */}
@@ -215,13 +267,21 @@ export function PartySelectScreen({ onStart }: Props) {
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
           {([0, 1, 2] as Column[]).map(col => {
             const pokemon = getPokemonInSlot('back', col);
+            const slotKey: SlotKey = `back-${col}`;
             return (
               <FormationSlot
                 key={`back-${col}`}
                 pokemon={pokemon}
-                onClick={() => handleSlotClick('back', col)}
+                slotKey={slotKey}
                 isEmpty={!pokemon}
-                canPlace={unplacedPokemon.length > 0}
+                draggedPokemonId={draggedPokemonId}
+                dragSource={dragSource}
+                dragOverTarget={dragOverTarget}
+                onDragStart={(e) => pokemon && handleDragStart(e, pokemon.id, slotKey)}
+                onDragEnd={handleDragEnd}
+                onDragOver={(e) => handleDragOver(e, slotKey)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, slotKey)}
               />
             );
           })}
@@ -235,54 +295,113 @@ export function PartySelectScreen({ onStart }: Props) {
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
           {([0, 1, 2] as Column[]).map(col => {
             const pokemon = getPokemonInSlot('front', col);
+            const slotKey: SlotKey = `front-${col}`;
             return (
               <FormationSlot
                 key={`front-${col}`}
                 pokemon={pokemon}
-                onClick={() => handleSlotClick('front', col)}
+                slotKey={slotKey}
                 isEmpty={!pokemon}
-                canPlace={unplacedPokemon.length > 0}
+                draggedPokemonId={draggedPokemonId}
+                dragSource={dragSource}
+                dragOverTarget={dragOverTarget}
+                onDragStart={(e) => pokemon && handleDragStart(e, pokemon.id, slotKey)}
+                onDragEnd={handleDragEnd}
+                onDragOver={(e) => handleDragOver(e, slotKey)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, slotKey)}
               />
             );
           })}
         </div>
       </div>
 
-      {/* Unplaced Pokemon */}
-      {unplacedPokemon.length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <div style={{ fontSize: 15, color: '#94a3b8', marginBottom: 8, textAlign: 'center' }}>
-            Click to place:
-          </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-            {unplacedPokemon.map(id => {
+      {/* Unplaced Pokemon - Always visible */}
+      <div style={{ marginTop: 16 }}>
+        <div style={{ fontSize: 15, color: '#94a3b8', marginBottom: 8, textAlign: 'center' }}>
+          {unplacedPokemon.length > 0 ? 'Drag to place:' : 'Drop Pokemon here to unplace:'}
+        </div>
+        <div
+          onDragOver={(e) => handleDragOver(e, 'unplaced')}
+          onDragLeave={handleDragLeave}
+          onDrop={(e) => handleDrop(e, 'unplaced')}
+          style={{
+            minHeight: 100,
+            padding: 16,
+            background: dragOverTarget === 'unplaced' ? '#2d2d3f' : '#1a1a24',
+            border: dragOverTarget === 'unplaced' 
+              ? '2px dashed #facc15' 
+              : unplacedPokemon.length > 0 
+                ? '2px solid #444' 
+                : '2px dashed #444',
+            borderRadius: 8,
+            display: 'flex',
+            gap: 8,
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            transition: 'all 0.2s',
+          }}
+        >
+          {unplacedPokemon.length > 0 ? (
+            unplacedPokemon.map(id => {
               const pokemon = starters.find(p => p.id === id);
               if (!pokemon) return null;
               return (
                 <div
                   key={id}
-                  onClick={() => handleUnplacedClick(id)}
+                  draggable={true}
+                  onDragStart={(e) => handleDragStart(e, id, 'unplaced')}
+                  onDragEnd={handleDragEnd}
                   style={{
+                    width: 100,
                     padding: 8,
                     background: '#2d2d3f',
                     border: '2px solid #facc15',
                     borderRadius: 8,
-                    cursor: 'pointer',
+                    cursor: 'grab',
                     textAlign: 'center',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseDown={(e) => {
+                    if (e.currentTarget instanceof HTMLElement) {
+                      e.currentTarget.style.cursor = 'grabbing';
+                    }
+                  }}
+                  onMouseUp={(e) => {
+                    if (e.currentTarget instanceof HTMLElement) {
+                      e.currentTarget.style.cursor = 'grab';
+                    }
                   }}
                 >
                   <img
                     src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemon.id}.gif`}
                     alt={pokemon.name}
                     style={{ width: 50, height: 50, imageRendering: 'pixelated', objectFit: 'contain' }}
+                    draggable={false}
                   />
                   <div style={{ fontSize: 13, fontWeight: 'bold' }}>{pokemon.name}</div>
                 </div>
               );
-            })}
-          </div>
+            })
+          ) : (
+            <div style={{ 
+              color: '#64748b', 
+              fontSize: 14, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              height: '100%',
+              minHeight: 60,
+            }}>
+              Drop Pokemon here
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Action buttons */}
       <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
@@ -324,32 +443,73 @@ export function PartySelectScreen({ onStart }: Props) {
 
 function FormationSlot({
   pokemon,
-  onClick,
+  slotKey,
   isEmpty,
-  canPlace,
+  draggedPokemonId,
+  dragSource,
+  dragOverTarget,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
 }: {
   pokemon: PokemonData | null;
-  onClick: () => void;
+  slotKey: SlotKey;
   isEmpty: boolean;
-  canPlace: boolean;
+  draggedPokemonId: string | null;
+  dragSource: SlotKey | 'unplaced' | null;
+  dragOverTarget: SlotKey | 'unplaced' | null;
+  onDragStart: (e: React.DragEvent) => void;
+  onDragEnd: (e: React.DragEvent) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDragLeave: () => void;
+  onDrop: (e: React.DragEvent) => void;
 }) {
+  const isDragging = draggedPokemonId !== null && dragSource === slotKey;
+  const isDragOver = dragOverTarget === slotKey;
+  const canDrop = draggedPokemonId !== null && dragSource !== slotKey;
+
   return (
     <div
-      onClick={onClick}
+      draggable={!!pokemon}
+      onDragStart={pokemon ? onDragStart : undefined}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
       style={{
         width: 100,
         height: 120,
-        border: isEmpty
-          ? canPlace ? '2px dashed #facc15' : '2px dashed #444'
-          : '2px solid #facc15',
+        border: isDragOver && canDrop
+          ? '2px solid #facc15'
+          : isEmpty
+            ? '2px dashed #444'
+            : '2px solid #facc15',
         borderRadius: 8,
-        background: isEmpty ? '#1a1a24' : '#2d2d3f',
+        background: isDragOver && canDrop
+          ? '#3d3d4f'
+          : isEmpty
+            ? '#1a1a24'
+            : '#2d2d3f',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        cursor: (isEmpty && canPlace) || !isEmpty ? 'pointer' : 'default',
+        cursor: pokemon ? 'grab' : canDrop ? 'pointer' : 'default',
         transition: 'all 0.2s',
+        opacity: isDragging ? 0.5 : 1,
+        boxShadow: isDragOver && canDrop ? '0 0 8px rgba(250, 204, 21, 0.5)' : 'none',
+      }}
+      onMouseDown={(e) => {
+        if (pokemon && e.currentTarget instanceof HTMLElement) {
+          e.currentTarget.style.cursor = 'grabbing';
+        }
+      }}
+      onMouseUp={(e) => {
+        if (pokemon && e.currentTarget instanceof HTMLElement) {
+          e.currentTarget.style.cursor = 'grab';
+        }
       }}
     >
       {pokemon ? (
@@ -358,13 +518,14 @@ function FormationSlot({
             src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemon.id}.gif`}
             alt={pokemon.name}
             style={{ width: 60, height: 60, imageRendering: 'pixelated', objectFit: 'contain' }}
+            draggable={false}
           />
           <div style={{ fontSize: 13, fontWeight: 'bold', color: '#e2e8f0' }}>
             {pokemon.name}
           </div>
         </>
       ) : (
-        <div style={{ fontSize: 26, color: canPlace ? '#facc15' : '#444' }}>+</div>
+        <div style={{ fontSize: 26, color: isDragOver && canDrop ? '#facc15' : '#444' }}>+</div>
       )}
     </div>
   );
