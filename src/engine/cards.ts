@@ -163,15 +163,16 @@ export function playCard(
     combatant.discardPile.push(cardId);
   }
 
+  // Check if any speed changed and rebuild turn order if needed
+  const speedChangeLogs = checkSpeedChangesAndRebuild(state, speedsBefore);
+  logs.push(...speedChangeLogs);
+
   // Slipstream: When using Gust, allies act immediately after you
+  // Runs AFTER speed check so it has final say on ally positioning
   if (cardId === 'gust' && combatant.passiveIds.includes('slipstream')) {
     const slipstreamLogs = applySlipstream(state, combatant);
     logs.push(...slipstreamLogs);
   }
-
-  // Check if any speed changed and rebuild turn order if needed
-  const speedChangeLogs = checkSpeedChangesAndRebuild(state, speedsBefore);
-  logs.push(...speedChangeLogs);
 
   return logs;
 }

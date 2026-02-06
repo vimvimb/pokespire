@@ -86,6 +86,7 @@ export function createCombatState(
     phase: 'ongoing',
     log: [],
     statusApplyCounter: 0,
+    slipstreamProtectedIds: [],
   };
 
   // Build initial turn order
@@ -173,8 +174,8 @@ export function checkSpeedChangesAndRebuild(
 
 /**
  * Rebuild turn order mid-round after a speed change.
- * Keeps already-acted entries in place, re-sorts only the remaining entries
- * (including the current actor who is mid-turn).
+ * Keeps already-acted entries in place, re-sorts only the remaining entries.
+ * Respects Slipstream protection: protected allies maintain their order ahead of enemies.
  */
 export function rebuildTurnOrderMidRound(state: CombatState): LogEntry[] {
   const logs: LogEntry[] = [];
@@ -182,14 +183,19 @@ export function rebuildTurnOrderMidRound(state: CombatState): LogEntry[] {
 
   // Split into acted and remaining
   const acted = state.turnOrder.filter(e => e.hasActed);
-  const remaining = state.turnOrder.filter(e => !e.hasActed).map(e => e.combatantId);
+  const remaining = state.turnOrder.filter(e => !e.hasActed);
 
-  // Sort remaining by speed using the same comparator
-  const remainingCombatants = remaining
-    .map(id => getCombatant(state, id))
+  // Separate protected (Slipstream) from unprotected
+  const protectedIds = new Set(state.slipstreamProtectedIds);
+  const protectedEntries = remaining.filter(e => protectedIds.has(e.combatantId));
+  const unprotectedEntries = remaining.filter(e => !protectedIds.has(e.combatantId));
+
+  // Sort only unprotected by speed
+  const unprotectedCombatants = unprotectedEntries
+    .map(e => getCombatant(state, e.combatantId))
     .filter(c => c.alive);
 
-  remainingCombatants.sort((a, b) => {
+  unprotectedCombatants.sort((a, b) => {
     const speedA = getEffectiveSpeed(a);
     const speedB = getEffectiveSpeed(b);
     if (speedA !== speedB) return speedB - speedA;
@@ -198,15 +204,16 @@ export function rebuildTurnOrderMidRound(state: CombatState): LogEntry[] {
     return a.slotIndex - b.slotIndex;
   });
 
-  const newRemaining: TurnQueueEntry[] = remainingCombatants.map(c => ({
+  const sortedUnprotected: TurnQueueEntry[] = unprotectedCombatants.map(c => ({
     combatantId: c.id,
     hasActed: false,
   }));
 
-  // Check if order actually changed
-  const oldRemaining = remaining;
+  // Merge: [acted] + [protected in current order] + [sorted unprotected]
+  const newRemaining = [...protectedEntries, ...sortedUnprotected];
+  const oldRemainingIds = remaining.map(e => e.combatantId);
   const newRemainingIds = newRemaining.map(e => e.combatantId);
-  const changed = oldRemaining.some((id, i) => id !== newRemainingIds[i]);
+  const changed = oldRemainingIds.some((id, i) => id !== newRemainingIds[i]);
 
   if (changed) {
     state.turnOrder = [...acted, ...newRemaining];
@@ -296,6 +303,9 @@ export function advanceRound(state: CombatState): LogEntry[] {
 
   // Reset round-based passive flags
   onRoundEnd(state);
+
+  // Clear Slipstream protection (only lasts one round)
+  state.slipstreamProtectedIds = [];
 
   state.round += 1;
   state.turnOrder = buildTurnOrder(state);

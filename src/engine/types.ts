@@ -301,6 +301,7 @@ export interface CombatState {
   phase: 'ongoing' | 'victory' | 'defeat';
   log: LogEntry[];
   statusApplyCounter: number;  // monotonic counter for appliedOrder
+  slipstreamProtectedIds: string[];  // combatants protected from speed reordering this round
 }
 
 export interface LogEntry {

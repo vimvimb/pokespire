@@ -187,6 +187,7 @@ function advanceToNextTurn(state: CombatState): LogEntry[] {
 /**
  * Slipstream: Move all allies to act immediately after the current combatant.
  * Triggered when using Gust with the Slipstream passive.
+ * Protected allies cannot be pushed behind enemies by speed changes for the rest of the round.
  */
 export function applySlipstream(state: CombatState, combatant: Combatant): LogEntry[] {
   const logs: LogEntry[] = [];
@@ -215,6 +216,11 @@ export function applySlipstream(state: CombatState, combatant: Combatant): LogEn
 
   // Insert allies right after current combatant
   state.turnOrder.splice(currentIdx + 1, 0, ...allyEntries);
+
+  // Mark these allies as Slipstream-protected for the rest of the round
+  // They won't be pushed behind enemies when speed changes
+  const allyIds = allyEntries.map(e => e.combatantId);
+  state.slipstreamProtectedIds = [...state.slipstreamProtectedIds, ...allyIds];
 
   const allyNames = allyEntries.map(e => getCombatant(state, e.combatantId).name);
   logs.push({
