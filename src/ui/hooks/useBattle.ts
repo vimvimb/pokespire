@@ -96,8 +96,8 @@ export function useBattle(): BattleHook {
           const endLogs = endTurn(s);
           addLogs(endLogs);
           setState({ ...s });
-          // Next combatant
-          setTimeout(() => processNextTurnRef.current(s), 500);
+          // Next combatant (pause before transitioning)
+          setTimeout(() => processNextTurnRef.current(s), 800);
           return;
         }
 
@@ -112,7 +112,8 @@ export function useBattle(): BattleHook {
         }
 
         setState({ ...s });
-        enemyTimerRef.current = window.setTimeout(playNext, 600);
+        // Delay between enemy card plays (slower for readability)
+        enemyTimerRef.current = window.setTimeout(playNext, 1200);
       } catch (error) {
         console.error('Error during enemy turn:', error);
         // Try to recover by ending the enemy's turn
@@ -127,7 +128,8 @@ export function useBattle(): BattleHook {
       }
     };
 
-    enemyTimerRef.current = window.setTimeout(playNext, 600);
+    // Initial delay before enemy starts playing (gives player time to see it's enemy turn)
+    enemyTimerRef.current = window.setTimeout(playNext, 800);
   }, [addLogs]);
 
   // Update refs when callbacks change
