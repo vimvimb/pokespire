@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import type { CombatState, LogEntry, Combatant, Column } from '../../engine/types';
 import { getCurrentCombatant } from '../../engine/combat';
 import { getMove } from '../../data/loaders';
@@ -8,7 +8,8 @@ import { HandDisplay } from '../components/HandDisplay';
 import { TurnOrderBar } from '../components/TurnOrderBar';
 import { BattleLog } from '../components/BattleLog';
 import { PileViewer } from '../components/PileViewer';
-import { ProgressionPanel } from '../components/ProgressionPanel';
+import { PokemonDetailsPanel } from '../components/PokemonDetailsPanel';
+import { useBattleEffects, BattleEffectsLayer } from '../components/BattleEffects';
 import type { BattlePhase } from '../hooks/useBattle';
 import type { RunState } from '../../run/types';
 import battleBackground from '../../../assets/backgrounds/rocket_lab_act_1_v4.png';
@@ -159,6 +160,111 @@ export function BattleScreen({
       setInspectedCombatantId(targetCombatant.id);
     }
   };
+
+  // Battle effects for visual feedback
+  const battleEffects = useBattleEffects();
+  const processedLogsRef = useRef<number>(0);
+
+  // Parse new logs to trigger visual effects
+  useEffect(() => {
+    const newLogs = logs.slice(processedLogsRef.current);
+    processedLogsRef.current = logs.length;
+
+    for (const log of newLogs) {
+      // Parse damage: "X takes Y damage" (most common pattern)
+      const damageMatch = log.message.match(/takes (\d+)(?: \w+)? damage/i);
+      // Also match multi-hit: "is hit X times for Y total damage"
+      const multiHitMatch = log.message.match(/is hit \d+ times for (\d+) total damage/i);
+      // Also match status damage: "Burn/Poison/Leech deals X damage to Y"
+      const statusDamageMatch = log.message.match(/deals (\d+) damage to (\w+)/i);
+
+      if (damageMatch || multiHitMatch) {
+        const damage = parseInt(damageMatch?.[1] || multiHitMatch?.[1] || '0');
+        // Target is in the log's combatantId
+        const target = state.combatants.find(c => c.id === log.combatantId);
+        if (target && damage > 0) {
+          battleEffects.addEvent({
+            type: 'damage',
+            targetId: target.id,
+            value: damage,
+          });
+        }
+      } else if (statusDamageMatch) {
+        const damage = parseInt(statusDamageMatch[1]);
+        const targetName = statusDamageMatch[2];
+        const target = state.combatants.find(c =>
+          c.name.toLowerCase() === targetName.toLowerCase()
+        );
+        if (target && damage > 0) {
+          battleEffects.addEvent({
+            type: 'damage',
+            targetId: target.id,
+            value: damage,
+          });
+        }
+      }
+
+      // Parse heal: "heals X HP" or "drains X HP"
+      const healMatch = log.message.match(/(?:heals|drains) (\d+) HP/i);
+      if (healMatch) {
+        const heal = parseInt(healMatch[1]);
+        const target = state.combatants.find(c => c.id === log.combatantId);
+        if (target && heal > 0) {
+          battleEffects.addEvent({
+            type: 'heal',
+            targetId: target.id,
+            value: heal,
+          });
+        }
+      }
+
+      // Parse block: "gains X Block"
+      const blockMatch = log.message.match(/gains (\d+) Block/i);
+      if (blockMatch) {
+        const block = parseInt(blockMatch[1]);
+        const target = state.combatants.find(c => c.id === log.combatantId);
+        if (target && block > 0) {
+          battleEffects.addEvent({
+            type: 'block',
+            targetId: target.id,
+            value: block,
+          });
+        }
+      }
+
+      // Parse card played: "X plays CardName (cost Y)."
+      const cardMatch = log.message.match(/^(\w+) plays (.+?) \(cost/i);
+      if (cardMatch) {
+        const sourceName = cardMatch[1];
+        const cardName = cardMatch[2];
+        battleEffects.showCardPlayed(sourceName, cardName);
+      }
+    }
+  }, [logs, state.combatants, battleEffects]);
+
+  // Get approximate screen position for a combatant (for floating numbers)
+  const getPositionForCombatant = useCallback((combatantId: string): { x: number; y: number } | null => {
+    const combatant = state.combatants.find(c => c.id === combatantId);
+    if (!combatant) return null;
+
+    const isPlayer = combatant.side === 'player';
+    const col = combatant.position.column;
+    const row = combatant.position.row;
+
+    // Approximate positions based on the grid layout
+    // These are rough estimates - in a real app we'd use refs
+    const centerX = window.innerWidth / 2;
+    const colOffset = (col - 1) * 170; // 170px per column
+    const sideOffset = isPlayer ? -250 : 250; // player left, enemy right
+
+    const baseY = isPlayer ? 320 : 180;
+    const rowOffset = row === 'back' ? (isPlayer ? 60 : -40) : 0;
+
+    return {
+      x: centerX + sideOffset + colOffset,
+      y: baseY + rowOffset + (col * 15), // account for tilt
+    };
+  }, [state.combatants]);
 
   // Calculate targetable combatants based on pending card's range
   const { needsTarget, targetableIds, rangeLabel } = useMemo(() => {
@@ -371,6 +477,15 @@ export function BattleScreen({
           />
         </div>
 
+        {/* Battle effects layer (floating numbers, card announcements) */}
+        <BattleEffectsLayer
+          events={battleEffects.events}
+          cardBanner={battleEffects.cardBanner}
+          getPositionForCombatant={getPositionForCombatant}
+          onEventComplete={battleEffects.removeEvent}
+          onBannerComplete={battleEffects.clearCardBanner}
+        />
+
         {/* Game over overlay */}
         {gameOver && (
           <div style={{
@@ -486,12 +601,11 @@ export function BattleScreen({
 
       {/* Pokemon inspection panel */}
       {inspectedRunPokemon && inspectedCombatant && runState && (
-        <ProgressionPanel
+        <PokemonDetailsPanel
           pokemon={inspectedRunPokemon}
           pokemonIndex={inspectedCombatant.slotIndex}
           partySize={runState.party.length}
           onClose={handleCloseInspection}
-          onLevelUp={() => {}} // No-op during battle
           onNavigate={handleNavigateInspection}
           readOnly
         />

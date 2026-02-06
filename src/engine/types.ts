@@ -95,7 +95,7 @@ export interface RecoilEffect {
   recoilPercent: number; // 0.5 = take 50% of damage dealt
 }
 
-/** Fixed damage - ignores Strength, Weak, Block, and Evasion */
+/** Fixed damage - ignores Strength, Enfeeble, Block, and Evasion */
 export interface SetDamageEffect {
   type: 'set_damage';
   value: number;  // exact damage dealt
@@ -212,7 +212,7 @@ export type StatusType =
   | 'poison'
   | 'paralysis'
   | 'slow'
-  | 'weak'
+  | 'enfeeble'
   | 'sleep'
   | 'leech'
   | 'evasion'

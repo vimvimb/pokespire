@@ -227,86 +227,68 @@ export function useBattle(): BattleHook {
     initializeBattle(s, hpOverrides, passiveOverrides);
   }, [initializeBattle]);
 
-  // Sandbox battle for testing targeting mechanics
-  // Player: Snorlax (back-right) with 999 HP and test moves
-  // Enemies: Blastoise, Charmander (front), Bulbasaur, Pikachu (back) - all 999 HP, deck of splash
+  // Sandbox battle for testing Blastoise passives (Bastion Barrage, etc.)
+  // Player: Blastoise with ALL water line passives and water/block cards
+  // Enemies: Rattata x3 (simple targets)
   const startSandboxBattle = useCallback(() => {
     // Get base Pokemon data
-    const snorlaxData = getPokemon('snorlax');
     const blastoiseData = getPokemon('blastoise');
-    const charmanderData = getPokemon('charmander');
-    const bulbasaurData = getPokemon('bulbasaur');
-    const pikachuData = getPokemon('pikachu');
+    const rattataData = getPokemon('rattata');
 
-    // Create splash deck (10 splashes)
+    // Blastoise test deck: block cards + water attacks to test Bastion Barrage
+    const blastoiseDeck = [
+      'withdraw',       // 1 cost - Gain 8 Block (water type)
+      'withdraw',       // duplicate for testing
+      'defend',         // 1 cost - Gain 5 Block (normal type)
+      'defend',         // duplicate
+      'water-gun',      // 1 cost - 5 damage (water) - should get Bastion Barrage bonus
+      'water-gun',      // duplicate
+      'hydro-pump',     // 3 cost - 15 damage (water) - big Bastion Barrage test
+      'bubble-beam',    // 2 cost - 9 damage (water)
+      'surf',           // 2 cost - 10 damage to all (water)
+      'tackle',         // 1 cost - 6 damage (normal) - no Bastion bonus
+    ];
+
+    // Simple splash deck for enemies
     const splashDeck = Array(10).fill('splash');
 
-    // Test deck with all new effect types
-    const testDeck = [
-      'comet-punch',    // multi_hit - 2×4 damage (Strength procs twice)
-      'dream-eater',    // heal_on_hit - 12 dmg, heal 50% of damage dealt
-      'double-edge',    // recoil - 20 dmg, take 33% recoil
-      'dragon-rage',    // set_damage - 40 fixed damage (ignores modifiers)
-      'super-fang',     // percent_hp - 50% of target's current HP
-      'explosion',      // self_ko - 50 dmg to all enemies, user faints
-      'haze',           // cleanse - remove 2 highest debuffs (cost 0, vanish)
-      'metronome',      // gain_energy + draw_cards - draw 2, gain 1 energy (vanish)
-      'swords-dance',   // apply_status_self - gain Strength 3
-    ];
-
-    // Override HP to 999, deck, and energy for Snorlax
-    const sandboxSnorlax: PokemonData = {
-      ...snorlaxData,
-      maxHp: 999,
-      energyPerTurn: 10,
-      deck: testDeck,
-    };
+    // Player Blastoise with high energy to test combos
     const sandboxBlastoise: PokemonData = {
       ...blastoiseData,
-      maxHp: 999,
-      deck: splashDeck,
+      maxHp: 100,
+      energyPerTurn: 10,
+      energyCap: 15,
+      deck: blastoiseDeck,
     };
-    const sandboxCharmander: PokemonData = {
-      ...charmanderData,
-      maxHp: 999,
-      deck: splashDeck,
-    };
-    const sandboxBulbasaur: PokemonData = {
-      ...bulbasaurData,
-      maxHp: 999,
-      deck: splashDeck,
-    };
-    const sandboxPikachu: PokemonData = {
-      ...pikachuData,
-      maxHp: 999,
+
+    // Simple enemies
+    const sandboxRattata: PokemonData = {
+      ...rattataData,
+      maxHp: 50,
       deck: splashDeck,
     };
 
-    // Positions:
-    // Player: Snorlax back-right (col 2)
-    // Enemies: Blastoise front-left (col 0), Charmander front-middle (col 1)
-    //          Bulbasaur back-middle (col 1, behind Charmander), Pikachu back-right (col 2)
-    const playerPositions: Position[] = [{ row: 'back', column: 2 }];
+    // Positions: Blastoise front, 3 Rattata front row
+    const playerPositions: Position[] = [{ row: 'front', column: 1 }];
     const enemyPositions: Position[] = [
-      { row: 'front', column: 0 },  // Blastoise
-      { row: 'front', column: 1 },  // Charmander
-      { row: 'back', column: 1 },   // Bulbasaur (behind Charmander)
-      { row: 'back', column: 2 },   // Pikachu (own column)
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
     ];
 
-    // Create combat state with custom positions
-    const enemies = [sandboxBlastoise, sandboxCharmander, sandboxBulbasaur, sandboxPikachu];
-    const s = createCombatState([sandboxSnorlax], enemies, playerPositions, enemyPositions);
+    // Create combat state
+    const enemies = [sandboxRattata, sandboxRattata, sandboxRattata];
+    const s = createCombatState([sandboxBlastoise], enemies, playerPositions, enemyPositions);
 
-    // Add debuffs to Snorlax for testing cleanse
-    const snorlaxCombatant = s.combatants.find(c => c.side === 'player');
-    if (snorlaxCombatant) {
-      snorlaxCombatant.statuses.push(
-        { type: 'burn', stacks: 6, appliedOrder: 0 },
-        { type: 'paralysis', stacks: 6, appliedOrder: 1 },
-        { type: 'weak', stacks: 6, appliedOrder: 2 },
-        { type: 'poison', stacks: 4, appliedOrder: 3 },
-      );
+    // Give Blastoise ALL water line passives for testing
+    const blastoiseCombatant = s.combatants.find(c => c.side === 'player');
+    if (blastoiseCombatant) {
+      blastoiseCombatant.passiveIds = [
+        'baby_shell',        // +3 Block at turn start
+        'pressure_hull',     // Retain 50% Block at round end
+        'fortified_cannons', // Water attacks grant Block = 50% damage dealt
+        'bastion_barrage',   // Water attacks deal +25% of current Block as bonus
+      ];
     }
 
     initializeBattle(s);

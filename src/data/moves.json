@@ -455,7 +455,7 @@
     "vanish": false,
     "effects": [
       { "type": "damage", "value": 10 },
-      { "type": "apply_status", "status": "weak", "stacks": 2 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 }
     ],
     "rarity": "uncommon",
     "pools": ["normal"],
@@ -546,7 +546,7 @@
     "range": "any_enemy",
     "vanish": true,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 2 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 }
     ],
     "rarity": "basic",
     "pools": ["normal"],
@@ -559,7 +559,7 @@
     "range": "any_enemy",
     "vanish": true,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 1 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 1 }
     ],
     "rarity": "basic",
     "pools": ["normal"],
@@ -572,7 +572,7 @@
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 2 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 }
     ],
     "rarity": "basic",
     "pools": ["normal"],
@@ -585,7 +585,7 @@
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 3 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 3 }
     ],
     "rarity": "common",
     "pools": ["normal"],
@@ -598,7 +598,7 @@
     "range": "any_enemy",
     "vanish": true,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 2 },
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 },
       { "type": "apply_status", "status": "slow", "stacks": 2 }
     ],
     "rarity": "common",
@@ -651,7 +651,7 @@
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 2 },
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 },
       { "type": "apply_status", "status": "slow", "stacks": 2 }
     ],
     "rarity": "common",
@@ -665,7 +665,7 @@
     "range": "any_enemy",
     "vanish": true,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 2 },
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 },
       { "type": "apply_status", "status": "slow", "stacks": 2 }
     ],
     "rarity": "basic",
@@ -863,7 +863,7 @@
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 2 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 }
     ],
     "rarity": "basic",
     "pools": ["normal"],
@@ -992,7 +992,7 @@
     "vanish": false,
     "effects": [
       { "type": "damage", "value": 7 },
-      { "type": "apply_status", "status": "weak", "stacks": 1 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 1 }
     ],
     "rarity": "common",
     "pools": ["normal"],
@@ -1005,7 +1005,7 @@
     "range": "any_enemy",
     "vanish": true,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 1 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 1 }
     ],
     "rarity": "basic",
     "pools": ["normal"],
@@ -1472,7 +1472,7 @@
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 2 },
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 },
       { "type": "apply_status", "status": "slow", "stacks": 2 }
     ],
     "rarity": "common",
@@ -1618,7 +1618,7 @@
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 2 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 }
     ],
     "rarity": "basic",
     "pools": ["ground"],
@@ -1725,7 +1725,7 @@
     "vanish": false,
     "effects": [
       { "type": "damage", "value": 9 },
-      { "type": "apply_status", "status": "weak", "stacks": 2 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 }
     ],
     "rarity": "common",
     "pools": ["ice"],
@@ -1793,7 +1793,7 @@
     "vanish": false,
     "effects": [
       { "type": "damage", "value": 6 },
-      { "type": "apply_status", "status": "weak", "stacks": 2 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 }
     ],
     "rarity": "common",
     "pools": ["poison"],
@@ -2058,7 +2058,7 @@
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "weak", "stacks": 2 }
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 }
     ],
     "rarity": "basic",
     "pools": ["psychic"],

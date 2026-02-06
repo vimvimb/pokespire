@@ -121,19 +121,19 @@ export const CHARMANDER_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Charmeleon',
-      description: '+10 Max HP. Add Flamethrower. Gain Spreading Flames.',
+      description: 'Evolve to Charmeleon (+10 HP). Add Flamethrower. Gain Spreading Flames.',
       evolvesTo: 'charmeleon',
       passiveId: 'spreading_flames',
-      hpBoost: 10,
+      hpBoost: 0,  // HP increase comes from Charmeleon's base stats
       cardsToAdd: ['flamethrower'],
     },
     {
       level: 3,
       name: 'Charizard',
-      description: '+10 Max HP. Add Fire Blast. Gain Blaze Strike.',
+      description: 'Evolve to Charizard (+10 HP). Add Fire Blast. Gain Blaze Strike.',
       evolvesTo: 'charizard',
       passiveId: 'blaze_strike',
-      hpBoost: 10,
+      hpBoost: 0,  // HP increase comes from Charizard's base stats
       cardsToAdd: ['fire-blast'],
     },
     {
@@ -162,19 +162,19 @@ export const BULBASAUR_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Ivysaur',
-      description: '+10 Max HP. Add 2x Razor Leaf. Gain Spreading Spores.',
+      description: 'Evolve to Ivysaur (+10 HP). Add 2x Razor Leaf. Gain Spreading Spores.',
       evolvesTo: 'ivysaur',
       passiveId: 'spreading_spores',
-      hpBoost: 10,
+      hpBoost: 0,  // HP increase comes from Ivysaur's base stats
       cardsToAdd: ['razor-leaf', 'razor-leaf'],
     },
     {
       level: 3,
       name: 'Venusaur',
-      description: '+10 Max HP. Add Solar Beam. Gain Overgrow.',
+      description: 'Evolve to Venusaur (+10 HP). Add Solar Beam. Gain Overgrow.',
       evolvesTo: 'venusaur',
       passiveId: 'overgrow',
-      hpBoost: 10,
+      hpBoost: 0,  // HP increase comes from Venusaur's base stats
       cardsToAdd: ['solar-beam'],
     },
     {
@@ -203,19 +203,19 @@ export const SQUIRTLE_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Wartortle',
-      description: '+10 Max HP. Add Bubble Beam. Gain Pressure Hull.',
+      description: 'Evolve to Wartortle (+10 HP). Add Bubble Beam. Gain Pressure Hull.',
       evolvesTo: 'wartortle',
       passiveId: 'pressure_hull',
-      hpBoost: 10,
+      hpBoost: 0,  // HP increase comes from Wartortle's base stats
       cardsToAdd: ['bubble-beam'],
     },
     {
       level: 3,
       name: 'Blastoise',
-      description: '+10 Max HP. Add Hydro Pump. Gain Fortified Cannons.',
+      description: 'Evolve to Blastoise (+10 HP). Add Hydro Pump. Gain Fortified Cannons.',
       evolvesTo: 'blastoise',
       passiveId: 'fortified_cannons',
-      hpBoost: 10,
+      hpBoost: 0,  // HP increase comes from Blastoise's base stats
       cardsToAdd: ['hydro-pump'],
     },
     {
@@ -260,10 +260,10 @@ export const PIKACHU_PROGRESSION: ProgressionTree = {
     {
       level: 4,
       name: 'Raichu',
-      description: '+20 Max HP. Speed -2. Add Body Slam, Mega Punch, Thunder.',
+      description: 'Evolve to Raichu (+20 HP, -2 Speed). Add Body Slam, Mega Punch, Thunder.',
       evolvesTo: 'raichu',
       passiveId: 'none',  // No new passive, retains all previous
-      hpBoost: 20,
+      hpBoost: 0,  // HP increase comes from Raichu's base stats
       cardsToAdd: ['body-slam', 'mega-punch', 'thunder'],
     },
   ],

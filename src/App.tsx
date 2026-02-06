@@ -14,6 +14,7 @@ import {
   createRunState,
   applyPercentHeal,
   applyMaxHpBoost,
+  applyExpBoost,
   addCardToDeck,
   syncBattleResults,
   moveToNode,
@@ -66,11 +67,20 @@ export default function App() {
     setScreen('map');
   }, [runState]);
 
-  // Handle rest choice: +10 max HP
-  const handleRestMaxHpBoost = useCallback((pokemonIndex: number) => {
+  // Handle rest choice: +5 max HP (and current HP)
+  const handleRestTrain = useCallback((pokemonIndex: number) => {
     if (!runState) return;
 
-    const newRun = applyMaxHpBoost(runState, pokemonIndex, 10);
+    const newRun = applyMaxHpBoost(runState, pokemonIndex, 5);
+    setRunState(newRun);
+    setScreen('map');
+  }, [runState]);
+
+  // Handle rest choice: +1 EXP
+  const handleRestMeditate = useCallback((pokemonIndex: number) => {
+    if (!runState) return;
+
+    const newRun = applyExpBoost(runState, pokemonIndex, 1);
     setRunState(newRun);
     setScreen('map');
   }, [runState]);
@@ -266,7 +276,8 @@ export default function App() {
       <RestScreen
         run={runState}
         onHeal={handleRestHeal}
-        onMaxHpBoost={handleRestMaxHpBoost}
+        onTrain={handleRestTrain}
+        onMeditate={handleRestMeditate}
       />
     );
   }

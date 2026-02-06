@@ -193,6 +193,26 @@ export function applyMaxHpBoost(
 }
 
 /**
+ * Grant EXP to a specific Pokemon.
+ * Used by rest events for the "meditate" option.
+ */
+export function applyExpBoost(
+  run: RunState,
+  pokemonIndex: number,
+  amount: number
+): RunState {
+  const newParty = run.party.map((pokemon, i) => {
+    if (i !== pokemonIndex) return pokemon;
+    return {
+      ...pokemon,
+      exp: pokemon.exp + amount,
+    };
+  });
+
+  return { ...run, party: newParty };
+}
+
+/**
  * Add a card to a Pokemon's deck.
  */
 export function addCardToDeck(

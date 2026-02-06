@@ -1,15 +1,26 @@
 import { useState } from 'react';
-import type { RunState, MapNode } from '../../run/types';
+import type { RunState, MapNode, BattleNode } from '../../run/types';
 import { getPokemon } from '../../data/loaders';
 import { canPokemonLevelUp, getAvailableNextNodes, EXP_PER_LEVEL } from '../../run/state';
 import { getNodesAtStage, getMaxStage } from '../../run/nodes';
-import { ProgressionPanel } from '../components/ProgressionPanel';
+import { PokemonDetailsPanel } from '../components/PokemonDetailsPanel';
 import { getSpriteSize } from '../../data/heights';
 
 interface Props {
   run: RunState;
   onSelectNode: (nodeId: string) => void;
   onLevelUp: (pokemonIndex: number) => void;
+}
+
+// Position for a node in the map coordinate system
+interface NodePosition {
+  x: number;  // center x
+  y: number;  // center y
+}
+
+/** Get mini sprite URL for a Pokemon (using black-white which has all Gen 1) */
+function getMiniSpriteUrl(pokemonId: string): string {
+  return `https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemonId}.gif`;
 }
 
 function getNodeIcon(node: MapNode): string {
@@ -45,8 +56,44 @@ function getNodeLabel(node: MapNode): string {
   return '???';
 }
 
+// Layout constants
+const NODE_SIZE = 60;
+const NODE_GAP = 20;
+const MAP_PADDING_X = 60;
+const MAP_PADDING_Y = 40;
+const MAP_WIDTH = 900;   // Fixed map content width
+const MAP_HEIGHT = 320;  // Fixed map content height
+
+/**
+ * Calculate positions for all nodes based on stage and index within stage.
+ * Returns a Map from nodeId to {x, y} coordinates (center of node).
+ */
+function calculateNodePositions(
+  nodesByStage: MapNode[][],
+  maxStage: number
+): Map<string, NodePosition> {
+  const positions = new Map<string, NodePosition>();
+
+  nodesByStage.forEach((stageNodes, stageIndex) => {
+    // X position: distribute stages evenly across width
+    const x = MAP_PADDING_X + (stageIndex / Math.max(maxStage, 1)) * MAP_WIDTH + NODE_SIZE / 2;
+
+    // Y positions: center the column of nodes vertically
+    const totalHeight = stageNodes.length * NODE_SIZE + (stageNodes.length - 1) * NODE_GAP;
+    const startY = MAP_PADDING_Y + (MAP_HEIGHT - totalHeight) / 2;
+
+    stageNodes.forEach((node, nodeIndex) => {
+      const y = startY + nodeIndex * (NODE_SIZE + NODE_GAP) + NODE_SIZE / 2;
+      positions.set(node.id, { x, y });
+    });
+  });
+
+  return positions;
+}
+
 export function MapScreen({ run, onSelectNode, onLevelUp }: Props) {
   const [selectedPokemonIndex, setSelectedPokemonIndex] = useState<number | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<MapNode | null>(null);
 
   const availableNodes = getAvailableNextNodes(run);
   const availableNodeIds = new Set(availableNodes.map(n => n.id));
@@ -79,6 +126,9 @@ export function MapScreen({ run, onSelectNode, onLevelUp }: Props) {
   for (let stage = 0; stage <= maxStage; stage++) {
     nodesByStage.push(getNodesAtStage(run.nodes, stage));
   }
+
+  // Calculate all node positions from data (no DOM queries needed)
+  const nodePositions = calculateNodePositions(nodesByStage, maxStage);
 
   return (
     <div style={{
@@ -188,88 +238,177 @@ export function MapScreen({ run, onSelectNode, onLevelUp }: Props) {
       </div>
 
       {/* Branching Map */}
-      <div style={{
-        display: 'flex',
-        gap: 8,
-        padding: 24,
-        background: '#1a1a24',
-        borderRadius: 16,
-        border: '1px solid #333',
-        overflowX: 'auto',
-        maxWidth: '100%',
-      }}>
-        {nodesByStage.map((stageNodes, stageIndex) => (
-          <div key={stageIndex} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            {/* Stage column */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 16,
-              minHeight: 200,
-              justifyContent: 'center',
-            }}>
-              {stageNodes.map(node => {
-                const isCurrent = node.id === run.currentNodeId;
-                const isVisited = visitedNodeIds.has(node.id);
-                const isAvailable = availableNodeIds.has(node.id);
-                const nodeColor = getNodeColor(node, isAvailable, isVisited, isCurrent);
+      <div
+        style={{
+          position: 'relative',
+          width: MAP_WIDTH + MAP_PADDING_X * 2,
+          height: MAP_HEIGHT + MAP_PADDING_Y * 2,
+          background: '#1a1a24',
+          borderRadius: 16,
+          border: '1px solid #333',
+          overflow: 'visible',
+        }}
+      >
+        {/* SVG layer for connection paths */}
+        <svg
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+            overflow: 'visible',
+          }}
+        >
+          {run.nodes.map(node => {
+            const fromPos = nodePositions.get(node.id);
+            if (!fromPos) return null;
 
-                return (
-                  <div
-                    key={node.id}
-                    onClick={() => handleNodeClick(node)}
-                    style={{
-                      width: 50,
-                      height: 50,
-                      borderRadius: '50%',
-                      background: isCurrent || isVisited ? nodeColor : '#2a2a3a',
-                      border: `3px solid ${nodeColor}`,
+            return node.connectsTo.map(targetId => {
+              const toPos = nodePositions.get(targetId);
+              if (!toPos) return null;
+
+              const isPathVisited = visitedNodeIds.has(node.id) && visitedNodeIds.has(targetId);
+              const isPathAvailable = visitedNodeIds.has(node.id) && availableNodeIds.has(targetId);
+
+              return (
+                <line
+                  key={`${node.id}-${targetId}`}
+                  x1={fromPos.x}
+                  y1={fromPos.y}
+                  x2={toPos.x}
+                  y2={toPos.y}
+                  stroke={isPathVisited ? '#22c55e' : isPathAvailable ? '#60a5fa' : '#444'}
+                  strokeWidth={isPathAvailable ? 3 : 2}
+                  strokeDasharray={isPathVisited || isPathAvailable ? 'none' : '5,5'}
+                  opacity={0.6}
+                />
+              );
+            });
+          })}
+        </svg>
+
+        {/* Nodes layer - absolutely positioned */}
+        {run.nodes.map(node => {
+          const pos = nodePositions.get(node.id);
+          if (!pos) return null;
+
+          const isCurrent = node.id === run.currentNodeId;
+          const isVisited = visitedNodeIds.has(node.id);
+          const isAvailable = availableNodeIds.has(node.id);
+          const nodeColor = getNodeColor(node, isAvailable, isVisited, isCurrent);
+          const isHovered = hoveredNode?.id === node.id;
+
+          return (
+            <div
+              key={node.id}
+              onClick={() => handleNodeClick(node)}
+              onMouseEnter={() => setHoveredNode(node)}
+              onMouseLeave={() => setHoveredNode(null)}
+              style={{
+                position: 'absolute',
+                left: pos.x - NODE_SIZE / 2,
+                top: pos.y - NODE_SIZE / 2,
+                width: NODE_SIZE,
+                height: NODE_SIZE,
+                borderRadius: '50%',
+                background: isCurrent || isVisited ? nodeColor : '#2a2a3a',
+                border: `3px solid ${nodeColor}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: isAvailable ? 'pointer' : 'default',
+                transition: 'all 0.2s',
+                boxShadow: isAvailable ? `0 0 12px ${nodeColor}66` : 'none',
+                transform: isAvailable ? 'scale(1.1)' : 'scale(1)',
+                zIndex: isHovered ? 100 : 1,
+              }}
+            >
+              <span style={{
+                fontSize: 22,
+                fontWeight: 'bold',
+                color: isCurrent || isVisited ? '#000' : nodeColor,
+              }}>
+                {getNodeIcon(node)}
+              </span>
+
+              {/* Hover preview for battle nodes */}
+              {isHovered && node.type === 'battle' && (
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '100%',
+                  transform: 'translateY(-50%)',
+                  marginLeft: 12,
+                  padding: '6px 10px',
+                  background: '#1e1e2e',
+                  border: `2px solid ${node.stage === 8 ? '#a855f7' : '#ef4444'}`,
+                  borderRadius: 8,
+                  display: 'flex',
+                  gap: 2,
+                  zIndex: 100,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                  pointerEvents: 'none',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {node.stage === 8 ? (
+                    /* Mystery silhouette for final boss */
+                    <div style={{
+                      width: 40,
+                      height: 40,
+                      background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%)',
+                      borderRadius: 4,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      cursor: isAvailable ? 'pointer' : 'default',
-                      transition: 'all 0.2s',
-                      boxShadow: isAvailable ? `0 0 12px ${nodeColor}66` : 'none',
-                      transform: isAvailable ? 'scale(1.1)' : 'scale(1)',
-                    }}
-                    title={`${getNodeLabel(node)}${isCurrent ? ' (Current)' : ''}${isAvailable ? ' (Click to move)' : ''}`}
-                  >
-                    <span style={{
-                      fontSize: 18,
-                      fontWeight: 'bold',
-                      color: isCurrent || isVisited ? '#000' : nodeColor,
+                      fontSize: 24,
+                      color: '#a855f7',
+                      textShadow: '0 0 8px #a855f7',
                     }}>
-                      {getNodeIcon(node)}
-                    </span>
-                  </div>
-                );
-              })}
+                      ?
+                    </div>
+                  ) : (
+                    (node as BattleNode).enemies.map((enemyId, idx) => (
+                      <img
+                        key={idx}
+                        src={getMiniSpriteUrl(enemyId)}
+                        alt={enemyId}
+                        style={{
+                          width: 36,
+                          height: 36,
+                          imageRendering: 'pixelated',
+                          objectFit: 'contain',
+                        }}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
             </div>
+          );
+        })}
 
-            {/* Stage label */}
-            <div style={{
-              marginTop: 8,
-              fontSize: 11,
-              color: '#64748b',
-            }}>
+        {/* Stage labels at bottom */}
+        {nodesByStage.map((_, stageIndex) => {
+          const x = MAP_PADDING_X + (stageIndex / Math.max(maxStage, 1)) * MAP_WIDTH + NODE_SIZE / 2;
+          return (
+            <div
+              key={`label-${stageIndex}`}
+              style={{
+                position: 'absolute',
+                left: x,
+                bottom: 8,
+                transform: 'translateX(-50%)',
+                fontSize: 12,
+                color: '#64748b',
+                fontWeight: 500,
+              }}
+            >
               {stageIndex === 0 ? 'Start' : stageIndex === maxStage ? 'Boss' : `Stage ${stageIndex}`}
             </div>
-
-            {/* Connection lines to next stage */}
-            {stageIndex < maxStage && (
-              <div style={{
-                position: 'absolute',
-                left: `calc(${stageIndex} * 66px + 57px)`,
-                width: 20,
-                height: 200,
-                pointerEvents: 'none',
-              }}>
-                {/* Lines are drawn via SVG in a separate layer */}
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Legend */}
@@ -312,9 +451,9 @@ export function MapScreen({ run, onSelectNode, onLevelUp }: Props) {
         </div>
       )}
 
-      {/* Progression Panel */}
+      {/* Pokemon Details Panel */}
       {selectedPokemonIndex !== null && (
-        <ProgressionPanel
+        <PokemonDetailsPanel
           pokemon={run.party[selectedPokemonIndex]}
           pokemonIndex={selectedPokemonIndex}
           partySize={run.party.length}

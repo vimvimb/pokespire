@@ -18,9 +18,9 @@ const STATUS_INFO: Record<string, { icon: string; color: string; describe: (stac
     icon: '🐌', color: '#6b7280',
     describe: (s, d) => `Reduces speed by ${s}. ${d} round${d !== 1 ? 's' : ''} remaining.`,
   },
-  weak: {
+  enfeeble: {
     icon: '💔', color: '#f97316',
-    describe: (s) => `Reduces damage dealt by ${s} (min 1). Removed at end of round.`,
+    describe: (s) => `This unit deals ${s} less damage (min 1). Removed at end of round.`,
   },
   sleep: {
     icon: '💤', color: '#818cf8',

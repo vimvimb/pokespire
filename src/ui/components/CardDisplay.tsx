@@ -70,10 +70,10 @@ const RARITY_COLORS: Record<CardRarity, string | null> = {
   legendary: '#fbbf24', // Gold
 };
 
-/** Build a live description reflecting current Strength/Weak/STAB/Blaze Strike/Bastion Barrage. */
+/** Build a live description reflecting current Strength/Enfeeble/STAB/Blaze Strike/Bastion Barrage. */
 function buildDescription(card: MoveDefinition, combatant: Combatant): React.ReactNode {
   const strength = getStatusStacks(combatant, 'strength');
-  const weak = getStatusStacks(combatant, 'weak');
+  const enfeeble = getStatusStacks(combatant, 'enfeeble');
   const stab = hasSTAB(combatant, card.type) ? STAB_BONUS : 0;
 
   // Check for Bastion Barrage bonus (water attacks gain +25% of current block)
@@ -82,7 +82,7 @@ function buildDescription(card: MoveDefinition, combatant: Combatant): React.Rea
     ? Math.floor(combatant.block * 0.25)
     : 0;
 
-  const additiveMod = strength + stab + bastionBonus - weak;
+  const additiveMod = strength + stab + bastionBonus - enfeeble;
 
   // Check for Blaze Strike multiplier (first fire attack of the turn)
   const hasBlazeStrike = combatant.passiveIds.includes('blaze_strike');

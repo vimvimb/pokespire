@@ -12,7 +12,7 @@ export interface DamageResult {
   baseDamage: number;
   rawDamage: number;
   strength: number;
-  weak: number;
+  enfeeble: number;
   stab: number;
   blazeStrikeMultiplier: number;  // 2 if Blaze Strike triggered, 1 otherwise
   bastionBarrageBonus: number;    // Bonus damage from Bastion Barrage
@@ -47,13 +47,13 @@ export function applyCardDamage(
   counterCurrentBonus?: number,
   staticFieldReduction?: number,
 ): DamageResult {
-  // Step 1: Apply Strength, Weak, STAB, Bastion Barrage, and Counter-Current from source
+  // Step 1: Apply Strength, Enfeeble, STAB, Bastion Barrage, and Counter-Current from source
   const strength = getStatusStacks(source, 'strength');
-  const weak = getStatusStacks(source, 'weak');
+  const enfeeble = getStatusStacks(source, 'enfeeble');
   const stab = moveType && hasSTAB(source, moveType) ? STAB_BONUS : 0;
   const bastionBonus = bastionBarrageBonus ?? 0;
   const counterBonus = counterCurrentBonus ?? 0;
-  let rawDamage = baseDamage + strength + stab + bastionBonus + counterBonus - weak;
+  let rawDamage = baseDamage + strength + stab + bastionBonus + counterBonus - enfeeble;
   rawDamage = Math.max(rawDamage, 1); // floor at 1
 
   // Step 1.5: Apply Blaze Strike multiplier (after STAB, before evasion)
@@ -94,7 +94,7 @@ export function applyCardDamage(
     baseDamage,
     rawDamage,
     strength,
-    weak,
+    enfeeble,
     stab,
     blazeStrikeMultiplier,
     bastionBarrageBonus: bastionBonus,
@@ -128,7 +128,7 @@ export function getBloomingCycleReduction(
 }
 
 /**
- * Apply bypass damage (burn, poison, leech) — no Strength, Weak, Evasion, or Block.
+ * Apply bypass damage (burn, poison, leech) — no Strength, Enfeeble, Evasion, or Block.
  * Returns the actual HP damage dealt.
  */
 export function applyBypassDamage(target: Combatant, damage: number): number {

@@ -49,7 +49,7 @@ export function applyStatus(
     case 'strength':
     case 'paralysis':
     case 'slow':
-    case 'weak':
+    case 'enfeeble':
     case 'evasion':
       // Additive stacking for all standard statuses
       if (existing) {
@@ -200,7 +200,7 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
 
       // All other statuses: decay by 1 per round
       if (status.type === 'paralysis' || status.type === 'slow' ||
-          status.type === 'weak' || status.type === 'strength' ||
+          status.type === 'enfeeble' || status.type === 'strength' ||
           status.type === 'evasion' || status.type === 'sleep') {
         const statusName = status.type.charAt(0).toUpperCase() + status.type.slice(1);
         logs.push({

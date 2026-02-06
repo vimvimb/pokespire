@@ -261,7 +261,7 @@ function resolveEffects(
         if (r.strength > 0) parts.push(`+${r.strength} Str`);
         if (r.bastionBarrageBonus > 0) parts.push(`+${r.bastionBarrageBonus} Bastion`);
         if (r.counterCurrentBonus > 0) parts.push(`+${r.counterCurrentBonus} Current`);
-        if (r.weak > 0) parts.push(`-${r.weak} Weak`);
+        if (r.enfeeble > 0) parts.push(`-${r.enfeeble} Enfeeble`);
         if (r.blazeStrikeMultiplier > 1) parts.push(`x${r.blazeStrikeMultiplier} Blaze`);
         if (r.bloomingCycleReduction > 0) parts.push(`-${r.bloomingCycleReduction} Blooming`);
         if (r.staticFieldReduction > 0) parts.push(`-${r.staticFieldReduction} Static`);
@@ -618,7 +618,7 @@ function resolveEffects(
 
       case 'cleanse': {
         // Remove debuffs from self (highest stacks first)
-        const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'weak', 'sleep', 'leech'];
+        const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech'];
         const debuffs = source.statuses
           .filter(s => debuffTypes.includes(s.type))
           .sort((a, b) => b.stacks - a.stacks);
