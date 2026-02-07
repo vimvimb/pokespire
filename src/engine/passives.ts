@@ -812,9 +812,9 @@ export function processProtectiveToxins(
   if (!attacker.passiveIds.includes('protective_toxins')) return logs;
   if (totalDamageToPoisoned <= 0) return logs;
 
-  // Get all living allies (same team as attacker)
+  // Get all living allies (same side as attacker)
   const allies = state.combatants.filter(c =>
-    c.alive && c.team === attacker.team
+    c.alive && c.side === attacker.side
   );
 
   for (const ally of allies) {
@@ -868,7 +868,7 @@ export function checkReckless(attacker: Combatant, card: MoveDefinition): number
  */
 export function checkLightningRod(
   state: CombatState,
-  attacker: Combatant,
+  _attacker: Combatant,
   originalTarget: Combatant,
   card: MoveDefinition
 ): { target: Combatant; redirected: boolean } {
@@ -880,9 +880,9 @@ export function checkLightningRod(
   // Find an ally with Lightning Rod in the same row as the target
   const allies = state.combatants.filter(c =>
     c.alive &&
-    c.team === originalTarget.team &&
+    c.side === originalTarget.side &&
     c.id !== originalTarget.id &&
-    c.row === originalTarget.row &&
+    c.position.row === originalTarget.position.row &&
     c.passiveIds.includes('lightning_rod')
   );
 
