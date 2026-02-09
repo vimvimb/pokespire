@@ -640,14 +640,14 @@ export function checkQuickFeet(
 }
 
 /**
- * Check Hustle effects.
- * Hustle: Draw an extra card at start of turn. Your attacks deal +2 damage but cost +1.
+ * Check Hustle multiplier.
+ * Hustle: Draw an extra card at start of turn. Your attacks deal 30% more damage but cost +1.
  */
-export function checkHustleDamageBonus(attacker: Combatant): number {
+export function checkHustleMultiplier(attacker: Combatant): number {
   if (attacker.passiveIds.includes('hustle')) {
-    return 3;
+    return 1.3;
   }
-  return 0;
+  return 1.0;
 }
 
 export function checkHustleCostIncrease(

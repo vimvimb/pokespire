@@ -24,6 +24,7 @@ export interface DamageResult {
   thickFatMultiplier: number;     // Multiplier from Thick Fat (0.75 for Fire/Ice)
   underdogBonus: number;         // Bonus from Underdog (+2 for common 1-cost cards)
   ragingBullMultiplier: number;   // Multiplier from Raging Bull (1.5x Normal below 50% HP)
+  hustleMultiplier: number;       // Multiplier from Hustle (1.3x for attacks)
   familyFuryBonus: number;        // Bonus from Family Fury (+2 per damaged ally)
   typeEffectiveness: number;      // Type matchup multiplier (1.25x super effective, 0.75x not effective)
   evasion: number;
@@ -50,6 +51,7 @@ export interface DamageModifiers {
   thickFatMultiplier?: number;
   underdogBonus?: number;
   ragingBullMultiplier?: number;
+  hustleMultiplier?: number;
   familyFuryBonus?: number;
   typeEffectiveness?: number;  // Type matchup multiplier
   ignoreEvasion?: boolean;  // For Scrappy
@@ -88,6 +90,10 @@ export function applyCardDamage(
   // Step 1.6: Apply Raging Bull multiplier (Normal attacks +50% below 50% HP)
   const ragingBullMultiplier = mods.ragingBullMultiplier ?? 1.0;
   rawDamage = Math.floor(rawDamage * ragingBullMultiplier);
+
+  // Step 1.62: Apply Hustle multiplier (attacks deal 30% more damage)
+  const hustleMultiplier = mods.hustleMultiplier ?? 1.0;
+  rawDamage = Math.floor(rawDamage * hustleMultiplier);
 
   // Step 1.65: Apply Type Effectiveness multiplier
   const typeEffectiveness = mods.typeEffectiveness ?? 1.0;
@@ -143,6 +149,7 @@ export function applyCardDamage(
     thickFatMultiplier: thickFatMultiplier,
     underdogBonus: underdogBonus,
     ragingBullMultiplier: ragingBullMultiplier,
+    hustleMultiplier: hustleMultiplier,
     familyFuryBonus: familyFuryBonus,
     typeEffectiveness: typeEffectiveness,
     evasion,

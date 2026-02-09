@@ -6,7 +6,7 @@ import {
   checkBlazeStrike, checkFortifiedCannons, checkCounterCurrent, checkStaticField,
   checkWhippingWinds, checkPredatorsPatience, checkThickHide, checkThickFat,
   checkUnderdog, checkAngerPoint, checkSheerForce, checkScrappy,
-  checkHustleDamageBonus, checkRelentless, checkReckless
+  checkHustleMultiplier, checkRelentless, checkReckless
 } from './passives';
 import { getBloomingCycleReduction } from './damage';
 
@@ -79,7 +79,7 @@ export function calculateDamagePreview(
   const predatorsPatienceBonus = checkPredatorsPatience(source, target);
   const underdogBonus = checkUnderdog(source, card);
   const scrappyBonus = checkScrappy(source, card);
-  const hustleBonus = checkHustleDamageBonus(source);
+  const hustleMultiplier = checkHustleMultiplier(source);
   const relentlessBonus = checkRelentless(source);
 
   // Multipliers (dryRun=true to avoid side effects during preview)
@@ -88,7 +88,7 @@ export function calculateDamagePreview(
   const angerPointMultiplier = checkAngerPoint(source);
   const sheerForceMultiplier = checkSheerForce(source);
   const recklessMultiplier = checkReckless(source, card);
-  const combinedMultiplier = angerPointMultiplier * sheerForceMultiplier * recklessMultiplier;
+  const combinedMultiplier = angerPointMultiplier * sheerForceMultiplier * recklessMultiplier * hustleMultiplier;
 
   // Type effectiveness
   const typeEffectiveness = getTypeEffectiveness(card.type, target.types);
@@ -103,7 +103,7 @@ export function calculateDamagePreview(
   // Calculate raw damage (before evasion/block)
   let rawDamage = baseDamage + strength + stab + fortifiedBonus + counterBonus +
     whippingWindsBonus + predatorsPatienceBonus + underdogBonus +
-    scrappyBonus + hustleBonus + relentlessBonus - enfeeble;
+    scrappyBonus + relentlessBonus - enfeeble;
   rawDamage = Math.max(rawDamage, 1);
 
   // Apply multipliers

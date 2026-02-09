@@ -10,7 +10,7 @@ import {
   onDamageDealt, onDamageTaken, onStatusApplied,
   checkGustForce, checkWhippingWinds, checkPredatorsPatience, checkThickHide, checkThickFat,
   checkUnderdog, checkAngerPoint, checkScrappy, checkSheerForce,
-  checkQuickFeet, checkHustleDamageBonus, checkHustleCostIncrease,
+  checkQuickFeet, checkHustleMultiplier, checkHustleCostIncrease,
   checkRelentless, checkPoisonPoint, isAttackCard,
   processToxicHorn, processProtectiveToxins, isPoisoned, sheerForceBlocksStatus,
   hasRockHead, checkReckless, checkLightningRod
@@ -457,13 +457,13 @@ function buildDamageModifiers(
     });
   }
 
-  // Hustle: Your attacks deal +2 damage
-  const hustleBonus = checkHustleDamageBonus(source);
-  if (hustleBonus > 0) {
+  // Hustle: Your attacks deal 30% more damage
+  const hustleMultiplier = checkHustleMultiplier(source);
+  if (hustleMultiplier > 1) {
     logs.push({
       round: state.round,
       combatantId: source.id,
-      message: `Hustle: +${hustleBonus} damage!`,
+      message: `Hustle: x1.3 damage!`,
     });
   }
 
@@ -502,7 +502,8 @@ function buildDamageModifiers(
     thickFatMultiplier,
     underdogBonus,
     ragingBullMultiplier: combinedMultiplier,  // Now includes Anger Point + Sheer Force
-    familyFuryBonus: scrappyBonus + hustleBonus + relentlessBonus,  // Combine flat bonuses
+    hustleMultiplier,  // 1.3x multiplier for attacks
+    familyFuryBonus: scrappyBonus + relentlessBonus,  // Combine flat bonuses
     typeEffectiveness,
     ignoreEvasion: false,  // No passive currently ignores evasion
   };
@@ -523,6 +524,7 @@ function buildDamageBreakdown(r: ReturnType<typeof applyCardDamage>): string {
   if (r.enfeeble > 0) parts.push(`-${r.enfeeble} Enfeeble`);
   if (r.blazeStrikeMultiplier > 1) parts.push(`x${r.blazeStrikeMultiplier} Blaze`);
   if (r.ragingBullMultiplier > 1) parts.push(`x${r.ragingBullMultiplier.toFixed(2)}`);
+  if (r.hustleMultiplier > 1) parts.push(`x${r.hustleMultiplier.toFixed(1)} Hustle`);
   if (r.typeEffectiveness !== 1.0) parts.push(`x${r.typeEffectiveness.toFixed(2)} Type`);
   if (r.bloomingCycleReduction > 0) parts.push(`-${r.bloomingCycleReduction} Blooming`);
   if (r.staticFieldReduction > 0) parts.push(`-${r.staticFieldReduction} Static`);

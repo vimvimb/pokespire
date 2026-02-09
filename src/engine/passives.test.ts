@@ -33,7 +33,7 @@ import {
   checkScrappy,
   checkParentalBond,
   checkQuickFeet,
-  checkHustleDamageBonus,
+  checkHustleMultiplier,
   checkHustleCostIncrease,
   checkRelentless,
   checkFortifiedCannons,
@@ -691,10 +691,10 @@ describe('Passive Abilities', () => {
   });
 
   describe('Hustle (damage/cost)', () => {
-    it('grants +3 damage bonus', () => {
+    it('grants 1.3x damage multiplier', () => {
       const attacker = createTestCombatant({ passiveIds: ['hustle'] });
 
-      expect(checkHustleDamageBonus(attacker)).toBe(3);
+      expect(checkHustleMultiplier(attacker)).toBe(1.3);
     });
 
     it('adds +1 cost to attack cards', () => {
