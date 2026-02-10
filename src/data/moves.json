@@ -607,16 +607,16 @@
   },
   "sing": {
     "name": "Sing",
-    "cost": 1,
+    "cost": 2,
     "type": "normal",
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "sleep", "stacks": 2 }
+      { "type": "apply_status", "status": "sleep", "stacks": 1 }
     ],
     "rarity": "uncommon",
     "pools": ["normal"],
-    "description": "Apply Sleep 2."
+    "description": "Apply Sleep 1."
   },
   "supersonic": {
     "name": "Supersonic",
@@ -845,16 +845,16 @@
   },
   "lovely-kiss": {
     "name": "Lovely Kiss",
-    "cost": 1,
+    "cost": 2,
     "type": "normal",
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "sleep", "stacks": 2 }
+      { "type": "apply_status", "status": "sleep", "stacks": 1 }
     ],
     "rarity": "uncommon",
     "pools": ["normal"],
-    "description": "Apply Sleep 2."
+    "description": "Apply Sleep 1."
   },
   "flash": {
     "name": "Flash",
@@ -1345,6 +1345,60 @@
     "pools": ["fire"],
     "description": "Deal 33 damage."
   },
+  "flame-wheel": {
+    "name": "Flame Wheel",
+    "cost": 1,
+    "type": "fire",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 6 },
+      { "type": "block", "value": 5 }
+    ],
+    "rarity": "common",
+    "pools": ["fire"],
+    "description": "Deal 6 damage. Gain 5 Block. (Front row)"
+  },
+  "fire-fang": {
+    "name": "Fire Fang",
+    "cost": 1,
+    "type": "fire",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 8 },
+      { "type": "apply_status", "status": "burn", "stacks": 1 }
+    ],
+    "rarity": "common",
+    "pools": ["fire"],
+    "description": "Deal 8 damage. Apply Burn 1. (Front row)"
+  },
+  "morning-sun": {
+    "name": "Morning Sun",
+    "cost": 2,
+    "type": "fire",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "heal", "value": 20 }
+    ],
+    "rarity": "rare",
+    "pools": ["fire"],
+    "description": "Heal 20 HP."
+  },
+  "flare-blitz": {
+    "name": "Flare Blitz",
+    "cost": 3,
+    "type": "fire",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "recoil", "value": 30, "recoilPercent": 0.25 }
+    ],
+    "rarity": "rare",
+    "pools": ["fire"],
+    "description": "Deal 30 damage. Take 25% recoil."
+  },
 
   "gust": {
     "name": "Gust",
@@ -1560,16 +1614,16 @@
   },
   "sleep-powder": {
     "name": "Sleep Powder",
-    "cost": 1,
+    "cost": 2,
     "type": "grass",
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "sleep", "stacks": 2 }
+      { "type": "apply_status", "status": "sleep", "stacks": 1 }
     ],
     "rarity": "uncommon",
     "pools": ["grass"],
-    "description": "Apply Sleep 2."
+    "description": "Apply Sleep 1."
   },
   "spore": {
     "name": "Spore",
@@ -1578,11 +1632,11 @@
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "sleep", "stacks": 3 }
+      { "type": "apply_status", "status": "sleep", "stacks": 1 }
     ],
     "rarity": "rare",
     "pools": ["grass"],
-    "description": "Apply Sleep 3."
+    "description": "Apply Sleep 1."
   },
   "solar-beam": {
     "name": "Solar Beam",
@@ -1948,16 +2002,16 @@
   },
   "hypnosis": {
     "name": "Hypnosis",
-    "cost": 1,
+    "cost": 2,
     "type": "psychic",
     "range": "any_enemy",
     "vanish": false,
     "effects": [
-      { "type": "apply_status", "status": "sleep", "stacks": 2 }
+      { "type": "apply_status", "status": "sleep", "stacks": 1 }
     ],
     "rarity": "uncommon",
     "pools": ["psychic"],
-    "description": "Apply Sleep 2."
+    "description": "Apply Sleep 1."
   },
   "meditate": {
     "name": "Meditate",
@@ -2266,5 +2320,75 @@
     "rarity": "epic",
     "pools": ["bug"],
     "description": "Deal 30 damage. (Front row)"
+  },
+
+  "spark": {
+    "name": "Spark",
+    "cost": 1,
+    "type": "electric",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 8 }
+    ],
+    "rarity": "common",
+    "pools": ["electric"],
+    "description": "Deal 8 damage. (Front row)"
+  },
+  "charge-beam": {
+    "name": "Charge Beam",
+    "cost": 1,
+    "type": "electric",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 5 },
+      { "type": "apply_status_self", "status": "strength", "stacks": 1 }
+    ],
+    "rarity": "common",
+    "pools": ["electric"],
+    "description": "Deal 5 damage. Gain Strength 1."
+  },
+  "discharge": {
+    "name": "Discharge",
+    "cost": 2,
+    "type": "electric",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 8 },
+      { "type": "apply_status", "status": "paralysis", "stacks": 1 }
+    ],
+    "rarity": "rare",
+    "pools": ["electric"],
+    "description": "Deal 8 damage to all enemies. Apply Paralysis 1."
+  },
+
+  "bug-bite": {
+    "name": "Bug Bite",
+    "cost": 1,
+    "type": "bug",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 8 }
+    ],
+    "rarity": "common",
+    "pools": ["bug"],
+    "description": "Deal 8 damage. (Front row)"
+  },
+  "silver-wind": {
+    "name": "Silver Wind",
+    "cost": 2,
+    "type": "bug",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 6 },
+      { "type": "apply_status_self", "status": "strength", "stacks": 1 }
+    ],
+    "rarity": "rare",
+    "pools": ["bug"],
+    "description": "Deal 6 damage to all enemies. Gain Strength 1."
   }
 }

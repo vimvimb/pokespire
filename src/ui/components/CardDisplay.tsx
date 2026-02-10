@@ -4,6 +4,8 @@ import { getStatusStacks } from '../../engine/status';
 import { hasSTAB, STAB_BONUS } from '../../engine/damage';
 import { isParentalBondCopy } from '../../data/loaders';
 import { getEffectiveCost } from '../../engine/cards';
+import { THEME } from '../theme';
+import { CardTypeMotif } from './CardTypeMotif';
 
 interface Props {
   cardId?: string;
@@ -76,7 +78,7 @@ const RARITY_COLORS: Record<CardRarity, string | null> = {
 };
 
 /** Build a live description reflecting current modifiers from passives. */
-function buildDescription(card: MoveDefinition, combatant: Combatant): React.ReactNode {
+function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered: boolean): React.ReactNode {
   const strength = getStatusStacks(combatant, 'strength');
   const enfeeble = getStatusStacks(combatant, 'enfeeble');
   const stab = hasSTAB(combatant, card.type) ? STAB_BONUS : 0;
@@ -107,6 +109,23 @@ function buildDescription(card: MoveDefinition, combatant: Combatant): React.Rea
   if (blazeStrikeActive) multiplier *= 2;
   if (ragingBullActive) multiplier *= 1.5;
 
+  // Build modifier tags for hover display
+  const tags: string[] = [];
+  if (stab > 0) tags.push(`+${stab} STAB`);
+  if (strength > 0) tags.push(`+${strength} Strength`);
+  if (enfeeble > 0) tags.push(`\u2212${enfeeble} Enfeeble`);
+  if (fortifiedBonus > 0) tags.push(`+${fortifiedBonus} Fort. Cannons`);
+  if (scrappyBonus > 0) tags.push(`+${scrappyBonus} Scrappy`);
+  if (hustleBonus > 0) tags.push(`+${hustleBonus} Hustle`);
+  if (blazeStrikeActive) tags.push('x2 Blaze');
+  if (ragingBullActive) tags.push('x1.5 Rage');
+
+  const hasDamageEffect = card.effects.some(e =>
+    e.type === 'damage' || e.type === 'multi_hit' || e.type === 'heal_on_hit' ||
+    e.type === 'recoil' || e.type === 'self_ko'
+  );
+  const showTags = isHovered && tags.length > 0 && hasDamageEffect;
+
   const parts: React.ReactNode[] = [];
   for (const effect of card.effects) {
     switch (effect.type) {
@@ -125,11 +144,6 @@ function buildDescription(card: MoveDefinition, combatant: Combatant): React.Rea
               <>{effective}</>
             )}
             {' '}damage.
-            {changed && (
-              <span style={{ fontSize: 11, color: '#64748b' }}>
-                {' '}({multiplier > 1 ? '(' : ''}{effect.value}{additiveMod > 0 ? `+${additiveMod}` : additiveMod !== 0 ? additiveMod : ''}{multiplier > 1 ? `) x${multiplier}` : ''})
-              </span>
-            )}
           </span>
         );
         break;
@@ -266,6 +280,11 @@ function buildDescription(card: MoveDefinition, combatant: Combatant): React.Rea
       {parts.map((p, i) => (
         <div key={i}>{p}</div>
       ))}
+      {showTags && (
+        <div style={{ fontSize: 10, color: THEME.text.tertiary, marginTop: 2 }}>
+          {tags.join(' \u00b7 ')}
+        </div>
+      )}
     </>
   );
 }
@@ -275,7 +294,7 @@ export function CardDisplay({ cardId, handIndex, card, combatant, canAfford, isS
   const primaryEffect = card.effects[0]?.type || 'damage';
   const effectColor = EFFECT_COLORS[primaryEffect] || '#888';
   const moveTypeColor = MOVE_TYPE_COLORS[card.type] || MOVE_TYPE_COLORS.normal;
-  const isSTAB = hasSTAB(combatant, card.type);
+  const rarityColor = card.rarity ? RARITY_COLORS[card.rarity] : null;
 
   const handleDragStart = (e: React.DragEvent) => {
     if (!canAfford) {
@@ -302,9 +321,33 @@ export function CardDisplay({ cardId, handIndex, card, combatant, canAfford, isS
   // Hover glow for playable cards
   const showHoverGlow = canAfford && isHovered && !isSelected;
 
-  // Echo copies get a persistent purple glow
+  // Build layered box-shadow
+  const typeTintShadow = `inset 0 0 8px ${moveTypeColor}25`;
+  const rarityGlow = rarityColor && card.rarity && ['rare', 'epic', 'legendary'].includes(card.rarity)
+    ? `inset 0 0 12px ${rarityColor}22`
+    : '';
   const echoGlow = isEchoCopy ? '0 0 12px 3px #a855f788' : '';
-  const combinedShadow = [echoGlow, showHoverGlow ? `0 0 16px 4px ${effectColor}66` : ''].filter(Boolean).join(', ') || 'none';
+  const hoverGlow = showHoverGlow ? `0 0 16px 4px ${moveTypeColor}55` : '';
+  const combinedShadow = [typeTintShadow, rarityGlow, echoGlow, hoverGlow].filter(Boolean).join(', ') || 'none';
+
+  // Background: type-tinted gradient, echo purple tint, or dimmed when can't afford
+  // Uses opaque colors so cards remain readable when hovering over the battlefield
+  const bgGradient = isSelected
+    ? `linear-gradient(to bottom, ${moveTypeColor}18, ${THEME.bg.elevated}) , linear-gradient(${THEME.bg.panel}, ${THEME.bg.panel})`
+    : isEchoCopy
+      ? `linear-gradient(to bottom, #a855f718, #2a1e3e), linear-gradient(${THEME.bg.panel}, ${THEME.bg.panel})`
+      : canAfford
+        ? `linear-gradient(to bottom, ${moveTypeColor}14, ${THEME.bg.panel}), linear-gradient(${THEME.bg.panel}, ${THEME.bg.panel})`
+        : `linear-gradient(to bottom, ${moveTypeColor}08, #111118), linear-gradient(#111118, #111118)`;
+
+  // Border
+  const borderColor = isSelected
+    ? effectColor
+    : isEchoCopy
+      ? '#a855f7'
+      : canAfford
+        ? THEME.border.medium
+        : '#222';
 
   return (
     <div
@@ -317,25 +360,13 @@ export function CardDisplay({ cardId, handIndex, card, combatant, canAfford, isS
       style={{
         width: 130,
         minHeight: 160,
-        background: isSelected
-          ? '#3b3b5c'
-          : isEchoCopy
-            ? '#2a1e3e'
-            : canAfford
-              ? '#1e1e2e'
-              : '#111118',
-        border: isSelected
-          ? `2px solid ${effectColor}`
-          : isEchoCopy
-            ? '2px solid #a855f7'
-            : canAfford
-              ? '2px solid #444'
-              : '2px solid #222',
+        background: bgGradient,
+        border: `1.5px solid ${borderColor}`,
         borderRadius: 8,
         padding: 10,
         display: 'flex',
         flexDirection: 'column',
-        gap: 5,
+        gap: 4,
         cursor: canAfford ? (isDragging ? 'grabbing' : 'grab') : 'not-allowed',
         opacity: isDragging ? 0.5 : canAfford ? 1 : 0.5,
         transition: 'all 0.15s',
@@ -344,44 +375,90 @@ export function CardDisplay({ cardId, handIndex, card, combatant, canAfford, isS
         transform: isDragging ? 'scale(0.95)' : undefined,
       }}
     >
-      {/* Cost badge */}
+      {/* Cost badge — diamond notch */}
       <div style={{
         position: 'absolute',
-        top: -8,
-        right: -8,
-        width: 26,
-        height: 26,
-        borderRadius: '50%',
-        background: costReduced ? '#4ade80' : '#60a5fa',
-        color: '#fff',
+        top: -12,
+        right: -12,
+        width: 32,
+        height: 32,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: 15,
-        fontWeight: 'bold',
-        border: '2px solid #1e1e2e',
       }}>
-        {effectiveCost}
+        <svg width="32" height="32" viewBox="0 0 32 32" style={{ position: 'absolute' }}>
+          <defs>
+            <filter id={`cost-glow-${costReduced ? 'g' : 'b'}`} x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          {/* Outer diamond — dark recess */}
+          <path
+            d="M16 2 L28 16 L16 30 L4 16 Z"
+            fill={THEME.bg.panelDark}
+            stroke={costReduced ? '#34d399' : '#5b8cc9'}
+            strokeWidth="1.2"
+          />
+          {/* Inner diamond — luminous fill */}
+          <path
+            d="M16 5 L25.5 16 L16 27 L6.5 16 Z"
+            fill={costReduced ? 'rgba(52, 211, 153, 0.15)' : 'rgba(96, 165, 250, 0.12)'}
+            stroke={costReduced ? 'rgba(52, 211, 153, 0.4)' : 'rgba(96, 165, 250, 0.3)'}
+            strokeWidth="0.8"
+            filter={`url(#cost-glow-${costReduced ? 'g' : 'b'})`}
+          />
+        </svg>
+        <span style={{
+          position: 'relative',
+          fontSize: 14,
+          fontWeight: 'bold',
+          color: costReduced ? '#6ee7b7' : '#a0c4f0',
+          textShadow: costReduced
+            ? '0 0 6px rgba(52, 211, 153, 0.6)'
+            : '0 0 6px rgba(96, 165, 250, 0.5)',
+        }}>
+          {effectiveCost}
+        </span>
       </div>
 
-      {/* Name */}
+      {/* SVG type motif band */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        margin: '2px 0 0',
+        opacity: 0.85,
+      }}>
+        <CardTypeMotif type={card.type} color={moveTypeColor} width={110} height={34} />
+      </div>
+
+      {/* Card name */}
       <div style={{
         fontSize: 15,
         fontWeight: 'bold',
-        color: '#e2e8f0',
-        borderBottom: `2px solid ${moveTypeColor}`,
-        paddingBottom: 4,
+        color: THEME.text.primary,
+        textAlign: 'center',
+        lineHeight: 1.15,
       }}>
         {card.name}
       </div>
 
-      {/* Range indicator */}
+      {/* Range with flanking lines */}
       <div style={{
-        fontSize: 11,
-        color: '#64748b',
+        fontSize: 10,
+        color: THEME.text.tertiary,
         textTransform: 'uppercase',
-        letterSpacing: '0.5px',
+        letterSpacing: '0.08em',
+        textAlign: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 4,
+        justifyContent: 'center',
       }}>
+        <span style={{ flex: 1, height: 1, background: THEME.border.subtle, maxWidth: 20 }} />
         {(() => {
           // Whipping Winds / Hurricane converts row attacks to all-enemy attacks
           const hasRowToAll = combatant.passiveIds.includes('whipping_winds') ||
@@ -392,15 +469,17 @@ export function CardDisplay({ cardId, handIndex, card, combatant, canAfford, isS
           }
           return RANGE_LABELS[card.range] || card.range;
         })()}
+        <span style={{ flex: 1, height: 1, background: THEME.border.subtle, maxWidth: 20 }} />
       </div>
 
       {/* Description */}
       <div style={{
-        fontSize: 13,
-        color: '#94a3b8',
+        fontSize: 12,
+        color: THEME.text.secondary,
         flex: 1,
+        lineHeight: 1.3,
       }}>
-        {buildDescription(card, combatant)}
+        {buildDescription(card, combatant, isHovered)}
       </div>
 
       {/* Echo badge for Parental Bond copies */}
@@ -427,35 +506,39 @@ export function CardDisplay({ cardId, handIndex, card, combatant, canAfford, isS
         </div>
       )}
 
-      {/* Move type badge */}
+      {/* Type badge with flanking em-dashes */}
       <div style={{
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: 'bold',
         textAlign: 'center',
-        padding: '2px 6px',
-        borderRadius: 4,
-        background: moveTypeColor + '33',
         color: moveTypeColor,
         textTransform: 'uppercase',
-        border: isSTAB ? `1px solid ${moveTypeColor}` : '1px solid transparent',
+        letterSpacing: '0.1em',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 3,
+        border: '1px solid transparent',
+        borderRadius: 4,
+        padding: '1px 4px',
       }}>
-        {card.type}{isSTAB && ' (STAB)'}
+        <span style={{ color: THEME.text.tertiary, fontSize: 8 }}>——</span>
+        {card.type}
+        <span style={{ color: THEME.text.tertiary, fontSize: 8 }}>——</span>
       </div>
 
-      {/* Rarity gem indicator */}
-      {card.rarity && RARITY_COLORS[card.rarity] && (
+      {/* Rarity gemstone — triangle pointing up into the card */}
+      {rarityColor && card.rarity && card.rarity !== 'basic' && (
         <div style={{
           position: 'absolute',
           bottom: -6,
           left: '50%',
           transform: 'translateX(-50%)',
-          width: 0,
-          height: 0,
-          borderLeft: '8px solid transparent',
-          borderRight: '8px solid transparent',
-          borderTop: `12px solid ${RARITY_COLORS[card.rarity]}`,
-          filter: card.rarity === 'legendary' ? 'drop-shadow(0 0 4px #fbbf24)' : 'none',
-        }} />
+        }}>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+            <path d="M8 0 L15 12 L1 12 Z" fill={rarityColor + '55'} stroke={rarityColor} strokeWidth="1.2" />
+          </svg>
+        </div>
       )}
     </div>
   );

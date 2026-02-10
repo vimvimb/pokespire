@@ -11,6 +11,7 @@ import {
 import { EXP_PER_LEVEL } from '../../run/state';
 import { getSpriteSize } from '../../data/heights';
 import { CardPreview } from './CardPreview';
+import { THEME } from '../theme';
 
 type Tab = 'skills' | 'stats' | 'deck';
 
@@ -112,9 +113,9 @@ export function PokemonDetailsPanel({
     width: 48,
     height: 48,
     borderRadius: '50%',
-    border: '2px solid #64748b',
+    border: '2px solid ' + THEME.border.bright,
     background: '#1e1e2e',
-    color: '#e2e8f0',
+    color: THEME.text.primary,
     fontSize: 24,
     cursor: 'pointer',
     display: 'flex',
@@ -130,7 +131,7 @@ export function PokemonDetailsPanel({
     borderRadius: '8px 8px 0 0',
     border: 'none',
     background: activeTab === tab ? '#2d2d3f' : 'transparent',
-    color: activeTab === tab ? '#facc15' : '#64748b',
+    color: activeTab === tab ? '#facc15' : THEME.text.tertiary,
     cursor: 'pointer',
     transition: 'all 0.15s',
   });
@@ -168,7 +169,7 @@ export function PokemonDetailsPanel({
         maxHeight: '90vh',
         overflow: 'hidden',
         border: '2px solid #facc15',
-        color: '#e2e8f0',
+        color: THEME.text.primary,
         display: 'flex',
         flexDirection: 'column',
       }}>
@@ -178,7 +179,7 @@ export function PokemonDetailsPanel({
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '16px 20px',
-          borderBottom: '1px solid #333',
+          borderBottom: '1px solid ' + THEME.border.subtle,
           background: '#1a1a24',
         }}>
           <div style={{
@@ -198,7 +199,7 @@ export function PokemonDetailsPanel({
             />
             <div>
               <div style={{ fontSize: 24, fontWeight: 'bold' }}>{basePokemon.name}</div>
-              <div style={{ fontSize: 14, color: '#94a3b8' }}>
+              <div style={{ fontSize: 14, color: THEME.text.secondary }}>
                 {!isFromBattle && `Level ${level} • ${exp}/${EXP_PER_LEVEL} EXP`}
                 {isFromBattle && `HP: ${currentHp}/${maxHp}`}
               </div>
@@ -211,7 +212,7 @@ export function PokemonDetailsPanel({
               height: 36,
               borderRadius: '50%',
               border: 'none',
-              background: '#333',
+              background: THEME.border.subtle,
               color: '#fff',
               fontSize: 24,
               cursor: 'pointer',
@@ -251,7 +252,7 @@ export function PokemonDetailsPanel({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {/* Combat Stats */}
               <div>
-                <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 8, textTransform: 'uppercase' }}>
+                <div style={{ fontSize: 14, color: THEME.text.secondary, marginBottom: 8, textTransform: 'uppercase' }}>
                   Combat Stats
                 </div>
                 <div style={{
@@ -270,7 +271,7 @@ export function PokemonDetailsPanel({
 
               {/* Passive Abilities */}
               <div>
-                <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 8, textTransform: 'uppercase' }}>
+                <div style={{ fontSize: 14, color: THEME.text.secondary, marginBottom: 8, textTransform: 'uppercase' }}>
                   Passive Abilities
                 </div>
                 {passiveInfos.length === 0 ? (
@@ -278,7 +279,7 @@ export function PokemonDetailsPanel({
                     padding: 16,
                     background: '#1e1e2e',
                     borderRadius: 8,
-                    color: '#64748b',
+                    color: THEME.text.tertiary,
                     fontStyle: 'italic',
                     textAlign: 'center',
                   }}>
@@ -296,7 +297,7 @@ export function PokemonDetailsPanel({
                         <div style={{ fontSize: 15, fontWeight: 'bold', color: '#facc15' }}>
                           {info.name}
                         </div>
-                        <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 4 }}>
+                        <div style={{ fontSize: 13, color: THEME.text.secondary, marginTop: 4 }}>
                           {info.description}
                         </div>
                       </div>
@@ -307,7 +308,7 @@ export function PokemonDetailsPanel({
 
               {/* Types */}
               <div>
-                <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 8, textTransform: 'uppercase' }}>
+                <div style={{ fontSize: 14, color: THEME.text.secondary, marginBottom: 8, textTransform: 'uppercase' }}>
                   Types
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -325,7 +326,7 @@ export function PokemonDetailsPanel({
               {/* Active Passives (shown for all, especially useful for enemies) */}
               {passiveInfos.length > 0 && (
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 'bold', color: '#94a3b8', marginBottom: 8 }}>
+                  <div style={{ fontSize: 14, fontWeight: 'bold', color: THEME.text.secondary, marginBottom: 8 }}>
                     Active Passives
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -342,7 +343,7 @@ export function PokemonDetailsPanel({
                         <div style={{ fontSize: 15, fontWeight: 'bold', color: '#22c55e' }}>
                           {passive.name}
                         </div>
-                        <div style={{ fontSize: 13, color: '#94a3b8', marginTop: 4 }}>
+                        <div style={{ fontSize: 13, color: THEME.text.secondary, marginTop: 4 }}>
                           {passive.description}
                         </div>
                       </div>
@@ -351,14 +352,14 @@ export function PokemonDetailsPanel({
                 </div>
               )}
               {passiveInfos.length === 0 && !tree && (
-                <div style={{ color: '#64748b', fontStyle: 'italic', textAlign: 'center', padding: 24 }}>
+                <div style={{ color: THEME.text.tertiary, fontStyle: 'italic', textAlign: 'center', padding: 24 }}>
                   No passive abilities
                 </div>
               )}
               {/* Progression Rungs (only for Pokemon with progression trees) */}
               {tree && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ fontSize: 14, fontWeight: 'bold', color: '#94a3b8', marginBottom: 4 }}>
+                <div style={{ fontSize: 14, fontWeight: 'bold', color: THEME.text.secondary, marginBottom: 4 }}>
                   Skill Tree
                 </div>
                 {tree.rungs.map((rung, i) => {
@@ -380,7 +381,7 @@ export function PokemonDetailsPanel({
                           ? '2px solid #3b82f6'
                           : isNext && canLevel
                             ? '2px dashed #facc15'
-                            : '1px solid #333',
+                            : '1px solid ' + THEME.border.subtle,
                         opacity: isUnlocked || isNext ? 1 : 0.5,
                       }}
                     >
@@ -406,11 +407,11 @@ export function PokemonDetailsPanel({
                         <div style={{
                           fontSize: 15,
                           fontWeight: 'bold',
-                          color: isCurrent ? '#3b82f6' : isUnlocked ? '#22c55e' : '#94a3b8',
+                          color: isCurrent ? '#3b82f6' : isUnlocked ? '#22c55e' : THEME.text.secondary,
                         }}>
                           {rung.name}
                         </div>
-                        <div style={{ fontSize: 13, color: '#94a3b8' }}>
+                        <div style={{ fontSize: 13, color: THEME.text.secondary }}>
                           {rung.description}
                         </div>
                         {rung.passiveId !== 'none' && (
@@ -472,7 +473,7 @@ export function PokemonDetailsPanel({
               {!canLevel && !isFromBattle && level < 4 && (
                 <div style={{
                   textAlign: 'center',
-                  color: '#94a3b8',
+                  color: THEME.text.secondary,
                   fontSize: 14,
                   padding: 8,
                 }}>
@@ -499,7 +500,7 @@ export function PokemonDetailsPanel({
           {/* Deck Tab */}
           {activeTab === 'deck' && (
             <div>
-              <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 12 }}>
+              <div style={{ fontSize: 14, color: THEME.text.secondary, marginBottom: 12 }}>
                 {deck.length} cards in deck
               </div>
               <div style={{
@@ -520,7 +521,7 @@ export function PokemonDetailsPanel({
                 <div style={{
                   textAlign: 'center',
                   padding: 32,
-                  color: '#64748b',
+                  color: THEME.text.tertiary,
                 }}>
                   No cards in deck
                 </div>
@@ -533,10 +534,10 @@ export function PokemonDetailsPanel({
         {partySize > 1 && !isFromBattle && (
           <div style={{
             textAlign: 'center',
-            color: '#64748b',
+            color: THEME.text.tertiary,
             fontSize: 13,
             padding: '12px 0',
-            borderTop: '1px solid #333',
+            borderTop: '1px solid ' + THEME.border.subtle,
             background: '#1a1a24',
           }}>
             {pokemonIndex + 1} / {partySize}
@@ -571,7 +572,7 @@ function StatBox({ label, value, icon, color }: { label: string; value: string; 
     }}>
       <div style={{ fontSize: 20 }}>{icon}</div>
       <div>
-        <div style={{ fontSize: 12, color: '#64748b' }}>{label}</div>
+        <div style={{ fontSize: 12, color: THEME.text.tertiary }}>{label}</div>
         <div style={{ fontSize: 18, fontWeight: 'bold', color }}>{value}</div>
       </div>
     </div>

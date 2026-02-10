@@ -45,7 +45,11 @@ import {
   checkReckless,
   checkLightningRod,
   checkPoisonPoint,
+  checkHypnoticGazeCostIncrease,
+  checkVolatile,
+  checkTintedLens,
 } from './passives';
+import { applyStatus, checkStatusImmunity, getStatusStacks } from './status';
 import { getMove } from '../data/loaders';
 
 describe('Passive Abilities', () => {
@@ -852,6 +856,658 @@ describe('Passive Abilities', () => {
       const poisonCard = getMove('poison-sting');
 
       expect(checkPoisonPoint(attacker, poisonCard, 0)).toBe(false);
+    });
+  });
+
+  // ============================================================
+  // Drowzee / Hypno line
+  // ============================================================
+
+  describe('Insomnia', () => {
+    it('blocks Sleep application', () => {
+      const combatant = createTestCombatant({ passiveIds: ['insomnia'] });
+      expect(checkStatusImmunity(combatant, 'sleep')).toBe(true);
+    });
+
+    it('does not block other statuses', () => {
+      const combatant = createTestCombatant({ passiveIds: ['insomnia'] });
+      expect(checkStatusImmunity(combatant, 'burn')).toBe(false);
+      expect(checkStatusImmunity(combatant, 'enfeeble')).toBe(false);
+    });
+
+    it('applyStatus respects insomnia', () => {
+      const combatant = createTestCombatant({ passiveIds: ['insomnia'] });
+      const state = createTestCombatState([combatant]);
+
+      const result = applyStatus(state, combatant, 'sleep', 3);
+
+      expect(result.applied).toBe(false);
+      expect(getStatusStacks(combatant, 'sleep')).toBe(0);
+    });
+  });
+
+  describe('Drowsy Aura', () => {
+    it('applies Enfeeble 1 when source applies Sleep', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'player',
+        passiveIds: ['drowsy_aura'],
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'enemy',
+      });
+      const state = createTestCombatState([attacker, target]);
+
+      const logs = onStatusApplied(state, attacker, target, 'sleep', 1);
+
+      expect(getStatusStacks(target, 'enfeeble')).toBe(1);
+      expect(logs.some(l => l.message.includes('Drowsy Aura'))).toBe(true);
+    });
+
+    it('does not apply Enfeeble for non-Sleep statuses', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'player',
+        passiveIds: ['drowsy_aura'],
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'enemy',
+      });
+      const state = createTestCombatState([attacker, target]);
+
+      onStatusApplied(state, attacker, target, 'burn', 1);
+
+      expect(getStatusStacks(target, 'enfeeble')).toBe(0);
+    });
+  });
+
+  describe('Inner Focus', () => {
+    it('blocks Enfeeble application', () => {
+      const combatant = createTestCombatant({ passiveIds: ['inner_focus'] });
+      expect(checkStatusImmunity(combatant, 'enfeeble')).toBe(true);
+    });
+
+    it('does not block other statuses', () => {
+      const combatant = createTestCombatant({ passiveIds: ['inner_focus'] });
+      expect(checkStatusImmunity(combatant, 'sleep')).toBe(false);
+      expect(checkStatusImmunity(combatant, 'burn')).toBe(false);
+    });
+
+    it('applyStatus respects inner focus', () => {
+      const combatant = createTestCombatant({ passiveIds: ['inner_focus'] });
+      const state = createTestCombatState([combatant]);
+
+      const result = applyStatus(state, combatant, 'enfeeble', 5);
+
+      expect(result.applied).toBe(false);
+      expect(getStatusStacks(combatant, 'enfeeble')).toBe(0);
+    });
+  });
+
+  describe('Hypnotic Gaze', () => {
+    it('applies +1 Sleep on unblocked Psychic attacks', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'player',
+        passiveIds: ['hypnotic_gaze'],
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'enemy',
+      });
+      const state = createTestCombatState([attacker, target]);
+      const confusionCard = getMove('confusion');
+
+      const logs = onDamageDealt(state, attacker, target, confusionCard, 7);
+
+      expect(getStatusStacks(target, 'sleep')).toBe(1);
+      expect(logs.some(l => l.message.includes('Hypnotic Gaze'))).toBe(true);
+    });
+
+    it('does not apply Sleep when damage is fully blocked', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'player',
+        passiveIds: ['hypnotic_gaze'],
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'enemy',
+      });
+      const state = createTestCombatState([attacker, target]);
+      const confusionCard = getMove('confusion');
+
+      onDamageDealt(state, attacker, target, confusionCard, 0);
+
+      expect(getStatusStacks(target, 'sleep')).toBe(0);
+    });
+
+    it('does not apply Sleep for non-Psychic attacks', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'player',
+        passiveIds: ['hypnotic_gaze'],
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'enemy',
+      });
+      const state = createTestCombatState([attacker, target]);
+      const tackleCard = getMove('tackle');
+
+      onDamageDealt(state, attacker, target, tackleCard, 6);
+
+      expect(getStatusStacks(target, 'sleep')).toBe(0);
+    });
+
+    it('increases cost of Psychic cards by 1', () => {
+      const combatant = createTestCombatant({ passiveIds: ['hypnotic_gaze'] });
+      const confusionCard = getMove('confusion');
+      const tackleCard = getMove('tackle');
+
+      expect(checkHypnoticGazeCostIncrease(combatant, confusionCard)).toBe(1);
+      expect(checkHypnoticGazeCostIncrease(combatant, tackleCard)).toBe(0);
+    });
+
+    it('triggers Drowsy Aura when both passives are present', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'player',
+        passiveIds: ['hypnotic_gaze', 'drowsy_aura'],
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'enemy',
+      });
+      const state = createTestCombatState([attacker, target]);
+      const confusionCard = getMove('confusion');
+
+      const logs = onDamageDealt(state, attacker, target, confusionCard, 7);
+
+      // Should have both Sleep and Enfeeble
+      expect(getStatusStacks(target, 'sleep')).toBe(1);
+      expect(getStatusStacks(target, 'enfeeble')).toBe(1);
+      expect(logs.some(l => l.message.includes('Hypnotic Gaze'))).toBe(true);
+      expect(logs.some(l => l.message.includes('Drowsy Aura'))).toBe(true);
+    });
+  });
+
+  // ============================================================
+  // Growlithe/Arcanine Line
+  // ============================================================
+
+  describe('Flash Fire', () => {
+    it('blocks Burn application (immunity)', () => {
+      const combatant = createTestCombatant({ passiveIds: ['flash_fire'] });
+      expect(checkStatusImmunity(combatant, 'burn')).toBe(true);
+    });
+
+    it('does not block other statuses', () => {
+      const combatant = createTestCombatant({ passiveIds: ['flash_fire'] });
+      expect(checkStatusImmunity(combatant, 'poison')).toBe(false);
+      expect(checkStatusImmunity(combatant, 'sleep')).toBe(false);
+      expect(checkStatusImmunity(combatant, 'paralysis')).toBe(false);
+    });
+
+    it('applyStatus respects Flash Fire burn immunity', () => {
+      const combatant = createTestCombatant({ passiveIds: ['flash_fire'] });
+      const state = createTestCombatState([combatant]);
+
+      const result = applyStatus(state, combatant, 'burn', 3);
+
+      expect(result.applied).toBe(false);
+      expect(getStatusStacks(combatant, 'burn')).toBe(0);
+    });
+
+    it('gains 2 Strength when hit by Fire attack', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['flash_fire'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const fireCard = getMove('ember');
+
+      const logs = onDamageTaken(state, attacker, target, 6, fireCard);
+
+      expect(getStatusStacks(target, 'strength')).toBe(2);
+      expect(logs.some(l => l.message.includes('Flash Fire'))).toBe(true);
+    });
+
+    it('does not gain Strength from non-Fire attacks', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['flash_fire'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const normalCard = getMove('tackle');
+
+      onDamageTaken(state, attacker, target, 6, normalCard);
+
+      expect(getStatusStacks(target, 'strength')).toBe(0);
+    });
+
+    it('does not trigger when no damage dealt (hpDamage = 0)', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['flash_fire'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const fireCard = getMove('ember');
+
+      const logs = onDamageTaken(state, attacker, target, 0, fireCard);
+
+      expect(getStatusStacks(target, 'strength')).toBe(0);
+      expect(logs.length).toBe(0);
+    });
+  });
+
+  describe('Flame Body', () => {
+    it('applies Burn 1 to attacker when taking damage', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['flame_body'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const normalCard = getMove('tackle');
+
+      const logs = onDamageTaken(state, attacker, target, 5, normalCard);
+
+      expect(getStatusStacks(attacker, 'burn')).toBe(1);
+      expect(logs.some(l => l.message.includes('Flame Body'))).toBe(true);
+    });
+
+    it('triggers on any damage type (not just Fire)', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['flame_body'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const waterCard = getMove('water-gun');
+
+      onDamageTaken(state, attacker, target, 5, waterCard);
+
+      expect(getStatusStacks(attacker, 'burn')).toBe(1);
+    });
+
+    it('does not trigger when no HP damage dealt', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['flame_body'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const normalCard = getMove('tackle');
+
+      onDamageTaken(state, attacker, target, 0, normalCard);
+
+      expect(getStatusStacks(attacker, 'burn')).toBe(0);
+    });
+
+    it('does not burn attacker if attacker has Flash Fire', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+        passiveIds: ['flash_fire'],
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['flame_body'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const normalCard = getMove('tackle');
+
+      onDamageTaken(state, attacker, target, 5, normalCard);
+
+      // Burn should be blocked by Flash Fire immunity
+      expect(getStatusStacks(attacker, 'burn')).toBe(0);
+    });
+
+    it('stacks Burn on repeated hits', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['flame_body'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const normalCard = getMove('tackle');
+
+      onDamageTaken(state, attacker, target, 5, normalCard);
+      onDamageTaken(state, attacker, target, 5, normalCard);
+      onDamageTaken(state, attacker, target, 5, normalCard);
+
+      expect(getStatusStacks(attacker, 'burn')).toBe(3);
+    });
+  });
+
+  // ============================================================
+  // Voltorb/Electrode Line
+  // ============================================================
+
+  describe('Static', () => {
+    it('applies Paralysis 1 to attacker when taking damage', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['static'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const card = getMove('tackle');
+
+      const logs = onDamageTaken(state, attacker, target, 5, card);
+
+      expect(getStatusStacks(attacker, 'paralysis')).toBe(1);
+      expect(logs.some(l => l.message.includes('Static'))).toBe(true);
+    });
+
+    it('does not trigger when no HP damage dealt', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['static'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const card = getMove('tackle');
+
+      const logs = onDamageTaken(state, attacker, target, 0, card);
+
+      expect(getStatusStacks(attacker, 'paralysis')).toBe(0);
+      expect(logs.length).toBe(0);
+    });
+
+    it('does not trigger if target is dead', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['static'],
+        hp: 0,
+      });
+      target.alive = false;
+      const state = createTestCombatState([attacker, target]);
+      const card = getMove('tackle');
+
+      const logs = onDamageTaken(state, attacker, target, 5, card);
+
+      expect(getStatusStacks(attacker, 'paralysis')).toBe(0);
+    });
+
+    it('stacks Paralysis on repeated hits', () => {
+      const attacker = createTestCombatant({
+        id: 'attacker',
+        side: 'enemy',
+      });
+      const target = createTestCombatant({
+        id: 'target',
+        side: 'player',
+        passiveIds: ['static'],
+      });
+      const state = createTestCombatState([attacker, target]);
+      const card = getMove('tackle');
+
+      onDamageTaken(state, attacker, target, 5, card);
+      onDamageTaken(state, attacker, target, 5, card);
+      onDamageTaken(state, attacker, target, 5, card);
+
+      expect(getStatusStacks(attacker, 'paralysis')).toBe(3);
+    });
+  });
+
+  describe('Charge', () => {
+    it('gains 1 Strength at turn start', () => {
+      const combatant = createTestCombatant({ passiveIds: ['charge'] });
+      const state = createTestCombatState([combatant]);
+
+      const logs = onTurnStart(state, combatant, getMove);
+
+      expect(getStatusStacks(combatant, 'strength')).toBe(1);
+      expect(logs.some(l => l.message.includes('Charge'))).toBe(true);
+    });
+
+    it('stacks Strength across multiple turns', () => {
+      const combatant = createTestCombatant({ passiveIds: ['charge'] });
+      const state = createTestCombatState([combatant]);
+
+      onTurnStart(state, combatant, getMove);
+      onTurnStart(state, combatant, getMove);
+      onTurnStart(state, combatant, getMove);
+
+      expect(getStatusStacks(combatant, 'strength')).toBe(3);
+    });
+  });
+
+  describe('Volatile', () => {
+    it('returns 1.5x multiplier for self-KO attacks', () => {
+      const attacker = createTestCombatant({ passiveIds: ['volatile'] });
+
+      expect(checkVolatile(attacker)).toBe(1.5);
+    });
+
+    it('returns 1.0 without the passive', () => {
+      const attacker = createTestCombatant({ passiveIds: [] });
+
+      expect(checkVolatile(attacker)).toBe(1.0);
+    });
+  });
+
+  // ============================================================
+  // Caterpie/Butterfree line passives
+  // ============================================================
+
+  describe('Shield Dust', () => {
+    it('makes the combatant immune to poison', () => {
+      const target = createTestCombatant({ passiveIds: ['shield_dust'] });
+
+      expect(checkStatusImmunity(target, 'poison')).toBe(true);
+    });
+
+    it('does not block burn', () => {
+      const target = createTestCombatant({ passiveIds: ['shield_dust'] });
+
+      expect(checkStatusImmunity(target, 'burn')).toBe(false);
+    });
+
+    it('does not block sleep', () => {
+      const target = createTestCombatant({ passiveIds: ['shield_dust'] });
+
+      expect(checkStatusImmunity(target, 'sleep')).toBe(false);
+    });
+
+    it('blocks poison application via applyStatus', () => {
+      const target = createTestCombatant({ passiveIds: ['shield_dust'] });
+      const state = createTestCombatState([target]);
+
+      const result = applyStatus(state, target, 'poison', 2, 'enemy-1');
+
+      expect(result.applied).toBe(false);
+      expect(getStatusStacks(target, 'poison')).toBe(0);
+    });
+  });
+
+  describe('Compound Eyes', () => {
+    it('gains 1 Evasion when applying a debuff to an enemy', () => {
+      const source = createTestCombatant({ id: 'player-1', side: 'player', passiveIds: ['compound_eyes'] });
+      const target = createTestCombatant({ id: 'enemy-1', side: 'enemy' });
+      const state = createTestCombatState([source, target]);
+
+      const logs = onStatusApplied(state, source, target, 'paralysis', 2);
+
+      expect(getStatusStacks(source, 'evasion')).toBe(1);
+      expect(logs.some(l => l.message.includes('Compound Eyes'))).toBe(true);
+    });
+
+    it('does not trigger when applying a buff to self', () => {
+      const source = createTestCombatant({ id: 'player-1', side: 'player', passiveIds: ['compound_eyes'] });
+      const state = createTestCombatState([source]);
+
+      onStatusApplied(state, source, source, 'strength', 2);
+
+      expect(getStatusStacks(source, 'evasion')).toBe(0);
+    });
+
+    it('does not trigger for non-debuff statuses on enemies', () => {
+      const source = createTestCombatant({ id: 'player-1', side: 'player', passiveIds: ['compound_eyes'] });
+      const target = createTestCombatant({ id: 'enemy-1', side: 'enemy' });
+      const state = createTestCombatState([source, target]);
+
+      onStatusApplied(state, source, target, 'strength', 2);
+
+      expect(getStatusStacks(source, 'evasion')).toBe(0);
+    });
+
+    it('triggers for each debuff application', () => {
+      const source = createTestCombatant({ id: 'player-1', side: 'player', passiveIds: ['compound_eyes'] });
+      const target = createTestCombatant({ id: 'enemy-1', side: 'enemy' });
+      const state = createTestCombatState([source, target]);
+
+      onStatusApplied(state, source, target, 'poison', 1);
+      onStatusApplied(state, source, target, 'slow', 2);
+
+      expect(getStatusStacks(source, 'evasion')).toBe(2);
+    });
+  });
+
+  describe('Powder Spread', () => {
+    it('spreads 1 stack of debuff to both adjacent enemies', () => {
+      const source = createTestCombatant({ id: 'player-1', side: 'player', passiveIds: ['powder_spread'] });
+      const target = createTestCombatant({ id: 'enemy-1', side: 'enemy' });
+      const adj1 = createTestCombatant({ id: 'enemy-2', side: 'enemy' });
+      const adj2 = createTestCombatant({ id: 'enemy-3', side: 'enemy' });
+
+      // Set positions: target in column 2, adj1 in column 1, adj2 in column 3
+      target.position = { row: 'front', column: 2 };
+      adj1.position = { row: 'front', column: 1 };
+      adj2.position = { row: 'front', column: 3 };
+
+      const state = createTestCombatState([source, target, adj1, adj2]);
+
+      const logs = onStatusApplied(state, source, target, 'paralysis', 3);
+
+      expect(getStatusStacks(adj1, 'paralysis')).toBe(1);
+      expect(getStatusStacks(adj2, 'paralysis')).toBe(1);
+      expect(logs.some(l => l.message.includes('Powder Spread'))).toBe(true);
+    });
+
+    it('does not spread to non-adjacent enemies', () => {
+      const source = createTestCombatant({ id: 'player-1', side: 'player', passiveIds: ['powder_spread'] });
+      const target = createTestCombatant({ id: 'enemy-1', side: 'enemy' });
+      const far = createTestCombatant({ id: 'enemy-2', side: 'enemy' });
+
+      target.position = { row: 'front', column: 1 };
+      far.position = { row: 'front', column: 3 }; // Column differs by 2
+
+      const state = createTestCombatState([source, target, far]);
+
+      onStatusApplied(state, source, target, 'slow', 2);
+
+      expect(getStatusStacks(far, 'slow')).toBe(0);
+    });
+
+    it('does not trigger when applying buffs', () => {
+      const source = createTestCombatant({ id: 'player-1', side: 'player', passiveIds: ['powder_spread'] });
+      const target = createTestCombatant({ id: 'enemy-1', side: 'enemy' });
+      const adj = createTestCombatant({ id: 'enemy-2', side: 'enemy' });
+
+      target.position = { row: 'front', column: 1 };
+      adj.position = { row: 'front', column: 2 };
+
+      const state = createTestCombatState([source, target, adj]);
+
+      onStatusApplied(state, source, target, 'strength', 2);
+
+      expect(getStatusStacks(adj, 'strength')).toBe(0);
+    });
+
+    it('does not trigger when applying to self', () => {
+      const source = createTestCombatant({ id: 'player-1', side: 'player', passiveIds: ['powder_spread'] });
+      const ally = createTestCombatant({ id: 'player-2', side: 'player' });
+
+      source.position = { row: 'front', column: 1 };
+      ally.position = { row: 'front', column: 2 };
+
+      const state = createTestCombatState([source, ally]);
+
+      onStatusApplied(state, source, source, 'poison', 1);
+
+      expect(getStatusStacks(ally, 'poison')).toBe(0);
+    });
+  });
+
+  describe('Tinted Lens', () => {
+    it('clamps not-very-effective to 1.0', () => {
+      const attacker = createTestCombatant({ passiveIds: ['tinted_lens'] });
+
+      expect(checkTintedLens(attacker, 0.75)).toBe(1.0);
+    });
+
+    it('clamps double resist to 1.0', () => {
+      const attacker = createTestCombatant({ passiveIds: ['tinted_lens'] });
+
+      expect(checkTintedLens(attacker, 0.5)).toBe(1.0);
+    });
+
+    it('does not affect neutral effectiveness', () => {
+      const attacker = createTestCombatant({ passiveIds: ['tinted_lens'] });
+
+      expect(checkTintedLens(attacker, 1.0)).toBe(1.0);
+    });
+
+    it('does not affect super effective', () => {
+      const attacker = createTestCombatant({ passiveIds: ['tinted_lens'] });
+
+      expect(checkTintedLens(attacker, 1.25)).toBe(1.25);
+    });
+
+    it('returns original value without the passive', () => {
+      const attacker = createTestCombatant({ passiveIds: [] });
+
+      expect(checkTintedLens(attacker, 0.75)).toBe(0.75);
     });
   });
 });

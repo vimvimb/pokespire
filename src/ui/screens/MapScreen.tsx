@@ -5,6 +5,7 @@ import { canPokemonLevelUp, getAvailableNextNodes, EXP_PER_LEVEL } from '../../r
 import { getNodesAtStage, getMaxStage } from '../../run/nodes';
 import { PokemonDetailsPanel } from '../components/PokemonDetailsPanel';
 import { getSpriteSize } from '../../data/heights';
+import { THEME } from '../theme';
 
 interface Props {
   run: RunState;
@@ -130,7 +131,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onRestart }: Props) {
       alignItems: 'center',
       gap: 24,
       padding: 32,
-      color: '#e2e8f0',
+      color: THEME.text.primary,
       minHeight: '100vh',
       overflowY: 'auto',
       background: '#0f0f17',
@@ -146,16 +147,16 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onRestart }: Props) {
           padding: '8px 16px',
           fontSize: 13,
           borderRadius: 6,
-          border: '1px solid #555',
+          border: '1px solid ' + THEME.border.bright,
           background: 'transparent',
-          color: '#94a3b8',
+          color: THEME.text.secondary,
           cursor: 'pointer',
         }}
       >
         Main Menu
       </button>
 
-      <h1 style={{ fontSize: 30, margin: 0, color: '#facc15' }}>
+      <h1 style={{ fontSize: 30, margin: 0, color: THEME.accent, letterSpacing: THEME.heading.letterSpacing }}>
         Act {run.currentAct} - {run.currentAct === 1 ? 'Rocket Lab' : 'The Depths'}
       </h1>
 
@@ -167,7 +168,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onRestart }: Props) {
         padding: 16,
         background: '#1e1e2e',
         borderRadius: 12,
-        border: '1px solid #333',
+        border: '1px solid ' + THEME.border.subtle,
       }}>
         {run.party.map((pokemon, i) => {
           const basePokemon = getPokemon(pokemon.formId);
@@ -226,13 +227,13 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onRestart }: Props) {
                 }}
               />
               <div style={{ fontSize: 13, fontWeight: 'bold' }}>{basePokemon.name}</div>
-              <div style={{ fontSize: 11, color: '#94a3b8' }}>
+              <div style={{ fontSize: 11, color: THEME.text.secondary }}>
                 Lv.{pokemon.level} | {pokemon.exp}/{EXP_PER_LEVEL} EXP
               </div>
               <div style={{
                 width: 60,
                 height: 6,
-                background: '#333',
+                background: THEME.border.subtle,
                 borderRadius: 3,
                 overflow: 'hidden',
               }}>
@@ -243,7 +244,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onRestart }: Props) {
                   borderRadius: 3,
                 }} />
               </div>
-              <div style={{ fontSize: 11, color: '#94a3b8' }}>
+              <div style={{ fontSize: 11, color: THEME.text.secondary }}>
                 {pokemon.currentHp}/{pokemon.maxHp}
               </div>
             </div>
@@ -259,7 +260,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onRestart }: Props) {
           height: MAP_HEIGHT + MAP_PADDING_Y * 2,
           background: '#1a1a24',
           borderRadius: 16,
-          border: '1px solid #333',
+          border: '1px solid ' + THEME.border.subtle,
           overflow: 'visible',
         }}
       >
@@ -415,7 +416,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onRestart }: Props) {
                 bottom: 8,
                 transform: 'translateX(-50%)',
                 fontSize: 12,
-                color: '#64748b',
+                color: THEME.text.tertiary,
                 fontWeight: 500,
               }}
             >
@@ -434,7 +435,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onRestart }: Props) {
         display: 'flex',
         gap: 24,
         fontSize: 13,
-        color: '#94a3b8',
+        color: THEME.text.secondary,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#facc15' }} />

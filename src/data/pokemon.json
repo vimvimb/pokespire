@@ -239,7 +239,10 @@
     "deck": [
       "tackle", "tackle", "tackle",
       "scratch", "scratch",
-      "tail-whip"
+      "bite", "bite",
+      "tail-whip",
+      "defend",
+      "focus-energy"
     ],
     "abilities": []
   },
@@ -255,7 +258,9 @@
       "peck", "peck",
       "wing-attack", "wing-attack",
       "gust", "gust",
-      "sand-attack"
+      "sand-attack",
+      "quick-attack",
+      "defend", "defend"
     ],
     "abilities": []
   },
@@ -268,17 +273,20 @@
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "bite", "bite", "bite",
+      "bite", "bite",
       "poison-sting", "poison-sting",
       "wrap",
-      "hiss"
+      "hiss",
+      "defend", "defend",
+      "acid",
+      "smog"
     ],
     "abilities": []
   },
   "snorlax": {
     "name": "Snorlax",
     "types": ["normal"],
-    "maxHp": 110,
+    "maxHp": 100,
     "baseSpeed": 2,
     "energyPerTurn": 3,
     "energyCap": 10,
@@ -302,10 +310,11 @@
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "quick-attack", "quick-attack",
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch",
       "bite", "bite",
-      "hyper-fang",
+      "tail-whip",
+      "defend",
       "focus-energy"
     ],
     "abilities": []
@@ -321,9 +330,11 @@
     "deck": [
       "bite", "bite",
       "poison-sting", "poison-sting",
-      "acid", "acid",
       "wrap",
-      "glare"
+      "hiss",
+      "defend", "defend",
+      "acid",
+      "smog"
     ],
     "abilities": []
   },
@@ -340,7 +351,8 @@
       "wing-attack", "wing-attack",
       "gust", "gust",
       "sand-attack",
-      "quick-attack"
+      "quick-attack",
+      "defend", "defend"
     ],
     "abilities": []
   },
@@ -353,11 +365,12 @@
     "energyCap": 10,
     "handSize": 5,
     "deck": [
+      "peck", "peck",
       "wing-attack", "wing-attack",
       "gust", "gust",
-      "quick-attack", "quick-attack",
-      "mirror-move",
-      "fly"
+      "sand-attack",
+      "quick-attack",
+      "defend", "defend"
     ],
     "abilities": []
   },
@@ -375,14 +388,15 @@
       "take-down",
       "thrash",
       "rage",
-      "horn-attack"
+      "horn-attack",
+      "defend", "defend"
     ],
     "abilities": []
   },
   "kangaskhan": {
     "name": "Kangaskhan",
     "types": ["normal"],
-    "maxHp": 70,
+    "maxHp": 65,
     "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
@@ -393,7 +407,8 @@
       "dizzy-punch",
       "bite", "bite",
       "counter",
-      "rage"
+      "rage",
+      "defend", "defend"
     ],
     "abilities": []
   },
@@ -447,7 +462,8 @@
       "poison-sting", "poison-sting",
       "smog",
       "horn-attack",
-      "leer"
+      "leer",
+      "acid"
     ],
     "abilities": []
   },
@@ -465,7 +481,8 @@
       "poison-sting", "poison-sting",
       "smog",
       "horn-attack",
-      "leer"
+      "leer",
+      "acid"
     ],
     "abilities": []
   },
@@ -479,11 +496,12 @@
     "handSize": 5,
     "deck": [
       "peck", "peck",
-      "smog",
       "defend", "defend",
       "poison-sting", "poison-sting",
+      "smog",
       "horn-attack",
-      "leer"
+      "leer",
+      "acid"
     ],
     "abilities": []
   },
@@ -502,7 +520,8 @@
       "poison-sting", "poison-sting",
       "smog",
       "bite",
-      "tail-whip"
+      "tail-whip",
+      "acid"
     ],
     "abilities": []
   },
@@ -516,12 +535,13 @@
     "handSize": 5,
     "deck": [
       "scratch",
-      "smog",
       "counter",
       "defend", "defend",
       "poison-sting", "poison-sting",
+      "smog",
       "bite",
-      "tail-whip"
+      "tail-whip",
+      "acid"
     ],
     "abilities": []
   },
@@ -535,12 +555,13 @@
     "handSize": 5,
     "deck": [
       "scratch",
-      "smog",
       "counter",
       "defend", "defend",
       "poison-sting", "poison-sting",
+      "smog",
       "bite",
-      "tail-whip"
+      "tail-whip",
+      "acid"
     ],
     "abilities": []
   },
@@ -556,14 +577,16 @@
       "horn-attack", "horn-attack",
       "stomp", "stomp",
       "rock-slide",
-      "defend", "defend"
+      "defend", "defend",
+      "tackle", "tackle",
+      "sand-attack"
     ],
     "abilities": []
   },
   "rhydon": {
     "name": "Rhydon",
     "types": ["ground", "rock"],
-    "maxHp": 58,
+    "maxHp": 65,
     "baseSpeed": 3,
     "energyPerTurn": 3,
     "energyCap": 10,
@@ -572,9 +595,159 @@
       "horn-attack", "horn-attack",
       "stomp", "stomp",
       "rock-slide",
-      "earthquake",
-      "take-down",
-      "defend"
+      "defend", "defend",
+      "tackle", "tackle",
+      "sand-attack"
+    ],
+    "abilities": []
+  },
+
+  "drowzee": {
+    "name": "Drowzee",
+    "types": ["psychic"],
+    "maxHp": 40,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "confusion", "confusion",
+      "pound", "pound",
+      "defend", "defend",
+      "hypnosis",
+      "barrier",
+      "teleport",
+      "psybeam"
+    ],
+    "abilities": []
+  },
+  "hypno": {
+    "name": "Hypno",
+    "types": ["psychic"],
+    "maxHp": 50,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "confusion", "confusion",
+      "pound", "pound",
+      "defend", "defend",
+      "hypnosis",
+      "barrier",
+      "teleport",
+      "psybeam"
+    ],
+    "abilities": []
+  },
+
+  "growlithe": {
+    "name": "Growlithe",
+    "types": ["fire"],
+    "maxHp": 45,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "fire-spin", "fire-spin",
+      "flame-wheel", "flame-wheel",
+      "fire-fang", "fire-fang",
+      "defend", "defend",
+      "bite",
+      "roar"
+    ],
+    "abilities": []
+  },
+  "arcanine": {
+    "name": "Arcanine",
+    "types": ["fire"],
+    "maxHp": 75,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "fire-spin", "fire-spin",
+      "flame-wheel", "flame-wheel",
+      "fire-fang", "fire-fang",
+      "defend", "defend",
+      "bite",
+      "roar"
+    ],
+    "abilities": []
+  },
+
+  "voltorb": {
+    "name": "Voltorb",
+    "types": ["electric"],
+    "maxHp": 22,
+    "baseSpeed": 9,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "thunder-shock", "thunder-shock",
+      "sonic-boom", "sonic-boom",
+      "spark", "spark",
+      "charge-beam",
+      "defend", "defend",
+      "screech"
+    ],
+    "abilities": []
+  },
+  "electrode": {
+    "name": "Electrode",
+    "types": ["electric"],
+    "maxHp": 40,
+    "baseSpeed": 10,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "thunder-shock", "thunder-shock",
+      "sonic-boom", "sonic-boom",
+      "spark", "spark",
+      "charge-beam",
+      "defend", "defend",
+      "screech"
+    ],
+    "abilities": []
+  },
+
+  "caterpie": {
+    "name": "Caterpie",
+    "types": ["bug"],
+    "maxHp": 18,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "string-shot", "string-shot",
+      "harden", "harden",
+      "stun-spore",
+      "poison-powder",
+      "bug-bite"
+    ],
+    "abilities": []
+  },
+  "butterfree": {
+    "name": "Butterfree",
+    "types": ["bug", "flying"],
+    "maxHp": 38,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "string-shot", "string-shot",
+      "harden", "harden",
+      "stun-spore",
+      "poison-powder",
+      "bug-bite"
     ],
     "abilities": []
   }

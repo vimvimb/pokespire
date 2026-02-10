@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { Combatant } from '../../engine/types';
 import type { DamagePreview } from '../../engine/preview';
 import { HealthBar } from './HealthBar';
-import { EnergyBar } from './EnergyBar';
+import { EnergyPips } from './EnergyPips';
+import { THEME } from '../theme';
 import { StatusIcons } from './StatusIcons';
 import { getSpriteSize } from '../../data/heights';
 
@@ -118,7 +119,7 @@ export function PokemonSprite({ combatant, isCurrentTurn, isTargetable, onSelect
             ? 'drop-shadow(0 0 12px rgba(239, 68, 68, 0.8))'
             : 'none',
       }}>
-        <div style={{ fontSize: 17, fontWeight: 'bold', color: '#e2e8f0', marginBottom: 4 }}>
+        <div style={{ fontSize: 17, fontWeight: 'bold', color: THEME.text.primary, marginBottom: 4 }}>
           {combatant.name}
         </div>
 
@@ -217,9 +218,7 @@ export function PokemonSprite({ combatant, isCurrentTurn, isTargetable, onSelect
       </div>
 
       {combatant.side === 'player' && (
-        <div style={{ width: '100%', maxWidth: 120 }}>
-          <EnergyBar current={combatant.energy} max={combatant.energyCap} />
-        </div>
+        <EnergyPips energy={combatant.energy} energyCap={combatant.energyCap} />
       )}
 
       {!combatant.alive && (

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { RunState, CardRemovalNode } from '../../run/types';
 import { getPokemon, getMove } from '../../data/loaders';
+import { THEME } from '../theme';
 
 interface Props {
   run: RunState;
@@ -53,7 +54,7 @@ export function CardRemovalScreen({ run, node, onComplete, onSkip }: Props) {
       alignItems: 'center',
       gap: 24,
       padding: 32,
-      color: '#e2e8f0',
+      color: THEME.text.primary,
       minHeight: '100vh',
       overflowY: 'auto',
       background: '#0f0f17',
@@ -64,18 +65,19 @@ export function CardRemovalScreen({ run, node, onComplete, onSkip }: Props) {
         fontWeight: 'bold',
         color: '#f43f5e',
         textShadow: '0 0 20px #f43f5e55',
+        letterSpacing: THEME.heading.letterSpacing,
       }}>
         Card Removal
       </div>
 
       <div style={{
         fontSize: 16,
-        color: '#94a3b8',
+        color: THEME.text.secondary,
         textAlign: 'center',
       }}>
         Select up to {node.maxRemovals} card{node.maxRemovals > 1 ? 's' : ''} to permanently remove from your decks.
         <br />
-        <span style={{ color: '#64748b' }}>
+        <span style={{ color: THEME.text.tertiary }}>
           ({totalSelected}/{node.maxRemovals} selected)
         </span>
       </div>
@@ -97,7 +99,7 @@ export function CardRemovalScreen({ run, node, onComplete, onSkip }: Props) {
               background: '#1e1e2e',
               borderRadius: 12,
               padding: 16,
-              border: '1px solid #333',
+              border: '1px solid ' + THEME.border.subtle,
             }}>
               {/* Pokemon Header */}
               <div style={{
@@ -118,7 +120,7 @@ export function CardRemovalScreen({ run, node, onComplete, onSkip }: Props) {
                 />
                 <div>
                   <div style={{ fontSize: 18, fontWeight: 'bold' }}>{basePokemon.name}</div>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>
+                  <div style={{ fontSize: 12, color: THEME.text.tertiary }}>
                     {pokemon.deck.length} cards in deck
                   </div>
                 </div>
@@ -144,16 +146,16 @@ export function CardRemovalScreen({ run, node, onComplete, onSkip }: Props) {
                         padding: '8px 12px',
                         fontSize: 12,
                         borderRadius: 6,
-                        border: isSelected ? '2px solid #f43f5e' : '1px solid #444',
+                        border: isSelected ? '2px solid #f43f5e' : '1px solid ' + THEME.border.medium,
                         background: isSelected ? '#f43f5e22' : '#2a2a3e',
-                        color: isSelected ? '#f43f5e' : '#e2e8f0',
+                        color: isSelected ? '#f43f5e' : THEME.text.primary,
                         cursor: canSelect ? 'pointer' : 'not-allowed',
                         opacity: canSelect ? 1 : 0.5,
                         transition: 'all 0.1s',
                       }}
                     >
                       <div style={{ fontWeight: 'bold' }}>{card.name}</div>
-                      <div style={{ fontSize: 10, color: '#64748b' }}>
+                      <div style={{ fontSize: 10, color: THEME.text.tertiary }}>
                         {card.cost} cost • {card.type}
                       </div>
                     </button>
@@ -178,9 +180,9 @@ export function CardRemovalScreen({ run, node, onComplete, onSkip }: Props) {
             fontSize: 16,
             fontWeight: 'bold',
             borderRadius: 8,
-            border: '1px solid #64748b',
+            border: '1px solid ' + THEME.border.bright,
             background: 'transparent',
-            color: '#94a3b8',
+            color: THEME.text.secondary,
             cursor: 'pointer',
           }}
         >

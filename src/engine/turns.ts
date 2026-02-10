@@ -46,17 +46,17 @@ export function startTurn(state: CombatState): { logs: LogEntry[]; skipped: bool
     return { logs, skipped: true };
   }
 
-  // Step 2: Gain energy (reduced by Sleep stacks)
+  // Step 2: Gain energy (Sleep reduces energy gain by 1, regardless of stacks; stacks = duration)
   const sleep = getStatus(combatant, 'sleep');
-  const sleepStacks = sleep?.stacks ?? 0;
-  const energyGain = Math.max(0, combatant.energyPerTurn - sleepStacks);
+  const isSleeping = sleep && sleep.stacks > 0;
+  const energyGain = Math.max(0, combatant.energyPerTurn - (isSleeping ? 1 : 0));
   combatant.energy = Math.min(combatant.energy + energyGain, combatant.energyCap);
 
-  if (sleepStacks > 0) {
+  if (isSleeping) {
     logs.push({
       round: state.round,
       combatantId: combatant.id,
-      message: `${combatant.name} is drowsy! Gains ${energyGain} energy (${combatant.energyPerTurn} - ${sleepStacks} Sleep). (Energy: ${combatant.energy})`,
+      message: `${combatant.name} is drowsy! Gains ${energyGain} energy (${combatant.energyPerTurn} - 1 Sleep). (Energy: ${combatant.energy})`,
     });
   } else {
     logs.push({
@@ -170,14 +170,12 @@ function advanceToNextTurn(state: CombatState): LogEntry[] {
     const roundLogs = advanceRound(state);
     logs.push(...roundLogs);
   } else {
-    // Advance to next un-acted combatant
-    state.currentTurnIndex++;
-    // Skip dead combatants (shouldn't exist in queue, but safety check)
-    while (
-      state.currentTurnIndex < state.turnOrder.length &&
-      state.turnOrder[state.currentTurnIndex].hasActed
-    ) {
-      state.currentTurnIndex++;
+    // Find the next un-acted combatant anywhere in the queue.
+    // After mid-round speed rebuilds, un-acted combatants may be at
+    // earlier indices than the current position, so we can't just scan forward.
+    const nextUnacted = state.turnOrder.findIndex(e => !e.hasActed);
+    if (nextUnacted >= 0) {
+      state.currentTurnIndex = nextUnacted;
     }
   }
 

@@ -1,5 +1,6 @@
 import type { RunState } from '../../run/types';
 import { getPokemon } from '../../data/loaders';
+import { THEME } from '../theme';
 
 interface Props {
   run: RunState;
@@ -15,7 +16,7 @@ export function ActTransitionScreen({ run, onContinue }: Props) {
       justifyContent: 'center',
       gap: 32,
       padding: 32,
-      color: '#e2e8f0',
+      color: THEME.text.primary,
       minHeight: '100vh',
       overflowY: 'auto',
       background: 'linear-gradient(180deg, #0f0f17 0%, #1a1a2e 50%, #16213e 100%)',
@@ -27,6 +28,7 @@ export function ActTransitionScreen({ run, onContinue }: Props) {
         color: '#60a5fa',
         textShadow: '0 0 30px #60a5fa55',
         textAlign: 'center',
+        letterSpacing: THEME.heading.letterSpacing,
       }}>
         Act 1 Complete!
       </div>
@@ -34,7 +36,7 @@ export function ActTransitionScreen({ run, onContinue }: Props) {
       {/* Story Text */}
       <div style={{
         fontSize: 18,
-        color: '#94a3b8',
+        color: THEME.text.secondary,
         textAlign: 'center',
         maxWidth: 600,
         lineHeight: 1.6,
@@ -89,11 +91,11 @@ export function ActTransitionScreen({ run, onContinue }: Props) {
                 }}
               />
               <div style={{ fontSize: 15, fontWeight: 'bold' }}>{basePokemon.name}</div>
-              <div style={{ fontSize: 12, color: '#94a3b8' }}>Lv. {pokemon.level}</div>
+              <div style={{ fontSize: 12, color: THEME.text.secondary }}>Lv. {pokemon.level}</div>
               <div style={{
                 width: 80,
                 height: 8,
-                background: '#333',
+                background: THEME.border.subtle,
                 borderRadius: 4,
                 overflow: 'hidden',
               }}>
@@ -104,10 +106,10 @@ export function ActTransitionScreen({ run, onContinue }: Props) {
                   borderRadius: 4,
                 }} />
               </div>
-              <div style={{ fontSize: 12, color: '#94a3b8' }}>
+              <div style={{ fontSize: 12, color: THEME.text.secondary }}>
                 {pokemon.currentHp}/{pokemon.maxHp} HP
               </div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>
+              <div style={{ fontSize: 11, color: THEME.text.tertiary }}>
                 {pokemon.deck.length} cards
               </div>
             </div>

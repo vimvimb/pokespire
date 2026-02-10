@@ -12,6 +12,7 @@ import {
   processRoundBoundary,
   checkStatusImmunity,
 } from './status';
+import { startTurn } from './turns';
 
 describe('Status Effects', () => {
   beforeEach(() => {
@@ -310,6 +311,39 @@ describe('Status Effects', () => {
       });
     });
 
+    describe('Sleep Decay', () => {
+      it('sleep decays by 1 each round', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'sleep', 3);
+        const state = createTestCombatState([combatant]);
+
+        processRoundBoundary(state);
+
+        expect(getStatusStacks(combatant, 'sleep')).toBe(2);
+      });
+
+      it('removes sleep when stacks reach 0', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'sleep', 1);
+        const state = createTestCombatState([combatant]);
+
+        processRoundBoundary(state);
+
+        expect(getStatusStacks(combatant, 'sleep')).toBe(0);
+        expect(combatant.statuses.find(s => s.type === 'sleep')).toBeUndefined();
+      });
+
+      it('sleep stacks additively (extends duration)', () => {
+        const combatant = createTestCombatant();
+        const state = createTestCombatState([combatant]);
+
+        applyStatus(state, combatant, 'sleep', 2);
+        applyStatus(state, combatant, 'sleep', 3);
+
+        expect(getStatusStacks(combatant, 'sleep')).toBe(5);
+      });
+    });
+
     describe('Status Decay', () => {
       it('paralysis decays by 1', () => {
         const combatant = createTestCombatant();
@@ -340,6 +374,92 @@ describe('Status Effects', () => {
 
         expect(getStatusStacks(combatant, 'haste')).toBe(1);
       });
+    });
+  });
+
+  describe('Sleep Energy Reduction (via startTurn)', () => {
+    it('reduces energy gain by 1 when sleeping', () => {
+      const combatant = createTestCombatant();
+      combatant.energy = 0;
+      combatant.energyPerTurn = 3;
+      addStatus(combatant, 'sleep', 2);
+      const state = createTestCombatState([combatant]);
+
+      startTurn(state);
+
+      // Should gain 2 energy (3 - 1), not 1 (3 - 2)
+      expect(combatant.energy).toBe(2);
+    });
+
+    it('reduces energy by exactly 1 regardless of sleep stacks', () => {
+      const combatant = createTestCombatant();
+      combatant.energy = 0;
+      combatant.energyPerTurn = 3;
+      addStatus(combatant, 'sleep', 5);
+      const state = createTestCombatState([combatant]);
+
+      startTurn(state);
+
+      // 5 stacks should still only reduce by 1
+      expect(combatant.energy).toBe(2);
+    });
+
+    it('does not reduce energy when not sleeping', () => {
+      const combatant = createTestCombatant();
+      combatant.energy = 0;
+      combatant.energyPerTurn = 3;
+      const state = createTestCombatState([combatant]);
+
+      startTurn(state);
+
+      expect(combatant.energy).toBe(3);
+    });
+
+    it('energy gain floors at 0 when energyPerTurn is 1', () => {
+      const combatant = createTestCombatant();
+      combatant.energy = 0;
+      combatant.energyPerTurn = 1;
+      addStatus(combatant, 'sleep', 2);
+      const state = createTestCombatState([combatant]);
+
+      startTurn(state);
+
+      // 1 - 1 = 0, not negative
+      expect(combatant.energy).toBe(0);
+    });
+
+    it('sleep lasts for stacks turns then expires', () => {
+      const combatant = createTestCombatant();
+      combatant.energy = 0;
+      combatant.energyPerTurn = 3;
+      addStatus(combatant, 'sleep', 2);
+      const state = createTestCombatState([combatant]);
+
+      // Turn 1: sleeping (2 stacks), gain 2 energy
+      startTurn(state);
+      expect(combatant.energy).toBe(2);
+
+      // Round boundary: sleep decays 2 -> 1
+      processRoundBoundary(state);
+      expect(getStatusStacks(combatant, 'sleep')).toBe(1);
+
+      // Turn 2: still sleeping (1 stack), gain 2 energy
+      combatant.energy = 0;
+      state.currentTurnIndex = 0;
+      state.turnOrder[0].hasActed = false;
+      startTurn(state);
+      expect(combatant.energy).toBe(2);
+
+      // Round boundary: sleep decays 1 -> 0, expires
+      processRoundBoundary(state);
+      expect(getStatusStacks(combatant, 'sleep')).toBe(0);
+
+      // Turn 3: no longer sleeping, gain full 3 energy
+      combatant.energy = 0;
+      state.currentTurnIndex = 0;
+      state.turnOrder[0].hasActed = false;
+      startTurn(state);
+      expect(combatant.energy).toBe(3);
     });
   });
 });

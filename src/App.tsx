@@ -14,6 +14,8 @@ import { SandboxConfigScreen } from './ui/screens/SandboxConfigScreen';
 import { ActTransitionScreen } from './ui/screens/ActTransitionScreen';
 import { CardRemovalScreen } from './ui/screens/CardRemovalScreen';
 import { PrologueScreen } from './ui/screens/PrologueScreen';
+import { Flourish } from './ui/components/Flourish';
+import { THEME } from './ui/theme';
 import type { SandboxPokemon } from './ui/screens/SandboxConfigScreen';
 import type { RunState, BattleNode } from './run/types';
 import {
@@ -328,45 +330,82 @@ export default function App() {
 
   // Render based on current screen
   if (screen === 'main_menu') {
+    const menuTextStyle: React.CSSProperties = {
+      padding: '12px 0',
+      fontSize: 22,
+      fontWeight: 'bold',
+      border: 'none',
+      background: 'transparent',
+      color: THEME.text.primary,
+      cursor: 'pointer',
+      letterSpacing: '0.08em',
+      transition: 'all 0.2s',
+      position: 'relative',
+    };
+    const secondaryMenuStyle: React.CSSProperties = {
+      ...menuTextStyle,
+      fontSize: 18,
+      color: THEME.text.secondary,
+    };
+    const hoverIn = (e: React.MouseEvent) => {
+      const t = e.currentTarget as HTMLElement;
+      t.style.color = THEME.accent;
+      t.style.textShadow = `0 0 12px rgba(250, 204, 21, 0.4)`;
+    };
+    const hoverOut = (e: React.MouseEvent, isSecondary = false) => {
+      const t = e.currentTarget as HTMLElement;
+      t.style.color = isSecondary ? THEME.text.secondary : THEME.text.primary;
+      t.style.textShadow = 'none';
+    };
+
     return (
       <div style={{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 32,
+        gap: 24,
         padding: 32,
-        color: '#e2e8f0',
+        color: THEME.text.primary,
         minHeight: '100vh',
-        background: '#0f0f17',
+        background: THEME.bg.base,
       }}>
         <div style={{
-          fontSize: 64,
+          fontSize: 68,
           fontWeight: 'bold',
-          color: '#facc15',
+          color: THEME.accent,
           textShadow: '0 0 20px rgba(250, 204, 21, 0.5)',
+          letterSpacing: '0.2em',
+          ...THEME.heading,
         }}>
           POKESPIRE
         </div>
+
+        <Flourish variant="divider" width={240} color={THEME.text.tertiary} />
+
         <div style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 16,
-          marginTop: 32,
+          alignItems: 'center',
+          gap: 4,
+          marginTop: 16,
         }}>
           {hasSavedGame && (
             <button
               onClick={handleContinue}
+              onMouseEnter={hoverIn}
+              onMouseLeave={(e) => {
+                const t = e.currentTarget as HTMLElement;
+                t.style.color = '#22c55e';
+                t.style.textShadow = 'none';
+              }}
               style={{
-                padding: '16px 64px',
-                fontSize: 20,
-                fontWeight: 'bold',
+                ...menuTextStyle,
+                color: '#22c55e',
+                border: `1px solid ${THEME.border.subtle}`,
                 borderRadius: 8,
-                border: 'none',
-                background: '#22c55e',
-                color: '#000',
-                cursor: 'pointer',
-                minWidth: 200,
+                padding: '12px 48px',
+                marginBottom: 8,
               }}
             >
               Continue Run
@@ -378,72 +417,40 @@ export default function App() {
               setHasSavedGame(false);
               setScreen('prologue');
             }}
-            style={{
-              padding: '16px 64px',
-              fontSize: 20,
-              fontWeight: 'bold',
-              borderRadius: 8,
-              border: hasSavedGame ? '2px solid #facc15' : 'none',
-              background: hasSavedGame ? 'transparent' : '#facc15',
-              color: hasSavedGame ? '#facc15' : '#000',
-              cursor: 'pointer',
-              minWidth: 200,
-            }}
+            onMouseEnter={hoverIn}
+            onMouseLeave={(e) => hoverOut(e)}
+            style={menuTextStyle}
           >
             {hasSavedGame ? 'New Run' : 'Campaign'}
           </button>
           <button
             onClick={handleGoToSandbox}
-            style={{
-              padding: '16px 64px',
-              fontSize: 20,
-              fontWeight: 'bold',
-              borderRadius: 8,
-              border: '2px solid #64748b',
-              background: 'transparent',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              minWidth: 200,
-            }}
+            onMouseEnter={hoverIn}
+            onMouseLeave={(e) => hoverOut(e, true)}
+            style={secondaryMenuStyle}
           >
             Sandbox
           </button>
           <button
             onClick={() => setScreen('pokedex')}
-            style={{
-              padding: '16px 64px',
-              fontSize: 20,
-              fontWeight: 'bold',
-              borderRadius: 8,
-              border: '2px solid #64748b',
-              background: 'transparent',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              minWidth: 200,
-            }}
+            onMouseEnter={hoverIn}
+            onMouseLeave={(e) => hoverOut(e, true)}
+            style={secondaryMenuStyle}
           >
             PokeDex
           </button>
           <button
             onClick={() => setScreen('card_dex')}
-            style={{
-              padding: '16px 64px',
-              fontSize: 20,
-              fontWeight: 'bold',
-              borderRadius: 8,
-              border: '2px solid #64748b',
-              background: 'transparent',
-              color: '#94a3b8',
-              cursor: 'pointer',
-              minWidth: 200,
-            }}
+            onMouseEnter={hoverIn}
+            onMouseLeave={(e) => hoverOut(e, true)}
+            style={secondaryMenuStyle}
           >
             Card Dex
           </button>
         </div>
         <div style={{
           fontSize: 14,
-          color: '#64748b',
+          color: THEME.text.tertiary,
           marginTop: 16,
           textAlign: 'center',
         }}>
@@ -579,20 +586,22 @@ export default function App() {
         justifyContent: 'center',
         gap: 32,
         padding: 32,
-        color: '#e2e8f0',
+        color: THEME.text.primary,
         minHeight: '100vh',
-        background: '#0f0f17',
+        background: THEME.bg.base,
       }}>
         <div style={{
           fontSize: 64,
           fontWeight: 'bold',
           color: '#ef4444',
+          letterSpacing: THEME.heading.letterSpacing,
         }}>
           RUN OVER
         </div>
+        <Flourish variant="heading" color="#ef4444" />
         <div style={{
           fontSize: 24,
-          color: '#94a3b8',
+          color: THEME.text.secondary,
           textAlign: 'center',
         }}>
           Your party was defeated...
@@ -605,7 +614,7 @@ export default function App() {
             fontWeight: 'bold',
             borderRadius: 8,
             border: 'none',
-            background: '#facc15',
+            background: THEME.accent,
             color: '#000',
             cursor: 'pointer',
           }}
@@ -654,9 +663,9 @@ export default function App() {
       justifyContent: 'center',
       gap: 24,
       padding: 32,
-      color: '#e2e8f0',
+      color: THEME.text.primary,
       minHeight: '100vh',
-      background: '#0f0f17',
+      background: THEME.bg.base,
     }}>
       <div style={{
         fontSize: 32,
@@ -667,14 +676,14 @@ export default function App() {
       </div>
       <div style={{
         fontSize: 16,
-        color: '#94a3b8',
+        color: THEME.text.secondary,
         textAlign: 'center',
         maxWidth: 500,
       }}>
         The game reached an unexpected state. This info can help debug the issue:
       </div>
       <pre style={{
-        background: '#1e1e2e',
+        background: THEME.bg.panel,
         padding: 16,
         borderRadius: 8,
         fontSize: 12,
@@ -693,9 +702,9 @@ export default function App() {
             fontSize: 16,
             fontWeight: 'bold',
             borderRadius: 8,
-            border: '2px solid #64748b',
+            border: `2px solid ${THEME.border.bright}`,
             background: 'transparent',
-            color: '#94a3b8',
+            color: THEME.text.secondary,
             cursor: 'pointer',
           }}
         >
@@ -709,7 +718,7 @@ export default function App() {
             fontWeight: 'bold',
             borderRadius: 8,
             border: 'none',
-            background: '#facc15',
+            background: THEME.accent,
             color: '#000',
             cursor: 'pointer',
           }}

@@ -2,6 +2,7 @@ import { useRef, useLayoutEffect, useCallback } from 'react';
 import type { CombatState } from '../../engine/types';
 import { getCombatant } from '../../engine/combat';
 import { getEffectiveSpeed } from '../../engine/status';
+import { THEME } from '../theme';
 
 interface Props {
   state: CombatState;
@@ -126,10 +127,22 @@ export function TurnOrderBar({ state }: Props) {
       background: 'transparent',
       borderRadius: 8,
       flexWrap: 'wrap',
+      position: 'relative',
     }}>
-      <span style={{ fontSize: 12, color: '#64748b', alignSelf: 'center', marginRight: 8 }}>
+      {/* Threading line behind entries */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: 0,
+        right: 0,
+        height: 1,
+        background: THEME.text.tertiary + '44',
+        zIndex: 0,
+      }} />
+      <span style={{ fontSize: 12, color: THEME.text.tertiary, alignSelf: 'center', marginRight: 4, position: 'relative', zIndex: 1 }}>
         Round {state.round}
       </span>
+      <span style={{ color: THEME.border.bright, alignSelf: 'center', marginRight: 8, fontSize: 14, position: 'relative', zIndex: 1 }}>·</span>
       {state.turnOrder.map((entry, idx) => {
         const c = getCombatant(state, entry.combatantId);
         const isCurrent = idx === state.currentTurnIndex;
@@ -141,22 +154,33 @@ export function TurnOrderBar({ state }: Props) {
             ref={setRef(entry.combatantId)}
             style={{
               padding: '4px 8px',
-              borderRadius: 4,
+              borderRadius: 6,
               fontSize: 14,
               fontWeight: isCurrent ? 'bold' : 'normal',
               background: isCurrent
-                ? '#facc15'
+                ? THEME.accent + '22'
                 : hasActed
-                  ? '#1e1e2e'
+                  ? THEME.bg.panelDark
                   : c.side === 'player'
-                    ? '#1e3a5f'
-                    : '#5f1e1e',
-              color: isCurrent ? '#000' : hasActed ? '#555' : '#e2e8f0',
+                    ? THEME.side.player
+                    : THEME.side.enemy,
+              color: isCurrent ? THEME.accent : hasActed ? THEME.text.tertiary : THEME.text.primary,
               opacity: hasActed ? 0.5 : 1,
-              border: isCurrent ? '1px solid #facc15' : '1px solid transparent',
+              border: isCurrent
+                ? `1px solid ${THEME.accent}`
+                : hasActed
+                  ? '1px solid transparent'
+                  : c.side === 'player'
+                    ? '1px solid rgba(42,74,110,0.6)'
+                    : '1px solid rgba(110,42,42,0.6)',
+              boxShadow: isCurrent
+                ? 'inset 0 0 8px rgba(250,204,21,0.15)'
+                : 'inset 0 0 4px rgba(0,0,0,0.2)',
+              position: 'relative',
+              zIndex: 1,
             }}
           >
-            <span style={{ fontSize: 12, opacity: 0.6 }}>{getEffectiveSpeed(c)}</span>
+            <span style={{ fontSize: 12, color: THEME.text.tertiary, opacity: 0.7 }}>{getEffectiveSpeed(c)}</span>
             {' '}{c.name}
           </div>
         );

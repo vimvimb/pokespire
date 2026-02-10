@@ -1,5 +1,6 @@
 import type { RunState } from '../../run/types';
 import { getPokemon } from '../../data/loaders';
+import { THEME } from '../theme';
 
 interface Props {
   run: RunState;
@@ -15,7 +16,7 @@ export function RunVictoryScreen({ run, onNewRun }: Props) {
       justifyContent: 'center',
       gap: 32,
       padding: 32,
-      color: '#e2e8f0',
+      color: THEME.text.primary,
       minHeight: '100vh',
       overflowY: 'auto',
       background: '#0f0f17',
@@ -25,13 +26,14 @@ export function RunVictoryScreen({ run, onNewRun }: Props) {
         fontWeight: 'bold',
         color: '#facc15',
         textShadow: '0 0 30px #facc1555',
+        letterSpacing: THEME.heading.letterSpacing,
       }}>
         VICTORY!
       </div>
 
       <div style={{
         fontSize: 26,
-        color: '#94a3b8',
+        color: THEME.text.secondary,
         textAlign: 'center',
       }}>
         You completed the run!
@@ -74,7 +76,7 @@ export function RunVictoryScreen({ run, onNewRun }: Props) {
               <div style={{
                 width: 80,
                 height: 8,
-                background: '#333',
+                background: THEME.border.subtle,
                 borderRadius: 4,
                 overflow: 'hidden',
               }}>
@@ -85,10 +87,10 @@ export function RunVictoryScreen({ run, onNewRun }: Props) {
                   borderRadius: 4,
                 }} />
               </div>
-              <div style={{ fontSize: 12, color: '#94a3b8' }}>
+              <div style={{ fontSize: 12, color: THEME.text.secondary }}>
                 {pokemon.currentHp}/{pokemon.maxHp} HP
               </div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>
+              <div style={{ fontSize: 11, color: THEME.text.tertiary }}>
                 {pokemon.deck.length} cards
               </div>
             </div>

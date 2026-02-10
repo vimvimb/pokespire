@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Combatant } from '../../engine/types';
 import { getMove } from '../../data/loaders';
 import { CardDisplay } from './CardDisplay';
+import { THEME } from '../theme';
 
 type PileType = 'draw' | 'discard' | 'vanished';
 
@@ -36,13 +37,16 @@ export function PileViewer({ combatant }: Props) {
   }
 
   const btnStyle = (pile: PileType, count: number): React.CSSProperties => ({
+    ...THEME.button.secondary,
     padding: '6px 12px',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: openPile === pile ? 'bold' : 'normal',
-    borderRadius: 6,
-    border: openPile === pile ? '2px solid #facc15' : '2px solid #444',
-    background: openPile === pile ? '#2d2d3f' : '#1e1e2e',
-    color: count > 0 ? '#e2e8f0' : '#555',
+    ...(openPile === pile ? {
+      borderColor: THEME.accent,
+      background: THEME.bg.elevated,
+      boxShadow: 'inset 0 0 8px rgba(250,204,21,0.1)',
+    } : {}),
+    color: count > 0 ? THEME.text.primary : THEME.text.tertiary,
     cursor: count > 0 ? 'pointer' : 'default',
     whiteSpace: 'nowrap',
   });
@@ -81,13 +85,14 @@ export function PileViewer({ combatant }: Props) {
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              background: '#1e1e2e',
-              borderRadius: 12,
-              border: '2px solid #444',
+              background: THEME.bg.panel,
+              borderRadius: 10,
+              border: `1.5px solid ${THEME.border.medium}`,
               padding: 20,
               maxWidth: 700,
               maxHeight: '80vh',
               overflowY: 'auto',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 0 12px rgba(0,0,0,0.2)',
             }}
           >
             <div style={{
@@ -96,19 +101,15 @@ export function PileViewer({ combatant }: Props) {
               alignItems: 'center',
               marginBottom: 16,
             }}>
-              <div style={{ fontSize: 20, fontWeight: 'bold', color: '#facc15' }}>
+              <div style={{ fontSize: 20, fontWeight: 'bold', color: THEME.accent }}>
                 {title}
               </div>
               <button
                 onClick={() => setOpenPile(null)}
                 style={{
+                  ...THEME.button.secondary,
                   padding: '4px 12px',
                   fontSize: 15,
-                  background: '#333',
-                  border: '1px solid #555',
-                  color: '#ccc',
-                  borderRadius: 6,
-                  cursor: 'pointer',
                 }}
               >
                 Close

@@ -9,11 +9,13 @@ import {
   type PassiveId,
 } from '../../run/progression';
 import { CardPreview } from '../components/CardPreview';
+import { Flourish } from '../components/Flourish';
+import { THEME } from '../theme';
 
-// Get all available base form Pokemon IDs (ones with progression trees)
+// ── Constants ──────────────────────────────────────────────────────
+
 const AVAILABLE_POKEMON = Object.keys(PROGRESSION_TREES);
 
-// All types and rarities for filtering
 const ALL_TYPES: MoveType[] = [
   'normal', 'fire', 'water', 'grass', 'electric', 'poison',
   'flying', 'psychic', 'dark', 'fighting', 'ice', 'bug',
@@ -43,14 +45,16 @@ const TYPE_COLORS: Record<MoveType, string> = {
   ground: '#e0c068',
 };
 
+// ── Exported interfaces (preserved for App.tsx compatibility) ──────
+
 export interface SandboxPokemon {
-  id: string; // unique id for this slot
+  id: string;
   baseFormId: string;
   level: number;
   has999Hp: boolean;
   startAt50Percent: boolean;
   position: Position;
-  customDeck: string[] | null; // null = use default deck
+  customDeck: string[] | null;
 }
 
 interface Props {
@@ -64,13 +68,13 @@ interface Props {
     hpOverrides: Map<string, { maxHp?: number; startPercent?: number }>
   ) => void;
   onBack: () => void;
-  // Persisted state from parent
   initialPlayerTeam?: SandboxPokemon[];
   initialEnemyTeam?: SandboxPokemon[];
   onConfigChange?: (playerTeam: SandboxPokemon[], enemyTeam: SandboxPokemon[]) => void;
 }
 
-// Get the Pokemon form ID at a given level (handles evolution)
+// ── Helpers ─────────────────────────────────────────────────────────
+
 function getFormIdAtLevel(baseFormId: string, level: number): string {
   const tree = getProgressionTree(baseFormId);
   if (!tree) return baseFormId;
@@ -85,7 +89,6 @@ function getFormIdAtLevel(baseFormId: string, level: number): string {
   return currentFormId;
 }
 
-// Get all passives accumulated up to a level
 function getPassivesAtLevel(baseFormId: string, level: number): string[] {
   const tree = getProgressionTree(baseFormId);
   if (!tree) return [];
@@ -100,7 +103,6 @@ function getPassivesAtLevel(baseFormId: string, level: number): string[] {
   return passives;
 }
 
-// Get deck at a level (base deck + added cards from progression)
 function getDeckAtLevel(baseFormId: string, level: number): string[] {
   const tree = getProgressionTree(baseFormId);
   const formId = getFormIdAtLevel(baseFormId, level);
@@ -124,7 +126,13 @@ function generateId(): string {
   return `pokemon-${nextId++}`;
 }
 
-// Filter button component
+function makeSpriteUrl(formId: string, variant: 'front' | 'back' = 'front'): string {
+  const prefix = variant === 'back' ? 'back-' : '';
+  return `https://img.pokemondb.net/sprites/black-white/anim/${prefix}normal/${formId}.gif`;
+}
+
+// ── Sub-components ─────────────────────────────────────────────────
+
 function FilterButton({ label, isSelected, onClick, color }: {
   label: string;
   isSelected: boolean;
@@ -139,9 +147,9 @@ function FilterButton({ label, isSelected, onClick, color }: {
         fontSize: 10,
         fontWeight: 'bold',
         borderRadius: 4,
-        border: isSelected ? `2px solid ${color}` : '1px solid transparent',
-        background: isSelected ? `${color}33` : '#2a2a3a',
-        color: isSelected ? color : '#94a3b8',
+        border: isSelected ? `2px solid ${color}` : `1px solid transparent`,
+        background: isSelected ? `${color}33` : THEME.bg.elevated,
+        color: isSelected ? color : THEME.text.secondary,
         cursor: 'pointer',
         textTransform: 'capitalize',
         transition: 'all 0.15s',
@@ -152,7 +160,8 @@ function FilterButton({ label, isSelected, onClick, color }: {
   );
 }
 
-// Deck Editor Modal
+// ── DeckEditorModal ────────────────────────────────────────────────
+
 function DeckEditorModal({
   currentDeck,
   defaultDeck,
@@ -168,10 +177,8 @@ function DeckEditorModal({
   const [selectedRarity, setSelectedRarity] = useState<CardRarity | 'all'>('all');
   const [searchText, setSearchText] = useState('');
 
-  // Get all cards filtered
   const filteredCards = useMemo(() => {
     const allCardIds = Object.keys(MOVES);
-
     return allCardIds
       .map(id => getMove(id))
       .filter(card => {
@@ -191,19 +198,9 @@ function DeckEditorModal({
       });
   }, [selectedType, selectedRarity, searchText]);
 
-  const addCard = (cardId: string) => {
-    onUpdateDeck([...currentDeck, cardId]);
-  };
-
-  const removeCard = (index: number) => {
-    const newDeck = currentDeck.filter((_, i) => i !== index);
-    onUpdateDeck(newDeck);
-  };
-
-  const resetDeck = () => {
-    onUpdateDeck(null);
-  };
-
+  const addCard = (cardId: string) => onUpdateDeck([...currentDeck, cardId]);
+  const removeCard = (index: number) => onUpdateDeck(currentDeck.filter((_, i) => i !== index));
+  const resetDeck = () => onUpdateDeck(null);
   const isCustomized = JSON.stringify(currentDeck) !== JSON.stringify(defaultDeck);
 
   return (
@@ -211,10 +208,7 @@ function DeckEditorModal({
       onClick={onClose}
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        top: 0, left: 0, right: 0, bottom: 0,
         background: 'rgba(0, 0, 0, 0.8)',
         display: 'flex',
         alignItems: 'center',
@@ -228,8 +222,9 @@ function DeckEditorModal({
           width: '90%',
           maxWidth: 1000,
           height: '85%',
-          background: '#1a1a24',
+          background: THEME.bg.panelDark,
           borderRadius: 12,
+          border: `1px solid ${THEME.border.medium}`,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -241,39 +236,16 @@ function DeckEditorModal({
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '16px 20px',
-          borderBottom: '1px solid #333',
+          borderBottom: `1px solid ${THEME.border.subtle}`,
         }}>
-          <h2 style={{ margin: 0, color: '#facc15', fontSize: 20 }}>Edit Deck</h2>
+          <h2 style={{ margin: 0, color: THEME.accent, fontSize: 20, ...THEME.heading }}>Edit Deck</h2>
           <div style={{ display: 'flex', gap: 12 }}>
             {isCustomized && (
-              <button
-                onClick={resetDeck}
-                style={{
-                  padding: '6px 16px',
-                  background: '#333',
-                  border: '1px solid #555',
-                  borderRadius: 6,
-                  color: '#94a3b8',
-                  cursor: 'pointer',
-                  fontSize: 13,
-                }}
-              >
+              <button onClick={resetDeck} style={{ padding: '6px 16px', ...THEME.button.secondary, fontSize: 13 }}>
                 Reset to Default
               </button>
             )}
-            <button
-              onClick={onClose}
-              style={{
-                padding: '6px 20px',
-                background: '#facc15',
-                border: 'none',
-                borderRadius: 6,
-                color: '#000',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: 13,
-              }}
-            >
+            <button onClick={onClose} style={{ padding: '6px 20px', ...THEME.button.primary, fontSize: 13 }}>
               Done
             </button>
           </div>
@@ -282,23 +254,15 @@ function DeckEditorModal({
         {/* Current Deck Preview */}
         <div style={{
           padding: '12px 20px',
-          borderBottom: '1px solid #333',
-          background: '#15151f',
+          borderBottom: `1px solid ${THEME.border.subtle}`,
+          background: THEME.bg.base,
         }}>
-          <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 8 }}>
+          <div style={{ fontSize: 13, color: THEME.text.secondary, marginBottom: 8 }}>
             Current Deck ({currentDeck.length} cards) - Click to remove:
           </div>
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 4,
-            maxHeight: 80,
-            overflowY: 'auto',
-          }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, maxHeight: 80, overflowY: 'auto' }}>
             {currentDeck.length === 0 ? (
-              <div style={{ color: '#64748b', fontStyle: 'italic', fontSize: 12 }}>
-                No cards in deck
-              </div>
+              <div style={{ color: THEME.text.tertiary, fontStyle: 'italic', fontSize: 12 }}>No cards in deck</div>
             ) : (
               currentDeck.map((cardId, i) => {
                 const card = getMove(cardId);
@@ -307,14 +271,11 @@ function DeckEditorModal({
                     key={`${cardId}-${i}`}
                     onClick={() => removeCard(i)}
                     style={{
-                      fontSize: 11,
-                      padding: '4px 8px',
+                      fontSize: 11, padding: '4px 8px',
                       background: `${TYPE_COLORS[card.type]}22`,
                       border: `1px solid ${TYPE_COLORS[card.type]}66`,
-                      borderRadius: 4,
-                      color: '#e2e8f0',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s',
+                      borderRadius: 4, color: THEME.text.primary,
+                      cursor: 'pointer', transition: 'all 0.15s',
                     }}
                     title="Click to remove"
                   >
@@ -329,72 +290,35 @@ function DeckEditorModal({
         {/* Filters */}
         <div style={{
           padding: '12px 20px',
-          borderBottom: '1px solid #333',
-          display: 'flex',
-          gap: 16,
-          flexWrap: 'wrap',
-          alignItems: 'center',
+          borderBottom: `1px solid ${THEME.border.subtle}`,
+          display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',
         }}>
-          {/* Search */}
           <input
-            type="text"
-            placeholder="Search cards..."
-            value={searchText}
+            type="text" placeholder="Search cards..." value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             style={{
-              padding: '6px 12px',
-              background: '#2a2a3e',
-              border: '1px solid #444',
-              borderRadius: 6,
-              color: '#e2e8f0',
-              fontSize: 12,
-              width: 150,
+              padding: '6px 12px', background: THEME.bg.elevated,
+              border: `1px solid ${THEME.border.medium}`, borderRadius: 6,
+              color: THEME.text.primary, fontSize: 12, width: 150,
             }}
           />
-
-          {/* Type Filter */}
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontSize: 11, color: '#64748b', marginRight: 4 }}>Type:</span>
-            <FilterButton
-              label="All"
-              isSelected={selectedType === 'all'}
-              onClick={() => setSelectedType('all')}
-              color="#94a3b8"
-            />
+            <span style={{ fontSize: 11, color: THEME.text.tertiary, marginRight: 4 }}>Type:</span>
+            <FilterButton label="All" isSelected={selectedType === 'all'} onClick={() => setSelectedType('all')} color={THEME.text.secondary} />
             {ALL_TYPES.map(type => (
-              <FilterButton
-                key={type}
-                label={type}
-                isSelected={selectedType === type}
-                onClick={() => setSelectedType(type)}
-                color={TYPE_COLORS[type]}
-              />
+              <FilterButton key={type} label={type} isSelected={selectedType === type} onClick={() => setSelectedType(type)} color={TYPE_COLORS[type]} />
             ))}
           </div>
-
-          {/* Rarity Filter */}
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontSize: 11, color: '#64748b', marginRight: 4 }}>Rarity:</span>
-            <FilterButton
-              label="All"
-              isSelected={selectedRarity === 'all'}
-              onClick={() => setSelectedRarity('all')}
-              color="#94a3b8"
-            />
+            <span style={{ fontSize: 11, color: THEME.text.tertiary, marginRight: 4 }}>Rarity:</span>
+            <FilterButton label="All" isSelected={selectedRarity === 'all'} onClick={() => setSelectedRarity('all')} color={THEME.text.secondary} />
             {ALL_RARITIES.map(rarity => (
-              <FilterButton
-                key={rarity}
-                label={rarity}
-                isSelected={selectedRarity === rarity}
-                onClick={() => setSelectedRarity(rarity)}
-                color="#94a3b8"
-              />
+              <FilterButton key={rarity} label={rarity} isSelected={selectedRarity === rarity} onClick={() => setSelectedRarity(rarity)} color={THEME.text.secondary} />
             ))}
           </div>
         </div>
 
-        {/* Card Count */}
-        <div style={{ padding: '8px 20px', fontSize: 12, color: '#64748b' }}>
+        <div style={{ padding: '8px 20px', fontSize: 12, color: THEME.text.tertiary }}>
           Showing {filteredCards.length} cards - Click to add to deck
         </div>
 
@@ -403,22 +327,16 @@ function DeckEditorModal({
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-            gap: 12,
-            justifyItems: 'center',
+            gap: 12, justifyItems: 'center',
           }}>
             {filteredCards.map(card => (
-              <div
-                key={card.id}
-                onClick={() => addCard(card.id)}
-                style={{ cursor: 'pointer' }}
-              >
+              <div key={card.id} onClick={() => addCard(card.id)} style={{ cursor: 'pointer' }}>
                 <CardPreview card={card} showHoverEffect={true} />
               </div>
             ))}
           </div>
-
           {filteredCards.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 48, color: '#64748b' }}>
+            <div style={{ textAlign: 'center', padding: 48, color: THEME.text.tertiary }}>
               No cards match the selected filters
             </div>
           )}
@@ -428,91 +346,67 @@ function DeckEditorModal({
   );
 }
 
-// Pokemon tile for selection
-function PokemonTile({
-  pokemonId,
-  isSelected,
+// ── FormationSlot ──────────────────────────────────────────────────
+
+function FormationSlot({
+  pokemon,
   onClick,
+  onRemove,
+  onDrop,
+  isSelected,
+  side,
 }: {
-  pokemonId: string;
-  isSelected: boolean;
+  pokemon: SandboxPokemon | null;
   onClick: () => void;
+  onRemove: () => void;
+  onDrop: (baseFormId: string) => void;
+  isSelected: boolean;
+  side: 'player' | 'enemy';
 }) {
-  const pokemon = getPokemon(pokemonId);
-  const spriteUrl = `https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemonId}.gif`;
+  const [dragOver, setDragOver] = useState(false);
+
+  const formId = pokemon ? getFormIdAtLevel(pokemon.baseFormId, pokemon.level) : null;
+  const sprite = formId
+    ? makeSpriteUrl(formId, side === 'player' ? 'back' : 'front')
+    : null;
+
+  const borderColor = isSelected
+    ? THEME.accent
+    : dragOver
+      ? THEME.status.energy
+      : pokemon
+        ? THEME.border.medium
+        : THEME.border.subtle;
+
+  const borderStyle = pokemon || isSelected || dragOver ? 'solid' : 'dashed';
+  const bg = isSelected
+    ? THEME.bg.elevated
+    : dragOver
+      ? `${THEME.status.energy}15`
+      : pokemon
+        ? THEME.bg.panel
+        : THEME.bg.base;
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    setDragOver(true);
+  };
+
+  const handleDragLeave = () => setDragOver(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const baseFormId = e.dataTransfer.getData('text/plain');
+    if (baseFormId) onDrop(baseFormId);
+  };
 
   return (
     <div
       onClick={onClick}
-      style={{
-        width: 72,
-        height: 80,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: isSelected ? '#3b3b5c' : '#1e1e2e',
-        border: isSelected ? '2px solid #60a5fa' : '1px solid #333',
-        borderRadius: 8,
-        cursor: 'pointer',
-        transition: 'all 0.15s',
-      }}
-    >
-      <img
-        src={spriteUrl}
-        alt={pokemon.name}
-        style={{ width: 48, height: 48, imageRendering: 'pixelated', objectFit: 'contain' }}
-        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-      />
-      <div style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center', marginTop: 2 }}>
-        {pokemon.name}
-      </div>
-    </div>
-  );
-}
-
-// Formation grid slot
-function FormationSlot({
-  row: _row,
-  col: _col,
-  pokemon,
-  onDrop,
-  onRemove,
-  onSelect,
-  isSelected,
-  side,
-}: {
-  row: Row;
-  col: Column;
-  pokemon: SandboxPokemon | null;
-  onDrop: (pokemonId: string) => void;
-  onRemove: () => void;
-  onSelect: () => void;
-  isSelected: boolean;
-  side: 'player' | 'enemy';
-}) {
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const pokemonId = e.dataTransfer.getData('text/plain');
-    if (pokemonId) {
-      onDrop(pokemonId);
-    }
-  };
-
-  const formId = pokemon ? getFormIdAtLevel(pokemon.baseFormId, pokemon.level) : null;
-  const spriteUrl = formId
-    ? `https://img.pokemondb.net/sprites/black-white/anim/${side === 'player' ? 'back-' : ''}normal/${formId}.gif`
-    : null;
-
-  return (
-    <div
-      onClick={pokemon ? onSelect : undefined}
       onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       style={{
         width: 100,
@@ -521,74 +415,118 @@ function FormationSlot({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: isSelected ? '#3b3b5c' : pokemon ? '#1e1e2e' : '#0f0f17',
-        border: isSelected ? '2px solid #facc15' : pokemon ? '1px solid #444' : '2px dashed #333',
+        background: bg,
+        border: `2px ${borderStyle} ${borderColor}`,
         borderRadius: 8,
         cursor: pokemon ? 'pointer' : 'default',
         position: 'relative',
+        transition: 'all 0.2s',
       }}
     >
       {pokemon ? (
         <>
-          {spriteUrl && (
+          {sprite && (
             <img
-              src={spriteUrl}
+              src={sprite}
               alt={formId || ''}
-              style={{ width: 64, height: 64, imageRendering: 'pixelated', objectFit: 'contain' }}
+              style={{ width: 60, height: 60, imageRendering: 'pixelated', objectFit: 'contain' }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           )}
-          <div style={{ fontSize: 11, color: '#e2e8f0', fontWeight: 'bold' }}>
+          <div style={{ fontSize: 11, color: THEME.text.primary, fontWeight: 'bold' }}>
             Lv.{pokemon.level}
           </div>
           {/* HP indicators */}
-          <div style={{ display: 'flex', gap: 2, position: 'absolute', top: 4, right: 4 }}>
+          <div style={{ display: 'flex', gap: 2, position: 'absolute', top: 3, right: 3 }}>
             {pokemon.has999Hp && (
-              <span style={{ fontSize: 10, background: '#4ade80', color: '#000', padding: '1px 3px', borderRadius: 2 }}>999</span>
+              <span style={{ fontSize: 9, background: THEME.status.heal, color: '#000', padding: '1px 3px', borderRadius: 2, fontWeight: 'bold' }}>999</span>
             )}
             {pokemon.startAt50Percent && (
-              <span style={{ fontSize: 10, background: '#fcd34d', color: '#000', padding: '1px 3px', borderRadius: 2 }}>50%</span>
+              <span style={{ fontSize: 9, background: '#fcd34d', color: '#000', padding: '1px 3px', borderRadius: 2, fontWeight: 'bold' }}>50%</span>
             )}
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
             style={{
-              position: 'absolute',
-              top: -8,
-              left: -8,
-              width: 20,
-              height: 20,
-              borderRadius: '50%',
-              background: '#ef4444',
-              border: 'none',
-              color: '#fff',
-              cursor: 'pointer',
-              fontSize: 12,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              position: 'absolute', top: -8, left: -8,
+              width: 20, height: 20, borderRadius: '50%',
+              background: THEME.status.damage, border: 'none',
+              color: '#fff', cursor: 'pointer', fontSize: 12,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
             x
           </button>
         </>
       ) : (
-        <div style={{ fontSize: 11, color: '#444' }}>
-          Drop here
+        <div style={{ fontSize: 11, color: THEME.text.tertiary }}>
+          {dragOver ? 'Drop here' : 'Empty'}
         </div>
       )}
     </div>
   );
 }
 
-// Pokemon details panel (shown when selected)
-function PokemonDetailsPanel({
+// ── FormationGrid (2 columns x 3 rows, mirroring battle layout) ───
+// Player: [Back | Front]  (back on left, front faces center)
+// Enemy:  [Front | Back]  (front faces center, back on right)
+
+function FormationGrid({
+  team,
+  side,
+  editingId,
+  onSlotClick,
+  onRemove,
+  onDrop,
+}: {
+  team: SandboxPokemon[];
+  side: 'player' | 'enemy';
+  editingId: string | null;
+  onSlotClick: (row: Row, col: Column) => void;
+  onRemove: (row: Row, col: Column) => void;
+  onDrop: (row: Row, col: Column, baseFormId: string) => void;
+}) {
+  const positions: Column[] = [0, 1, 2];
+  // Column order: player = back then front; enemy = front then back
+  const colOrder: Row[] = side === 'player' ? ['back', 'front'] : ['front', 'back'];
+  const colLabels = side === 'player' ? ['Back', 'Front'] : ['Front', 'Back'];
+
+  return (
+    <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
+      {colOrder.map((row, ci) => (
+        <div key={row} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <div style={{ fontSize: 9, color: THEME.text.tertiary, ...THEME.heading }}>{colLabels[ci]}</div>
+          {positions.map(col => {
+            const pokemon = team.find(p => p.position.row === row && p.position.column === col);
+            return (
+              <FormationSlot
+                key={`${row}-${col}`}
+                pokemon={pokemon || null}
+                onClick={() => onSlotClick(row, col)}
+                onRemove={() => onRemove(row, col)}
+                onDrop={(baseFormId) => onDrop(row, col, baseFormId)}
+                isSelected={pokemon?.id === editingId}
+                side={side}
+              />
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── InlineDetailEditor ─────────────────────────────────────────────
+
+function InlineDetailEditor({
   pokemon,
   onUpdate,
+  onRemove,
   onOpenDeckEditor,
 }: {
   pokemon: SandboxPokemon;
   onUpdate: (pokemon: SandboxPokemon) => void;
+  onRemove: () => void;
   onOpenDeckEditor: () => void;
 }) {
   const formId = getFormIdAtLevel(pokemon.baseFormId, pokemon.level);
@@ -596,104 +534,107 @@ function PokemonDetailsPanel({
   const defaultDeck = getDeckAtLevel(pokemon.baseFormId, pokemon.level);
   const currentDeck = pokemon.customDeck ?? defaultDeck;
   const isCustomDeck = pokemon.customDeck !== null;
+  const pokemonData = getPokemon(formId);
 
   return (
     <div style={{
-      padding: 16,
-      background: '#1e1e2e',
+      padding: '14px 20px',
+      background: THEME.bg.panel,
+      border: `1px solid ${THEME.border.medium}`,
       borderRadius: 8,
-      border: '1px solid #444',
+      display: 'flex',
+      gap: 20,
+      alignItems: 'flex-start',
+      flexWrap: 'wrap',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+      {/* Sprite + Name */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80 }}>
         <img
-          src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${formId}.gif`}
+          src={makeSpriteUrl(formId)}
           alt={formId}
-          style={{ width: 64, height: 64, imageRendering: 'pixelated' }}
+          style={{ width: 56, height: 56, imageRendering: 'pixelated', objectFit: 'contain' }}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
-        <div>
-          <h3 style={{ margin: 0, color: '#facc15' }}>{getPokemon(formId).name}</h3>
-          <div style={{ fontSize: 12, color: '#64748b' }}>
-            {passives.map(p => PASSIVE_DEFINITIONS[p as PassiveId]?.name).join(', ') || 'No passives'}
-          </div>
+        <div style={{ fontSize: 13, fontWeight: 'bold', color: THEME.accent, marginTop: 4 }}>
+          {pokemonData.name}
         </div>
       </div>
 
-      {/* Level selector */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <span style={{ fontSize: 13, color: '#94a3b8' }}>Level:</span>
-        {[1, 2, 3, 4].map(l => (
-          <button
-            key={l}
-            onClick={() => onUpdate({ ...pokemon, level: l, customDeck: null })}
-            style={{
-              width: 32,
-              height: 32,
-              background: pokemon.level === l ? '#60a5fa' : '#2a2a3e',
-              border: 'none',
-              borderRadius: 4,
-              color: pokemon.level === l ? '#fff' : '#94a3b8',
-              cursor: 'pointer',
-              fontWeight: pokemon.level === l ? 'bold' : 'normal',
-            }}
-          >
-            {l}
-          </button>
-        ))}
+      {/* Level — preserves customDeck */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ fontSize: 11, color: THEME.text.tertiary, ...THEME.heading }}>Level</div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[1, 2, 3, 4].map(l => (
+            <button
+              key={l}
+              onClick={() => onUpdate({ ...pokemon, level: l })}
+              style={{
+                width: 30, height: 30,
+                ...(pokemon.level === l ? THEME.button.primary : THEME.button.secondary),
+                fontSize: 13, padding: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Passives */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 120 }}>
+        <div style={{ fontSize: 11, color: THEME.text.tertiary, ...THEME.heading }}>Passives</div>
+        {passives.length === 0 ? (
+          <div style={{ fontSize: 12, color: THEME.text.tertiary, fontStyle: 'italic' }}>None</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {passives.map(p => (
+              <div key={p} style={{ fontSize: 12, color: THEME.text.secondary }}>
+                {PASSIVE_DEFINITIONS[p as PassiveId]?.name ?? p}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* HP toggles */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ fontSize: 11, color: THEME.text.tertiary, ...THEME.heading }}>HP</div>
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
           <input
-            type="checkbox"
-            checked={pokemon.has999Hp}
+            type="checkbox" checked={pokemon.has999Hp}
             onChange={(e) => onUpdate({ ...pokemon, has999Hp: e.target.checked })}
-            style={{ width: 16, height: 16 }}
+            style={{ width: 14, height: 14, accentColor: THEME.status.heal }}
           />
-          <span style={{ fontSize: 13, color: '#4ade80' }}>999 HP</span>
+          <span style={{ fontSize: 12, color: THEME.status.heal }}>999 HP</span>
         </label>
         <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
           <input
-            type="checkbox"
-            checked={pokemon.startAt50Percent}
+            type="checkbox" checked={pokemon.startAt50Percent}
             onChange={(e) => onUpdate({ ...pokemon, startAt50Percent: e.target.checked })}
-            style={{ width: 16, height: 16 }}
+            style={{ width: 14, height: 14, accentColor: '#fcd34d' }}
           />
-          <span style={{ fontSize: 13, color: '#fcd34d' }}>Start at 50% HP</span>
+          <span style={{ fontSize: 12, color: '#fcd34d' }}>Start 50%</span>
         </label>
       </div>
 
-      {/* Deck section */}
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span style={{ fontSize: 13, color: '#94a3b8' }}>
-            Deck ({currentDeck.length} cards){isCustomDeck && ' *'}
-          </span>
+      {/* Deck preview + Edit */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 160 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: 11, color: THEME.text.tertiary, ...THEME.heading }}>
+            Deck ({currentDeck.length}){isCustomDeck ? ' *' : ''}
+          </div>
           <button
             onClick={onOpenDeckEditor}
-            style={{
-              padding: '6px 16px',
-              background: '#60a5fa',
-              border: 'none',
-              borderRadius: 6,
-              color: '#fff',
-              cursor: 'pointer',
-              fontSize: 12,
-              fontWeight: 'bold',
-            }}
+            style={{ padding: '3px 10px', ...THEME.button.primary, fontSize: 11 }}
           >
             Edit Deck
           </button>
         </div>
         <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 4,
-          maxHeight: 150,
-          overflowY: 'auto',
-          padding: 8,
-          background: '#0f0f17',
-          borderRadius: 4,
+          display: 'flex', flexWrap: 'wrap', gap: 3,
+          maxHeight: 56, overflowY: 'auto',
+          padding: 6, background: THEME.bg.base, borderRadius: 4,
         }}>
           {currentDeck.map((cardId, i) => {
             const card = getMove(cardId);
@@ -701,12 +642,10 @@ function PokemonDetailsPanel({
               <div
                 key={`${cardId}-${i}`}
                 style={{
-                  fontSize: 11,
-                  padding: '3px 6px',
+                  fontSize: 10, padding: '2px 5px',
                   background: `${TYPE_COLORS[card.type]}22`,
                   border: `1px solid ${TYPE_COLORS[card.type]}44`,
-                  borderRadius: 4,
-                  color: '#e2e8f0',
+                  borderRadius: 3, color: THEME.text.primary,
                 }}
               >
                 {card.name}
@@ -715,9 +654,70 @@ function PokemonDetailsPanel({
           })}
         </div>
       </div>
+
+      {/* Remove */}
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignSelf: 'center' }}>
+        <button
+          onClick={onRemove}
+          style={{
+            padding: '6px 14px', ...THEME.button.secondary,
+            color: THEME.status.damage, borderColor: THEME.status.damage + '55',
+            fontSize: 12,
+          }}
+        >
+          Remove
+        </button>
+      </div>
     </div>
   );
 }
+
+// ── PokemonRosterTile (draggable) ──────────────────────────────────
+
+function PokemonRosterTile({
+  pokemonId,
+  onDragStart,
+  onDragEnd,
+}: {
+  pokemonId: string;
+  onDragStart: (e: React.DragEvent) => void;
+  onDragEnd: () => void;
+}) {
+  const pokemon = getPokemon(pokemonId);
+
+  return (
+    <div
+      draggable
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      style={{
+        width: 72,
+        height: 80,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: THEME.bg.panel,
+        border: `1px solid ${THEME.border.subtle}`,
+        borderRadius: 8,
+        cursor: 'grab',
+        transition: 'all 0.15s',
+      }}
+    >
+      <img
+        src={makeSpriteUrl(pokemonId)}
+        alt={pokemon.name}
+        style={{ width: 48, height: 48, imageRendering: 'pixelated', objectFit: 'contain' }}
+        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+      />
+      <div style={{ fontSize: 10, color: THEME.text.secondary, textAlign: 'center', marginTop: 2 }}>
+        {pokemon.name}
+      </div>
+    </div>
+  );
+}
+
+// ── Root: SandboxConfigScreen ──────────────────────────────────────
 
 export function SandboxConfigScreen({
   onStartBattle,
@@ -728,98 +728,139 @@ export function SandboxConfigScreen({
 }: Props) {
   const [playerTeam, setPlayerTeam] = useState<SandboxPokemon[]>(initialPlayerTeam);
   const [enemyTeam, setEnemyTeam] = useState<SandboxPokemon[]>(initialEnemyTeam);
+  const [editingPokemonId, setEditingPokemonId] = useState<string | null>(null);
+  const [editingSide, setEditingSide] = useState<'player' | 'enemy'>('player');
+  const [showDeckEditor, setShowDeckEditor] = useState(false);
 
-  // Notify parent when config changes so it can persist state
+  // Persist config changes to parent
   useEffect(() => {
     onConfigChange?.(playerTeam, enemyTeam);
   }, [playerTeam, enemyTeam, onConfigChange]);
 
-  const [selectedPokemonId, setSelectedPokemonId] = useState<string | null>(null);
-  const [selectedSide, setSelectedSide] = useState<'player' | 'enemy'>('player');
-  const [draggedBaseForm, setDraggedBaseForm] = useState<string | null>(null);
-  const [showDeckEditor, setShowDeckEditor] = useState(false);
+  // Close editor on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setEditingPokemonId(null);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
-  const selectedPokemon = selectedPokemonId
-    ? (selectedSide === 'player' ? playerTeam : enemyTeam).find(p => p.id === selectedPokemonId)
-    : null;
+  const setTeam = (side: 'player' | 'enemy') => side === 'player' ? setPlayerTeam : setEnemyTeam;
+
+  // ── Drag from roster ──
 
   const handleDragStart = (e: React.DragEvent, baseFormId: string) => {
     e.dataTransfer.setData('text/plain', baseFormId);
-    setDraggedBaseForm(baseFormId);
+    e.dataTransfer.effectAllowed = 'copy';
   };
 
-  const handleDragEnd = () => {
-    setDraggedBaseForm(null);
-  };
+  // ── Drop onto a slot ──
 
-  const addPokemonToSlot = (side: 'player' | 'enemy', row: Row, col: Column, baseFormId: string) => {
+  const handleDrop = useCallback((side: 'player' | 'enemy', row: Row, col: Column, baseFormId: string) => {
     const team = side === 'player' ? playerTeam : enemyTeam;
-    const setTeam = side === 'player' ? setPlayerTeam : setEnemyTeam;
-
-    // Check if slot is occupied
     const existingIndex = team.findIndex(p => p.position.row === row && p.position.column === col);
+
+    const newPokemon: SandboxPokemon = {
+      id: generateId(),
+      baseFormId,
+      level: 1,
+      has999Hp: true,
+      startAt50Percent: false,
+      position: { row, column: col },
+      customDeck: null,
+    };
+
     if (existingIndex >= 0) {
-      // Replace existing
-      const newTeam = [...team];
-      newTeam[existingIndex] = {
-        id: generateId(),
-        baseFormId,
-        level: 1,
-        has999Hp: false,
-        startAt50Percent: false,
-        position: { row, column: col },
-        customDeck: null,
-      };
-      setTeam(newTeam);
+      // Replace existing pokemon in slot
+      setTeam(side)(t => t.map((p, i) => i === existingIndex ? newPokemon : p));
     } else if (team.length < 6) {
-      // Add new
-      setTeam([...team, {
-        id: generateId(),
-        baseFormId,
-        level: 1,
-        has999Hp: false,
-        startAt50Percent: false,
-        position: { row, column: col },
-        customDeck: null,
-      }]);
+      setTeam(side)(t => [...t, newPokemon]);
     }
-  };
 
-  const removePokemonFromSlot = (side: 'player' | 'enemy', row: Row, col: Column) => {
-    const team = side === 'player' ? playerTeam : enemyTeam;
-    const setTeam = side === 'player' ? setPlayerTeam : setEnemyTeam;
+    // Auto-select the dropped pokemon for editing
+    setEditingPokemonId(newPokemon.id);
+    setEditingSide(side);
+  }, [playerTeam, enemyTeam]);
 
-    const newTeam = team.filter(p => !(p.position.row === row && p.position.column === col));
-    setTeam(newTeam);
+  // ── Slot click → select for editing, or swap/move if already editing ──
 
-    // Clear selection if removed
-    const removed = team.find(p => p.position.row === row && p.position.column === col);
-    if (removed && removed.id === selectedPokemonId) {
-      setSelectedPokemonId(null);
-    }
-  };
-
-  const selectPokemon = (side: 'player' | 'enemy', row: Row, col: Column) => {
+  const handleSlotClick = useCallback((side: 'player' | 'enemy', row: Row, col: Column) => {
     const team = side === 'player' ? playerTeam : enemyTeam;
     const pokemon = team.find(p => p.position.row === row && p.position.column === col);
+
+    // If editing a pokemon on THIS side and click a different slot → swap/move
+    if (editingPokemonId !== null && editingSide === side) {
+      const editingPokemon = team.find(p => p.id === editingPokemonId);
+      if (editingPokemon) {
+        // Same slot → close editor
+        if (editingPokemon.position.row === row && editingPokemon.position.column === col) {
+          setEditingPokemonId(null);
+          return;
+        }
+        // Swap or move
+        if (pokemon) {
+          setTeam(side)(t => t.map(p => {
+            if (p.id === editingPokemonId) return { ...p, position: { row, column: col } };
+            if (p.position.row === row && p.position.column === col) return { ...p, position: editingPokemon.position };
+            return p;
+          }));
+        } else {
+          setTeam(side)(t => t.map(p =>
+            p.id === editingPokemonId ? { ...p, position: { row, column: col } } : p
+          ));
+        }
+        return;
+      }
+    }
+
+    // Click a filled slot → select it
     if (pokemon) {
-      setSelectedPokemonId(pokemon.id);
-      setSelectedSide(side);
+      setEditingPokemonId(pokemon.id);
+      setEditingSide(side);
     }
-  };
+  }, [playerTeam, enemyTeam, editingPokemonId, editingSide]);
 
-  const updateSelectedPokemon = (updated: SandboxPokemon) => {
-    if (selectedSide === 'player') {
-      setPlayerTeam(team => team.map(p => p.id === updated.id ? updated : p));
-    } else {
-      setEnemyTeam(team => team.map(p => p.id === updated.id ? updated : p));
-    }
-  };
+  // ── Remove ──
 
-  const updateSelectedPokemonDeck = (deck: string[] | null) => {
-    if (!selectedPokemon) return;
-    updateSelectedPokemon({ ...selectedPokemon, customDeck: deck });
-  };
+  const handleRemove = useCallback((side: 'player' | 'enemy', row: Row, col: Column) => {
+    const team = side === 'player' ? playerTeam : enemyTeam;
+    const pokemon = team.find(p => p.position.row === row && p.position.column === col);
+    if (pokemon && pokemon.id === editingPokemonId) setEditingPokemonId(null);
+    setTeam(side)(t => t.filter(p => !(p.position.row === row && p.position.column === col)));
+  }, [playerTeam, enemyTeam, editingPokemonId]);
+
+  const handleRemoveEditing = useCallback((side: 'player' | 'enemy') => {
+    if (!editingPokemonId) return;
+    setTeam(side)(t => t.filter(p => p.id !== editingPokemonId));
+    setEditingPokemonId(null);
+  }, [editingPokemonId]);
+
+  // ── Update pokemon ──
+
+  const handleUpdatePokemon = useCallback((side: 'player' | 'enemy', updated: SandboxPokemon) => {
+    setTeam(side)(t => t.map(p => p.id === updated.id ? updated : p));
+  }, []);
+
+  // ── Deck editor ──
+
+  const editingPokemon = editingPokemonId
+    ? (editingSide === 'player' ? playerTeam : enemyTeam).find(p => p.id === editingPokemonId)
+    : null;
+
+  const selectedDefaultDeck = editingPokemon
+    ? getDeckAtLevel(editingPokemon.baseFormId, editingPokemon.level) : [];
+  const selectedCurrentDeck = editingPokemon
+    ? (editingPokemon.customDeck ?? selectedDefaultDeck) : [];
+
+  const handleUpdateDeck = useCallback((deck: string[] | null) => {
+    if (!editingPokemonId) return;
+    setTeam(editingSide)(t => t.map(p =>
+      p.id === editingPokemonId ? { ...p, customDeck: deck } : p
+    ));
+  }, [editingPokemonId, editingSide]);
+
+  // ── Start battle ──
 
   const handleStartBattle = useCallback(() => {
     if (playerTeam.length === 0 || enemyTeam.length === 0) return;
@@ -852,20 +893,13 @@ export function SandboxConfigScreen({
     });
 
     const hpOverrides = new Map<string, { maxHp?: number; startPercent?: number }>();
-    playerTeam.forEach((p, i) => {
+    [...playerTeam, ...enemyTeam].forEach((p, i) => {
       const overrides: { maxHp?: number; startPercent?: number } = {};
       if (p.has999Hp) overrides.maxHp = 999;
       if (p.startAt50Percent) overrides.startPercent = 0.5;
       if (Object.keys(overrides).length > 0) {
-        hpOverrides.set(`player-${i}`, overrides);
-      }
-    });
-    enemyTeam.forEach((p, i) => {
-      const overrides: { maxHp?: number; startPercent?: number } = {};
-      if (p.has999Hp) overrides.maxHp = 999;
-      if (p.startAt50Percent) overrides.startPercent = 0.5;
-      if (Object.keys(overrides).length > 0) {
-        hpOverrides.set(`enemy-${i}`, overrides);
+        const key = i < playerTeam.length ? `player-${i}` : `enemy-${i - playerTeam.length}`;
+        hpOverrides.set(key, overrides);
       }
     });
 
@@ -874,181 +908,168 @@ export function SandboxConfigScreen({
 
   const canStart = playerTeam.length > 0 && enemyTeam.length > 0;
 
-  const renderFormationGrid = (side: 'player' | 'enemy', team: SandboxPokemon[]) => {
-    const rows: Row[] = side === 'player' ? ['front', 'back'] : ['back', 'front'];
-    const cols: Column[] = [0, 1, 2];
+  // Helpers for which editor to show
+  const playerEditingPokemon = editingSide === 'player' ? editingPokemon : null;
+  const enemyEditingPokemon = editingSide === 'enemy' ? editingPokemon : null;
 
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {rows.map(row => (
-          <div key={row} style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-            {cols.map(col => {
-              const pokemon = team.find(p => p.position.row === row && p.position.column === col);
-              return (
-                <FormationSlot
-                  key={`${row}-${col}`}
-                  row={row}
-                  col={col}
-                  pokemon={pokemon || null}
-                  onDrop={(baseFormId) => addPokemonToSlot(side, row, col, baseFormId)}
-                  onRemove={() => removePokemonFromSlot(side, row, col)}
-                  onSelect={() => selectPokemon(side, row, col)}
-                  isSelected={pokemon?.id === selectedPokemonId}
-                  side={side}
-                />
-              );
-            })}
-          </div>
-        ))}
-        <div style={{ textAlign: 'center', fontSize: 11, color: '#64748b' }}>
-          {side === 'player' ? 'Your Team (Front -> Back)' : 'Enemy Team (Back -> Front)'}
-        </div>
-      </div>
-    );
-  };
-
-  // Get default and current deck for selected pokemon
-  const selectedDefaultDeck = selectedPokemon
-    ? getDeckAtLevel(selectedPokemon.baseFormId, selectedPokemon.level)
-    : [];
-  const selectedCurrentDeck = selectedPokemon
-    ? (selectedPokemon.customDeck ?? selectedDefaultDeck)
-    : [];
+  // ── Render ──
 
   return (
     <div style={{
+      height: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      minHeight: '100vh',
-      background: '#0f0f17',
-      color: '#e2e8f0',
+      background: THEME.bg.base,
+      color: THEME.text.primary,
     }}>
-      {/* Header */}
+      {/* Header bar — fixed at top */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '16px 24px',
-        borderBottom: '1px solid #333',
+        padding: '14px 24px',
+        borderBottom: `1px solid ${THEME.border.subtle}`,
+        flexShrink: 0,
       }}>
         <button
           onClick={onBack}
-          style={{
-            padding: '8px 16px',
-            background: 'transparent',
-            border: '1px solid #444',
-            borderRadius: 6,
-            color: '#94a3b8',
-            cursor: 'pointer',
-          }}
+          style={{ padding: '8px 16px', ...THEME.button.secondary, fontSize: 13 }}
         >
-          Back
+          &larr; Back
         </button>
-        <h1 style={{ margin: 0, color: '#facc15', fontSize: 24 }}>Sandbox Battle</h1>
+        <h1 style={{ margin: 0, color: THEME.accent, fontSize: 22, ...THEME.heading }}>
+          Sandbox Battle
+        </h1>
         <button
           onClick={handleStartBattle}
           disabled={!canStart}
           style={{
             padding: '10px 24px',
-            background: canStart ? '#facc15' : '#333',
-            border: 'none',
-            borderRadius: 6,
-            color: canStart ? '#000' : '#666',
+            ...(canStart ? THEME.button.primary : THEME.button.secondary),
+            fontSize: 14,
+            opacity: canStart ? 1 : 0.4,
             cursor: canStart ? 'pointer' : 'not-allowed',
-            fontWeight: 'bold',
           }}
         >
-          Start Battle
+          Start Battle &rarr;
         </button>
       </div>
 
-      {/* Main content */}
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* Pokemon selector (left) */}
+      {/* Scrollable content */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '20px 16px 48px',
+      }}>
+        {/* ── Battlefield row: [Player Grid] [Roster] [Enemy Grid] ── */}
         <div style={{
-          width: 280,
-          borderRight: '1px solid #333',
-          padding: 16,
-          overflowY: 'auto',
-        }}>
-          <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 12 }}>
-            Drag Pokemon to formation:
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {AVAILABLE_POKEMON.map(pokemonId => (
-              <div
-                key={pokemonId}
-                draggable
-                onDragStart={(e) => handleDragStart(e, pokemonId)}
-                onDragEnd={handleDragEnd}
-                style={{ cursor: 'grab' }}
-              >
-                <PokemonTile
-                  pokemonId={pokemonId}
-                  isSelected={draggedBaseForm === pokemonId}
-                  onClick={() => {}}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Formations (center) */}
-        <div style={{
-          flex: 1,
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
           justifyContent: 'center',
-          gap: 48,
-          padding: 24,
+          alignItems: 'flex-start',
+          gap: 20,
         }}>
-          {/* Enemy formation */}
-          <div>
-            <div style={{ textAlign: 'center', color: '#ef4444', fontWeight: 'bold', marginBottom: 12 }}>
-              Enemy Team ({enemyTeam.length}/6)
-            </div>
-            {renderFormationGrid('enemy', enemyTeam)}
+          {/* Player side */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 'bold', color: THEME.status.heal, ...THEME.heading }}>
+              Your Team ({playerTeam.length}/6)
+            </span>
+            <FormationGrid
+              team={playerTeam}
+              side="player"
+              editingId={editingSide === 'player' ? editingPokemonId : null}
+              onSlotClick={(r, c) => handleSlotClick('player', r, c)}
+              onRemove={(r, c) => handleRemove('player', r, c)}
+              onDrop={(r, c, id) => handleDrop('player', r, c, id)}
+            />
           </div>
 
-          <div style={{ fontSize: 20, color: '#facc1555', fontWeight: 'bold' }}>VS</div>
-
-          {/* Player formation */}
-          <div>
-            <div style={{ textAlign: 'center', color: '#4ade80', fontWeight: 'bold', marginBottom: 12 }}>
-              Your Team ({playerTeam.length}/6)
+          {/* Shared roster (center) */}
+          <div style={{
+            flex: 1,
+            maxWidth: 480,
+            minWidth: 200,
+            padding: '12px',
+            background: THEME.bg.panel,
+            border: `1px solid ${THEME.border.subtle}`,
+            borderRadius: 8,
+            alignSelf: 'stretch',
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            <div style={{ textAlign: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 11, color: THEME.text.tertiary, ...THEME.heading }}>
+                Pokemon Roster
+              </span>
+              <div style={{ fontSize: 10, color: THEME.text.tertiary, marginTop: 2 }}>
+                Drag to either team
+              </div>
             </div>
-            {renderFormationGrid('player', playerTeam)}
+            <Flourish variant="heading" color={THEME.text.tertiary} />
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 6,
+              justifyContent: 'center',
+              marginTop: 8,
+              flex: 1,
+              overflowY: 'auto',
+            }}>
+              {AVAILABLE_POKEMON.map(pokemonId => (
+                <PokemonRosterTile
+                  key={pokemonId}
+                  pokemonId={pokemonId}
+                  onDragStart={(e) => handleDragStart(e, pokemonId)}
+                  onDragEnd={() => {}}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Enemy side */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 'bold', color: THEME.status.damage, ...THEME.heading }}>
+              Enemy Team ({enemyTeam.length}/6)
+            </span>
+            <FormationGrid
+              team={enemyTeam}
+              side="enemy"
+              editingId={editingSide === 'enemy' ? editingPokemonId : null}
+              onSlotClick={(r, c) => handleSlotClick('enemy', r, c)}
+              onRemove={(r, c) => handleRemove('enemy', r, c)}
+              onDrop={(r, c, id) => handleDrop('enemy', r, c, id)}
+            />
           </div>
         </div>
 
-        {/* Details panel (right) */}
-        <div style={{
-          width: 320,
-          borderLeft: '1px solid #333',
-          padding: 16,
-          overflowY: 'auto',
-        }}>
-          {selectedPokemon ? (
-            <PokemonDetailsPanel
-              pokemon={selectedPokemon}
-              onUpdate={updateSelectedPokemon}
+        {/* ── Inline editor (below the battlefield row) ── */}
+        <div style={{ maxWidth: 960, margin: '16px auto 0' }}>
+          {playerEditingPokemon && (
+            <InlineDetailEditor
+              key={playerEditingPokemon.id}
+              pokemon={playerEditingPokemon}
+              onUpdate={(p) => handleUpdatePokemon('player', p)}
+              onRemove={() => handleRemoveEditing('player')}
               onOpenDeckEditor={() => setShowDeckEditor(true)}
             />
-          ) : (
-            <div style={{ color: '#64748b', fontStyle: 'italic', textAlign: 'center', marginTop: 48 }}>
-              Click a Pokemon in the formation to edit its level, HP, and deck.
-            </div>
+          )}
+          {enemyEditingPokemon && (
+            <InlineDetailEditor
+              key={enemyEditingPokemon.id}
+              pokemon={enemyEditingPokemon}
+              onUpdate={(p) => handleUpdatePokemon('enemy', p)}
+              onRemove={() => handleRemoveEditing('enemy')}
+              onOpenDeckEditor={() => setShowDeckEditor(true)}
+            />
           )}
         </div>
       </div>
 
       {/* Deck Editor Modal */}
-      {showDeckEditor && selectedPokemon && (
+      {showDeckEditor && editingPokemon && (
         <DeckEditorModal
           currentDeck={selectedCurrentDeck}
           defaultDeck={selectedDefaultDeck}
-          onUpdateDeck={updateSelectedPokemonDeck}
+          onUpdateDeck={handleUpdateDeck}
           onClose={() => setShowDeckEditor(false)}
         />
       )}

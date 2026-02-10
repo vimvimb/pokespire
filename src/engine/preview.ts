@@ -6,7 +6,7 @@ import {
   checkBlazeStrike, checkFortifiedCannons, checkCounterCurrent, checkStaticField,
   checkKeenEye, checkPredatorsPatience, checkThickHide, checkThickFat,
   checkUnderdog, checkAngerPoint, checkSheerForce, checkScrappy,
-  checkHustleMultiplier, checkRelentless, checkReckless
+  checkHustleMultiplier, checkRelentless, checkReckless, checkTintedLens
 } from './passives';
 import { getBloomingCycleReduction } from './damage';
 
@@ -90,8 +90,9 @@ export function calculateDamagePreview(
   const recklessMultiplier = checkReckless(source, card);
   const combinedMultiplier = angerPointMultiplier * sheerForceMultiplier * recklessMultiplier * hustleMultiplier;
 
-  // Type effectiveness
-  const typeEffectiveness = getTypeEffectiveness(card.type, target.types);
+  // Type effectiveness (with Tinted Lens adjustment)
+  let typeEffectiveness = getTypeEffectiveness(card.type, target.types);
+  typeEffectiveness = checkTintedLens(source, typeEffectiveness);
   const effectivenessLabel = getEffectivenessLabel(typeEffectiveness);
 
   // Defensive modifiers

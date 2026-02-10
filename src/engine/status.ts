@@ -42,11 +42,38 @@ export function checkStatusImmunity(
   target: Combatant,
   type: StatusType
 ): boolean {
+  return getStatusImmunitySource(target, type) !== null;
+}
+
+/**
+ * Get the name of the passive that grants immunity to a status type.
+ * Returns null if no immunity applies.
+ */
+export function getStatusImmunitySource(
+  target: Combatant,
+  type: StatusType
+): string | null {
   // Immunity: You cannot be Poisoned or Burned
   if ((type === 'poison' || type === 'burn') && target.passiveIds.includes('immunity')) {
-    return true;
+    return 'Immunity';
   }
-  return false;
+  // Shield Dust: You cannot be Poisoned
+  if (type === 'poison' && target.passiveIds.includes('shield_dust')) {
+    return 'Shield Dust';
+  }
+  // Flash Fire: You cannot be Burned
+  if (type === 'burn' && target.passiveIds.includes('flash_fire')) {
+    return 'Flash Fire';
+  }
+  // Insomnia: You cannot be put to Sleep
+  if (type === 'sleep' && target.passiveIds.includes('insomnia')) {
+    return 'Insomnia';
+  }
+  // Inner Focus: You cannot be Enfeebled
+  if (type === 'enfeeble' && target.passiveIds.includes('inner_focus')) {
+    return 'Inner Focus';
+  }
+  return null;
 }
 
 export interface ApplyStatusResult {

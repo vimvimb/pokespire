@@ -70,7 +70,25 @@ export type PassiveId =
   // thick_hide shared
   | 'rock_head'
   | 'lightning_rod'
-  | 'reckless';
+  | 'reckless'
+  // Drowzee/Hypno line
+  | 'insomnia'
+  | 'drowsy_aura'
+  | 'inner_focus'
+  | 'hypnotic_gaze'
+  // Growlithe/Arcanine line
+  | 'flash_fire'
+  | 'flame_body'
+  // Voltorb/Electrode line
+  | 'static'
+  | 'charge'
+  | 'volatile'
+  | 'final_spark'
+  // Caterpie/Butterfree line
+  | 'shield_dust'
+  | 'compound_eyes'
+  | 'powder_spread'
+  | 'tinted_lens';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -290,6 +308,66 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   reckless: {
     name: 'Reckless',
     description: 'Your recoil moves deal 30% more damage.',
+  },
+  // Drowzee/Hypno line
+  insomnia: {
+    name: 'Insomnia',
+    description: 'You are immune to Sleep.',
+  },
+  drowsy_aura: {
+    name: 'Drowsy Aura',
+    description: 'When you apply Sleep, also apply Enfeeble 1.',
+  },
+  inner_focus: {
+    name: 'Inner Focus',
+    description: 'You are immune to Enfeeble.',
+  },
+  hypnotic_gaze: {
+    name: 'Hypnotic Gaze',
+    description: 'Unblocked Psychic attacks apply +1 Sleep. Psychic cards cost +1 energy.',
+  },
+  // Growlithe/Arcanine line
+  flash_fire: {
+    name: 'Flash Fire',
+    description: 'You are immune to Burn. When hit by a Fire attack, gain 2 Strength.',
+  },
+  flame_body: {
+    name: 'Flame Body',
+    description: 'When you take damage, apply Burn 1 to the attacker.',
+  },
+  // Voltorb/Electrode line
+  static: {
+    name: 'Static',
+    description: 'When you take damage, apply Paralysis 1 to the attacker.',
+  },
+  charge: {
+    name: 'Charge',
+    description: 'At the start of your turn, gain 1 Strength.',
+  },
+  volatile: {
+    name: 'Volatile',
+    description: 'Self-KO attacks deal 50% more damage.',
+  },
+  final_spark: {
+    name: 'Final Spark',
+    description: 'When you play a Self-KO card, all allies gain 3 Strength and 2 Haste.',
+  },
+  // Caterpie/Butterfree line
+  shield_dust: {
+    name: 'Shield Dust',
+    description: 'You are immune to Poison.',
+  },
+  compound_eyes: {
+    name: 'Compound Eyes',
+    description: 'When you apply a debuff to an enemy, gain 1 Evasion.',
+  },
+  powder_spread: {
+    name: 'Powder Spread',
+    description: 'When you apply a debuff to an enemy, also apply 1 stack to both adjacent enemies.',
+  },
+  tinted_lens: {
+    name: 'Tinted Lens',
+    description: 'Your not-very-effective attacks have no damage penalty.',
   },
 };
 
@@ -855,6 +933,166 @@ export const RHYHORN_PROGRESSION: ProgressionTree = {
   ],
 };
 
+// Drowzee progression tree
+export const DROWZEE_PROGRESSION: ProgressionTree = {
+  baseFormId: 'drowzee',
+  rungs: [
+    {
+      level: 1,
+      name: 'Drowzee',
+      description: 'Starting form with Insomnia passive.',
+      passiveId: 'insomnia',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Hypno',
+      description: 'Evolve to Hypno. Add Dream Eater. Gain Drowsy Aura.',
+      evolvesTo: 'hypno',
+      passiveId: 'drowsy_aura',
+      hpBoost: 5,
+      cardsToAdd: ['dream-eater'],
+    },
+    {
+      level: 3,
+      name: 'Hypno',
+      description: 'Add Psychic. Gain Inner Focus.',
+      passiveId: 'inner_focus',
+      hpBoost: 5,
+      cardsToAdd: ['psychic'],
+    },
+    {
+      level: 4,
+      name: 'Hypno (Mastered)',
+      description: 'Gain Hypnotic Gaze.',
+      passiveId: 'hypnotic_gaze',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
+// Growlithe progression tree - fire vanguard frontliner
+export const GROWLITHE_PROGRESSION: ProgressionTree = {
+  baseFormId: 'growlithe',
+  rungs: [
+    {
+      level: 1,
+      name: 'Growlithe',
+      description: 'Starting form with Flash Fire passive.',
+      passiveId: 'flash_fire',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Arcanine',
+      description: 'Evolve to Arcanine (+30 HP). Add Morning Sun. Gain Intimidate.',
+      evolvesTo: 'arcanine',
+      passiveId: 'intimidate',
+      hpBoost: 0,
+      cardsToAdd: ['morning-sun'],
+    },
+    {
+      level: 3,
+      name: 'Arcanine',
+      description: 'Add Flare Blitz. Gain Flame Body.',
+      passiveId: 'flame_body',
+      hpBoost: 0,
+      cardsToAdd: ['flare-blitz'],
+    },
+    {
+      level: 4,
+      name: 'Arcanine (Mastered)',
+      description: 'Gain Inferno Momentum.',
+      passiveId: 'inferno_momentum',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
+// Voltorb progression tree - fastest glass cannon, self-destruct theme
+export const VOLTORB_PROGRESSION: ProgressionTree = {
+  baseFormId: 'voltorb',
+  rungs: [
+    {
+      level: 1,
+      name: 'Voltorb',
+      description: 'Starting form with Static passive.',
+      passiveId: 'static',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Electrode',
+      description: 'Evolve to Electrode (+18 HP). Add Self-Destruct. Gain Charge.',
+      evolvesTo: 'electrode',
+      passiveId: 'charge',
+      hpBoost: 0,
+      cardsToAdd: ['self-destruct'],
+    },
+    {
+      level: 3,
+      name: 'Electrode',
+      description: 'Add Discharge. Gain Volatile.',
+      passiveId: 'volatile',
+      hpBoost: 0,
+      cardsToAdd: ['discharge'],
+    },
+    {
+      level: 4,
+      name: 'Electrode (Mastered)',
+      description: 'Gain Final Spark.',
+      passiveId: 'final_spark',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
+// Caterpie progression tree - status-spreading support moth
+export const CATERPIE_PROGRESSION: ProgressionTree = {
+  baseFormId: 'caterpie',
+  rungs: [
+    {
+      level: 1,
+      name: 'Caterpie',
+      description: 'Starting form with Shield Dust passive.',
+      passiveId: 'shield_dust',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Butterfree',
+      description: 'Evolve to Butterfree (+20 HP). Gain Compound Eyes.',
+      evolvesTo: 'butterfree',
+      passiveId: 'compound_eyes',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 3,
+      name: 'Butterfree',
+      description: 'Add Silver Wind. Gain Powder Spread.',
+      passiveId: 'powder_spread',
+      hpBoost: 0,
+      cardsToAdd: ['silver-wind'],
+    },
+    {
+      level: 4,
+      name: 'Butterfree (Mastered)',
+      description: 'Add Sleep Powder. Gain Tinted Lens.',
+      passiveId: 'tinted_lens',
+      hpBoost: 0,
+      cardsToAdd: ['sleep-powder'],
+    },
+  ],
+};
+
 // All progression trees indexed by base form ID
 export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   charmander: CHARMANDER_PROGRESSION,
@@ -871,6 +1109,10 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   'nidoran-m': NIDORAN_M_PROGRESSION,
   'nidoran-f': NIDORAN_F_PROGRESSION,
   rhyhorn: RHYHORN_PROGRESSION,
+  drowzee: DROWZEE_PROGRESSION,
+  growlithe: GROWLITHE_PROGRESSION,
+  voltorb: VOLTORB_PROGRESSION,
+  caterpie: CATERPIE_PROGRESSION,
 };
 
 /**
@@ -910,6 +1152,18 @@ export function getProgressionTree(pokemonId: string): ProgressionTree | null {
   if (pokemonId === 'nidorina' || pokemonId === 'nidoqueen') {
     return NIDORAN_F_PROGRESSION;
   }
+  if (pokemonId === 'hypno') {
+    return DROWZEE_PROGRESSION;
+  }
+  if (pokemonId === 'arcanine') {
+    return GROWLITHE_PROGRESSION;
+  }
+  if (pokemonId === 'electrode') {
+    return VOLTORB_PROGRESSION;
+  }
+  if (pokemonId === 'butterfree') {
+    return CATERPIE_PROGRESSION;
+  }
   return null;
 }
 
@@ -943,6 +1197,18 @@ export function getBaseFormId(pokemonId: string): string {
   }
   if (pokemonId === 'nidorina' || pokemonId === 'nidoqueen') {
     return 'nidoran-f';
+  }
+  if (pokemonId === 'hypno') {
+    return 'drowzee';
+  }
+  if (pokemonId === 'arcanine') {
+    return 'growlithe';
+  }
+  if (pokemonId === 'electrode') {
+    return 'voltorb';
+  }
+  if (pokemonId === 'butterfree') {
+    return 'caterpie';
   }
   return pokemonId;
 }

@@ -171,6 +171,16 @@ export function onTurnStart(
   // Hustle: Draw an extra card at start of turn (card draw handled externally via flag check)
   // Note: The actual card draw is handled in turns.ts by checking this passive
 
+  // Charge: Gain 1 Strength at the start of your turn
+  if (combatant.passiveIds.includes('charge')) {
+    applyStatus(state, combatant, 'strength', 1, combatant.id);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Charge: ${combatant.name} gains 1 Strength!`,
+    });
+  }
+
   // Reset Relentless bonus counter at turn start
   combatant.costModifiers['relentlessBonus'] = 0;
 
@@ -226,16 +236,18 @@ export function onDamageDealt(
 
   // Kindling: Unblocked Fire attacks apply +1 Burn
   if (attacker.passiveIds.includes('kindling') && card.type === 'fire' && damageDealt > 0) {
-    applyStatus(state, target, 'burn', 1, attacker.id);
-    logs.push({
-      round: state.round,
-      combatantId: attacker.id,
-      message: `Kindling: +1 Burn applied to ${target.name}!`,
-    });
+    const kindlingResult = applyStatus(state, target, 'burn', 1, attacker.id);
+    if (kindlingResult.applied) {
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `Kindling: +1 Burn applied to ${target.name}!`,
+      });
 
-    // Trigger Spreading Flames if attacker has it (even if target died)
-    const spreadLogs = onStatusApplied(state, attacker, target, 'burn', 1);
-    logs.push(...spreadLogs);
+      // Trigger Spreading Flames if attacker has it (even if target died)
+      const spreadLogs = onStatusApplied(state, attacker, target, 'burn', 1);
+      logs.push(...spreadLogs);
+    }
   }
 
   // Torrent Shield: First Water attack each turn grants Block equal to damage dealt
@@ -281,6 +293,20 @@ export function onDamageDealt(
     logs.push(...spreadLogs);
   }
 
+  // Hypnotic Gaze: Unblocked Psychic attacks apply +1 Sleep
+  if (attacker.passiveIds.includes('hypnotic_gaze') && card.type === 'psychic' && damageDealt > 0) {
+    applyStatus(state, target, 'sleep', 1, attacker.id);
+    logs.push({
+      round: state.round,
+      combatantId: attacker.id,
+      message: `Hypnotic Gaze: +1 Sleep applied to ${target.name}!`,
+    });
+
+    // Trigger Drowsy Aura if attacker has it
+    const auraLogs = onStatusApplied(state, attacker, target, 'sleep', 1);
+    logs.push(...auraLogs);
+  }
+
   // Numbing Strike: Unblocked Electric attacks apply +1 Paralysis
   if (attacker.passiveIds.includes('numbing_strike') && card.type === 'electric' && damageDealt > 0) {
     applyStatus(state, target, 'paralysis', 1, attacker.id);
@@ -314,25 +340,69 @@ export function onStatusApplied(
       // Apply 1 Burn to each adjacent enemy
       // Note: This should NOT trigger Spreading Flames recursively
       // We handle this by only checking the source's passive, not re-checking
-      applyStatusDirect(state, adj, 'burn', 1, source.id);
-      logs.push({
-        round: state.round,
-        combatantId: source.id,
-        message: `Spreading Flames: 1 Burn spreads to ${adj.name}!`,
-      });
+      const applied = applyStatusDirect(state, adj, 'burn', 1, source.id);
+      if (applied) {
+        logs.push({
+          round: state.round,
+          combatantId: source.id,
+          message: `Spreading Flames: 1 Burn spreads to ${adj.name}!`,
+        });
+      }
     }
+  }
+
+  // Drowsy Aura: When applying Sleep, also apply 1 Enfeeble
+  if (source.passiveIds.includes('drowsy_aura') && statusType === 'sleep') {
+    applyStatusDirect(state, target, 'enfeeble', 1, source.id);
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Drowsy Aura: Enfeeble 1 applied to ${target.name}!`,
+    });
   }
 
   // Spreading Spores: Apply 1 Leech to adjacent enemies
   if (source.passiveIds.includes('spreading_spores') && statusType === 'leech') {
     const adjacent = getAdjacentEnemies(state, target);
     for (const adj of adjacent) {
-      applyStatusDirect(state, adj, 'leech', 1, source.id);
-      logs.push({
-        round: state.round,
-        combatantId: source.id,
-        message: `Spreading Spores: 1 Leech spreads to ${adj.name}!`,
-      });
+      const applied = applyStatusDirect(state, adj, 'leech', 1, source.id);
+      if (applied) {
+        logs.push({
+          round: state.round,
+          combatantId: source.id,
+          message: `Spreading Spores: 1 Leech spreads to ${adj.name}!`,
+        });
+      }
+    }
+  }
+
+  // Compound Eyes: When you apply a debuff to an enemy, gain 1 Evasion
+  const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech'];
+  if (source.passiveIds.includes('compound_eyes') &&
+      debuffTypes.includes(statusType) &&
+      source.side !== target.side) {
+    applyStatusDirect(state, source, 'evasion', 1, source.id);
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Compound Eyes: ${source.name} gains 1 Evasion!`,
+    });
+  }
+
+  // Powder Spread: When you apply a debuff to an enemy, also apply 1 stack to both adjacent enemies
+  if (source.passiveIds.includes('powder_spread') &&
+      debuffTypes.includes(statusType) &&
+      source.side !== target.side) {
+    const adjacent = getAdjacentEnemies(state, target);
+    for (const adj of adjacent) {
+      const applied = applyStatusDirect(state, adj, statusType, 1, source.id);
+      if (applied) {
+        logs.push({
+          round: state.round,
+          combatantId: source.id,
+          message: `Powder Spread: 1 ${statusType} spreads to ${adj.name}!`,
+        });
+      }
     }
   }
 
@@ -342,6 +412,7 @@ export function onStatusApplied(
 /**
  * Direct status application without triggering passive hooks.
  * Used internally to prevent infinite recursion.
+ * Returns true if the status was actually applied (not blocked by immunity).
  */
 function applyStatusDirect(
   state: CombatState,
@@ -349,9 +420,9 @@ function applyStatusDirect(
   statusType: string,
   stacks: number,
   sourceId: string
-): void {
-  // Use the regular applyStatus but mark it as non-recursive
-  applyStatus(state, target, statusType as any, stacks, sourceId);
+): boolean {
+  const result = applyStatus(state, target, statusType as any, stacks, sourceId);
+  return result.applied;
 }
 
 /**
@@ -423,10 +494,10 @@ export function onRoundEnd(state: CombatState): void {
  */
 export function onDamageTaken(
   state: CombatState,
-  _attacker: Combatant,
+  attacker: Combatant,
   target: Combatant,
   hpDamage: number,
-  _card: MoveDefinition  // Card info preserved for future passives
+  card: MoveDefinition
 ): LogEntry[] {
   const logs: LogEntry[] = [];
 
@@ -440,6 +511,36 @@ export function onDamageTaken(
       round: state.round,
       combatantId: target.id,
       message: `Raging Bull: ${target.name} gains 4 Strength!`,
+    });
+  }
+
+  // Flash Fire: When hit by a Fire attack, gain 2 Strength
+  if (target.passiveIds.includes('flash_fire') && card.type === 'fire' && target.alive) {
+    applyStatus(state, target, 'strength', 2, target.id);
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Flash Fire: ${target.name} gains 2 Strength from Fire attack!`,
+    });
+  }
+
+  // Flame Body: When you take damage, apply Burn 1 to the attacker
+  if (target.passiveIds.includes('flame_body') && target.alive && attacker.alive) {
+    applyStatus(state, attacker, 'burn', 1, target.id);
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Flame Body: ${attacker.name} is burned by ${target.name}!`,
+    });
+  }
+
+  // Static: When you take damage, apply Paralysis 1 to the attacker
+  if (target.passiveIds.includes('static') && target.alive && attacker.alive) {
+    applyStatus(state, attacker, 'paralysis', 1, target.id);
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Static: ${attacker.name} is paralyzed by ${target.name}!`,
     });
   }
 
@@ -669,6 +770,20 @@ export function checkHustleCostIncrease(
 }
 
 /**
+ * Check Hypnotic Gaze cost increase.
+ * Hypnotic Gaze: Psychic cards cost +1 energy.
+ */
+export function checkHypnoticGazeCostIncrease(
+  combatant: Combatant,
+  card: MoveDefinition
+): number {
+  if (combatant.passiveIds.includes('hypnotic_gaze') && card.type === 'psychic') {
+    return 1;
+  }
+  return 0;
+}
+
+/**
  * Track Relentless damage bonus.
  * Relentless: Each card you play this turn gives your next attack +1 damage.
  * Returns bonus based on cards played this turn.
@@ -887,6 +1002,30 @@ export function checkReckless(attacker: Combatant, card: MoveDefinition): number
   // Check if the card has a recoil effect
   const hasRecoil = card.effects.some(e => e.type === 'recoil');
   return hasRecoil ? 1.3 : 1.0;
+}
+
+/**
+ * Check Volatile damage multiplier for self-KO attacks.
+ * Volatile: Self-KO attacks deal 50% more damage.
+ * Returns the multiplier (1.0 normally, 1.5 when active).
+ */
+export function checkVolatile(attacker: Combatant): number {
+  if (attacker.passiveIds.includes('volatile')) {
+    return 1.5;
+  }
+  return 1.0;
+}
+
+/**
+ * Check Tinted Lens type effectiveness adjustment.
+ * Tinted Lens: Not-very-effective attacks have no damage penalty (clamp to 1.0).
+ * Returns the adjusted type effectiveness multiplier.
+ */
+export function checkTintedLens(attacker: Combatant, typeEffectiveness: number): number {
+  if (attacker.passiveIds.includes('tinted_lens') && typeEffectiveness < 1.0) {
+    return 1.0;
+  }
+  return typeEffectiveness;
 }
 
 /**

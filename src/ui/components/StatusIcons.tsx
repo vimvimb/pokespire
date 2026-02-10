@@ -24,7 +24,7 @@ const STATUS_INFO: Record<string, { icon: string; color: string; describe: (stac
   },
   sleep: {
     icon: '💤', color: '#818cf8',
-    describe: (s) => `Skips turn entirely. ${s} turn${s !== 1 ? 's' : ''} remaining.`,
+    describe: (s) => `Drowsy: loses 1 energy per turn. ${s} turn${s !== 1 ? 's' : ''} remaining.`,
   },
   leech: {
     icon: '🌿', color: '#22c55e',

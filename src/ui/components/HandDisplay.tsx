@@ -1,4 +1,4 @@
-import { useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
+import { useState, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import type { Combatant } from '../../engine/types';
 import { getMove } from '../../data/loaders';
 import { getEffectiveCost } from '../../engine/cards';
@@ -17,10 +17,16 @@ interface Props {
   draggingIndex?: number | null;
 }
 
+const HOVER_SCALE = 1.35;
+const HOVER_LIFT = -30; // px upward
+const NEIGHBOR_SHIFT = 20; // px outward for immediate neighbors
+
 export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDisplay(
   { combatant, selectedIndex, onSelectCard, onDragStart, onDragEnd, draggingIndex },
   ref
 ) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   // Refs to track card DOM positions
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
@@ -45,13 +51,40 @@ export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDispla
       display: 'flex',
       gap: 12,
       justifyContent: 'center',
-      flexWrap: 'wrap',
+      alignItems: 'flex-end',
     }}>
       {combatant.hand.map((cardId, idx) => {
         const card = getMove(cardId);
         // Use centralized cost calculation (includes Quick Feet, Hustle, Inferno Momentum)
         const effectiveCost = getEffectiveCost(combatant, idx);
         const canAfford = combatant.energy >= effectiveCost;
+
+        const isHovered = hoveredIndex === idx;
+        const isDragging = draggingIndex === idx;
+
+        // Compute transform for fan effect
+        let translateX = 0;
+        let translateY = 0;
+        let scale = 1;
+        let zIndex = 1;
+
+        if (hoveredIndex !== null && !isDragging) {
+          const distance = idx - hoveredIndex;
+          if (distance === 0) {
+            // Hovered card: scale up + lift
+            scale = HOVER_SCALE;
+            translateY = HOVER_LIFT;
+            zIndex = 10;
+          } else {
+            // Neighbors shift outward; amount decreases with distance
+            const sign = distance > 0 ? 1 : -1;
+            const absDist = Math.abs(distance);
+            if (absDist <= 2) {
+              translateX = sign * NEIGHBOR_SHIFT / absDist;
+            }
+            zIndex = 1;
+          }
+        }
 
         return (
           <div
@@ -62,6 +95,15 @@ export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDispla
               } else {
                 cardRefs.current.delete(idx);
               }
+            }}
+            onMouseEnter={() => setHoveredIndex(idx)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            style={{
+              transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale})`,
+              transformOrigin: 'center bottom',
+              transition: 'transform 0.15s ease-out',
+              zIndex,
+              position: 'relative',
             }}
           >
             <CardDisplay
@@ -74,7 +116,7 @@ export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDispla
               onClick={() => onSelectCard(idx)}
               onDragStart={() => onDragStart?.(idx)}
               onDragEnd={onDragEnd}
-              isDragging={draggingIndex === idx}
+              isDragging={isDragging}
             />
           </div>
         );

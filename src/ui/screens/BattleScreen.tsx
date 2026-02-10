@@ -9,12 +9,15 @@ import { PokemonSprite } from '../components/PokemonSprite';
 import { HandDisplay, type HandDisplayRef } from '../components/HandDisplay';
 import { TurnOrderBar } from '../components/TurnOrderBar';
 import { BattleLog } from '../components/BattleLog';
-import { PileViewer } from '../components/PileViewer';
+import { PileButton } from '../components/PileButton';
+import { PileModal } from '../components/PileModal';
+import { EnergyPips } from '../components/EnergyPips';
 import { PokemonDetailsPanel } from '../components/PokemonDetailsPanel';
 import { useBattleEffects, BattleEffectsLayer } from '../components/BattleEffects';
 import type { BattlePhase } from '../hooks/useBattle';
 import type { RunState } from '../../run/types';
 import { getBattleSpriteScale } from '../../data/heights';
+import { THEME } from '../theme';
 import battleBackground from '../../../assets/backgrounds/rocket_lab_act_1_v4.png';
 
 export type BattleResult = 'victory' | 'defeat';
@@ -152,6 +155,17 @@ export function BattleScreen({
 
   // Inspection state - track which combatant is being inspected
   const [inspectedCombatantId, setInspectedCombatantId] = useState<string | null>(null);
+
+  // Pile viewer state
+  const [openPile, setOpenPile] = useState<'draw' | 'discard' | 'vanished' | null>(null);
+  const togglePile = (pile: 'draw' | 'discard' | 'vanished') => {
+    setOpenPile(prev => prev === pile ? null : pile);
+  };
+
+  // Clear open pile when active combatant changes
+  useEffect(() => {
+    setOpenPile(null);
+  }, [currentCombatant?.id]);
 
   // Drag-and-drop state
   const [draggingCardIndex, setDraggingCardIndex] = useState<number | null>(null);
@@ -307,8 +321,9 @@ export function BattleScreen({
       if (pos) targetPositions = [pos];
     }
 
-    // Check if this is a block/defend card
-    const isBlockCard = card.effects.some(e => e.type === 'block');
+    // Check if this is a pure block/defend card (no damage effects)
+    const hasDamage = card.effects.some(e => ['damage', 'multi_hit', 'recoil', 'heal_on_hit', 'self_ko', 'set_damage', 'percent_hp'].includes(e.type));
+    const isBlockCard = !hasDamage && card.effects.some(e => e.type === 'block');
 
     // Trigger card fly animation if we have positions
     if (cardPos && targetPositions.length > 0) {
@@ -481,7 +496,8 @@ export function BattleScreen({
           if (sourcePos) {
             // Look up card definition by name for type/effects info
             const cardDef = Object.values(MOVES).find(m => m.name === cardName);
-            const isBlockCard = cardDef?.effects.some(e => e.type === 'block') ?? false;
+            const hasDamage = cardDef?.effects.some(e => ['damage', 'multi_hit', 'recoil', 'heal_on_hit', 'self_ko', 'set_damage', 'percent_hp'].includes(e.type)) ?? false;
+            const isBlockCard = !hasDamage && (cardDef?.effects.some(e => e.type === 'block') ?? false);
             const cardType = cardDef?.type ?? 'normal';
 
             if (isBlockCard) {
@@ -645,8 +661,9 @@ export function BattleScreen({
       if (pos) targetPositions = [pos];
     }
 
-    // Check if this is a block/defend card
-    const isBlockCard = card.effects.some(e => e.type === 'block');
+    // Check if this is a pure block/defend card (no damage effects)
+    const hasDamage = card.effects.some(e => ['damage', 'multi_hit', 'recoil', 'heal_on_hit', 'self_ko', 'set_damage', 'percent_hp'].includes(e.type));
+    const isBlockCard = !hasDamage && card.effects.some(e => e.type === 'block');
 
     // Trigger card fly animation if we have positions
     if (cardPos && targetPositions.length > 0) {
@@ -745,8 +762,8 @@ export function BattleScreen({
       backgroundImage: `url(${battleBackground})`,
       backgroundSize: 'cover',
       backgroundPosition: 'center 72%',
-      color: '#e2e8f0',
-      fontFamily: "'Segoe UI', system-ui, sans-serif",
+      color: THEME.text.primary,
+      fontFamily: "'Kreon', Georgia, serif",
       overflow: 'hidden',
     }}>
       {/* Top bar: turn order + reset */}
@@ -758,7 +775,7 @@ export function BattleScreen({
         display: 'flex',
         alignItems: 'center',
         gap: 8,
-        background: 'rgba(18, 18, 26, 0.4)',
+        background: 'transparent',
         padding: 8,
         zIndex: 10,
       }}>
@@ -769,14 +786,9 @@ export function BattleScreen({
           <button
             onClick={onBackToSandboxConfig}
             style={{
+              ...THEME.button.secondary,
               padding: '6px 14px',
-              fontSize: 15,
-              fontWeight: 'bold',
-              borderRadius: 6,
-              border: '1px solid #555',
-              background: '#333',
-              color: '#ccc',
-              cursor: 'pointer',
+              fontSize: 14,
               whiteSpace: 'nowrap',
               marginRight: 8,
             }}
@@ -787,14 +799,9 @@ export function BattleScreen({
         <button
           onClick={onRestart}
           style={{
+            ...THEME.button.secondary,
             padding: '6px 14px',
-            fontSize: 15,
-            fontWeight: 'bold',
-            borderRadius: 6,
-            border: '1px solid #555',
-            background: '#333',
-            color: '#ccc',
-            cursor: 'pointer',
+            fontSize: 14,
             whiteSpace: 'nowrap',
             marginRight: 8,
           }}
@@ -812,7 +819,7 @@ export function BattleScreen({
           right: 0,
           textAlign: 'center',
           padding: 8,
-          background: '#ef444433',
+          background: THEME.status.damage + '25',
           color: '#fca5a5',
           fontSize: 15,
           fontWeight: 'bold',
@@ -822,13 +829,9 @@ export function BattleScreen({
           <button
             onClick={() => onSelectCard(null)}
             style={{
+              ...THEME.button.secondary,
               marginLeft: 12,
               padding: '2px 8px',
-              background: '#333',
-              border: '1px solid #555',
-              color: '#ccc',
-              borderRadius: 4,
-              cursor: 'pointer',
               fontSize: 15,
             }}
           >
@@ -876,7 +879,7 @@ export function BattleScreen({
         <div style={{
           fontSize: 26,
           fontWeight: 'bold',
-          color: '#facc1555',
+          color: THEME.accent + '44',
         }}>
           VS
         </div>
@@ -916,7 +919,7 @@ export function BattleScreen({
             <div style={{
               fontSize: victoryStage === 'celebrating' ? 64 : 48,
               fontWeight: 'bold',
-              color: '#facc15',
+              color: THEME.accent,
               textShadow: '0 0 20px rgba(250, 204, 21, 0.6), 0 0 40px rgba(250, 204, 21, 0.4)',
               animation: victoryStage === 'celebrating' ? 'victoryPulse 0.6s ease-in-out infinite alternate' : 'none',
               transition: 'font-size 0.3s ease',
@@ -985,7 +988,7 @@ export function BattleScreen({
             <div style={{
               fontSize: 52,
               fontWeight: 'bold',
-              color: '#ef4444',
+              color: THEME.status.damage,
             }}>
               DEFEAT
             </div>
@@ -997,7 +1000,7 @@ export function BattleScreen({
                 fontWeight: 'bold',
                 borderRadius: 8,
                 border: 'none',
-                background: '#facc15',
+                background: THEME.accent,
                 color: '#000',
                 cursor: 'pointer',
               }}
@@ -1042,8 +1045,8 @@ export function BattleScreen({
         bottom: 0,
         left: 260,
         right: 0,
-        borderTop: '1px solid #222',
-        background: 'rgba(18, 18, 26, 0.4)',
+        borderTop: '1px solid ' + THEME.border.subtle,
+        background: THEME.chrome.backdrop,
         padding: 12,
         display: 'flex',
         flexDirection: 'column',
@@ -1062,27 +1065,18 @@ export function BattleScreen({
           </div>
         )}
 
-        {/* Hand + pile viewer (only during player turn) */}
+        {/* Flow layout: Deck → Hand → Energy+EndTurn → Discard → Vanished */}
         {isPlayerTurn && currentCombatant && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'center' }}>
-            {/* Energy + Pile viewer */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '6px 12px',
-                background: 'rgba(96, 165, 250, 0.2)',
-                borderRadius: 8,
-                border: '1px solid #60a5fa',
-              }}>
-                <span style={{ fontSize: 20 }}>⚡</span>
-                <span style={{ fontSize: 20, fontWeight: 'bold', color: '#60a5fa' }}>
-                  {currentCombatant.energy}
-                </span>
-              </div>
-              <PileViewer combatant={currentCombatant} />
-            </div>
+            {/* Deck button (left) */}
+            <PileButton
+              label="Deck"
+              count={currentCombatant.drawPile.length}
+              isActive={openPile === 'draw'}
+              onClick={() => togglePile('draw')}
+            />
+
+            {/* Hand cards (center) */}
             <HandDisplay
               ref={handDisplayRef}
               combatant={currentCombatant}
@@ -1092,26 +1086,68 @@ export function BattleScreen({
               onDragEnd={handleDragEnd}
               draggingIndex={draggingCardIndex}
             />
-            <button
-              onClick={onEndTurn}
-              style={{
-                padding: '10px 20px',
-                fontSize: 15,
-                fontWeight: 'bold',
-                borderRadius: 8,
-                border: '2px solid #facc15',
-                background: 'transparent',
-                color: '#facc15',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              End Turn
-            </button>
+
+            {/* Energy vessel + End Turn (right of hand) */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+              <EnergyPips energy={currentCombatant.energy} energyCap={currentCombatant.energyCap} variant="vessel" />
+              <button
+                onClick={onEndTurn}
+                style={{
+                  ...THEME.button.primary,
+                  padding: '8px 18px',
+                  fontSize: 14,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                End Turn
+              </button>
+            </div>
+
+            {/* Discard button */}
+            <PileButton
+              label="Discard"
+              count={currentCombatant.discardPile.length}
+              isActive={openPile === 'discard'}
+              onClick={() => togglePile('discard')}
+            />
+
+            {/* Vanished button (conditional) */}
+            {currentCombatant.vanishedPile.length > 0 && (
+              <PileButton
+                label="Vanished"
+                count={currentCombatant.vanishedPile.length}
+                isActive={openPile === 'vanished'}
+                onClick={() => togglePile('vanished')}
+              />
+            )}
           </div>
         )}
-
       </div>
+
+      {/* Pile modal (rendered outside bottom panel for correct overlay stacking) */}
+      {openPile && currentCombatant && (() => {
+        let cards: string[] = [];
+        let title = '';
+        if (openPile === 'draw') {
+          cards = [...currentCombatant.drawPile].sort(() => Math.random() - 0.5);
+          title = `Draw Pile (${currentCombatant.drawPile.length})`;
+        } else if (openPile === 'discard') {
+          cards = [...currentCombatant.discardPile].reverse();
+          title = `Discard Pile (${currentCombatant.discardPile.length})`;
+        } else if (openPile === 'vanished') {
+          cards = [...currentCombatant.vanishedPile];
+          title = `Vanished (${currentCombatant.vanishedPile.length})`;
+        }
+        if (cards.length === 0) return null;
+        return (
+          <PileModal
+            title={title}
+            cards={cards}
+            combatant={currentCombatant}
+            onClose={() => setOpenPile(null)}
+          />
+        );
+      })()}
 
       {/* Pokemon inspection panel - works for both player and enemy */}
       {inspectedCombatant && (

@@ -3,17 +3,17 @@ import { getMove, isParentalBondCopy } from '../data/loaders';
 import { getCombatant, snapshotSpeeds, checkSpeedChangesAndRebuild } from './combat';
 import { applyCardDamage, applyHeal, applyBypassDamage, getBloomingCycleReduction } from './damage';
 import type { DamageModifiers } from './damage';
-import { applyStatus } from './status';
+import { applyStatus, getStatusImmunitySource } from './status';
 import { getEffectiveFrontRow } from './position';
 import {
   checkBlazeStrike, checkFortifiedCannons, checkCounterCurrent, checkStaticField,
   onDamageDealt, onDamageTaken, onStatusApplied,
   checkGustForce, checkKeenEye, hasWhippingWinds, checkPredatorsPatience, checkThickHide, checkThickFat,
   checkUnderdog, checkAngerPoint, checkScrappy, checkSheerForce,
-  checkQuickFeet, checkHustleMultiplier, checkHustleCostIncrease,
+  checkQuickFeet, checkHustleMultiplier, checkHustleCostIncrease, checkHypnoticGazeCostIncrease,
   checkRelentless, checkPoisonPoint, isAttackCard,
   processToxicHorn, processProtectiveToxins, isPoisoned, sheerForceBlocksStatus,
-  hasRockHead, checkReckless, checkLightningRod
+  hasRockHead, checkReckless, checkLightningRod, checkVolatile, checkTintedLens
 } from './passives';
 import { shuffle, MAX_HAND_SIZE } from './deck';
 import { getTypeEffectiveness, getEffectivenessLabel } from './typeChart';
@@ -47,15 +47,17 @@ export function playCard(
 
   const card = getMove(cardId);
 
-  // Calculate effective cost (accounting for Inferno Momentum, Quick Feet, Hustle)
+  // Calculate effective cost (accounting for Inferno Momentum, Quick Feet, Hustle, Hypnotic Gaze)
   const hasInfernoReduction = combatant.turnFlags.infernoMomentumReducedIndex === handIndex;
   const quickFeetReduction = checkQuickFeet(combatant, card);
   const hustleCostIncrease = checkHustleCostIncrease(combatant, card);
+  const hypnoticGazeCostIncrease = checkHypnoticGazeCostIncrease(combatant, card);
 
   let effectiveCost = card.cost;
   if (hasInfernoReduction) effectiveCost -= 3;
   effectiveCost -= quickFeetReduction;
   effectiveCost += hustleCostIncrease;
+  effectiveCost += hypnoticGazeCostIncrease;
   effectiveCost = Math.max(0, effectiveCost);
 
   // Validate energy
@@ -478,7 +480,19 @@ function buildDamageModifiers(
   }
 
   // Type Effectiveness: Calculate multiplier based on move type vs target types
-  const typeEffectiveness = getTypeEffectiveness(card.type, target.types);
+  let typeEffectiveness = getTypeEffectiveness(card.type, target.types);
+
+  // Tinted Lens: Not-very-effective attacks have no damage penalty
+  const rawTypeEffectiveness = typeEffectiveness;
+  typeEffectiveness = checkTintedLens(source, typeEffectiveness);
+  if (typeEffectiveness !== rawTypeEffectiveness) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Tinted Lens: type penalty negated (x${rawTypeEffectiveness.toFixed(2)} → x1.00)!`,
+    });
+  }
+
   const effectivenessLabel = getEffectivenessLabel(typeEffectiveness);
   if (effectivenessLabel) {
     logs.push({
@@ -888,8 +902,20 @@ function resolveEffects(
 
       case 'self_ko': {
         // Deal massive damage, then user dies
+        // Volatile: Self-KO attacks deal 50% more damage
+        const volatileMultiplier = checkVolatile(source);
+        const boostedValue = Math.floor(effect.value * volatileMultiplier);
+        // Only log Volatile boost once (source.alive is false after first target)
+        if (volatileMultiplier > 1 && source.alive) {
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `Volatile: Self-KO damage boosted to ${boostedValue}!`,
+          });
+        }
+
         const mods = buildDamageModifiers(state, source, target, card, logs, false);
-        const r = applyCardDamage(source, target, effect.value, card.type, mods);
+        const r = applyCardDamage(source, target, boostedValue, card.type, mods);
 
         logs.push({
           round: state.round,
@@ -936,14 +962,36 @@ function resolveEffects(
           });
         }
 
-        // User faints
-        source.hp = 0;
-        source.alive = false;
-        logs.push({
-          round: state.round,
-          combatantId: source.id,
-          message: `${source.name} faints from the attack!`,
-        });
+        // Final Spark + faint only on first target (source still alive)
+        if (source.alive) {
+          // Final Spark: When playing a Self-KO card, all allies gain 3 Strength and 2 Haste
+          // Trigger before fainting so allies are buffed
+          if (source.passiveIds.includes('final_spark')) {
+            const allies = state.combatants.filter(c =>
+              c.alive && c.side === source.side && c.id !== source.id
+            );
+            for (const ally of allies) {
+              applyStatus(state, ally, 'strength', 3, source.id);
+              applyStatus(state, ally, 'haste', 2, source.id);
+            }
+            if (allies.length > 0) {
+              logs.push({
+                round: state.round,
+                combatantId: source.id,
+                message: `Final Spark: ${allies.map(a => a.name).join(', ')} ${allies.length === 1 ? 'gains' : 'gain'} 3 Strength and 2 Haste!`,
+              });
+            }
+          }
+
+          // User faints
+          source.hp = 0;
+          source.alive = false;
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${source.name} faints from the attack!`,
+          });
+        }
         break;
       }
 
@@ -1056,11 +1104,11 @@ function resolveEffects(
       }
 
       case 'block': {
-        target.block += effect.value;
+        source.block += effect.value;
         logs.push({
           round: state.round,
-          combatantId: target.id,
-          message: `${target.name} gains ${effect.value} Block. (Block: ${target.block})`,
+          combatantId: source.id,
+          message: `${source.name} gains ${effect.value} Block. (Block: ${source.block})`,
         });
         break;
       }
@@ -1108,11 +1156,12 @@ function resolveEffects(
           );
           logs.push(...statusPassiveLogs);
         } else {
-          // Status was blocked (e.g., by Immunity)
+          // Status was blocked by a passive immunity
+          const immunitySource = getStatusImmunitySource(target, effect.status);
           logs.push({
             round: state.round,
             combatantId: target.id,
-            message: `Immunity makes ${target.name} immune to ${effect.status}!`,
+            message: `${immunitySource} makes ${target.name} immune to ${effect.status}!`,
           });
         }
         break;
@@ -1135,7 +1184,7 @@ export function getPlayableCards(combatant: Combatant): string[] {
 
 /**
  * Get the effective cost of a card at a specific hand index.
- * Accounts for: Inferno Momentum, Quick Feet, Hustle
+ * Accounts for: Inferno Momentum, Quick Feet, Hustle, Hypnotic Gaze
  */
 export function getEffectiveCost(combatant: Combatant, handIndex: number): number {
   const cardId = combatant.hand[handIndex];
@@ -1153,6 +1202,9 @@ export function getEffectiveCost(combatant: Combatant, handIndex: number): numbe
 
   // Hustle: Attacks cost +1
   cost += checkHustleCostIncrease(combatant, card);
+
+  // Hypnotic Gaze: Psychic cards cost +1
+  cost += checkHypnoticGazeCostIncrease(combatant, card);
 
   return Math.max(0, cost);
 }

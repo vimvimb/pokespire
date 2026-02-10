@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { PokemonData, Position, Row, Column } from '../../engine/types';
 import { STARTER_POKEMON } from '../../data/loaders';
+import { THEME } from '../theme';
 
 interface Props {
   onStart: (party: PokemonData[], positions: Position[]) => void;
@@ -182,7 +183,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
         alignItems: 'center',
         gap: 24,
         padding: 32,
-        color: '#e2e8f0',
+        color: THEME.text.primary,
         position: 'relative',
         minHeight: '100vh',
         overflowY: 'auto',
@@ -198,19 +199,19 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
             padding: '8px 16px',
             fontSize: 13,
             borderRadius: 6,
-            border: '1px solid #555',
+            border: '1px solid ' + THEME.border.bright,
             background: 'transparent',
-            color: '#94a3b8',
+            color: THEME.text.secondary,
             cursor: 'pointer',
           }}
         >
           Main Menu
         </button>
 
-        <h1 style={{ fontSize: 30, margin: 0, color: '#facc15' }}>
+        <h1 style={{ fontSize: 30, margin: 0, color: '#facc15', letterSpacing: THEME.heading.letterSpacing }}>
           Choose Your Party
         </h1>
-        <p style={{ color: '#94a3b8', margin: 0 }}>
+        <p style={{ color: THEME.text.secondary, margin: 0 }}>
           Select 1-4 Pokemon for battle
         </p>
 
@@ -237,7 +238,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
                     width: 160,
                     padding: 16,
                     borderRadius: 12,
-                    border: isSelected ? '3px solid #facc15' : '3px solid #333',
+                    border: isSelected ? '3px solid #facc15' : '3px solid ' + THEME.border.subtle,
                     background: isSelected ? '#2d2d3f' : '#1e1e2e',
                     cursor: 'pointer',
                     textAlign: 'center',
@@ -253,7 +254,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
                   <div style={{ fontSize: 17, fontWeight: 'bold', marginTop: 8 }}>
                     {pokemon.name}
                   </div>
-                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>
+                  <div style={{ fontSize: 12, color: THEME.text.secondary, marginTop: 4 }}>
                     HP: {pokemon.maxHp} | SPD: {pokemon.baseSpeed}
                   </div>
                 </div>
@@ -270,11 +271,11 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
           padding: 20,
           background: '#1a1a24',
           borderRadius: 12,
-          border: '1px solid #333',
+          border: '1px solid ' + THEME.border.subtle,
         }}>
           <div style={{
             fontSize: 14,
-            color: '#94a3b8',
+            color: THEME.text.secondary,
             fontWeight: 'bold',
             textTransform: 'uppercase',
             marginBottom: 12,
@@ -293,7 +294,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
                     width: 140,
                     padding: 12,
                     borderRadius: 10,
-                    border: isSelected ? '3px solid #facc15' : '2px solid #333',
+                    border: isSelected ? '3px solid #facc15' : '2px solid ' + THEME.border.subtle,
                     background: isSelected ? '#2d2d3f' : '#1e1e2e',
                     cursor: 'pointer',
                     textAlign: 'center',
@@ -309,7 +310,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
                   <div style={{ fontSize: 15, fontWeight: 'bold', marginTop: 6 }}>
                     {pokemon.name}
                   </div>
-                  <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>
+                  <div style={{ fontSize: 11, color: THEME.text.secondary, marginTop: 2 }}>
                     HP: {pokemon.maxHp} | SPD: {pokemon.baseSpeed}
                   </div>
                 </div>
@@ -346,7 +347,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
       alignItems: 'center',
       gap: 24,
       padding: 32,
-      color: '#e2e8f0',
+      color: THEME.text.primary,
       position: 'relative',
       minHeight: '100vh',
       overflowY: 'auto',
@@ -362,26 +363,26 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
           padding: '8px 16px',
           fontSize: 13,
           borderRadius: 6,
-          border: '1px solid #555',
+          border: '1px solid ' + THEME.border.bright,
           background: 'transparent',
-          color: '#94a3b8',
+          color: THEME.text.secondary,
           cursor: 'pointer',
         }}
       >
         Main Menu
       </button>
 
-      <h1 style={{ fontSize: 30, margin: 0, color: '#facc15' }}>
+      <h1 style={{ fontSize: 30, margin: 0, color: '#facc15', letterSpacing: THEME.heading.letterSpacing }}>
         Set Formation
       </h1>
-      <p style={{ color: '#94a3b8', margin: 0 }}>
+      <p style={{ color: THEME.text.secondary, margin: 0 }}>
         Drag and drop Pokemon to set your formation (Back row is protected by Front row)
       </p>
 
       {/* Formation Grid */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {/* Back row label */}
-        <div style={{ textAlign: 'center', fontSize: 13, color: '#64748b', textTransform: 'uppercase' }}>
+        <div style={{ textAlign: 'center', fontSize: 13, color: THEME.text.tertiary, textTransform: 'uppercase' }}>
           Back Row (Protected)
         </div>
         {/* Back row */}
@@ -409,7 +410,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
         </div>
 
         {/* Front row label */}
-        <div style={{ textAlign: 'center', fontSize: 13, color: '#64748b', textTransform: 'uppercase', marginTop: 8 }}>
+        <div style={{ textAlign: 'center', fontSize: 13, color: THEME.text.tertiary, textTransform: 'uppercase', marginTop: 8 }}>
           Front Row (Exposed)
         </div>
         {/* Front row */}
@@ -439,7 +440,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
 
       {/* Unplaced Pokemon - Always visible */}
       <div style={{ marginTop: 16 }}>
-        <div style={{ fontSize: 15, color: '#94a3b8', marginBottom: 8, textAlign: 'center' }}>
+        <div style={{ fontSize: 15, color: THEME.text.secondary, marginBottom: 8, textAlign: 'center' }}>
           {unplacedPokemon.length > 0 ? 'Drag to place:' : 'Drop Pokemon here to unplace:'}
         </div>
         <div
@@ -451,10 +452,10 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
             padding: 16,
             background: dragOverTarget === 'unplaced' ? '#2d2d3f' : '#1a1a24',
             border: dragOverTarget === 'unplaced' 
-              ? '2px dashed #facc15' 
-              : unplacedPokemon.length > 0 
-                ? '2px solid #444' 
-                : '2px dashed #444',
+              ? '2px dashed #facc15'
+              : unplacedPokemon.length > 0
+                ? '2px solid ' + THEME.border.medium
+                : '2px dashed ' + THEME.border.medium,
             borderRadius: 8,
             display: 'flex',
             gap: 8,
@@ -509,9 +510,9 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
               );
             })
           ) : (
-            <div style={{ 
-              color: '#64748b', 
-              fontSize: 14, 
+            <div style={{
+              color: THEME.text.tertiary,
+              fontSize: 14,
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center',
@@ -533,9 +534,9 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
             fontSize: 15,
             fontWeight: 'bold',
             borderRadius: 8,
-            border: '2px solid #555',
+            border: '2px solid ' + THEME.border.bright,
             background: 'transparent',
-            color: '#94a3b8',
+            color: THEME.text.secondary,
             cursor: 'pointer',
           }}
         >
@@ -605,7 +606,7 @@ function FormationSlot({
         border: isDragOver && canDrop
           ? '2px solid #facc15'
           : isEmpty
-            ? '2px dashed #444'
+            ? '2px dashed ' + THEME.border.medium
             : '2px solid #facc15',
         borderRadius: 8,
         background: isDragOver && canDrop
@@ -641,12 +642,12 @@ function FormationSlot({
             style={{ width: 60, height: 60, imageRendering: 'pixelated', objectFit: 'contain' }}
             draggable={false}
           />
-          <div style={{ fontSize: 13, fontWeight: 'bold', color: '#e2e8f0' }}>
+          <div style={{ fontSize: 13, fontWeight: 'bold', color: THEME.text.primary }}>
             {pokemon.name}
           </div>
         </>
       ) : (
-        <div style={{ fontSize: 26, color: isDragOver && canDrop ? '#facc15' : '#444' }}>+</div>
+        <div style={{ fontSize: 26, color: isDragOver && canDrop ? '#facc15' : THEME.border.medium }}>+</div>
       )}
     </div>
   );

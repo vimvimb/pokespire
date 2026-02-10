@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { RunState } from '../../run/types';
 import { getPokemon, getMove } from '../../data/loaders';
 import { EXP_PER_LEVEL } from '../../run/state';
+import { THEME } from '../theme';
 
 interface Props {
   run: RunState;
@@ -126,7 +127,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
       alignItems: 'center',
       gap: 24,
       padding: 32,
-      color: '#e2e8f0',
+      color: THEME.text.primary,
       height: isForgetMode ? '100vh' : undefined,
       minHeight: isForgetMode ? undefined : '100vh',
       overflowY: isForgetMode ? 'hidden' : 'auto',
@@ -143,20 +144,20 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
           padding: '8px 16px',
           fontSize: 13,
           borderRadius: 6,
-          border: '1px solid #555',
+          border: '1px solid ' + THEME.border.bright,
           background: 'transparent',
-          color: '#94a3b8',
+          color: THEME.text.secondary,
           cursor: 'pointer',
         }}
       >
         Main Menu
       </button>
 
-      <h1 style={{ fontSize: 30, margin: 0, color: '#facc15' }}>
+      <h1 style={{ fontSize: 30, margin: 0, color: '#facc15', letterSpacing: THEME.heading.letterSpacing }}>
         Pokemon Center
       </h1>
 
-      <p style={{ color: '#94a3b8', margin: 0, textAlign: 'center', maxWidth: 500 }}>
+      <p style={{ color: THEME.text.secondary, margin: 0, textAlign: 'center', maxWidth: 500 }}>
         Your Pokemon can rest here. Choose how to spend your time.
       </p>
 
@@ -179,9 +180,9 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
                 fontSize: 16,
                 fontWeight: 'bold',
                 borderRadius: 16,
-                border: isSelected ? `3px solid ${opt.color}` : '3px solid #333',
+                border: isSelected ? `3px solid ${opt.color}` : '3px solid ' + THEME.border.subtle,
                 background: isSelected ? opt.bgColor : '#1e1e2e',
-                color: isSelected ? opt.color : '#64748b',
+                color: isSelected ? opt.color : THEME.text.tertiary,
                 cursor: 'pointer',
                 transition: 'all 0.2s',
                 minWidth: 140,
@@ -208,7 +209,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
               />
               <div style={{ fontSize: 28, fontWeight: 'bold' }}>{opt.icon}</div>
               <div style={{ fontSize: 15 }}>{opt.title}</div>
-              <div style={{ fontSize: 12, color: isSelected ? opt.color : '#64748b', opacity: 0.8 }}>
+              <div style={{ fontSize: 12, color: isSelected ? opt.color : THEME.text.tertiary, opacity: 0.8 }}>
                 {opt.subtitle}
               </div>
             </button>
@@ -263,7 +264,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
                     padding: 16,
                     borderRadius: 16,
                     border: isDead
-                      ? '3px solid #333'
+                      ? '3px solid ' + THEME.border.subtle
                       : `3px solid ${currentOption.color}`,
                     background: isDead ? '#1a1a24' : '#1e1e2e',
                     cursor: isDead ? 'not-allowed' : 'pointer',
@@ -299,7 +300,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
                     {basePokemon.name}
                   </div>
 
-                  <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
+                  <div style={{ fontSize: 12, color: THEME.text.tertiary, marginTop: 2 }}>
                     Lv.{pokemon.level} | {pokemon.exp}/{EXP_PER_LEVEL} EXP
                   </div>
 
@@ -307,7 +308,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
                   <div style={{
                     width: '100%',
                     height: 8,
-                    background: '#333',
+                    background: THEME.border.subtle,
                     borderRadius: 4,
                     overflow: 'hidden',
                     marginTop: 8,
@@ -320,7 +321,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
                     }} />
                   </div>
 
-                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>
+                  <div style={{ fontSize: 12, color: THEME.text.secondary, marginTop: 4 }}>
                     {pokemon.currentHp}/{pokemon.maxHp} HP
                   </div>
 
@@ -343,7 +344,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
 
                       {selectedChoice === 'heal' && (
                         <>
-                          <div style={{ color: '#e2e8f0' }}>
+                          <div style={{ color: THEME.text.primary }}>
                             {previewHealHp}/{pokemon.maxHp} HP
                           </div>
                           <div style={{ color: currentOption.color, fontSize: 12, marginTop: 2 }}>
@@ -354,7 +355,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
 
                       {selectedChoice === 'train' && (
                         <>
-                          <div style={{ color: '#e2e8f0' }}>
+                          <div style={{ color: THEME.text.primary }}>
                             {previewTrainHp}/{previewMaxHp} HP
                           </div>
                           <div style={{ color: currentOption.color, fontSize: 12, marginTop: 2 }}>
@@ -365,7 +366,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
 
                       {selectedChoice === 'meditate' && (
                         <>
-                          <div style={{ color: '#e2e8f0' }}>
+                          <div style={{ color: THEME.text.primary }}>
                             {previewExp}/{EXP_PER_LEVEL} EXP
                           </div>
                           <div style={{ color: currentOption.color, fontSize: 12, marginTop: 2 }}>
@@ -396,7 +397,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
 
           {/* Click hint */}
           <div style={{
-            color: '#64748b',
+            color: THEME.text.tertiary,
             fontSize: 13,
             marginTop: 8,
           }}>
@@ -434,7 +435,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
                   background: '#1e1e2e',
                   borderRadius: 12,
                   padding: 16,
-                  border: selectedCardIndex !== undefined ? '2px solid #f43f5e' : '1px solid #333',
+                  border: selectedCardIndex !== undefined ? '2px solid #f43f5e' : '1px solid ' + THEME.border.subtle,
                 }}>
                   {/* Pokemon Header */}
                   <div style={{
@@ -455,7 +456,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
                     />
                     <div>
                       <div style={{ fontSize: 18, fontWeight: 'bold' }}>{basePokemon.name}</div>
-                      <div style={{ fontSize: 12, color: '#64748b' }}>
+                      <div style={{ fontSize: 12, color: THEME.text.tertiary }}>
                         {pokemon.deck.length} cards • {selectedCardIndex !== undefined ? '1 selected' : 'Select a card to forget'}
                       </div>
                     </div>
@@ -479,15 +480,15 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
                             padding: '8px 12px',
                             fontSize: 12,
                             borderRadius: 6,
-                            border: isSelected ? '2px solid #f43f5e' : '1px solid #444',
+                            border: isSelected ? '2px solid #f43f5e' : '1px solid ' + THEME.border.medium,
                             background: isSelected ? '#f43f5e22' : '#2a2a3e',
-                            color: isSelected ? '#f43f5e' : '#e2e8f0',
+                            color: isSelected ? '#f43f5e' : THEME.text.primary,
                             cursor: 'pointer',
                             transition: 'all 0.1s',
                           }}
                         >
                           <div style={{ fontWeight: 'bold' }}>{card.name}</div>
-                          <div style={{ fontSize: 10, color: '#64748b' }}>
+                          <div style={{ fontSize: 10, color: THEME.text.tertiary }}>
                             {card.cost} cost • {card.type}
                           </div>
                         </button>
@@ -506,7 +507,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
             alignItems: 'center',
             gap: 8,
             padding: '16px 0',
-            borderTop: '1px solid #333',
+            borderTop: '1px solid ' + THEME.border.subtle,
             background: '#0f0f17',
           }}>
             <button
@@ -525,7 +526,7 @@ export function RestScreen({ run, onHeal, onTrain, onMeditate, onForget, onResta
             >
               Forget {forgetSelections.size} Card{forgetSelections.size !== 1 ? 's' : ''}
             </button>
-            <div style={{ color: '#64748b', fontSize: 12 }}>
+            <div style={{ color: THEME.text.tertiary, fontSize: 12 }}>
               Select one card from each Pokemon (optional)
             </div>
           </div>

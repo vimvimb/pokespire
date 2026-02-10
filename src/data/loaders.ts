@@ -85,6 +85,10 @@ export const STARTER_POKEMON: Record<string, PokemonData> = {
   'nidoran-m': POKEMON['nidoran-m'],
   'nidoran-f': POKEMON['nidoran-f'],
   rhyhorn: POKEMON.rhyhorn,
+  drowzee: POKEMON.drowzee,
+  growlithe: POKEMON.growlithe,
+  voltorb: POKEMON.voltorb,
+  caterpie: POKEMON.caterpie,
 };
 
 /** Enemy Pokemon */

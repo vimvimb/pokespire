@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import type { MoveDefinition, MoveType, CardRarity } from '../../engine/types';
+import { THEME } from '../theme';
+import { CardTypeMotif } from './CardTypeMotif';
 
 interface Props {
   card: MoveDefinition;
@@ -179,9 +181,18 @@ export function CardPreview({ card, onClick, isSelected = false, showHoverEffect
   const primaryEffect = card.effects[0]?.type || 'damage';
   const effectColor = EFFECT_COLORS[primaryEffect] || '#888';
   const moveTypeColor = MOVE_TYPE_COLORS[card.type] || MOVE_TYPE_COLORS.normal;
+  const rarityColor = card.rarity ? RARITY_COLORS[card.rarity] : null;
 
   const isClickable = !!onClick;
   const showHoverGlow = showHoverEffect && isClickable && isHovered && !isSelected;
+
+  // Rarity border glow for rare+ cards
+  const rarityGlow = rarityColor && card.rarity && ['rare', 'epic', 'legendary'].includes(card.rarity)
+    ? `inset 0 0 12px ${rarityColor}22`
+    : '';
+  const hoverGlow = showHoverGlow ? `0 0 16px 4px ${moveTypeColor}55` : '';
+  const typeTintShadow = `inset 0 0 8px ${moveTypeColor}25`;
+  const combinedShadow = [typeTintShadow, rarityGlow, hoverGlow].filter(Boolean).join(', ') || 'none';
 
   return (
     <div
@@ -191,67 +202,111 @@ export function CardPreview({ card, onClick, isSelected = false, showHoverEffect
       style={{
         width: 140,
         minHeight: 180,
-        background: isSelected ? '#3b3b5c' : '#1e1e2e',
+        background: isSelected
+          ? `linear-gradient(to bottom, ${moveTypeColor}18, ${THEME.bg.elevated})`
+          : `linear-gradient(to bottom, ${moveTypeColor}14, ${THEME.bg.panel})`,
         border: isSelected
-          ? `2px solid ${effectColor}`
-          : '2px solid #444',
+          ? `1.5px solid ${effectColor}`
+          : `1.5px solid ${THEME.border.medium}`,
         borderRadius: 8,
         padding: 10,
         display: 'flex',
         flexDirection: 'column',
-        gap: 5,
+        gap: 4,
         cursor: isClickable ? 'pointer' : 'default',
         transition: 'all 0.15s',
         position: 'relative',
-        boxShadow: showHoverGlow ? `0 0 16px 4px ${effectColor}66` : 'none',
+        boxShadow: combinedShadow,
         transform: isHovered && isClickable ? 'translateY(-4px)' : 'none',
       }}
     >
-      {/* Cost badge */}
+      {/* Cost badge — diamond notch */}
       <div style={{
         position: 'absolute',
-        top: -8,
-        right: -8,
-        width: 26,
-        height: 26,
-        borderRadius: '50%',
-        background: '#60a5fa',
-        color: '#fff',
+        top: -12,
+        right: -12,
+        width: 32,
+        height: 32,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: 15,
-        fontWeight: 'bold',
-        border: '2px solid #1e1e2e',
       }}>
-        {card.cost}
+        <svg width="32" height="32" viewBox="0 0 32 32" style={{ position: 'absolute' }}>
+          <defs>
+            <filter id="cost-glow-preview" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <path
+            d="M16 2 L28 16 L16 30 L4 16 Z"
+            fill={THEME.bg.panelDark}
+            stroke="#5b8cc9"
+            strokeWidth="1.2"
+          />
+          <path
+            d="M16 5 L25.5 16 L16 27 L6.5 16 Z"
+            fill="rgba(96, 165, 250, 0.12)"
+            stroke="rgba(96, 165, 250, 0.3)"
+            strokeWidth="0.8"
+            filter="url(#cost-glow-preview)"
+          />
+        </svg>
+        <span style={{
+          position: 'relative',
+          fontSize: 14,
+          fontWeight: 'bold',
+          color: '#a0c4f0',
+          textShadow: '0 0 6px rgba(96, 165, 250, 0.5)',
+        }}>
+          {card.cost}
+        </span>
       </div>
 
-      {/* Name */}
+      {/* SVG type motif band */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        margin: '2px 0 0',
+        opacity: 0.9,
+      }}>
+        <CardTypeMotif type={card.type} color={moveTypeColor} width={120} height={36} />
+      </div>
+
+      {/* Card name */}
       <div style={{
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#e2e8f0',
-        borderBottom: `2px solid ${moveTypeColor}`,
-        paddingBottom: 4,
+        color: THEME.text.primary,
+        textAlign: 'center',
       }}>
         {card.name}
       </div>
 
-      {/* Range indicator */}
+      {/* Range with flanking lines */}
       <div style={{
-        fontSize: 11,
-        color: '#64748b',
+        fontSize: 10,
+        color: THEME.text.tertiary,
         textTransform: 'uppercase',
-        letterSpacing: '0.5px',
+        letterSpacing: '0.08em',
+        textAlign: 'center',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 4,
+        justifyContent: 'center',
       }}>
+        <span style={{ flex: 1, height: 1, background: THEME.border.subtle, maxWidth: 24 }} />
         {RANGE_LABELS[card.range] || card.range}
+        <span style={{ flex: 1, height: 1, background: THEME.border.subtle, maxWidth: 24 }} />
       </div>
 
       {/* Description */}
       <div style={{
         fontSize: 12,
-        color: '#94a3b8',
+        color: THEME.text.secondary,
         flex: 1,
         lineHeight: 1.4,
       }}>
@@ -270,34 +325,36 @@ export function CardPreview({ card, onClick, isSelected = false, showHoverEffect
         </div>
       )}
 
-      {/* Move type badge */}
+      {/* Type badge with flanking em-dashes */}
       <div style={{
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: 'bold',
         textAlign: 'center',
-        padding: '2px 6px',
-        borderRadius: 4,
-        background: moveTypeColor + '33',
         color: moveTypeColor,
         textTransform: 'uppercase',
+        letterSpacing: '0.1em',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
       }}>
+        <span style={{ color: THEME.text.tertiary }}>——</span>
         {card.type}
+        <span style={{ color: THEME.text.tertiary }}>——</span>
       </div>
 
-      {/* Rarity gem indicator */}
-      {card.rarity && RARITY_COLORS[card.rarity] && (
+      {/* Rarity gemstone — triangle pointing up into the card */}
+      {rarityColor && card.rarity && card.rarity !== 'basic' && (
         <div style={{
           position: 'absolute',
           bottom: -6,
           left: '50%',
           transform: 'translateX(-50%)',
-          width: 0,
-          height: 0,
-          borderLeft: '8px solid transparent',
-          borderRight: '8px solid transparent',
-          borderTop: `12px solid ${RARITY_COLORS[card.rarity]}`,
-          filter: card.rarity === 'legendary' ? 'drop-shadow(0 0 4px #fbbf24)' : 'none',
-        }} />
+        }}>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+            <path d="M8 0 L15 12 L1 12 Z" fill={rarityColor + '55'} stroke={rarityColor} strokeWidth="1.2" />
+          </svg>
+        </div>
       )}
     </div>
   );

@@ -51,6 +51,22 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   'nidoran-f': 5,   // Real: 7kg, reduced 10% for sprite scaling
   nidorina: 20,
   nidoqueen: 17,  // Real: 60kg, reduced 35% for sprite scaling
+
+  // Drowzee line
+  drowzee: 10,    // Real: 32.4kg, reduced for sprite scaling
+  hypno: 25,      // Real: 75.6kg, reduced for sprite scaling
+
+  // Growlithe line
+  growlithe: 12,  // Real: 19kg, reduced for sprite scaling
+  arcanine: 50,   // Real: 155kg, reduced for sprite scaling
+
+  // Voltorb line
+  voltorb: 10,
+  electrode: 12,
+
+  // Caterpie line
+  caterpie: 1,
+  butterfree: 8,  // Real: 32kg, increased for sprite scaling
 };
 
 // Reference Pokemon and base sprite size

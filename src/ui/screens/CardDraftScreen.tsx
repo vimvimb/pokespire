@@ -5,6 +5,7 @@ import { createRng } from '../../run/rng';
 import { sampleDraftCards } from '../../run/draft';
 import { CardPreview } from '../components/CardPreview';
 import { PokemonDetailsPanel } from '../components/PokemonDetailsPanel';
+import { THEME } from '../theme';
 
 interface Props {
   run: RunState;
@@ -80,7 +81,7 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart }: Props) {
       alignItems: 'center',
       gap: 24,
       padding: 32,
-      color: '#e2e8f0',
+      color: THEME.text.primary,
       minHeight: '100vh',
       overflowY: 'auto',
       background: '#0f0f17',
@@ -96,21 +97,21 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart }: Props) {
           padding: '8px 16px',
           fontSize: 13,
           borderRadius: 6,
-          border: '1px solid #555',
+          border: '1px solid ' + THEME.border.bright,
           background: 'transparent',
-          color: '#94a3b8',
+          color: THEME.text.secondary,
           cursor: 'pointer',
         }}
       >
         Main Menu
       </button>
 
-      <h1 style={{ fontSize: 30, margin: 0, color: '#facc15' }}>
+      <h1 style={{ fontSize: 30, margin: 0, color: '#facc15', letterSpacing: THEME.heading.letterSpacing }}>
         Card Draft
       </h1>
 
       {/* Progress */}
-      <div style={{ fontSize: 15, color: '#94a3b8' }}>
+      <div style={{ fontSize: 15, color: THEME.text.secondary }}>
         Pokemon {currentDraftIndex + 1} of {alivePokemonIndices.length}
       </div>
 
@@ -138,7 +139,7 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart }: Props) {
           style={{ width: 80, height: 80, imageRendering: 'pixelated', objectFit: 'contain' }}
         />
         <div style={{ fontSize: 20, fontWeight: 'bold' }}>{basePokemon.name}</div>
-        <div style={{ fontSize: 13, color: '#94a3b8' }}>
+        <div style={{ fontSize: 13, color: THEME.text.secondary }}>
           Current deck size: {currentPokemon.deck.length} cards
         </div>
         <div style={{ fontSize: 11, color: '#60a5fa' }}>
@@ -146,7 +147,7 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart }: Props) {
         </div>
       </div>
 
-      <p style={{ color: '#94a3b8', margin: 0, textAlign: 'center' }}>
+      <p style={{ color: THEME.text.secondary, margin: 0, textAlign: 'center' }}>
         Choose a card to add to {basePokemon.name}'s deck, or skip
       </p>
 
@@ -181,9 +182,9 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart }: Props) {
           fontSize: 15,
           fontWeight: 'bold',
           borderRadius: 8,
-          border: '2px solid #555',
+          border: '2px solid ' + THEME.border.bright,
           background: 'transparent',
-          color: '#94a3b8',
+          color: THEME.text.secondary,
           cursor: 'pointer',
           marginTop: 8,
         }}
