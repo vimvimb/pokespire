@@ -1276,7 +1276,7 @@ describe('Passive Abilities', () => {
       const state = createTestCombatState([attacker, target]);
       const card = getMove('tackle');
 
-      const logs = onDamageTaken(state, attacker, target, 5, card);
+      onDamageTaken(state, attacker, target, 5, card);
 
       expect(getStatusStacks(attacker, 'paralysis')).toBe(0);
     });
@@ -1423,10 +1423,10 @@ describe('Passive Abilities', () => {
       const adj1 = createTestCombatant({ id: 'enemy-2', side: 'enemy' });
       const adj2 = createTestCombatant({ id: 'enemy-3', side: 'enemy' });
 
-      // Set positions: target in column 2, adj1 in column 1, adj2 in column 3
-      target.position = { row: 'front', column: 2 };
-      adj1.position = { row: 'front', column: 1 };
-      adj2.position = { row: 'front', column: 3 };
+      // Set positions: target in column 1, adj1 in column 0, adj2 in column 2
+      target.position = { row: 'front', column: 1 };
+      adj1.position = { row: 'front', column: 0 };
+      adj2.position = { row: 'front', column: 2 };
 
       const state = createTestCombatState([source, target, adj1, adj2]);
 
@@ -1442,8 +1442,8 @@ describe('Passive Abilities', () => {
       const target = createTestCombatant({ id: 'enemy-1', side: 'enemy' });
       const far = createTestCombatant({ id: 'enemy-2', side: 'enemy' });
 
-      target.position = { row: 'front', column: 1 };
-      far.position = { row: 'front', column: 3 }; // Column differs by 2
+      target.position = { row: 'front', column: 0 };
+      far.position = { row: 'front', column: 2 }; // Column differs by 2
 
       const state = createTestCombatState([source, target, far]);
 

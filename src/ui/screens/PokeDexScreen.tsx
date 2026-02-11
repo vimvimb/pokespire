@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { PokemonData, MoveType } from '../../engine/types';
+import type { PokemonData } from '../../engine/types';
 import { STARTER_POKEMON, getMove } from '../../data/loaders';
 import { CardPreview } from '../components/CardPreview';
 import { PokemonTile, TYPE_COLORS } from '../components/PokemonTile';

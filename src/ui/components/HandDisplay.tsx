@@ -59,7 +59,6 @@ export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDispla
         const effectiveCost = getEffectiveCost(combatant, idx);
         const canAfford = combatant.energy >= effectiveCost;
 
-        const isHovered = hoveredIndex === idx;
         const isDragging = draggingIndex === idx;
 
         // Compute transform for fan effect

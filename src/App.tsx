@@ -494,8 +494,8 @@ export default function App() {
           fontWeight: 'bold',
           color: THEME.accent,
           textShadow: '0 0 20px rgba(250, 204, 21, 0.5)',
-          letterSpacing: '0.2em',
           ...THEME.heading,
+          letterSpacing: '0.2em',
         }}>
           POKESPIRE
         </div>

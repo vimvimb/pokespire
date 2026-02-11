@@ -13,9 +13,8 @@ interface Props {
   onRestart: () => void;
 }
 
-function PokemonRow({ pokemon, index, isDead, canLevel, onClick, isSwapTarget, onSwapClick }: {
+function PokemonRow({ pokemon, isDead, canLevel, onClick, isSwapTarget, onSwapClick }: {
   pokemon: RunPokemon;
-  index: number;
   isDead: boolean;
   canLevel: boolean;
   onClick: () => void;
@@ -164,7 +163,6 @@ export function MapPartySidebar({ party, bench, onPokemonClick, onSwap, onRestar
           <PokemonRow
             key={`party-${i}`}
             pokemon={pokemon}
-            index={i}
             isDead={isDead}
             canLevel={canLevel}
             onClick={() => !isDead && onPokemonClick(i)}
@@ -209,7 +207,6 @@ export function MapPartySidebar({ party, bench, onPokemonClick, onSwap, onRestar
               >
                 <PokemonRow
                   pokemon={pokemon}
-                  index={i}
                   isDead={isDead}
                   canLevel={false}
                   onClick={() => handleBenchClick(i)}

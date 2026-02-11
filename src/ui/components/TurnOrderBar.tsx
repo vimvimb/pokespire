@@ -77,7 +77,7 @@ export function TurnOrderBar({ state }: Props) {
             const elapsed = now - startTime;
             const t = Math.min(elapsed / ANIM_DURATION, 1);
 
-            for (const { id, deltaX, el } of movedEntries) {
+            for (const { deltaX, el } of movedEntries) {
               // Phase 1 (0→0.25): drop down from bar
               // Phase 2 (0.15→0.85): slide horizontally
               // Phase 3 (0.75→1.0): rise back into bar
