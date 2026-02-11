@@ -756,5 +756,57 @@
       "fury-attack"
     ],
     "abilities": []
+  },
+
+  "magikarp": {
+    "name": "Magikarp",
+    "types": ["water"],
+    "maxHp": 20,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "splash", "splash", "splash",
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "flail",
+      "bounce"
+    ],
+    "abilities": []
+  },
+  "gyarados": {
+    "name": "Gyarados",
+    "types": ["water", "flying"],
+    "maxHp": 65,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "splash", "splash", "splash",
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "flail",
+      "bounce"
+    ],
+    "abilities": []
+  },
+  "lapras": {
+    "name": "Lapras",
+    "types": ["water", "ice"],
+    "maxHp": 90,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "defend", "defend", "defend",
+      "water-gun", "water-gun",
+      "mist", "mist",
+      "sing"
+    ],
+    "abilities": []
   }
 }

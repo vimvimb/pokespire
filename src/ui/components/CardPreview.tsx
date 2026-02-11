@@ -56,6 +56,7 @@ const RANGE_LABELS: Record<string, string> = {
   column: 'Column',
   all_enemies: 'All',
   self: 'Self',
+  any_ally: 'Any Ally',
 };
 
 const RARITY_COLORS: Record<CardRarity, string | null> = {

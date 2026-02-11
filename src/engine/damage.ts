@@ -119,6 +119,11 @@ export function applyCardDamage(
   const thickFatMultiplier = mods.thickFatMultiplier ?? 1.0;
   rawDamage = Math.floor(rawDamage * thickFatMultiplier);
 
+  // Step 1.9: Shell Armor — cap damage at 20
+  if (target.passiveIds.includes('shell_armor') && rawDamage > 20) {
+    rawDamage = 20;
+  }
+
   // Step 2: Apply Evasion from target (unless Scrappy ignores it)
   const ignoreEvasion = mods.ignoreEvasion ?? false;
   const evasion = ignoreEvasion ? 0 : getStatusStacks(target, 'evasion');

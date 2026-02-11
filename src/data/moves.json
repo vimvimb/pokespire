@@ -1748,15 +1748,14 @@
     "name": "Mist",
     "cost": 1,
     "type": "ice",
-    "range": "self",
+    "range": "any_ally",
     "vanish": false,
     "effects": [
-      { "type": "block", "value": 5 },
-      { "type": "apply_status_self", "status": "evasion", "stacks": 1 }
+      { "type": "cleanse", "count": 1 }
     ],
     "rarity": "basic",
     "pools": ["ice"],
-    "description": "Gain 5 Block and Evasion 1."
+    "description": "Cleanse 1 debuff from an ally."
   },
   "haze": {
     "name": "Haze",
@@ -2390,5 +2389,47 @@
     "rarity": "rare",
     "pools": ["bug"],
     "description": "Deal 6 damage to all enemies. Gain Strength 1."
+  },
+
+  "flail": {
+    "name": "Flail",
+    "cost": 1,
+    "type": "normal",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 6, "bonusValue": 6, "bonusCondition": "user_below_half_hp" }
+    ],
+    "rarity": "common",
+    "pools": ["normal"],
+    "description": "Deal 6 damage. Deal 12 instead if below 50% HP. (Front row)"
+  },
+  "bounce": {
+    "name": "Bounce",
+    "cost": 2,
+    "type": "flying",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 12 },
+      { "type": "apply_status", "status": "paralysis", "stacks": 1 }
+    ],
+    "rarity": "rare",
+    "pools": ["flying"],
+    "description": "Deal 12 damage. Apply Paralysis 1."
+  },
+  "dragon-dance": {
+    "name": "Dragon Dance",
+    "cost": 1,
+    "type": "dragon",
+    "range": "self",
+    "vanish": true,
+    "effects": [
+      { "type": "apply_status_self", "status": "strength", "stacks": 2 },
+      { "type": "apply_status_self", "status": "haste", "stacks": 2 }
+    ],
+    "rarity": "epic",
+    "pools": ["dragon"],
+    "description": "Gain 2 Strength and 2 Haste. Vanish."
   }
 }

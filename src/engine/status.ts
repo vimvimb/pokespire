@@ -285,6 +285,24 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
       }
     }
 
+    // Fortifying Aria: Heal allies for half of current Block (before block resets)
+    if (c.passiveIds.includes('fortifying_aria') && c.block > 0 && c.alive) {
+      const healAmount = Math.floor(c.block / 2);
+      if (healAmount > 0) {
+        const allies = state.combatants.filter(a => a.alive && a.side === c.side && a.id !== c.id);
+        for (const ally of allies) {
+          const healed = applyHeal(ally, healAmount);
+          if (healed > 0) {
+            logs.push({
+              round: state.round,
+              combatantId: c.id,
+              message: `Fortifying Aria: ${ally.name} heals ${healed} HP! (${c.name}'s Block: ${c.block})`,
+            });
+          }
+        }
+      }
+    }
+
     // Reset Block (but Pressure Hull retains 50% of current block)
     if (c.block > 0) {
       const hasPressureHull = c.passiveIds.includes('pressure_hull');

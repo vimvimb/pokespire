@@ -67,6 +67,13 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   // Weedle line
   weedle: 3,
   beedrill: 14,   // Real: 29.5kg, reduced for sprite scaling
+
+  // Magikarp line
+  magikarp: 10,
+  gyarados: 235,  // Real: 235kg
+
+  // Lapras
+  lapras: 80,     // Real: 220kg, reduced for sprite scaling
 };
 
 // Reference Pokemon and base sprite size

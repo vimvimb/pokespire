@@ -187,8 +187,8 @@ function selectTarget(
   attacker: Combatant,
   card: MoveDefinition
 ): string | undefined {
-  // Self-targeting cards
-  if (card.range === 'self') return attacker.id;
+  // Self-targeting or ally-targeting cards
+  if (card.range === 'self' || card.range === 'any_ally') return attacker.id;
 
   // Get valid enemies
   const enemies = state.combatants.filter(c =>

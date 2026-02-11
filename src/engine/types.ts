@@ -23,7 +23,8 @@ export type MoveRange =
   | 'any_row'       // player picks front or back row, hits all in that row
   | 'column'        // hits all enemies in a column (front + back)
   | 'all_enemies'   // AoE all enemies
-  | 'self';         // self-targeting
+  | 'self'          // self-targeting
+  | 'any_ally';     // any ally (including self)
 
 // --- Legacy Targeting (deprecated) ---
 
@@ -57,6 +58,8 @@ export type CardEffectType =
 export interface DamageEffect {
   type: 'damage';
   value: number;
+  bonusValue?: number;           // extra damage if condition met
+  bonusCondition?: 'user_below_half_hp';  // condition type
 }
 
 export interface BlockEffect {

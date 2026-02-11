@@ -60,14 +60,23 @@ export function chooseEnemyAction(
     .map(id => ({ id, card: getMove(id) }))
     .filter(({ card }) =>
       card.cost <= energy &&
-      (card.range === 'self' || card.effects.some(e => e.type === 'block'))
+      (card.range === 'self' || card.range === 'any_ally' || card.effects.some(e => e.type === 'block'))
     )
     .sort((a, b) => a.card.cost - b.card.cost);
 
   if (defenseCards.length > 0) {
+    const defCard = defenseCards[0];
+    if (defCard.card.range === 'any_ally') {
+      // Target self for ally-targeting defense cards
+      return {
+        type: 'play_card',
+        cardInstanceId: defCard.id,
+        targetId: combatant.id,
+      };
+    }
     return {
       type: 'play_card',
-      cardInstanceId: defenseCards[0].id,
+      cardInstanceId: defCard.id,
     };
   }
 

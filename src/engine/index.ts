@@ -12,7 +12,7 @@ export { drawCards, shuffle } from './deck';
 export { chooseEnemyAction } from './ai';
 export {
   getEffectiveFrontRow, isInEffectiveFrontRow, getCombatantAtPosition,
-  getValidTargets, isValidTarget,
+  getValidTargets, isValidTarget, getCardValidTargets,
   assignPartyPositions, requiresTargetSelection, isAoERange,
 } from './position';
 export * from './types';

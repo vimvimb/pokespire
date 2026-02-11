@@ -92,7 +92,15 @@ export type PassiveId =
   // Weedle/Beedrill line
   | 'poison_barb'
   | 'adaptability'
-  | 'swarm_strike';
+  | 'swarm_strike'
+  // Magikarp/Gyarados line
+  | 'great_leap'
+  | 'moxie'
+  | 'tyrants_tantrum'
+  // Lapras
+  | 'water_absorb'
+  | 'shell_armor'
+  | 'fortifying_aria';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -385,6 +393,32 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   swarm_strike: {
     name: 'Swarm Strike',
     description: 'The first Bug attack you play each turn deals double damage.',
+  },
+  // Magikarp/Gyarados line
+  great_leap: {
+    name: 'Great Leap',
+    description: 'When you play Splash, gain 3 Evasion.',
+  },
+  moxie: {
+    name: 'Moxie',
+    description: 'When you KO an enemy, gain 3 energy.',
+  },
+  tyrants_tantrum: {
+    name: "Tyrant's Tantrum",
+    description: 'When you play an attack, gain Strength equal to its cost.',
+  },
+  // Lapras
+  water_absorb: {
+    name: 'Water Absorb',
+    description: 'Immune to Water attacks. Instead, heal for the base damage.',
+  },
+  shell_armor: {
+    name: 'Shell Armor',
+    description: 'No single attack can deal more than 20 damage to you.',
+  },
+  fortifying_aria: {
+    name: 'Fortifying Aria',
+    description: 'At end of round, heal allies for half of your current Block.',
   },
 };
 
@@ -1150,6 +1184,85 @@ export const WEEDLE_PROGRESSION: ProgressionTree = {
   ],
 };
 
+// Magikarp progression tree - weak start, powerful Gyarados evolution
+export const MAGIKARP_PROGRESSION: ProgressionTree = {
+  baseFormId: 'magikarp',
+  rungs: [
+    {
+      level: 1,
+      name: 'Magikarp',
+      description: 'Starting form with Great Leap passive.',
+      passiveId: 'great_leap',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Gyarados',
+      description: 'Evolve to Gyarados (+45 HP). Add Dragon Rage. Gain Intimidate.',
+      evolvesTo: 'gyarados',
+      passiveId: 'intimidate',
+      hpBoost: 0,
+      cardsToAdd: ['dragon-rage'],
+    },
+    {
+      level: 3,
+      name: 'Gyarados',
+      description: '+5 HP. Gain Moxie.',
+      passiveId: 'moxie',
+      hpBoost: 5,
+      cardsToAdd: [],
+    },
+    {
+      level: 4,
+      name: 'Gyarados (Mastered)',
+      description: "Add Dragon Dance. Gain Tyrant's Tantrum.",
+      passiveId: 'tyrants_tantrum',
+      hpBoost: 0,
+      cardsToAdd: ['dragon-dance'],
+    },
+  ],
+};
+
+// Lapras progression tree
+export const LAPRAS_PROGRESSION: ProgressionTree = {
+  baseFormId: 'lapras',
+  rungs: [
+    {
+      level: 1,
+      name: 'Lapras',
+      description: 'Starting form with Water Absorb passive.',
+      passiveId: 'water_absorb',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Lapras',
+      description: '+5 HP. Add Surf. Gain Pressure Hull.',
+      passiveId: 'pressure_hull',
+      hpBoost: 5,
+      cardsToAdd: ['surf'],
+    },
+    {
+      level: 3,
+      name: 'Lapras',
+      description: '+5 HP. Gain Shell Armor.',
+      passiveId: 'shell_armor',
+      hpBoost: 5,
+      cardsToAdd: [],
+    },
+    {
+      level: 4,
+      name: 'Lapras (Mastered)',
+      description: 'Add Blizzard. Gain Fortifying Aria.',
+      passiveId: 'fortifying_aria',
+      hpBoost: 0,
+      cardsToAdd: ['blizzard'],
+    },
+  ],
+};
+
 // All progression trees indexed by base form ID
 export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   charmander: CHARMANDER_PROGRESSION,
@@ -1171,6 +1284,8 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   voltorb: VOLTORB_PROGRESSION,
   caterpie: CATERPIE_PROGRESSION,
   weedle: WEEDLE_PROGRESSION,
+  magikarp: MAGIKARP_PROGRESSION,
+  lapras: LAPRAS_PROGRESSION,
 };
 
 /**
@@ -1225,6 +1340,9 @@ export function getProgressionTree(pokemonId: string): ProgressionTree | null {
   if (pokemonId === 'beedrill') {
     return WEEDLE_PROGRESSION;
   }
+  if (pokemonId === 'gyarados') {
+    return MAGIKARP_PROGRESSION;
+  }
   return null;
 }
 
@@ -1273,6 +1391,9 @@ export function getBaseFormId(pokemonId: string): string {
   }
   if (pokemonId === 'beedrill') {
     return 'weedle';
+  }
+  if (pokemonId === 'gyarados') {
+    return 'magikarp';
   }
   return pokemonId;
 }

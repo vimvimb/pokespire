@@ -90,6 +90,8 @@ export const STARTER_POKEMON: Record<string, PokemonData> = {
   voltorb: POKEMON.voltorb,
   caterpie: POKEMON.caterpie,
   weedle: POKEMON.weedle,
+  magikarp: POKEMON.magikarp,
+  lapras: POKEMON.lapras,
 };
 
 /** Enemy Pokemon */
@@ -122,7 +124,7 @@ export function getMove(id: string): MoveDefinition {
         // Halve all damage-dealing effects
         switch (effect.type) {
           case 'damage':
-            return { ...effect, value: Math.floor(effect.value / 2) };
+            return { ...effect, value: Math.floor(effect.value / 2), ...(effect.bonusValue !== undefined ? { bonusValue: Math.floor(effect.bonusValue / 2) } : {}) };
           case 'multi_hit':
             return { ...effect, value: Math.floor(effect.value / 2) };
           case 'recoil':

@@ -15,6 +15,7 @@ interface Props {
   onDragStart?: (index: number) => void;
   onDragEnd?: () => void;
   draggingIndex?: number | null;
+  unplayableCardIndices?: Set<number>;
 }
 
 const HOVER_SCALE = 1.35;
@@ -22,7 +23,7 @@ const HOVER_LIFT = -30; // px upward
 const NEIGHBOR_SHIFT = 20; // px outward for immediate neighbors
 
 export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDisplay(
-  { combatant, selectedIndex, onSelectCard, onDragStart, onDragEnd, draggingIndex },
+  { combatant, selectedIndex, onSelectCard, onDragStart, onDragEnd, draggingIndex, unplayableCardIndices },
   ref
 ) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -57,7 +58,7 @@ export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDispla
         const card = getMove(cardId);
         // Use centralized cost calculation (includes Quick Feet, Hustle, Inferno Momentum)
         const effectiveCost = getEffectiveCost(combatant, idx);
-        const canAfford = combatant.energy >= effectiveCost;
+        const canAfford = combatant.energy >= effectiveCost && !unplayableCardIndices?.has(idx);
 
         const isDragging = draggingIndex === idx;
 

@@ -308,6 +308,19 @@ export function onDamageDealt(
     logs.push(...auraLogs);
   }
 
+  // Moxie: When you KO an enemy, gain 3 energy
+  if (attacker.passiveIds.includes('moxie') && !target.alive && damageDealt > 0) {
+    const energyGained = Math.min(3, attacker.energyCap - attacker.energy);
+    if (energyGained > 0) {
+      attacker.energy += energyGained;
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `Moxie: ${attacker.name} gains ${energyGained} energy from the KO!`,
+      });
+    }
+  }
+
   // Numbing Strike: Unblocked Electric attacks apply +1 Paralysis
   if (attacker.passiveIds.includes('numbing_strike') && card.type === 'electric' && damageDealt > 0) {
     applyStatus(state, target, 'paralysis', 1, attacker.id);

@@ -1,4 +1,4 @@
-import type { Combatant, CombatState, CombatantSide, Position, Row, Column, MoveRange } from './types';
+import type { Combatant, CombatState, CombatantSide, Position, Row, Column, MoveRange, MoveDefinition } from './types';
 
 // ============================================================
 // Position Helpers — Grid positioning and targeting
@@ -49,6 +49,10 @@ export function getValidTargets(
 ): Combatant[] {
   if (range === 'self') {
     return [source];
+  }
+
+  if (range === 'any_ally') {
+    return state.combatants.filter(c => c.alive && c.side === source.side);
   }
 
   const enemies = state.combatants.filter(c => c.alive && c.side !== source.side);
@@ -122,6 +126,26 @@ export function isValidTarget(
 }
 
 /**
+ * Get valid targets for a card, accounting for effect requirements.
+ * Cleanse-only cards only return targets that have debuffs.
+ */
+export function getCardValidTargets(
+  state: CombatState,
+  source: Combatant,
+  card: MoveDefinition
+): Combatant[] {
+  let targets = getValidTargets(state, source, card.range);
+
+  const isCleansOnly = card.effects.length > 0 && card.effects.every(e => e.type === 'cleanse');
+  if (isCleansOnly) {
+    const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech'];
+    targets = targets.filter(t => t.statuses.some(s => debuffTypes.includes(s.type)));
+  }
+
+  return targets;
+}
+
+/**
  * Get piercing targets: the front target + any Pokemon in the same column behind.
  */
 export function getPiercingTargets(
@@ -188,6 +212,7 @@ export function requiresTargetSelection(range: MoveRange, combatant?: Combatant)
     case 'front_enemy':
     case 'back_enemy':
     case 'any_enemy':
+    case 'any_ally':
     case 'front_row':
     case 'back_row':
     case 'any_row':

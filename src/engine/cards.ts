@@ -190,6 +190,27 @@ export function playCard(
     });
   }
 
+  // Great Leap: When you play Splash, gain 3 Evasion
+  const baseCardIdForSplash = cardId.replace('__parental', '');
+  if (baseCardIdForSplash === 'splash' && combatant.passiveIds.includes('great_leap')) {
+    applyStatus(state, combatant, 'evasion', 3, combatant.id);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Great Leap: ${combatant.name} gains 3 Evasion from Splash!`,
+    });
+  }
+
+  // Tyrant's Tantrum: When you play an attack, gain Strength equal to its cost
+  if (isAttackCard(card) && combatant.passiveIds.includes('tyrants_tantrum') && effectiveCost > 0) {
+    applyStatus(state, combatant, 'strength', effectiveCost, combatant.id);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Tyrant's Tantrum: ${combatant.name} gains ${effectiveCost} Strength!`,
+    });
+  }
+
   // Vanish or discard
   if (card.vanish) {
     // Card is removed from the game — track in vanished pile
@@ -227,6 +248,16 @@ function resolveTargets(
   targetId?: string,
 ): Combatant[] {
   const enemies = state.combatants.filter(c => c.alive && c.side !== source.side);
+
+  if (range === 'any_ally') {
+    const allies = state.combatants.filter(c => c.alive && c.side === source.side);
+    if (targetId) {
+      const target = getCombatant(state, targetId);
+      return [target];
+    }
+    if (allies.length === 1) return [allies[0]];
+    throw new Error('any_ally requires targetId when multiple allies exist');
+  }
 
   if (enemies.length === 0 && range !== 'self') {
     return [];
@@ -599,6 +630,34 @@ function resolveEffects(
 ): EffectResolutionResult {
   const logs: LogEntry[] = [];
   let damageToPoisoned = 0;
+
+  // Water Absorb: Immune to Water-type attacks, heal for base damage instead
+  if (target.passiveIds.includes('water_absorb') && card.type === 'water') {
+    let healBasis = 0;
+    for (const effect of card.effects) {
+      if (effect.type === 'damage' || effect.type === 'recoil' || effect.type === 'heal_on_hit' || effect.type === 'self_ko') {
+        healBasis += effect.value;
+      } else if (effect.type === 'multi_hit') {
+        healBasis += effect.value * effect.hits;
+      }
+    }
+    if (healBasis > 0) {
+      const healed = applyHeal(target, healBasis);
+      logs.push({
+        round: state.round,
+        combatantId: target.id,
+        message: `Water Absorb: ${target.name} heals ${healed} HP! (HP: ${target.hp}/${target.maxHp})`,
+      });
+    } else {
+      logs.push({
+        round: state.round,
+        combatantId: target.id,
+        message: `Water Absorb: ${target.name} is immune to Water attacks!`,
+      });
+    }
+    return { logs, damageToPoisoned: 0 };
+  }
+
   const targetWasPoisoned = isPoisoned(target);  // Check before any damage
 
   for (const effect of card.effects) {
@@ -609,7 +668,15 @@ function resolveEffects(
         // Build all damage modifiers
         const mods = buildDamageModifiers(state, source, target, card, logs, false);
 
-        const r = applyCardDamage(source, target, effect.value, card.type, mods);
+        // Check for bonus damage condition (e.g., Flail)
+        let damageValue = effect.value;
+        if (effect.bonusValue && effect.bonusCondition) {
+          if (effect.bonusCondition === 'user_below_half_hp' && source.hp < source.maxHp * 0.5) {
+            damageValue += effect.bonusValue;
+          }
+        }
+
+        const r = applyCardDamage(source, target, damageValue, card.type, mods);
 
         // Build breakdown string
         const breakdown = buildDamageBreakdown(r);
@@ -1084,26 +1151,28 @@ function resolveEffects(
       }
 
       case 'apply_status_self': {
-        // Apply status to self (source), not target
-        applyStatus(state, source, effect.status, effect.stacks, source.id);
+        // Apply status to self (source), or to target for ally-targeting cards
+        const statusRecipient = card.range === 'any_ally' ? target : source;
+        applyStatus(state, statusRecipient, effect.status, effect.stacks, source.id);
         logs.push({
           round: state.round,
-          combatantId: source.id,
-          message: `${effect.status} ${effect.stacks} applied to ${source.name}.`,
+          combatantId: statusRecipient.id,
+          message: `${effect.status} ${effect.stacks} applied to ${statusRecipient.name}.`,
         });
 
         // Trigger passive effects for status application
         const statusPassiveLogs = onStatusApplied(
-          state, source, source, effect.status, effect.stacks
+          state, source, statusRecipient, effect.status, effect.stacks
         );
         logs.push(...statusPassiveLogs);
         break;
       }
 
       case 'cleanse': {
-        // Remove debuffs from self (highest stacks first)
+        // Remove debuffs (highest stacks first), from target for ally-targeting cards
+        const cleanseRecipient = card.range === 'any_ally' ? target : source;
         const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech'];
-        const debuffs = source.statuses
+        const debuffs = cleanseRecipient.statuses
           .filter(s => debuffTypes.includes(s.type))
           .sort((a, b) => b.stacks - a.stacks);
 
@@ -1111,9 +1180,9 @@ function resolveEffects(
         const removedNames: string[] = [];
 
         for (const debuff of toRemove) {
-          const idx = source.statuses.findIndex(s => s.type === debuff.type);
+          const idx = cleanseRecipient.statuses.findIndex(s => s.type === debuff.type);
           if (idx !== -1) {
-            source.statuses.splice(idx, 1);
+            cleanseRecipient.statuses.splice(idx, 1);
             removedNames.push(`${debuff.type} ${debuff.stacks}`);
           }
         }
@@ -1121,25 +1190,26 @@ function resolveEffects(
         if (removedNames.length > 0) {
           logs.push({
             round: state.round,
-            combatantId: source.id,
-            message: `${source.name} cleanses ${removedNames.join(', ')}!`,
+            combatantId: cleanseRecipient.id,
+            message: `${source.name} cleanses ${removedNames.join(', ')} from ${cleanseRecipient.name}!`,
           });
         } else {
           logs.push({
             round: state.round,
-            combatantId: source.id,
-            message: `${source.name} has no debuffs to cleanse.`,
+            combatantId: cleanseRecipient.id,
+            message: `${cleanseRecipient.name} has no debuffs to cleanse.`,
           });
         }
         break;
       }
 
       case 'block': {
-        source.block += effect.value;
+        const blockRecipient = card.range === 'any_ally' ? target : source;
+        blockRecipient.block += effect.value;
         logs.push({
           round: state.round,
-          combatantId: source.id,
-          message: `${source.name} gains ${effect.value} Block. (Block: ${source.block})`,
+          combatantId: blockRecipient.id,
+          message: `${blockRecipient.name} gains ${effect.value} Block. (Block: ${blockRecipient.block})`,
         });
         break;
       }

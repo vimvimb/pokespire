@@ -37,6 +37,11 @@ export function calculateDamagePreview(
   target: Combatant,
   card: MoveDefinition
 ): DamagePreview | null {
+  // Water Absorb: No damage from Water-type attacks (heals instead)
+  if (target.passiveIds.includes('water_absorb') && card.type === 'water') {
+    return null;
+  }
+
   // Find the first damage-dealing effect
   const damageEffect = card.effects.find(e =>
     e.type === 'damage' || e.type === 'multi_hit' || e.type === 'heal_on_hit' ||
@@ -54,6 +59,14 @@ export function calculateDamagePreview(
 
   switch (damageEffect.type) {
     case 'damage':
+      baseDamage = damageEffect.value;
+      // Check for bonus damage condition (e.g., Flail)
+      if (damageEffect.bonusValue && damageEffect.bonusCondition) {
+        if (damageEffect.bonusCondition === 'user_below_half_hp' && source.hp < source.maxHp * 0.5) {
+          baseDamage += damageEffect.bonusValue;
+        }
+      }
+      break;
     case 'heal_on_hit':
     case 'recoil':
     case 'self_ko':
@@ -119,6 +132,11 @@ export function calculateDamagePreview(
   // Apply defensive reductions
   rawDamage = Math.max(rawDamage - bloomingReduction - staticReduction - thickHideReduction, 0);
   rawDamage = Math.floor(rawDamage * thickFatMultiplier);
+
+  // Shell Armor: Cap damage at 20
+  if (target.passiveIds.includes('shell_armor') && rawDamage > 20) {
+    rawDamage = 20;
+  }
 
   // Calculate evasion reduction
   const evasion = getStatusStacks(target, 'evasion');

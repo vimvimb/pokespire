@@ -650,6 +650,8 @@ const RECRUIT_POOL_ALL = [
   'charmander', 'squirtle', 'bulbasaur', 'pikachu', 'pidgey', 'rattata',
   'ekans', 'tauros', 'snorlax', 'kangaskhan', 'nidoran-m', 'nidoran-f',
   'rhyhorn', 'drowzee', 'growlithe', 'voltorb', 'caterpie', 'weedle',
+  'magikarp',
+  'lapras',
 ];
 
 /** Simple seeded RNG (Lehmer / Park-Miller). Returns value in [0, 1) and next seed. */

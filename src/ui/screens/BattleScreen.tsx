@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import type { CombatState, LogEntry, Combatant, Column, MoveRange } from '../../engine/types';
 import { getCurrentCombatant } from '../../engine/combat';
 import { getMove, MOVES } from '../../data/loaders';
-import { getValidTargets, requiresTargetSelection, isAoERange } from '../../engine/position';
+import { getValidTargets, getCardValidTargets, requiresTargetSelection, isAoERange } from '../../engine/position';
 import { calculateDamagePreview } from '../../engine/preview';
 import type { DamagePreview } from '../../engine/preview';
 import { PokemonSprite } from '../components/PokemonSprite';
@@ -361,7 +361,7 @@ export function BattleScreen({
 
     const cardId = currentCombatant.hand[activeCardIndex];
     const card = getMove(cardId);
-    const validTargets = getValidTargets(state, currentCombatant, card.range);
+    const validTargets = getCardValidTargets(state, currentCombatant, card);
 
     // Calculate damage preview for each valid target
     const previews = new Map<string, DamagePreview | null>();
@@ -586,7 +586,7 @@ export function BattleScreen({
 
     const cardId = currentCombatant.hand[pendingCardIndex];
     const card = getMove(cardId);
-    const validTargets = getValidTargets(state, currentCombatant, card.range);
+    const validTargets = getCardValidTargets(state, currentCombatant, card);
 
     // Check if this range requires manual target selection
     if (!requiresTargetSelection(card.range, currentCombatant)) {
@@ -685,7 +685,7 @@ export function BattleScreen({
 
     const cardId = currentCombatant.hand[pendingCardIndex];
     const card = getMove(cardId);
-    const validTargets = getValidTargets(state, currentCombatant, card.range);
+    const validTargets = getCardValidTargets(state, currentCombatant, card);
 
     // AoE or self - auto-play without target
     if (!requiresTargetSelection(card.range, currentCombatant)) {
@@ -866,12 +866,15 @@ export function BattleScreen({
           <BattleGrid
             combatants={players}
             currentCombatant={currentCombatant}
-            targetableIds={new Set()} // Players targeting allies not implemented yet
+            targetableIds={dragTargetableIds.size > 0 ? dragTargetableIds : targetableIds}
             onSelectTarget={triggerCardFlyAndSelectTarget}
             onInspect={handleInspect}
             side="player"
             spriteScale={spriteScale}
-            // No drag targeting for player side (yet)
+            onDragEnterTarget={handleDragEnterTarget}
+            onDragLeaveTarget={handleDragLeaveTarget}
+            onDropOnTarget={handleDropOnTarget}
+            hoveredTargetIds={affectedHoverIds}
           />
         </div>
 
@@ -1085,6 +1088,16 @@ export function BattleScreen({
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
               draggingIndex={draggingCardIndex}
+              unplayableCardIndices={(() => {
+                const indices = new Set<number>();
+                currentCombatant.hand.forEach((cardId, idx) => {
+                  const card = getMove(cardId);
+                  if (getCardValidTargets(state, currentCombatant, card).length === 0) {
+                    indices.add(idx);
+                  }
+                });
+                return indices;
+              })()}
             />
 
             {/* Energy vessel + End Turn (right of hand) */}
