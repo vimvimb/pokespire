@@ -7,6 +7,7 @@ import {
   createCombatState, getCurrentCombatant, buildTurnOrder,
 } from '../../engine/combat';
 import { startTurn, processAction, endTurn, skipTurnAndAdvance } from '../../engine/turns';
+import { getEffectiveCost } from '../../engine/cards';
 import { drawCards } from '../../engine/deck';
 import { chooseEnemyAction } from '../../engine/ai';
 import type { RunState, BattleNode as MapBattleNode } from '../../run/types';
@@ -457,33 +458,46 @@ export function useBattle(): BattleHook {
     const cardId = combatant.hand[cardIndex];
     if (!cardId) return;
 
-    const actionLogs = processAction(state, {
-      type: 'play_card',
-      cardInstanceId: cardId,
-      targetId,
-    });
-    addLogs(actionLogs);
-    setPendingCardIndex(null);
+    // Guard: don't attempt to play a card we can't afford
+    const cost = getEffectiveCost(combatant, cardIndex);
+    if (combatant.energy < cost) return;
 
-    if (state.phase !== 'ongoing') {
-      setPhase(state.phase === 'victory' ? 'victory' : 'defeat');
+    try {
+      const actionLogs = processAction(state, {
+        type: 'play_card',
+        cardInstanceId: cardId,
+        targetId,
+      });
+      addLogs(actionLogs);
+      setPendingCardIndex(null);
+
+      if (state.phase !== 'ongoing') {
+        setPhase(state.phase === 'victory' ? 'victory' : 'defeat');
+      }
+      setState({ ...state });
+    } catch (error) {
+      console.error('Error playing card:', error);
+      setPendingCardIndex(null);
     }
-    setState({ ...state });
   }, [state, phase, addLogs]);
 
   const switchPosition = useCallback((targetPosition: Position) => {
     if (!state || phase !== 'player_turn') return;
 
-    const actionLogs = processAction(state, {
-      type: 'switch_position',
-      targetPosition,
-    });
-    addLogs(actionLogs);
+    try {
+      const actionLogs = processAction(state, {
+        type: 'switch_position',
+        targetPosition,
+      });
+      addLogs(actionLogs);
 
-    if (state.phase !== 'ongoing') {
-      setPhase(state.phase === 'victory' ? 'victory' : 'defeat');
+      if (state.phase !== 'ongoing') {
+        setPhase(state.phase === 'victory' ? 'victory' : 'defeat');
+      }
+      setState({ ...state });
+    } catch (error) {
+      console.error('Error switching position:', error);
     }
-    setState({ ...state });
   }, [state, phase, addLogs]);
 
   const endPlayerTurn = useCallback(() => {

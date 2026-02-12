@@ -132,7 +132,7 @@ export const ACT1_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
-    x: 0.36, y: 0.43,
+    x: 0.36, y: 0.515,
   },
   {
     id: 's2-battle-duo-2',
@@ -145,7 +145,7 @@ export const ACT1_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
-    x: 0.36, y: 0.53,
+    x: 0.36, y: 0.70,
   },
 
   // ============================================
@@ -169,7 +169,7 @@ export const ACT1_NODES: MapNode[] = [
     completed: false,
     enemies: ['pidgeotto'],
     enemyPositions: [{ row: 'front', column: 1 }],
-    x: 0.47, y: 0.43,
+    x: 0.47, y: 0.515,
   },
   {
     id: 's3-battle-arbok',
@@ -179,7 +179,7 @@ export const ACT1_NODES: MapNode[] = [
     completed: false,
     enemies: ['arbok'],
     enemyPositions: [{ row: 'front', column: 1 }],
-    x: 0.47, y: 0.53,
+    x: 0.47, y: 0.70,
   },
 
   // ============================================
@@ -192,7 +192,7 @@ export const ACT1_NODES: MapNode[] = [
     connectsTo: ['s4-rest', 's4-battle-combo'],
     completed: false,
     eventType: 'train',
-    x: 0.47, y: 0.14,
+    x: 0.44, y: 0.14,
   },
   {
     id: 's3-event-meditate',
@@ -201,7 +201,7 @@ export const ACT1_NODES: MapNode[] = [
     connectsTo: ['s4-battle-evolved'],
     completed: false,
     eventType: 'meditate',
-    x: 0.47, y: 0.84,
+    x: 0.41, y: 0.90,
   },
 
   // ============================================
@@ -226,7 +226,7 @@ export const ACT1_NODES: MapNode[] = [
     connectsTo: ['s5-battle-tauros'],
     completed: false,
     eventType: 'train',  // Placeholder — randomized per run in createRunState
-    x: 0.57, y: 0.14,
+    x: 0.60, y: 0.14,
   },
   {
     id: 's4-battle-combo',
@@ -239,7 +239,7 @@ export const ACT1_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
-    x: 0.57, y: 0.43,
+    x: 0.57, y: 0.515,
   },
   {
     id: 's4-battle-evolved',
@@ -252,7 +252,7 @@ export const ACT1_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
-    x: 0.57, y: 0.53,
+    x: 0.57, y: 0.70,
   },
   {
     id: 's4-event-forget',
@@ -261,7 +261,7 @@ export const ACT1_NODES: MapNode[] = [
     connectsTo: ['s5-battle-pidgeot', 's5-battle-snorlax', 's5-battle-kangaskhan'],
     completed: false,
     eventType: 'forget',
-    x: 0.57, y: 0.84,
+    x: 0.60, y: 0.90,
   },
 
   // ============================================
@@ -310,7 +310,7 @@ export const ACT1_NODES: MapNode[] = [
     completed: false,
     enemies: ['pidgeot'],
     enemyPositions: [{ row: 'front', column: 1 }],
-    x: 0.68, y: 0.40,
+    x: 0.68, y: 0.45,
   },
   {
     id: 's5-battle-snorlax',
@@ -320,7 +320,7 @@ export const ACT1_NODES: MapNode[] = [
     completed: false,
     enemies: ['snorlax'],
     enemyPositions: [{ row: 'front', column: 1 }],
-    x: 0.68, y: 0.48,
+    x: 0.68, y: 0.58,
   },
   {
     id: 's5-battle-kangaskhan',
@@ -330,7 +330,7 @@ export const ACT1_NODES: MapNode[] = [
     completed: false,
     enemies: ['kangaskhan'],
     enemyPositions: [{ row: 'front', column: 1 }],
-    x: 0.68, y: 0.56,
+    x: 0.68, y: 0.70,
   },
   {
     id: 's5-rest',
@@ -505,7 +505,7 @@ export const ACT2_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
-    x: 0.36, y: 0.44,
+    x: 0.36, y: 0.56,
   },
   {
     id: 'a2-s2-battle-2',
@@ -516,7 +516,7 @@ export const ACT2_NODES: MapNode[] = [
     enemies: ['snorlax'],
     enemyPositions: [{ row: 'front', column: 1 }],
     enemyHpMultiplier: 1.2,
-    x: 0.36, y: 0.54,
+    x: 0.36, y: 0.76,
   },
 
   // ============================================
@@ -561,7 +561,7 @@ export const ACT2_NODES: MapNode[] = [
       { row: 'front', column: 1 },
       { row: 'front', column: 2 },
     ],
-    x: 0.48, y: 0.54,
+    x: 0.48, y: 0.76,
   },
 
   // ============================================
@@ -574,7 +574,7 @@ export const ACT2_NODES: MapNode[] = [
     connectsTo: ['a2-s4-battle-1', 'a2-s4-battle-2'],
     completed: false,
     eventType: 'train',  // Placeholder — randomized per run in transitionToAct2
-    x: 0.48, y: 0.12,
+    x: 0.44, y: 0.12,
   },
 
   // ============================================
@@ -587,7 +587,7 @@ export const ACT2_NODES: MapNode[] = [
     connectsTo: ['a2-s4-battle-2', 'a2-s4-battle-3'],
     completed: false,
     eventType: 'meditate',
-    x: 0.48, y: 0.84,
+    x: 0.48, y: 0.90,
   },
 
   // ============================================
@@ -597,7 +597,7 @@ export const ACT2_NODES: MapNode[] = [
     id: 'a2-s4-battle-1',
     type: 'battle',
     stage: 4,
-    connectsTo: ['a2-s5-battle-1', 'a2-s5-battle-2'],
+    connectsTo: ['a2-s5-battle-1', 'a2-s5-battle-2', 'detour-a2-tr-event'],
     completed: false,
     enemies: ['pidgeot', 'kangaskhan'],
     enemyPositions: [
@@ -607,6 +607,20 @@ export const ACT2_NODES: MapNode[] = [
     enemyHpMultiplier: 1.2,
     x: 0.60, y: 0.34,
   },
+
+  // ============================================
+  // Top-Right Detour (train event from a2-s4-battle-1)
+  // ============================================
+  {
+    id: 'detour-a2-tr-event',
+    type: 'event',
+    stage: 4,
+    connectsTo: ['a2-s5-battle-1', 'a2-s5-battle-2'],
+    completed: false,
+    eventType: 'train',
+    x: 0.60, y: 0.12,
+  },
+
   {
     id: 'a2-s4-battle-2',
     type: 'battle',
@@ -633,7 +647,7 @@ export const ACT2_NODES: MapNode[] = [
       { row: 'front', column: 2 },
     ],
     enemyHpMultiplier: 1.2,
-    x: 0.60, y: 0.54,
+    x: 0.60, y: 0.76,
   },
 
   // ============================================
@@ -646,7 +660,7 @@ export const ACT2_NODES: MapNode[] = [
     connectsTo: ['a2-s5-battle-2', 'a2-s5-battle-3'],
     completed: false,
     eventType: 'forget',
-    x: 0.60, y: 0.84,
+    x: 0.60, y: 0.90,
   },
 
   // ============================================
@@ -678,7 +692,7 @@ export const ACT2_NODES: MapNode[] = [
       { row: 'front', column: 2 },
     ],
     enemyHpMultiplier: 1.2,
-    x: 0.72, y: 0.44,
+    x: 0.72, y: 0.56,
   },
   {
     id: 'a2-s5-battle-3',
@@ -692,7 +706,7 @@ export const ACT2_NODES: MapNode[] = [
       { row: 'front', column: 2 },
     ],
     enemyHpMultiplier: 1.2,
-    x: 0.72, y: 0.54,
+    x: 0.72, y: 0.76,
   },
 
   // ============================================
@@ -730,7 +744,7 @@ export const ACT2_NODES: MapNode[] = [
     stage: 5,
     connectsTo: ['a2-s6-boss-mewtwo'],
     completed: false,
-    x: 0.82, y: 0.84,
+    x: 0.90, y: 0.66,
   },
 
   // ============================================

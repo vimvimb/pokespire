@@ -23,6 +23,7 @@ import { getPokemon } from './data/loaders';
 import { SHOP_ITEMS, CARD_FORGET_COST } from './data/shop';
 import {
   createRunState,
+  createAct2TestState,
   applyPartyPercentHeal,
   applyFullHealAll,
   applyMaxHpBoost,
@@ -489,7 +490,13 @@ export default function App() {
     setScreen('map');
   }, []);
 
-  // Restart to main menu
+  // Return to main menu (preserves save)
+  const handleMainMenu = useCallback(() => {
+    setScreen('main_menu');
+    setHasSavedGame(!!runState);
+  }, [runState]);
+
+  // Abandon run and return to main menu (clears save)
   const handleRestart = useCallback(() => {
     clearSave();
     setHasSavedGame(false);
@@ -500,6 +507,14 @@ export default function App() {
   // Go to sandbox configuration screen
   const handleGoToSandbox = useCallback(() => {
     setScreen('sandbox_config');
+  }, []);
+
+  // Start a test run at Act 2 with a leveled party
+  const handleTestAct2 = useCallback(() => {
+    clearSave();
+    const run = createAct2TestState();
+    setRunState(run);
+    setScreen('map');
   }, []);
 
   // Start a configured sandbox battle
@@ -651,6 +666,20 @@ export default function App() {
           >
             Card Dex
           </button>
+          <button
+            onClick={handleTestAct2}
+            onMouseEnter={hoverIn}
+            onMouseLeave={(e) => hoverOut(e, true)}
+            style={{
+              ...secondaryMenuStyle,
+              marginTop: 16,
+              fontSize: 14,
+              color: THEME.text.tertiary,
+              opacity: 0.6,
+            }}
+          >
+            Test Act 2
+          </button>
         </div>
         <div style={{
           fontSize: 14,
@@ -699,7 +728,7 @@ if (screen === 'select') {
         onRearrange={handleRearrange}
         onPurchase={handlePurchase}
         onForgetCard={handleForgetCard}
-        onRestart={handleRestart}
+        onRestart={handleMainMenu}
       />
     );
   }
@@ -709,7 +738,7 @@ if (screen === 'select') {
       <RestScreen
         run={runState}
         onHeal={handleRestHeal}
-        onRestart={handleRestart}
+        onRestart={handleMainMenu}
       />
     );
   }
@@ -724,7 +753,7 @@ if (screen === 'select') {
         onTrain={handleEventTrain}
         onMeditate={handleEventMeditate}
         onForget={handleEventForget}
-        onRestart={handleRestart}
+        onRestart={handleMainMenu}
       />
     );
   }
@@ -740,7 +769,7 @@ if (screen === 'select') {
           onStartFight={handleRecruitFight}
           onRecruit={handleRecruitConfirm}
           onDecline={handleRecruitDecline}
-          onRestart={handleRestart}
+          onRestart={handleMainMenu}
         />
       );
     }
@@ -754,7 +783,7 @@ if (screen === 'select') {
       <CardDraftScreen
         run={runState}
         onDraftComplete={handleDraftComplete}
-        onRestart={handleRestart}
+        onRestart={handleMainMenu}
         goldEarned={lastGoldEarned}
       />
     );
@@ -772,7 +801,7 @@ if (screen === 'select') {
         onPlayCard={handlePlayCard}
         onEndTurn={battle.endPlayerTurn}
         onSwitchPosition={battle.switchPosition}
-        onRestart={handleRestart}
+        onRestart={handleMainMenu}
         onBattleEnd={handleBattleEnd}
         runState={runState ?? undefined}
         onBackToSandboxConfig={isSandboxBattle ? handleBackToSandboxConfig : undefined}
@@ -785,7 +814,7 @@ if (screen === 'select') {
       <ActTransitionScreen
         run={runState}
         onContinue={handleActTransitionContinue}
-        onRestart={handleRestart}
+        onRestart={handleMainMenu}
       />
     );
   }
@@ -799,7 +828,7 @@ if (screen === 'select') {
           node={cardRemovalNode}
           onComplete={handleCardRemovalComplete}
           onSkip={handleCardRemovalSkip}
-          onRestart={handleRestart}
+          onRestart={handleMainMenu}
         />
       );
     }

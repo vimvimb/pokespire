@@ -46,6 +46,17 @@ export function MapTooltip({ node, position, mapBounds, actConfig }: Props) {
       fontSize: 13,
     }}>
       {renderContent(node, actConfig)}
+      <div style={{
+        marginTop: 6,
+        paddingTop: 4,
+        borderTop: `1px solid ${THEME.border.subtle}`,
+        fontSize: 10,
+        color: THEME.text.tertiary,
+        fontFamily: 'monospace',
+        opacity: 0.6,
+      }}>
+        {node.id}
+      </div>
     </div>
   );
 }

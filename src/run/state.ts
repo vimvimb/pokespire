@@ -208,6 +208,38 @@ export function transitionToAct2(run: RunState): RunState {
 }
 
 /**
+ * Create a test run state that starts at Act 2 with a leveled, healthy party.
+ * Used for dev testing only.
+ */
+export function createAct2TestState(): RunState {
+  const starters = ['charmander', 'squirtle', 'bulbasaur', 'pikachu'];
+  const positions: Position[] = [
+    { row: 'front', column: 0 },
+    { row: 'front', column: 2 },
+    { row: 'back', column: 0 },
+    { row: 'back', column: 2 },
+  ];
+
+  const party = starters.map(id => getPokemon(id));
+  let run = createRunState(party, positions, Date.now(), 300);
+
+  // Give enough EXP for 2 level-ups (level 3) and apply them
+  run = {
+    ...run,
+    party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL * 2 })),
+  };
+  for (let lvl = 0; lvl < 2; lvl++) {
+    for (let i = 0; i < run.party.length; i++) {
+      run = applyLevelUp(run, i);
+    }
+  }
+
+  // Full heal and transition to Act 2
+  run = applyFullHealAll(run);
+  return transitionToAct2(run);
+}
+
+/**
  * Get the current act transition node (if at one).
  */
 export function getCurrentActTransitionNode(run: RunState): ActTransitionNode | null {
