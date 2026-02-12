@@ -10,7 +10,7 @@ import type { MapNode } from './types';
  * - Stage 3: Center room (evolved battles) + events (train, meditate)
  * - Stage 4: Harder battles + forget event + top-right recruit detour (TR)
  * - Stage 5: Pre-boss mini-bosses + train event
- * - Stage 6: Giovanni Boss Fight (Persian, Nidoking, Rhydon)
+ * - Stage 6: Ariana Boss Fight (Arbok, Raticate, Hypno)
  *
  * Corner detour mechanic: junction → battle → recruit → backtrack to main path
  * After visiting a recruit node, the player rejoins the main path at the same
@@ -281,7 +281,7 @@ export const ACT1_NODES: MapNode[] = [
     id: 'detour-tr-recruit',
     type: 'recruit',
     stage: 4,
-    connectsTo: ['s6-boss-giovanni'],
+    connectsTo: ['s6-boss-ariana'],
     completed: false,
     pokemonId: '',
     recruited: false,
@@ -296,7 +296,7 @@ export const ACT1_NODES: MapNode[] = [
     id: 's5-battle-tauros',
     type: 'battle',
     stage: 5,
-    connectsTo: ['s6-boss-giovanni', 'detour-tr-battle'],
+    connectsTo: ['s6-boss-ariana', 'detour-tr-battle'],
     completed: false,
     enemies: ['tauros'],
     enemyPositions: [{ row: 'front', column: 1 }],
@@ -306,7 +306,7 @@ export const ACT1_NODES: MapNode[] = [
     id: 's5-battle-pidgeot',
     type: 'battle',
     stage: 5,
-    connectsTo: ['s6-boss-giovanni'],
+    connectsTo: ['s6-boss-ariana'],
     completed: false,
     enemies: ['pidgeot'],
     enemyPositions: [{ row: 'front', column: 1 }],
@@ -316,7 +316,7 @@ export const ACT1_NODES: MapNode[] = [
     id: 's5-battle-snorlax',
     type: 'battle',
     stage: 5,
-    connectsTo: ['s6-boss-giovanni'],
+    connectsTo: ['s6-boss-ariana'],
     completed: false,
     enemies: ['snorlax'],
     enemyPositions: [{ row: 'front', column: 1 }],
@@ -326,7 +326,7 @@ export const ACT1_NODES: MapNode[] = [
     id: 's5-battle-kangaskhan',
     type: 'battle',
     stage: 5,
-    connectsTo: ['s6-boss-giovanni', 's5-rest'],
+    connectsTo: ['s6-boss-ariana', 's5-rest'],
     completed: false,
     enemies: ['kangaskhan'],
     enemyPositions: [{ row: 'front', column: 1 }],
@@ -336,21 +336,21 @@ export const ACT1_NODES: MapNode[] = [
     id: 's5-rest',
     type: 'rest',
     stage: 5,
-    connectsTo: ['s6-boss-giovanni'],
+    connectsTo: ['s6-boss-ariana'],
     completed: false,
     x: 0.80, y: 0.78,
   },
 
   // ============================================
-  // Stage 6: Giovanni Boss Fight
+  // Stage 6: Ariana Boss Fight
   // ============================================
   {
-    id: 's6-boss-giovanni',
+    id: 's6-boss-ariana',
     type: 'battle',
     stage: 6,
     connectsTo: ['act1-complete'],
     completed: false,
-    enemies: ['persian', 'nidoking', 'rhydon'],
+    enemies: ['arbok', 'raticate', 'hypno'],
     enemyPositions: [
       { row: 'front', column: 0 },
       { row: 'front', column: 1 },
@@ -384,7 +384,7 @@ export const ACT1_NODES: MapNode[] = [
  * - Stage 3: Center crater (scaled battles) + events (top-center random, bottom meditate)
  * - Stage 4: Right-center (harder battles) + forget event
  * - Stage 5: Pre-boss mini-bosses + TR recruit detour + BR rest
- * - Stage 6: Mewtwo Final Boss
+ * - Stage 6: Giovanni Boss Fight
  *
  * Corner detour mechanic: junction → battle → recruit → backtrack to main path
  * Perimeter event detours: battle → event → backtrack to main path
@@ -670,7 +670,7 @@ export const ACT2_NODES: MapNode[] = [
     id: 'a2-s5-battle-1',
     type: 'battle',
     stage: 5,
-    connectsTo: ['a2-s6-boss-mewtwo', 'detour-a2-tr-battle'],
+    connectsTo: ['a2-s6-boss-giovanni', 'detour-a2-tr-battle'],
     completed: false,
     enemies: ['snorlax', 'tauros', 'kangaskhan'],
     enemyPositions: [
@@ -684,7 +684,7 @@ export const ACT2_NODES: MapNode[] = [
     id: 'a2-s5-battle-2',
     type: 'battle',
     stage: 5,
-    connectsTo: ['a2-s6-boss-mewtwo'],
+    connectsTo: ['a2-s6-boss-giovanni'],
     completed: false,
     enemies: ['pidgeot', 'kangaskhan'],
     enemyPositions: [
@@ -698,7 +698,7 @@ export const ACT2_NODES: MapNode[] = [
     id: 'a2-s5-battle-3',
     type: 'battle',
     stage: 5,
-    connectsTo: ['a2-s6-boss-mewtwo', 'a2-s5-rest'],
+    connectsTo: ['a2-s6-boss-giovanni', 'a2-s5-rest'],
     completed: false,
     enemies: ['snorlax', 'pidgeot'],
     enemyPositions: [
@@ -727,7 +727,7 @@ export const ACT2_NODES: MapNode[] = [
     id: 'detour-a2-tr-recruit',
     type: 'recruit',
     stage: 5,
-    connectsTo: ['a2-s6-boss-mewtwo'],
+    connectsTo: ['a2-s6-boss-giovanni'],
     completed: false,
     pokemonId: '',
     recruited: false,
@@ -742,23 +742,306 @@ export const ACT2_NODES: MapNode[] = [
     id: 'a2-s5-rest',
     type: 'rest',
     stage: 5,
-    connectsTo: ['a2-s6-boss-mewtwo'],
+    connectsTo: ['a2-s6-boss-giovanni'],
     completed: false,
     x: 0.90, y: 0.66,
+  },
+
+  // ============================================
+  // Stage 6: Giovanni Boss Fight
+  // ============================================
+  {
+    id: 'a2-s6-boss-giovanni',
+    type: 'battle',
+    stage: 6,
+    connectsTo: ['a2-act2-complete'],
+    completed: false,
+    enemies: ['persian', 'nidoking', 'rhydon'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+    ],
+    x: 0.90, y: 0.44,
+    size: 'large',
+  },
+
+  // ============================================
+  // Act Transition Node
+  // ============================================
+  {
+    id: 'a2-act2-complete',
+    type: 'act_transition',
+    stage: 7,
+    connectsTo: [],
+    completed: false,
+    nextAct: 3,
+    x: 0.97, y: 0.44,
+  },
+];
+
+/**
+ * Act 3 Branching Map — Underground Caverns
+ *
+ * Structure (~20 nodes, diamond branching pattern):
+ * - Stage 0: Spawn
+ * - Stage 1: First split (2 battles, evolved Pokemon)
+ * - Stage 2: 2 battles + 1 rest
+ * - Stage 3: 3 battles (3-4 enemies, 1.15x HP)
+ * - Stage 4: 2 battles + 1 train event (3-4 enemies, 1.2x HP)
+ * - Stage 5: 3 battles + 1 rest (3-4 enemies, 1.25x HP)
+ * - Stage 6: Mewtwo Final Boss
+ */
+
+export const ACT3_NODES: MapNode[] = [
+  // ============================================
+  // Stage 0: Spawn
+  // ============================================
+  {
+    id: 'a3-s0-spawn',
+    type: 'spawn',
+    stage: 0,
+    connectsTo: ['a3-s1-battle-1', 'a3-s1-battle-2'],
+    completed: false,
+    x: 0.05, y: 0.44,
+  },
+
+  // ============================================
+  // Stage 1: First Split (evolved Pokemon)
+  // ============================================
+  {
+    id: 'a3-s1-battle-1',
+    type: 'battle',
+    stage: 1,
+    connectsTo: ['a3-s2-battle-1', 'a3-s2-rest'],
+    completed: false,
+    enemies: ['arcanine', 'nidoking', 'sandslash'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+    ],
+    x: 0.18, y: 0.30,
+  },
+  {
+    id: 'a3-s1-battle-2',
+    type: 'battle',
+    stage: 1,
+    connectsTo: ['a3-s2-rest', 'a3-s2-battle-2'],
+    completed: false,
+    enemies: ['gyarados', 'nidoqueen', 'fearow'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+    ],
+    x: 0.18, y: 0.58,
+  },
+
+  // ============================================
+  // Stage 2: Mid-early (2 battles + 1 rest)
+  // ============================================
+  {
+    id: 'a3-s2-battle-1',
+    type: 'battle',
+    stage: 2,
+    connectsTo: ['a3-s3-battle-1', 'a3-s3-battle-2'],
+    completed: false,
+    enemies: ['rhydon', 'electrode', 'hypno'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+    ],
+    x: 0.30, y: 0.24,
+  },
+  {
+    id: 'a3-s2-rest',
+    type: 'rest',
+    stage: 2,
+    connectsTo: ['a3-s3-battle-2'],
+    completed: false,
+    x: 0.30, y: 0.44,
+  },
+  {
+    id: 'a3-s2-battle-2',
+    type: 'battle',
+    stage: 2,
+    connectsTo: ['a3-s3-battle-2', 'a3-s3-battle-3'],
+    completed: false,
+    enemies: ['dragonair', 'lapras', 'pidgeot'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+    ],
+    x: 0.30, y: 0.64,
+  },
+
+  // ============================================
+  // Stage 3: Center (3 battles, 3-4 enemies, 1.15x HP)
+  // ============================================
+  {
+    id: 'a3-s3-battle-1',
+    type: 'battle',
+    stage: 3,
+    connectsTo: ['a3-s4-battle-1', 'a3-s4-event-train'],
+    completed: false,
+    enemies: ['nidoking', 'nidoqueen', 'arcanine'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+    ],
+    enemyHpMultiplier: 1.15,
+    x: 0.42, y: 0.24,
+  },
+  {
+    id: 'a3-s3-battle-2',
+    type: 'battle',
+    stage: 3,
+    connectsTo: ['a3-s4-battle-1', 'a3-s4-battle-2'],
+    completed: false,
+    enemies: ['snorlax', 'kangaskhan', 'lapras', 'hypno'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+      { row: 'back', column: 1 },
+    ],
+    enemyHpMultiplier: 1.15,
+    x: 0.42, y: 0.44,
+  },
+  {
+    id: 'a3-s3-battle-3',
+    type: 'battle',
+    stage: 3,
+    connectsTo: ['a3-s4-battle-2', 'a3-s4-event-train'],
+    completed: false,
+    enemies: ['gyarados', 'dragonair', 'rhydon'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+    ],
+    enemyHpMultiplier: 1.15,
+    x: 0.42, y: 0.64,
+  },
+
+  // ============================================
+  // Stage 4: Harder (2 battles + 1 train event, 1.2x HP)
+  // ============================================
+  {
+    id: 'a3-s4-battle-1',
+    type: 'battle',
+    stage: 4,
+    connectsTo: ['a3-s5-battle-1', 'a3-s5-battle-2'],
+    completed: false,
+    enemies: ['dragonite', 'arcanine', 'nidoking'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+    ],
+    enemyHpMultiplier: 1.2,
+    x: 0.55, y: 0.30,
+  },
+  {
+    id: 'a3-s4-event-train',
+    type: 'event',
+    stage: 4,
+    connectsTo: ['a3-s5-battle-2'],
+    completed: false,
+    eventType: 'train',
+    x: 0.55, y: 0.44,
+  },
+  {
+    id: 'a3-s4-battle-2',
+    type: 'battle',
+    stage: 4,
+    connectsTo: ['a3-s5-battle-2', 'a3-s5-battle-3'],
+    completed: false,
+    enemies: ['gyarados', 'lapras', 'electrode', 'sandslash'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+      { row: 'back', column: 1 },
+    ],
+    enemyHpMultiplier: 1.2,
+    x: 0.55, y: 0.58,
+  },
+
+  // ============================================
+  // Stage 5: Pre-Boss (3 battles + 1 rest, 1.25x HP)
+  // ============================================
+  {
+    id: 'a3-s5-battle-1',
+    type: 'battle',
+    stage: 5,
+    connectsTo: ['a3-s6-boss-mewtwo'],
+    completed: false,
+    enemies: ['dragonite', 'snorlax', 'kangaskhan'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+    ],
+    enemyHpMultiplier: 1.25,
+    x: 0.68, y: 0.26,
+  },
+  {
+    id: 'a3-s5-battle-2',
+    type: 'battle',
+    stage: 5,
+    connectsTo: ['a3-s6-boss-mewtwo', 'a3-s5-rest'],
+    completed: false,
+    enemies: ['nidoking', 'nidoqueen', 'arcanine', 'rhydon'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+      { row: 'back', column: 1 },
+    ],
+    enemyHpMultiplier: 1.25,
+    x: 0.68, y: 0.44,
+  },
+  {
+    id: 'a3-s5-battle-3',
+    type: 'battle',
+    stage: 5,
+    connectsTo: ['a3-s6-boss-mewtwo'],
+    completed: false,
+    enemies: ['gyarados', 'dragonite', 'lapras'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 1 },
+      { row: 'front', column: 2 },
+    ],
+    enemyHpMultiplier: 1.25,
+    x: 0.68, y: 0.62,
+  },
+  {
+    id: 'a3-s5-rest',
+    type: 'rest',
+    stage: 5,
+    connectsTo: ['a3-s6-boss-mewtwo'],
+    completed: false,
+    x: 0.80, y: 0.58,
   },
 
   // ============================================
   // Stage 6: Mewtwo Final Boss
   // ============================================
   {
-    id: 'a2-s6-boss-mewtwo',
+    id: 'a3-s6-boss-mewtwo',
     type: 'battle',
     stage: 6,
     connectsTo: [],
     completed: false,
     enemies: ['mewtwo'],
     enemyPositions: [{ row: 'front', column: 1 }],
-    x: 0.90, y: 0.44,
+    x: 0.88, y: 0.44,
     size: 'large',
   },
 ];
@@ -788,5 +1071,7 @@ export function getMaxStage(nodes: MapNode[]): number {
  * Get nodes for a specific act
  */
 export function getNodesForAct(act: number): MapNode[] {
-  return act === 1 ? ACT1_NODES : ACT2_NODES;
+  if (act === 1) return ACT1_NODES;
+  if (act === 2) return ACT2_NODES;
+  return ACT3_NODES;
 }

@@ -19,8 +19,10 @@ import {
   getRunPokemonData,
   applyFullHealAll,
   transitionToAct2,
+  transitionToAct3,
   isRunComplete,
   isAct1Complete,
+  isAct2Complete,
 } from '../run/state';
 import { createCombatState, getCurrentCombatant } from './combat';
 import { startTurn, processAction, endTurn } from './turns';
@@ -63,7 +65,7 @@ export interface SimulationSummary {
   defeats: number;
   errors: number;
   averageBattlesBeforeDefeat: number;
-  defeatsByAct: { act1: number; act2: number };
+  defeatsByAct: { act1: number; act2: number; act3: number };
   results: SimulationResult[];
 }
 
@@ -609,9 +611,13 @@ function simulateSingleRun(
           run = applyFullHealAll(run);
           run = transitionToAct2(run);
           result.finalAct = 2;
-        } else if (run.currentAct === 2 && isRunComplete(run)) {
+        } else if (run.currentAct === 2 && isAct2Complete(run)) {
+          run = applyFullHealAll(run);
+          run = transitionToAct3(run);
+          result.finalAct = 3;
+        } else if (run.currentAct === 3 && isRunComplete(run)) {
           result.outcome = 'victory';
-          result.finalAct = 2;
+          result.finalAct = 3;
           break;
         }
 
@@ -642,8 +648,13 @@ function simulateSingleRun(
 
       } else if (nextNode.type === 'act_transition') {
         // Handled after boss battle
-        run = transitionToAct2(run);
-        result.finalAct = 2;
+        if (run.currentAct === 1) {
+          run = transitionToAct2(run);
+          result.finalAct = 2;
+        } else if (run.currentAct === 2) {
+          run = transitionToAct3(run);
+          result.finalAct = 3;
+        }
 
       } else if (nextNode.type === 'spawn') {
         // Just move on
@@ -717,6 +728,7 @@ export function runSimulation(config?: Partial<SimulationConfig>): SimulationSum
 
   const act1Defeats = defeatResults.filter(r => r.defeatedAtAct === 1).length;
   const act2Defeats = defeatResults.filter(r => r.defeatedAtAct === 2).length;
+  const act3Defeats = defeatResults.filter(r => r.defeatedAtAct === 3).length;
 
   const summary: SimulationSummary = {
     totalRuns: fullConfig.numRuns,
@@ -724,7 +736,7 @@ export function runSimulation(config?: Partial<SimulationConfig>): SimulationSum
     defeats,
     errors,
     averageBattlesBeforeDefeat: avgBattles,
-    defeatsByAct: { act1: act1Defeats, act2: act2Defeats },
+    defeatsByAct: { act1: act1Defeats, act2: act2Defeats, act3: act3Defeats },
     results,
   };
 
@@ -741,6 +753,7 @@ export function runSimulation(config?: Partial<SimulationConfig>): SimulationSum
   console.log(`\nDefeat breakdown:`);
   console.log(`  Act 1: ${summary.defeatsByAct.act1}`);
   console.log(`  Act 2: ${summary.defeatsByAct.act2}`);
+  console.log(`  Act 3: ${summary.defeatsByAct.act3}`);
   console.log(`  Avg battles before defeat: ${summary.averageBattlesBeforeDefeat.toFixed(1)}`);
   console.log(`========================================\n`);
 

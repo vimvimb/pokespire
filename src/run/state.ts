@@ -2,7 +2,7 @@ import type { PokemonData, Position, Column, Row, Combatant } from '../engine/ty
 import type { RunState, RunPokemon, MapNode, BattleNode, ActTransitionNode, CardRemovalNode, EventType } from './types';
 import { getPokemon, getMove } from '../data/loaders';
 import { STARTING_GOLD } from '../data/shop';
-import { ACT1_NODES, ACT2_NODES, getNodeById } from './nodes';
+import { ACT1_NODES, ACT2_NODES, ACT3_NODES, getNodeById } from './nodes';
 import {
   getProgressionTree,
   getRungForLevel,
@@ -148,20 +148,29 @@ export function moveToNode(run: RunState, nodeId: string): RunState {
 }
 
 /**
- * Check if the run is complete (Mewtwo defeated in Act 2).
+ * Check if the run is complete (Mewtwo defeated in Act 3).
  */
 export function isRunComplete(run: RunState): boolean {
-  if (run.currentAct !== 2) return false;
-  const mewtwoNode = run.nodes.find(n => n.id === 'a2-s6-boss-mewtwo');
+  if (run.currentAct !== 3) return false;
+  const mewtwoNode = run.nodes.find(n => n.id === 'a3-s6-boss-mewtwo');
   return mewtwoNode?.completed ?? false;
 }
 
 /**
- * Check if Act 1 is complete (Giovanni defeated).
+ * Check if Act 1 is complete (Ariana defeated).
  */
 export function isAct1Complete(run: RunState): boolean {
   if (run.currentAct !== 1) return false;
-  const giovanniNode = run.nodes.find(n => n.id === 's6-boss-giovanni');
+  const arianaNode = run.nodes.find(n => n.id === 's6-boss-ariana');
+  return arianaNode?.completed ?? false;
+}
+
+/**
+ * Check if Act 2 is complete (Giovanni defeated).
+ */
+export function isAct2Complete(run: RunState): boolean {
+  if (run.currentAct !== 2) return false;
+  const giovanniNode = run.nodes.find(n => n.id === 'a2-s6-boss-giovanni');
   return giovanniNode?.completed ?? false;
 }
 
@@ -237,6 +246,66 @@ export function createAct2TestState(): RunState {
   // Full heal and transition to Act 2
   run = applyFullHealAll(run);
   return transitionToAct2(run);
+}
+
+/**
+ * Transition to Act 3 - preserves party, resets nodes to Act 3 map.
+ * Note: Party is healed before showing the transition screen.
+ */
+export function transitionToAct3(run: RunState): RunState {
+  // Deep copy Act 3 nodes
+  let act3Nodes: MapNode[] = ACT3_NODES.map(node => ({ ...node }));
+
+  // Mark spawn as completed
+  const spawnNode = act3Nodes.find(n => n.type === 'spawn');
+  if (spawnNode) {
+    spawnNode.completed = true;
+  }
+
+  // No recruits in Act 3
+
+  // Randomize event types for detour events
+  act3Nodes = assignRandomEventTypes(act3Nodes, run.seed + 200000);
+
+  return {
+    ...run,
+    currentAct: 3,
+    currentNodeId: 'a3-s0-spawn',
+    visitedNodeIds: ['a3-s0-spawn'],
+    nodes: act3Nodes,
+  };
+}
+
+/**
+ * Create a test run state that starts at Act 3 with a leveled, healthy party.
+ * Used for dev testing only.
+ */
+export function createAct3TestState(): RunState {
+  const starters = ['charmander', 'squirtle', 'bulbasaur', 'pikachu'];
+  const positions: Position[] = [
+    { row: 'front', column: 0 },
+    { row: 'front', column: 2 },
+    { row: 'back', column: 0 },
+    { row: 'back', column: 2 },
+  ];
+
+  const party = starters.map(id => getPokemon(id));
+  let run = createRunState(party, positions, Date.now(), 500);
+
+  // Give enough EXP for 3 level-ups (level 4) and apply them
+  run = {
+    ...run,
+    party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL * 3 })),
+  };
+  for (let lvl = 0; lvl < 3; lvl++) {
+    for (let i = 0; i < run.party.length; i++) {
+      run = applyLevelUp(run, i);
+    }
+  }
+
+  // Full heal and transition to Act 3
+  run = applyFullHealAll(run);
+  return transitionToAct3(run);
 }
 
 /**

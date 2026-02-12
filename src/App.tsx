@@ -24,6 +24,7 @@ import { SHOP_ITEMS, CARD_FORGET_COST } from './data/shop';
 import {
   createRunState,
   createAct2TestState,
+  createAct3TestState,
   applyPartyPercentHeal,
   applyFullHealAll,
   applyMaxHpBoost,
@@ -34,9 +35,11 @@ import {
   moveToNode,
   isRunComplete,
   isAct1Complete,
+  isAct2Complete,
   getCurrentNode,
   applyLevelUp,
   transitionToAct2,
+  transitionToAct3,
   removeCardsFromDeck,
   removeCardFromBench,
   getCurrentCardRemovalNode,
@@ -301,12 +304,17 @@ export default function App() {
       newRun = addGold(newRun, goldEarned);
     }
 
-    // Check if this was the final boss (Mewtwo in Act 2)
+    // Check if this was the final boss (Mewtwo in Act 3)
     if (isRunComplete(newRun)) {
       setScreen('run_victory');
       setRunState(newRun);
+    } else if (isAct2Complete(newRun)) {
+      // Giovanni defeated in Act 2 - full heal and go to act transition
+      newRun = applyFullHealAll(newRun);
+      setRunState(newRun);
+      setScreen('act_transition');
     } else if (isAct1Complete(newRun)) {
-      // Giovanni defeated - full heal and go to act transition
+      // Ariana defeated - full heal and go to act transition
       newRun = applyFullHealAll(newRun);
       setRunState(newRun);
       setScreen('act_transition');
@@ -368,10 +376,15 @@ export default function App() {
     setRunState(afterRemove);
   }, [runState]);
 
-  // Handle act transition - continue to Act 2
+  // Handle act transition - continue to next act
   const handleActTransitionContinue = useCallback(() => {
     if (!runState) return;
-    const newRun = transitionToAct2(runState);
+    let newRun: RunState;
+    if (runState.currentAct === 1) {
+      newRun = transitionToAct2(runState);
+    } else {
+      newRun = transitionToAct3(runState);
+    }
     setRunState(newRun);
     setScreen('map');
   }, [runState]);
@@ -513,6 +526,14 @@ export default function App() {
   const handleTestAct2 = useCallback(() => {
     clearSave();
     const run = createAct2TestState();
+    setRunState(run);
+    setScreen('map');
+  }, []);
+
+  // Start a test run at Act 3 with a leveled party
+  const handleTestAct3 = useCallback(() => {
+    clearSave();
+    const run = createAct3TestState();
     setRunState(run);
     setScreen('map');
   }, []);
@@ -666,20 +687,34 @@ export default function App() {
           >
             Card Dex
           </button>
-          <button
-            onClick={handleTestAct2}
-            onMouseEnter={hoverIn}
-            onMouseLeave={(e) => hoverOut(e, true)}
-            style={{
-              ...secondaryMenuStyle,
-              marginTop: 16,
-              fontSize: 14,
-              color: THEME.text.tertiary,
-              opacity: 0.6,
-            }}
-          >
-            Test Act 2
-          </button>
+          <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
+            <button
+              onClick={handleTestAct2}
+              onMouseEnter={hoverIn}
+              onMouseLeave={(e) => hoverOut(e, true)}
+              style={{
+                ...secondaryMenuStyle,
+                fontSize: 14,
+                color: THEME.text.tertiary,
+                opacity: 0.6,
+              }}
+            >
+              Test Act 2
+            </button>
+            <button
+              onClick={handleTestAct3}
+              onMouseEnter={hoverIn}
+              onMouseLeave={(e) => hoverOut(e, true)}
+              style={{
+                ...secondaryMenuStyle,
+                fontSize: 14,
+                color: THEME.text.tertiary,
+                opacity: 0.6,
+              }}
+            >
+              Test Act 3
+            </button>
+          </div>
         </div>
         <div style={{
           fontSize: 14,

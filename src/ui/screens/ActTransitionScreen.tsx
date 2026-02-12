@@ -8,7 +8,33 @@ interface Props {
   onRestart: () => void;
 }
 
+interface TransitionContent {
+  heading: string;
+  story: string;
+  buttonLabel: string;
+  accentColor: string;
+}
+
+function getTransitionContent(act: number): TransitionContent {
+  if (act === 1) {
+    return {
+      heading: 'Act 1 Complete!',
+      story: 'Ariana has been defeated, but she was only a diversion. Giovanni himself waits on the floor below...',
+      buttonLabel: 'Continue to Act 2',
+      accentColor: '#60a5fa',
+    };
+  }
+  return {
+    heading: 'Act 2 Complete!',
+    story: "Giovanni has fallen. His final words: \"You're too late \u2014 Mewtwo has escaped into the caverns below.\"",
+    buttonLabel: 'Descend to Act 3',
+    accentColor: '#a855f7',
+  };
+}
+
 export function ActTransitionScreen({ run, onContinue, onRestart }: Props) {
+  const content = getTransitionContent(run.currentAct);
+
   return (
     <div style={{
       display: 'flex',
@@ -45,12 +71,12 @@ export function ActTransitionScreen({ run, onContinue, onRestart }: Props) {
       <div style={{
         fontSize: 52,
         fontWeight: 'bold',
-        color: '#60a5fa',
-        textShadow: '0 0 30px #60a5fa55',
+        color: content.accentColor,
+        textShadow: `0 0 30px ${content.accentColor}55`,
         textAlign: 'center',
         letterSpacing: THEME.heading.letterSpacing,
       }}>
-        Act 1 Complete!
+        {content.heading}
       </div>
 
       {/* Story Text */}
@@ -61,10 +87,7 @@ export function ActTransitionScreen({ run, onContinue, onRestart }: Props) {
         maxWidth: 600,
         lineHeight: 1.6,
       }}>
-        Giovanni has been defeated, but the battle is far from over.
-        <br /><br />
-        Deep within the facility, Mewtwo awaits. Your party descends
-        further into the Rocket Lab, ready to face whatever challenges lie ahead.
+        {content.story}
       </div>
 
       {/* Party Healed Message */}
@@ -84,7 +107,7 @@ export function ActTransitionScreen({ run, onContinue, onRestart }: Props) {
         padding: 24,
         background: '#1e1e2e',
         borderRadius: 12,
-        border: '2px solid #60a5fa',
+        border: `2px solid ${content.accentColor}`,
       }}>
         {run.party.map((pokemon, i) => {
           const basePokemon = getPokemon(pokemon.formId);
@@ -146,7 +169,7 @@ export function ActTransitionScreen({ run, onContinue, onRestart }: Props) {
           fontWeight: 'bold',
           borderRadius: 8,
           border: 'none',
-          background: '#60a5fa',
+          background: content.accentColor,
           color: '#000',
           cursor: 'pointer',
           marginTop: 16,
@@ -154,14 +177,14 @@ export function ActTransitionScreen({ run, onContinue, onRestart }: Props) {
         }}
         onMouseOver={(e) => {
           e.currentTarget.style.transform = 'scale(1.05)';
-          e.currentTarget.style.boxShadow = '0 0 20px #60a5fa55';
+          e.currentTarget.style.boxShadow = `0 0 20px ${content.accentColor}55`;
         }}
         onMouseOut={(e) => {
           e.currentTarget.style.transform = 'scale(1)';
           e.currentTarget.style.boxShadow = 'none';
         }}
       >
-        Continue to Act 2
+        {content.buttonLabel}
       </button>
     </div>
   );
