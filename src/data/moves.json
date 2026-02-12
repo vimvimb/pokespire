@@ -987,7 +987,7 @@
   "metal-claw": {
     "name": "Metal Claw",
     "cost": 1,
-    "type": "normal",
+    "type": "steel",
     "range": "front_enemy",
     "vanish": false,
     "effects": [

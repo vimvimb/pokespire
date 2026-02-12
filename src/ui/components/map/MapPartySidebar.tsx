@@ -28,6 +28,7 @@ function PokemonRow({ pokemon, isDead, canLevel, onClick, isSwapTarget, onSwapCl
 }) {
   const basePokemon = getPokemon(pokemon.formId);
   const hpPercent = (pokemon.currentHp / pokemon.maxHp) * 100;
+  const showLevelUp = canLevel && !isDead;
 
   return (
     <div
@@ -42,14 +43,19 @@ function PokemonRow({ pokemon, isDead, canLevel, onClick, isSwapTarget, onSwapCl
         cursor: isDead && !onSwapClick ? 'default' : 'pointer',
         transition: 'background 0.15s',
         position: 'relative',
-        border: isSwapTarget ? '1px solid #60a5fa' : '1px solid transparent',
-        background: isSwapTarget ? 'rgba(96, 165, 250, 0.08)' : 'transparent',
+        border: showLevelUp
+          ? '1px solid #facc15'
+          : isSwapTarget ? '1px solid #60a5fa' : '1px solid transparent',
+        background: showLevelUp
+          ? 'rgba(250, 204, 21, 0.08)'
+          : isSwapTarget ? 'rgba(96, 165, 250, 0.08)' : 'transparent',
+        boxShadow: showLevelUp ? '0 0 10px rgba(250, 204, 21, 0.2), inset 0 0 10px rgba(250, 204, 21, 0.05)' : 'none',
       }}
       onMouseEnter={(e) => {
-        if (!isDead || onSwapClick) (e.currentTarget as HTMLDivElement).style.background = isSwapTarget ? 'rgba(96, 165, 250, 0.15)' : 'rgba(255,255,255,0.05)';
+        if (!isDead || onSwapClick) (e.currentTarget as HTMLDivElement).style.background = showLevelUp ? 'rgba(250, 204, 21, 0.15)' : isSwapTarget ? 'rgba(96, 165, 250, 0.15)' : 'rgba(255,255,255,0.05)';
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.background = isSwapTarget ? 'rgba(96, 165, 250, 0.08)' : 'transparent';
+        (e.currentTarget as HTMLDivElement).style.background = showLevelUp ? 'rgba(250, 204, 21, 0.08)' : isSwapTarget ? 'rgba(96, 165, 250, 0.08)' : 'transparent';
       }}
     >
       <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -64,13 +70,13 @@ function PokemonRow({ pokemon, isDead, canLevel, onClick, isSwapTarget, onSwapCl
             filter: isDead ? 'grayscale(100%)' : 'none',
           }}
         />
-        {canLevel && !isDead && (
+        {showLevelUp && (
           <div style={{
             position: 'absolute',
-            top: -4,
-            right: -4,
-            width: 16,
-            height: 16,
+            top: -6,
+            right: -8,
+            width: 20,
+            height: 20,
             borderRadius: '50%',
             background: '#facc15',
             color: '#000',
@@ -78,10 +84,11 @@ function PokemonRow({ pokemon, isDead, canLevel, onClick, isSwapTarget, onSwapCl
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 'bold',
-            fontSize: 12,
-            animation: 'pulse 1s infinite',
+            fontSize: 14,
+            animation: 'levelUpBadge 1.5s ease-in-out infinite',
+            boxShadow: '0 0 8px rgba(250, 204, 21, 0.6)',
           }}>
-            !
+            ▲
           </div>
         )}
       </div>
@@ -90,9 +97,20 @@ function PokemonRow({ pokemon, isDead, canLevel, onClick, isSwapTarget, onSwapCl
         <div style={{ fontSize: 13, fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           {basePokemon.name}
         </div>
-        <div style={{ fontSize: 10, color: THEME.text.tertiary }}>
-          Lv.{pokemon.level} | {pokemon.exp}/{EXP_PER_LEVEL} EXP
-        </div>
+        {showLevelUp ? (
+          <div style={{
+            fontSize: 10,
+            fontWeight: 'bold',
+            color: '#facc15',
+            animation: 'levelUpText 2s ease-in-out infinite',
+          }}>
+            LEVEL UP READY
+          </div>
+        ) : (
+          <div style={{ fontSize: 10, color: THEME.text.tertiary }}>
+            Lv.{pokemon.level} | {pokemon.exp}/{EXP_PER_LEVEL} EXP
+          </div>
+        )}
         <div style={{
           width: '100%',
           height: 5,
@@ -446,10 +464,15 @@ export function MapPartySidebar({ party, bench, graveyard, gold, onPokemonClick,
       </button>
 
       <style>{`
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.2); }
-          100% { transform: scale(1); }
+        @keyframes levelUpBadge {
+          0% { transform: scale(1); box-shadow: 0 0 8px rgba(250, 204, 21, 0.6); }
+          50% { transform: scale(1.25); box-shadow: 0 0 14px rgba(250, 204, 21, 0.9); }
+          100% { transform: scale(1); box-shadow: 0 0 8px rgba(250, 204, 21, 0.6); }
+        }
+        @keyframes levelUpText {
+          0% { opacity: 0.7; }
+          50% { opacity: 1; }
+          100% { opacity: 0.7; }
         }
       `}</style>
     </div>

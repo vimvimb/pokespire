@@ -185,6 +185,7 @@ export type MoveType =
   | 'ghost'
   | 'rock'
   | 'ground'
+  | 'steel'
   | 'item';
 
 // --- Cards / Moves ---

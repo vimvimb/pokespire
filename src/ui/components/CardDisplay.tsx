@@ -55,6 +55,7 @@ export const MOVE_TYPE_COLORS: Record<MoveType, string> = {
   ghost: '#705898',
   rock: '#b8a038',
   ground: '#e0c068',
+  steel: '#b8b8d0',
   item: '#4ade80',
 };
 

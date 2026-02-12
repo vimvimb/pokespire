@@ -382,6 +382,32 @@ function renderMotif(type: MoveType, main: string, faint: string, subtle: string
         </g>
       );
 
+    case 'steel':
+      // Steel gear/cog — interlocking gear teeth
+      return (
+        <g>
+          {/* Main gear */}
+          <circle cx="65" cy="20" r="8" stroke={main} strokeWidth="1.5" fill={faint} />
+          <circle cx="65" cy="20" r="4" stroke={subtle} strokeWidth="1" fill="none" />
+          {/* Gear teeth */}
+          <rect x="63" y="9" width="4" height="4" rx="0.5" fill={main} opacity={0.6} />
+          <rect x="63" y="27" width="4" height="4" rx="0.5" fill={main} opacity={0.6} />
+          <rect x="74" y="18" width="4" height="4" rx="0.5" fill={main} opacity={0.6} />
+          <rect x="53" y="18" width="4" height="4" rx="0.5" fill={main} opacity={0.6} />
+          {/* Diagonal teeth */}
+          <rect x="72" y="12" width="3" height="3" rx="0.5" fill={subtle} transform="rotate(45 73.5 13.5)" />
+          <rect x="55" y="25" width="3" height="3" rx="0.5" fill={subtle} transform="rotate(45 56.5 26.5)" />
+          <rect x="55" y="12" width="3" height="3" rx="0.5" fill={subtle} transform="rotate(45 56.5 13.5)" />
+          <rect x="72" y="25" width="3" height="3" rx="0.5" fill={subtle} transform="rotate(45 73.5 26.5)" />
+          {/* Small second gear */}
+          <circle cx="84" cy="14" r="4" stroke={faint} strokeWidth="1" fill="none" />
+          <circle cx="84" cy="14" r="1.5" fill={subtle} />
+          {/* Metal shine accents */}
+          <line x1="40" y1="28" x2="50" y2="28" stroke={faint} strokeWidth="0.6" />
+          <line x1="42" y1="30" x2="48" y2="30" stroke={faint} strokeWidth="0.4" />
+        </g>
+      );
+
     default:
       // Fallback — simple horizontal line with dot
       return (

@@ -10,7 +10,7 @@ interface Props {
 const ALL_TYPES: MoveType[] = [
   'normal', 'fire', 'water', 'grass', 'electric', 'poison',
   'flying', 'psychic', 'dark', 'fighting', 'ice', 'bug',
-  'dragon', 'ghost', 'rock', 'ground',
+  'dragon', 'ghost', 'rock', 'ground', 'steel', 'item',
 ];
 
 const ALL_RARITIES: CardRarity[] = [
@@ -34,6 +34,7 @@ const TYPE_COLORS: Record<MoveType, string> = {
   ghost: '#705898',
   rock: '#b8a038',
   ground: '#e0c068',
+  steel: '#b8b8d0',
   item: '#4ade80',
 };
 
@@ -49,6 +50,7 @@ const RARITY_COLORS: Record<CardRarity, string> = {
 export function CardDexScreen({ onBack }: Props) {
   const [selectedType, setSelectedType] = useState<MoveType | 'all'>('all');
   const [selectedRarity, setSelectedRarity] = useState<CardRarity | 'all'>('all');
+  const [searchText, setSearchText] = useState('');
 
   // Get all card IDs and filter them
   const filteredCards = useMemo(() => {
@@ -59,6 +61,7 @@ export function CardDexScreen({ onBack }: Props) {
       .filter(card => {
         if (selectedType !== 'all' && card.type !== selectedType) return false;
         if (selectedRarity !== 'all' && card.rarity !== selectedRarity) return false;
+        if (searchText && !card.name.toLowerCase().includes(searchText.toLowerCase())) return false;
         return true;
       })
       .sort((a, b) => {
@@ -71,7 +74,7 @@ export function CardDexScreen({ onBack }: Props) {
         if (rarityCompare !== 0) return rarityCompare;
         return a.name.localeCompare(b.name);
       });
-  }, [selectedType, selectedRarity]);
+  }, [selectedType, selectedRarity, searchText]);
 
   return (
     <div style={{
@@ -111,7 +114,7 @@ export function CardDexScreen({ onBack }: Props) {
         <div style={{ width: 80 }} /> {/* Spacer for centering */}
       </div>
 
-      {/* Filters */}
+      {/* Search + Filters */}
       <div style={{
         display: 'flex',
         gap: 24,
@@ -119,7 +122,31 @@ export function CardDexScreen({ onBack }: Props) {
         borderBottom: '1px solid #333',
         background: '#15151f',
         flexWrap: 'wrap',
+        alignItems: 'flex-start',
       }}>
+        {/* Search */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <label style={{ fontSize: 12, color: '#64748b', textTransform: 'uppercase' }}>
+            Search
+          </label>
+          <input
+            type="text"
+            placeholder="Search cards..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            style={{
+              padding: '6px 12px',
+              fontSize: 13,
+              borderRadius: 6,
+              border: '1px solid #444',
+              background: '#2a2a3a',
+              color: '#e2e8f0',
+              outline: 'none',
+              width: 180,
+            }}
+          />
+        </div>
+
         {/* Type Filter */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <label style={{ fontSize: 12, color: '#64748b', textTransform: 'uppercase' }}>

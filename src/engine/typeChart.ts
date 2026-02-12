@@ -26,7 +26,7 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
     grass: SUPER_EFFECTIVE,
     ice: SUPER_EFFECTIVE,
     bug: SUPER_EFFECTIVE,
-    // steel: SUPER_EFFECTIVE, // Steel not in MoveType yet
+    steel: SUPER_EFFECTIVE,
     fire: NOT_EFFECTIVE,
     water: NOT_EFFECTIVE,
     rock: NOT_EFFECTIVE,
@@ -66,7 +66,7 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
     ground: NOT_EFFECTIVE,
     rock: NOT_EFFECTIVE,
     ghost: NOT_EFFECTIVE,
-    // steel: IMMUNE_REPLACEMENT, // Steel not in MoveType
+    steel: IMMUNE_REPLACEMENT, // Would be immune in Pokemon
   },
   flying: {
     grass: SUPER_EFFECTIVE,
@@ -93,7 +93,7 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
     ice: SUPER_EFFECTIVE,
     rock: SUPER_EFFECTIVE,
     dark: SUPER_EFFECTIVE,
-    // steel: SUPER_EFFECTIVE, // Steel not in MoveType
+    steel: SUPER_EFFECTIVE,
     poison: NOT_EFFECTIVE,
     flying: NOT_EFFECTIVE,
     psychic: NOT_EFFECTIVE,
@@ -119,13 +119,11 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
     poison: NOT_EFFECTIVE,
     flying: NOT_EFFECTIVE,
     ghost: NOT_EFFECTIVE,
-    // steel: NOT_EFFECTIVE, // Steel not in MoveType
-    // fairy: NOT_EFFECTIVE, // Fairy not in MoveType
+    steel: NOT_EFFECTIVE,
   },
   dragon: {
     dragon: SUPER_EFFECTIVE,
-    // steel: NOT_EFFECTIVE, // Steel not in MoveType
-    // fairy: IMMUNE_REPLACEMENT, // Fairy not in MoveType
+    steel: NOT_EFFECTIVE,
   },
   ghost: {
     psychic: SUPER_EFFECTIVE,
@@ -146,10 +144,18 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
     electric: SUPER_EFFECTIVE,
     poison: SUPER_EFFECTIVE,
     rock: SUPER_EFFECTIVE,
-    // steel: SUPER_EFFECTIVE, // Steel not in MoveType
+    steel: SUPER_EFFECTIVE,
     grass: NOT_EFFECTIVE,
     bug: NOT_EFFECTIVE,
     flying: IMMUNE_REPLACEMENT, // Would be immune in Pokemon
+  },
+  steel: {
+    rock: SUPER_EFFECTIVE,
+    ice: SUPER_EFFECTIVE,
+    fire: NOT_EFFECTIVE,
+    water: NOT_EFFECTIVE,
+    electric: NOT_EFFECTIVE,
+    steel: NOT_EFFECTIVE,
   },
   item: {}, // Items don't deal damage, no type interactions
 };
