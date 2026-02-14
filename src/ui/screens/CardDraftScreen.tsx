@@ -269,7 +269,6 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
         style={{
           padding: '10px 28px',
           fontSize: 14,
-          fontWeight: 'bold',
           ...THEME.button.secondary,
           position: 'relative',
           zIndex: 1,

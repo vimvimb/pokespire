@@ -267,9 +267,7 @@ export function RunVictoryScreen({ run, onNewRun }: Props) {
             background: 'transparent',
             color: THEME.accent,
             cursor: 'pointer',
-            letterSpacing: '0.1em',
             ...THEME.heading,
-            textTransform: 'uppercase',
           }}
         >
           New Run

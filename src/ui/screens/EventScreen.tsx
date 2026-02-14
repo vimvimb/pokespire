@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
 import type { RunState } from '../../run/types';
 import type { EventEffect } from '../../data/events';
-import { ALL_EVENTS, needsPokemonSelection, isInteractiveEffect } from '../../data/events';
+import { ALL_EVENTS, needsPokemonSelection } from '../../data/events';
 import { resolveOutcome, processEffects } from '../../run/events';
 import type { PendingInteractive } from '../../run/events';
 import { getPokemon, getMove } from '../../data/loaders';
-import { EXP_PER_LEVEL, removeCardsFromDeck, addCardToDeck, createRecruitPokemon, getRecruitLevel, recruitToRoster } from '../../run/state';
-import { sampleDraftCards, buildTypePool } from '../../run/draft';
+import { removeCardsFromDeck, addCardToDeck, createRecruitPokemon, getRecruitLevel, recruitToRoster } from '../../run/state';
+import { buildTypePool } from '../../run/draft';
 import { createRng, sampleCards } from '../../run/rng';
 import { SHOP_ITEMS } from '../../data/shop';
 import { ScreenShell } from '../components/ScreenShell';
@@ -586,7 +586,6 @@ export function EventScreen({ run, eventId, onComplete, onRestart }: Props) {
                 </SectionHeading>
                 <CardRemovalUI
                   run={phase.workingRun}
-                  maxPerPokemon={effect.count}
                   mode={effect.mode}
                   selections={removalSelections}
                   onToggle={handleRemovalToggle}
@@ -622,7 +621,6 @@ export function EventScreen({ run, eventId, onComplete, onRestart }: Props) {
                   party={phase.workingRun.party}
                   onPick={handleEpicDraftPick}
                   color={color}
-                  label="Epic Draft"
                   selectedCard={draftSelectedCard}
                   onSelectCard={setDraftSelectedCard}
                 />
@@ -640,7 +638,6 @@ export function EventScreen({ run, eventId, onComplete, onRestart }: Props) {
                   party={phase.workingRun.party}
                   onPick={handleShopDraftPick}
                   color={color}
-                  label="Free Item"
                   selectedCard={draftSelectedCard}
                   onSelectCard={setDraftSelectedCard}
                 />
@@ -851,12 +848,11 @@ function PokemonPicker({ party, color, onSelect }: {
   );
 }
 
-function DraftUI({ options, party, onPick, color, label, selectedCard, onSelectCard }: {
+function DraftUI({ options, party, onPick, color, selectedCard, onSelectCard }: {
   options: string[];
   party: RunState['party'];
   onPick: (cardId: string, pokemonIndex: number) => void;
   color: string;
-  label: string;
   selectedCard: string | null;
   onSelectCard: (cardId: string | null) => void;
 }) {
@@ -903,9 +899,8 @@ function DraftUI({ options, party, onPick, color, label, selectedCard, onSelectC
   );
 }
 
-function CardRemovalUI({ run, maxPerPokemon, mode, selections, onToggle, color }: {
+function CardRemovalUI({ run, mode, selections, onToggle, color }: {
   run: RunState;
-  maxPerPokemon: number;
   mode: 'one' | 'each';
   selections: Map<number, number[]>;
   onToggle: (pokemonIndex: number, cardIndex: number) => void;

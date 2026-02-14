@@ -1208,7 +1208,6 @@ export function BattleScreen({
                 style={{
                   padding: '12px 32px',
                   fontSize: 16,
-                  fontWeight: 'bold',
                   ...THEME.button.secondary,
                   marginTop: 8,
                 }}

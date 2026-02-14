@@ -686,7 +686,7 @@ interface ProgressionRungDisplayProps {
   onNavigate: (pokemonId: string) => void;
 }
 
-function ProgressionRungDisplay({ rung, isFirst, isLast, tree, index, onNavigate }: ProgressionRungDisplayProps) {
+function ProgressionRungDisplay({ rung, isFirst, tree, index, onNavigate }: ProgressionRungDisplayProps) {
   const passive = PASSIVE_DEFINITIONS[rung.passiveId];
   const evolutionSprite = rung.evolvesTo || (isFirst ? tree.baseFormId : null);
   const levelColor = getLevelColor(rung.level);

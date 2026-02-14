@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { RunState } from '../../run/types';
 import type { Position } from '../../engine/types';
-import { ALL_EVENTS, getEventsForAct } from '../../data/events';
+import { getEventsForAct } from '../../data/events';
 import type { EventDefinition } from '../../data/events';
 import { EventScreen } from './EventScreen';
 import { createRunState, applyLevelUp, applyDamage } from '../../run/state';
