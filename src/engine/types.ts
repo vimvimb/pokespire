@@ -59,7 +59,7 @@ export interface DamageEffect {
   type: 'damage';
   value: number;
   bonusValue?: number;           // extra damage if condition met
-  bonusCondition?: 'user_below_half_hp';  // condition type
+  bonusCondition?: 'user_below_half_hp' | 'target_debuff_stacks';  // condition type
 }
 
 export interface BlockEffect {
@@ -186,6 +186,7 @@ export type MoveType =
   | 'rock'
   | 'ground'
   | 'steel'
+  | 'fairy'
   | 'item';
 
 // --- Cards / Moves ---
@@ -219,6 +220,8 @@ export interface MoveDefinition {
   pools?: MoveType[];  // Which type pools this card belongs to (for drafting)
   isItem?: boolean;    // true = shop-only item card, never appears in draft
   singleUse?: boolean; // true = permanently removed from deck after use (not just vanish for battle)
+  uncollectible?: boolean; // true = cannot appear in drafts, hidden in Card Dex by default
+  goldOnHit?: boolean; // true = gain gold equal to damage dealt (Pay Day)
 }
 
 // --- Status Effects ---
@@ -233,7 +236,8 @@ export type StatusType =
   | 'leech'
   | 'evasion'
   | 'strength'
-  | 'haste';
+  | 'haste'
+  | 'taunt';
 
 export interface StatusInstance {
   type: StatusType;
@@ -263,6 +267,7 @@ export interface CombatantTurnFlags {
   dragonsMajestyReducedIndex: number | null;  // Index of card with cost reduced by Dragon's Majesty
   sniperUsedThisTurn: boolean;  // First attack ignores evasion and block (Fearow line)
   hasSwitchedThisTurn: boolean;  // Can only switch position once per turn
+  finisherUsedThisTurn: boolean;  // First 3+ cost attack deals double, clears Strength (Machamp line)
 }
 
 export interface Combatant {
@@ -317,6 +322,7 @@ export interface CombatState {
   log: LogEntry[];
   statusApplyCounter: number;  // monotonic counter for appliedOrder
   slipstreamProtectedIds: string[];  // combatants protected from speed reordering this round
+  goldEarned: number;  // gold earned during combat (from Pay Day, etc.)
 }
 
 export interface LogEntry {
@@ -358,4 +364,6 @@ export interface PokemonData {
   deck: string[];  // move definition IDs
   abilities: string[];  // ability IDs (stubbed for future expansion)
   description?: string;  // playstyle hint shown on hover in party select
+  energyModifier?: number;  // Permanent energy per turn modifier from events
+  drawModifier?: number;    // Permanent hand size modifier from events
 }

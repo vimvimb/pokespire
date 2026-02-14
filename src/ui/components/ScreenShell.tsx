@@ -1,5 +1,6 @@
 import type { ReactNode, CSSProperties } from 'react';
 import { THEME } from '../theme';
+import { AmbientBackground } from './AmbientBackground';
 
 /**
  * ScreenShell — the universal viewport wrapper for every screen.
@@ -25,21 +26,27 @@ interface Props {
   children: ReactNode;
   /** Extra styles merged onto the scrollable body div. */
   bodyStyle?: CSSProperties;
+  /** Show floating particle ambient background instead of flat dark base. */
+  ambient?: boolean;
+  /** Optional tint for the ambient background (e.g. 'rgba(250,204,21,0.03)'). */
+  ambientTint?: string;
 }
 
-export function ScreenShell({ header, children, bodyStyle }: Props) {
+export function ScreenShell({ header, children, bodyStyle, ambient, ambientTint }: Props) {
   return (
     <div
       style={{
         height: '100dvh',         // dvh = dynamic viewport height (accounts for browser chrome)
         display: 'flex',
         flexDirection: 'column',
-        background: THEME.bg.base,
+        background: ambient ? 'transparent' : THEME.bg.base,
         color: THEME.text.primary,
+        position: 'relative',
       }}
     >
+      {ambient && <AmbientBackground tint={ambientTint} />}
       {header && (
-        <div style={{ flexShrink: 0 }}>
+        <div style={{ flexShrink: 0, position: 'relative', zIndex: 1 }}>
           {header}
         </div>
       )}
@@ -48,6 +55,8 @@ export function ScreenShell({ header, children, bodyStyle }: Props) {
           flex: 1,
           minHeight: 0,       // ← the critical line
           overflowY: 'auto',
+          position: 'relative',
+          zIndex: 1,
           ...bodyStyle,
         }}
       >

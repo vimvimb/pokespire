@@ -35,6 +35,7 @@ const STATUS_DISPLAY: Record<string, { icon: string; color: string }> = {
   evasion: { icon: '💨', color: '#67e8f9' },
   strength: { icon: '💪', color: '#ef4444' },
   haste: { icon: '💨', color: '#22d3ee' },
+  taunt: { icon: '☝️', color: '#dc2626' },
 };
 
 // Card fly animation event
@@ -202,6 +203,7 @@ const MOVE_TYPE_COLORS: Record<MoveType, string> = {
   rock: '#b8a038',
   ground: '#e0c068',
   steel: '#b8b8d0',
+  fairy: '#ee99ac',
   item: '#4ade80',
 };
 

@@ -408,6 +408,34 @@ function renderMotif(type: MoveType, main: string, faint: string, subtle: string
         </g>
       );
 
+    case 'fairy':
+      // Central sparkle star with fairy dust arcs and smaller stars
+      return (
+        <g>
+          {/* Central four-pointed star */}
+          <path d="M65 12 L67.5 17.5 L73 20 L67.5 22.5 L65 28 L62.5 22.5 L57 20 L62.5 17.5 Z" stroke={main} strokeWidth="1.5" fill={subtle} />
+          <circle cx="65" cy="20" r="1.5" fill={main} opacity={0.8} />
+          {/* Left fairy dust arc */}
+          <path d="M55 18 Q44 14 36 18 Q32 22 36 26" stroke={faint} strokeWidth="1.2" fill="none" />
+          {/* Right fairy dust arc */}
+          <path d="M75 18 Q86 14 94 18 Q98 22 94 26" stroke={faint} strokeWidth="1.2" fill="none" />
+          {/* Left small star */}
+          <path d="M38 16 L39.5 18.5 L42 19 L39.5 19.5 L38 22 L36.5 19.5 L34 19 L36.5 18.5 Z" stroke={faint} strokeWidth="0.8" fill={subtle} />
+          {/* Right small star */}
+          <path d="M92 16 L93.5 18.5 L96 19 L93.5 19.5 L92 22 L90.5 19.5 L88 19 L90.5 18.5 Z" stroke={faint} strokeWidth="0.8" fill={subtle} />
+          {/* Sparkle dots */}
+          <circle cx="48" cy="12" r="1" fill={main} opacity={0.5} />
+          <circle cx="82" cy="12" r="1" fill={main} opacity={0.5} />
+          <circle cx="32" cy="24" r="0.8" fill={faint} />
+          <circle cx="98" cy="24" r="0.8" fill={faint} />
+          {/* Bottom accent sparkles */}
+          <circle cx="55" cy="28" r="1.2" fill={faint} />
+          <circle cx="75" cy="28" r="1.2" fill={faint} />
+          <circle cx="60" cy="32" r="0.8" fill={subtle} />
+          <circle cx="70" cy="32" r="0.8" fill={subtle} />
+        </g>
+      );
+
     default:
       // Fallback — simple horizontal line with dot
       return (

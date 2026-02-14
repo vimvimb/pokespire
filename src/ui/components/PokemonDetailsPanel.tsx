@@ -12,9 +12,16 @@ import {
 import { EXP_PER_LEVEL } from '../../run/state';
 import { getSpriteSize } from '../../data/heights';
 import { CardPreview } from './CardPreview';
+import { DexFrame } from './DexFrame';
 import { THEME } from '../theme';
 
 type Tab = 'skills' | 'stats' | 'deck';
+
+const TAB_COLORS: Record<Tab, string> = {
+  skills: THEME.accent,   // gold
+  stats: '#60a5fa',        // blue
+  deck: '#4ade80',         // green
+};
 
 // Props can accept either RunPokemon (map view) or Combatant (battle view)
 interface Props {
@@ -31,6 +38,12 @@ interface Props {
   // Common
   onClose: () => void;
   readOnly?: boolean;
+}
+
+interface PassiveInfo {
+  id: string;
+  name: string;
+  description: string;
 }
 
 /** Infer a combatant's level by checking which progression rungs match its passives. */
@@ -52,6 +65,75 @@ function getSpriteUrl(pokemonId: string): string {
   return `https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemonId}.gif`;
 }
 
+// ── Small SVG helpers ────────────────────────────────────────────────
+
+function DiamondNode({ color, size = 12 }: { color: string; size?: number }) {
+  const h = size / 2;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0, display: 'block' }}>
+      <path d={`M${h} 0 L${size} ${h} L${h} ${size} L0 ${h} Z`} fill={color} />
+    </svg>
+  );
+}
+
+function DiamondPip({ filled }: { filled: boolean }) {
+  return (
+    <svg width={10} height={10} viewBox="0 0 10 10" style={{ display: 'block' }}>
+      <path
+        d="M5 1 L9 5 L5 9 L1 5 Z"
+        fill={filled ? THEME.accent : 'transparent'}
+        stroke={filled ? THEME.accent : THEME.border.medium}
+        strokeWidth={1}
+      />
+    </svg>
+  );
+}
+
+// ── Type colors ──────────────────────────────────────────────────────
+
+const TYPE_COLORS: Record<string, string> = {
+  normal: '#a8a878',
+  fire: '#f08030',
+  water: '#6890f0',
+  grass: '#78c850',
+  electric: '#f8d030',
+  poison: '#a040a0',
+  flying: '#a890f0',
+  psychic: '#f85888',
+  dark: '#705848',
+  fighting: '#c03028',
+  ice: '#98d8d8',
+  bug: '#a8b820',
+  dragon: '#7038f8',
+  ghost: '#705898',
+  rock: '#b8a038',
+  ground: '#e0c068',
+  steel: '#b8b8d0',
+  fairy: '#ee99ac',
+  item: '#4ade80',
+};
+
+// ── Nav button style ─────────────────────────────────────────────────
+
+const navBtnStyle: React.CSSProperties = {
+  width: 28,
+  height: 28,
+  borderRadius: 4,
+  border: `1px solid ${THEME.border.medium}`,
+  background: 'transparent',
+  color: THEME.text.secondary,
+  fontSize: 18,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  padding: 0,
+  lineHeight: 1,
+};
+
+// ── Main component ───────────────────────────────────────────────────
+
 export function PokemonDetailsPanel({
   pokemon,
   pokemonIndex = 0,
@@ -62,33 +144,25 @@ export function PokemonDetailsPanel({
   onClose,
   readOnly = false,
 }: Props) {
-  // Determine which data source we're using
   const isFromBattle = !!combatant;
-
-  // Default to 'skills' tab - shows passives for both map view and battle view
   const [activeTab, setActiveTab] = useState<Tab>('skills');
 
-  // Get base data - normalize from either source
+  // Normalize data from either source
   const formId = isFromBattle ? combatant!.pokemonId : pokemon!.formId;
   const baseFormId = isFromBattle ? combatant!.pokemonId : pokemon!.baseFormId;
   const basePokemon = getPokemon(formId);
 
-  // Stats
   const currentHp = isFromBattle ? combatant!.hp : pokemon!.currentHp;
   const maxHp = isFromBattle ? combatant!.maxHp : pokemon!.maxHp;
-  // Infer level from passives when viewing a combatant (combatants don't track level)
   const level = isFromBattle ? inferLevelFromPassives(baseFormId, combatant!.passiveIds) : pokemon!.level;
   const exp = isFromBattle ? 0 : pokemon!.exp;
   const passiveIds = isFromBattle ? combatant!.passiveIds : pokemon!.passiveIds;
-  // For combatants, combine all piles to show full deck; for RunPokemon just use deck
   const deck: string[] = isFromBattle
     ? [...combatant!.drawPile, ...combatant!.hand, ...combatant!.discardPile, ...combatant!.vanishedPile]
     : pokemon!.deck;
 
-  // Combat stats from base Pokemon data (use combatant values if in battle for modified stats)
   const energyPerTurn = basePokemon.energyPerTurn;
   const energyCap = basePokemon.energyCap;
-  // Hand size can be modified by passives like Hustle (+1)
   const baseHandSize = isFromBattle ? combatant!.handSize : basePokemon.handSize;
   const hustleBonus = passiveIds.includes('hustle') && !isFromBattle ? 1 : 0;
   const handSize = baseHandSize + hustleBonus;
@@ -97,13 +171,13 @@ export function PokemonDetailsPanel({
   const tree = getProgressionTree(baseFormId);
   const canLevel = !readOnly && !isFromBattle && canLevelUp(level, exp);
 
-  // Get all passive info
-  const passiveInfos = passiveIds.map(id => ({
-    id,
-    ...PASSIVE_DEFINITIONS[id as PassiveId],
-  }));
+  const passiveInfos: PassiveInfo[] = passiveIds
+    .map(id => {
+      const def = PASSIVE_DEFINITIONS[id as PassiveId];
+      return def ? { id, name: def.name, description: def.description } : null;
+    })
+    .filter((x): x is PassiveInfo => x !== null);
 
-  // Get deck cards
   const deckCards = deck.map((cardId: string) => getMove(cardId));
 
   const handleLevelUp = () => {
@@ -126,35 +200,10 @@ export function PokemonDetailsPanel({
     }
   };
 
-  const arrowButtonStyle: React.CSSProperties = {
-    width: 48,
-    height: 48,
-    borderRadius: '50%',
-    border: '2px solid ' + THEME.border.bright,
-    background: '#1e1e2e',
-    color: THEME.text.primary,
-    fontSize: 24,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'all 0.15s',
-  };
-
-  const tabStyle = (tab: Tab): React.CSSProperties => ({
-    padding: '8px 16px',
-    fontSize: 14,
-    fontWeight: 'bold',
-    borderRadius: '8px 8px 0 0',
-    border: 'none',
-    background: activeTab === tab ? '#2d2d3f' : 'transparent',
-    color: activeTab === tab ? '#facc15' : THEME.text.tertiary,
-    cursor: 'pointer',
-    transition: 'all 0.15s',
-  });
+  const showNav = partySize > 1 && !isFromBattle;
 
   return (
-    <div style={{
+    <div className="pdp-overlay" style={{
       position: 'fixed',
       top: 0,
       left: 0,
@@ -165,472 +214,631 @@ export function PokemonDetailsPanel({
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 1000,
-      gap: 16,
     }}>
-      {/* Left Arrow */}
-      {partySize > 1 && !isFromBattle && (
-        <button
-          onClick={handlePrevious}
-          style={arrowButtonStyle}
-          title="Previous Pokemon"
-        >
-          ‹
-        </button>
-      )}
-
-      <div style={{
-        background: '#1e1e2e',
-        borderRadius: 16,
-        minWidth: 550,
-        maxWidth: 650,
-        maxHeight: '90vh',
-        overflow: 'hidden',
-        border: '2px solid #facc15',
-        color: THEME.text.primary,
-        display: 'flex',
-        flexDirection: 'column',
-      }}>
-        {/* Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '16px 20px',
-          borderBottom: '1px solid ' + THEME.border.subtle,
-          background: '#1a1a24',
-        }}>
+      <div className="pdp-panel">
+        <DexFrame>
           <div style={{
+            overflow: 'hidden',
+            borderRadius: 2,
+            background: THEME.bg.panel,
+            height: '75vh',
+            width: 'clamp(500px, 45vw, 650px)',
             display: 'flex',
-            alignItems: 'center',
-            gap: 16,
+            flexDirection: 'column',
+            color: THEME.text.primary,
           }}>
-            <img
-              src={getSpriteUrl(formId)}
-              alt={basePokemon.name}
-              style={{
-                width: getSpriteSize(formId),
-                height: getSpriteSize(formId),
-                imageRendering: 'pixelated',
-                objectFit: 'contain',
-              }}
-            />
-            <div>
-              <div style={{ fontSize: 24, fontWeight: 'bold' }}>{basePokemon.name}</div>
-              <div style={{ fontSize: 14, color: THEME.text.secondary }}>
-                {!isFromBattle && `Level ${level} • ${exp}/${EXP_PER_LEVEL} EXP`}
-                {isFromBattle && `HP: ${currentHp}/${maxHp}`}
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              border: 'none',
-              background: THEME.border.subtle,
-              color: '#fff',
-              fontSize: 24,
-              cursor: 'pointer',
-            }}
-          >
-            ×
-          </button>
-        </div>
+            {/* ── Header ── */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '14px 16px',
+              borderBottom: `1px solid ${THEME.border.subtle}`,
+              background: THEME.bg.panelDark,
+              flexShrink: 0,
+            }}>
+              {showNav && (
+                <button
+                  onClick={handlePrevious}
+                  className="pdp-nav-btn"
+                  style={navBtnStyle}
+                  title="Previous Pokemon"
+                >
+                  &#8249;
+                </button>
+              )}
 
-        {/* Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: 4,
-          padding: '8px 16px 0',
-          background: '#1a1a24',
-        }}>
-          <button style={tabStyle('skills')} onClick={() => setActiveTab('skills')}>
-            Skills
-          </button>
-          <button style={tabStyle('stats')} onClick={() => setActiveTab('stats')}>
-            Stats
-          </button>
-          <button style={tabStyle('deck')} onClick={() => setActiveTab('deck')}>
-            Deck ({deck.length})
-          </button>
-        </div>
+              <img
+                src={getSpriteUrl(formId)}
+                alt={basePokemon.name}
+                style={{
+                  width: Math.min(getSpriteSize(formId), 56),
+                  height: Math.min(getSpriteSize(formId), 56),
+                  imageRendering: 'pixelated',
+                  objectFit: 'contain',
+                }}
+              />
 
-        {/* Tab Content */}
-        <div style={{
-          flex: 1,
-          overflow: 'auto',
-          padding: 20,
-          background: '#2d2d3f',
-        }}>
-          {/* Stats Tab */}
-          {activeTab === 'stats' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Combat Stats */}
-              <div>
-                <div style={{ fontSize: 14, color: THEME.text.secondary, marginBottom: 8, textTransform: 'uppercase' }}>
-                  Combat Stats
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 20, fontWeight: 'bold', ...THEME.heading, letterSpacing: '0.08em' }}>
+                  {basePokemon.name}
                 </div>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: 12,
-                }}>
-                  <StatBox label="HP" value={`${currentHp}/${maxHp}`} icon="❤️" color="#ef4444" />
-                  <StatBox label="Speed" value={speed.toString()} icon="💨" color="#facc15" />
-                  <StatBox label="Energy/Turn" value={energyPerTurn.toString()} icon="🔋" color="#60a5fa" />
-                  <StatBox label="Energy Cap" value={energyCap.toString()} icon="🔌" color="#a855f7" />
-                  <StatBox label="Cards/Turn" value={handSize.toString()} icon="🃏" color="#4ade80" />
-                  <StatBox label="Deck Size" value={deck.length.toString()} icon="📚" color="#f97316" />
-                </div>
-              </div>
-
-              {/* Passive Abilities */}
-              <div>
-                <div style={{ fontSize: 14, color: THEME.text.secondary, marginBottom: 8, textTransform: 'uppercase' }}>
-                  Passive Abilities
-                </div>
-                {passiveInfos.length === 0 ? (
-                  <div style={{
-                    padding: 16,
-                    background: '#1e1e2e',
-                    borderRadius: 8,
-                    color: THEME.text.tertiary,
-                    fontStyle: 'italic',
-                    textAlign: 'center',
-                  }}>
-                    No passive abilities yet
+                {isFromBattle ? (
+                  <div style={{ fontSize: 13, color: THEME.text.secondary, marginTop: 2 }}>
+                    HP {currentHp}/{maxHp}
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {passiveInfos.map((info, i) => (
-                      <div key={i} style={{
-                        padding: 12,
-                        background: '#1e1e2e',
-                        borderRadius: 8,
-                        borderLeft: '3px solid #facc15',
-                      }}>
-                        <div style={{ fontSize: 15, fontWeight: 'bold', color: '#facc15' }}>
-                          {info.name}
-                        </div>
-                        <div style={{ fontSize: 13, color: THEME.text.secondary, marginTop: 4 }}>
-                          {info.description}
-                        </div>
-                      </div>
-                    ))}
+                  <div style={{ marginTop: 4 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                      <span style={{ fontSize: 12, color: THEME.text.secondary }}>Lv.{level}</span>
+                      <span style={{ fontSize: 10, color: THEME.text.tertiary }}>
+                        {level >= 4 ? 'MAX' : `${exp}/${EXP_PER_LEVEL} EXP`}
+                      </span>
+                    </div>
+                    <div style={{
+                      width: '100%',
+                      height: 5,
+                      background: THEME.border.subtle,
+                      borderRadius: 3,
+                      overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        width: level >= 4 ? '100%' : `${(exp / EXP_PER_LEVEL) * 100}%`,
+                        height: '100%',
+                        background: level >= 4 ? '#22c55e' : THEME.accent,
+                        borderRadius: 3,
+                        transition: 'width 0.3s ease',
+                      }} />
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Types */}
-              <div>
-                <div style={{ fontSize: 14, color: THEME.text.secondary, marginBottom: 8, textTransform: 'uppercase' }}>
-                  Types
-                </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {basePokemon.types.map((type, i) => (
-                    <TypeBadge key={i} type={type} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Skills Tab */}
-          {activeTab === 'skills' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* Active Passives (shown for all, especially useful for enemies) */}
-              {passiveInfos.length > 0 && (
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 'bold', color: THEME.text.secondary, marginBottom: 8 }}>
-                    Active Passives
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {passiveInfos.map((passive) => (
-                      <div
-                        key={passive.id}
-                        style={{
-                          padding: 12,
-                          borderRadius: 8,
-                          background: '#22c55e22',
-                          border: '1px solid #22c55e44',
-                        }}
-                      >
-                        <div style={{ fontSize: 15, fontWeight: 'bold', color: '#22c55e' }}>
-                          {passive.name}
-                        </div>
-                        <div style={{ fontSize: 13, color: THEME.text.secondary, marginTop: 4 }}>
-                          {passive.description}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {passiveInfos.length === 0 && !tree && (
-                <div style={{ color: THEME.text.tertiary, fontStyle: 'italic', textAlign: 'center', padding: 24 }}>
-                  No passive abilities
-                </div>
-              )}
-              {/* Progression Rungs (only for Pokemon with progression trees) */}
-              {tree && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ fontSize: 14, fontWeight: 'bold', color: THEME.text.secondary, marginBottom: 4 }}>
-                  Skill Tree
-                </div>
-                {tree.rungs.map((rung, i) => {
-                  const isUnlocked = level >= rung.level;
-                  const isCurrent = level === rung.level;
-                  const isNext = level + 1 === rung.level;
-
-                  return (
-                    <div
-                      key={i}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                        padding: 12,
-                        borderRadius: 8,
-                        background: isCurrent ? '#3b82f633' : isUnlocked ? '#22c55e22' : '#1e1e2e',
-                        border: isCurrent
-                          ? '2px solid #3b82f6'
-                          : isNext && canLevel
-                            ? '2px dashed #facc15'
-                            : '1px solid ' + THEME.border.subtle,
-                        opacity: isUnlocked || isNext ? 1 : 0.5,
-                      }}
-                    >
-                      {/* Level indicator */}
-                      <div style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: '50%',
-                        background: isUnlocked ? '#22c55e' : '#444',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 'bold',
-                        fontSize: 14,
-                        color: isUnlocked ? '#000' : '#888',
-                        flexShrink: 0,
-                      }}>
-                        {isUnlocked ? '✓' : rung.level}
-                      </div>
-
-                      {/* Rung info */}
-                      <div style={{ flex: 1 }}>
-                        <div style={{
-                          fontSize: 15,
-                          fontWeight: 'bold',
-                          color: isCurrent ? '#3b82f6' : isUnlocked ? '#22c55e' : THEME.text.secondary,
-                        }}>
-                          {rung.name}
-                        </div>
-                        <div style={{ fontSize: 13, color: THEME.text.secondary }}>
-                          {rung.description}
-                        </div>
-                        {rung.passiveId !== 'none' && (
-                          <div
-                            style={{
-                              fontSize: 12,
-                              color: '#60a5fa',
-                              marginTop: 4,
-                              fontStyle: 'italic',
-                            }}
-                            title={PASSIVE_DEFINITIONS[rung.passiveId]?.description || ''}
-                          >
-                            💡 {PASSIVE_DEFINITIONS[rung.passiveId]?.name}: {PASSIVE_DEFINITIONS[rung.passiveId]?.description}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Next indicator */}
-                      {isNext && canLevel && (
-                        <div style={{
-                          fontSize: 12,
-                          fontWeight: 'bold',
-                          color: '#facc15',
-                          padding: '4px 8px',
-                          background: '#facc1522',
-                          borderRadius: 4,
-                        }}>
-                          NEXT
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              )}
-
-              {/* Level Up Button (only shown when tree exists) */}
-              {tree && (
-                <>
-              {canLevel && onLevelUp && (
+              {showNav && (
                 <button
-                  onClick={handleLevelUp}
-                  style={{
-                    width: '100%',
-                    padding: '14px 24px',
-                    fontSize: 16,
-                    fontWeight: 'bold',
-                    borderRadius: 8,
-                    border: 'none',
-                    background: '#facc15',
-                    color: '#000',
-                    cursor: 'pointer',
-                  }}
+                  onClick={handleNext}
+                  className="pdp-nav-btn"
+                  style={navBtnStyle}
+                  title="Next Pokemon"
                 >
-                  Level Up (Spend {EXP_PER_LEVEL} EXP)
+                  &#8250;
                 </button>
               )}
 
-              {!canLevel && !isFromBattle && level < 4 && (
-                <div style={{
-                  textAlign: 'center',
-                  color: THEME.text.secondary,
-                  fontSize: 14,
-                  padding: 8,
-                }}>
-                  Need {EXP_PER_LEVEL} EXP to level up (current: {exp})
-                </div>
+              <button
+                onClick={onClose}
+                className="pdp-nav-btn"
+                style={{
+                  ...navBtnStyle,
+                  marginLeft: showNav ? 0 : 'auto',
+                }}
+                title="Close"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* ── Tabs ── */}
+            <div style={{
+              display: 'flex',
+              gap: 2,
+              padding: '8px 16px',
+              background: THEME.bg.panelDark,
+              borderBottom: `1px solid ${THEME.border.subtle}`,
+              flexShrink: 0,
+            }}>
+              {(['skills', 'stats', 'deck'] as Tab[]).map(tab => {
+                const isActive = activeTab === tab;
+                const color = TAB_COLORS[tab];
+                const label = tab === 'deck'
+                  ? `Deck (${deck.length})`
+                  : tab.charAt(0).toUpperCase() + tab.slice(1);
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className="pdp-tab-btn"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '5px 12px',
+                      borderRadius: 4,
+                      border: isActive ? `1px solid ${color}50` : '1px solid transparent',
+                      background: isActive ? `${color}12` : 'transparent',
+                      cursor: 'pointer',
+                      fontSize: 12,
+                      fontWeight: isActive ? 'bold' : 'normal',
+                      color: isActive ? color : THEME.text.tertiary,
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    <span style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: color,
+                      opacity: isActive ? 1 : 0.4,
+                      boxShadow: isActive ? `0 0 6px ${color}40` : 'none',
+                      flexShrink: 0,
+                      display: 'inline-block',
+                    }} />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* ── Tab content (scrollable, keyed for cross-fade) ── */}
+            <div
+              key={`${formId}-${activeTab}`}
+              className="pdp-content"
+              style={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: 'auto',
+                padding: 20,
+                background: 'radial-gradient(ellipse at 50% 45%, #0d1b2a 0%, #070e18 55%, #020408 100%)',
+              }}
+            >
+              {activeTab === 'stats' && (
+                <StatsContent
+                  currentHp={currentHp}
+                  maxHp={maxHp}
+                  speed={speed}
+                  energyPerTurn={energyPerTurn}
+                  energyCap={energyCap}
+                  handSize={handSize}
+                  deckSize={deck.length}
+                  types={basePokemon.types}
+                  passiveInfos={passiveInfos}
+                />
               )}
 
-              {level >= 4 && (
-                <div style={{
-                  textAlign: 'center',
-                  color: '#22c55e',
-                  fontSize: 15,
-                  fontWeight: 'bold',
-                  padding: 8,
-                }}>
-                  Max Level Reached!
-                </div>
+              {activeTab === 'skills' && (
+                <SkillsContent
+                  tree={tree}
+                  level={level}
+                  exp={exp}
+                  canLevel={canLevel}
+                  isFromBattle={isFromBattle}
+                  passiveInfos={passiveInfos}
+                  onLevelUp={onLevelUp ? handleLevelUp : undefined}
+                />
               )}
-              </>
+
+              {activeTab === 'deck' && (
+                <DeckContent deck={deck} deckCards={deckCards} />
               )}
             </div>
-          )}
 
-          {/* Deck Tab */}
-          {activeTab === 'deck' && (
-            <div>
-              <div style={{ fontSize: 14, color: THEME.text.secondary, marginBottom: 12 }}>
-                {deck.length} cards in deck
-              </div>
+            {/* ── Footer: diamond pips ── */}
+            {showNav && (
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-                gap: 12,
-                justifyItems: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '10px 0',
+                borderTop: `1px solid ${THEME.border.subtle}`,
+                background: THEME.bg.panelDark,
+                flexShrink: 0,
               }}>
-                {deckCards.map((card: MoveDefinition, i: number) => (
-                  <CardPreview
-                    key={`${card.id}-${i}`}
-                    card={card}
-                    showHoverEffect={false}
-                  />
+                {Array.from({ length: partySize }, (_, i) => (
+                  <DiamondPip key={i} filled={i === pokemonIndex} />
                 ))}
               </div>
-              {deck.length === 0 && (
-                <div style={{
-                  textAlign: 'center',
-                  padding: 32,
-                  color: THEME.text.tertiary,
-                }}>
-                  No cards in deck
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </DexFrame>
+      </div>
 
-        {/* Footer - Pokemon indicator */}
-        {partySize > 1 && !isFromBattle && (
+      {/* ── Animations ── */}
+      <style>{`
+        .pdp-overlay {
+          animation: pdpFadeIn 0.15s ease-out forwards;
+        }
+        .pdp-panel {
+          animation: pdpSlideIn 0.2s ease-out forwards;
+        }
+        .pdp-content {
+          animation: pdpContentIn 0.15s ease-out forwards;
+        }
+        @keyframes pdpFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes pdpSlideIn {
+          from { opacity: 0; transform: scale(0.96) translateY(8px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes pdpContentIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .pdp-nav-btn {
+          transition: border-color 0.15s, color 0.15s;
+        }
+        .pdp-nav-btn:hover {
+          border-color: ${THEME.accent} !important;
+          color: ${THEME.accent} !important;
+        }
+        .pdp-tab-btn {
+          transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+        .pdp-tab-btn:hover {
+          background: rgba(255, 255, 255, 0.04) !important;
+        }
+        .pdp-content::-webkit-scrollbar { width: 4px; }
+        .pdp-content::-webkit-scrollbar-track { background: transparent; }
+        .pdp-content::-webkit-scrollbar-thumb {
+          background: ${THEME.border.subtle};
+          border-radius: 2px;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ── Stats tab ────────────────────────────────────────────────────────
+
+function StatsContent({
+  currentHp, maxHp, speed, energyPerTurn, energyCap, handSize, deckSize, types, passiveInfos,
+}: {
+  currentHp: number;
+  maxHp: number;
+  speed: number;
+  energyPerTurn: number;
+  energyCap: number;
+  handSize: number;
+  deckSize: number;
+  types: string[];
+  passiveInfos: PassiveInfo[];
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Combat Stats */}
+      <div>
+        <SectionLabel>Combat Stats</SectionLabel>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+          <StatBox label="HP" value={`${currentHp}/${maxHp}`} color="#ef4444" />
+          <StatBox label="Speed" value={speed.toString()} color={THEME.accent} />
+          <StatBox label="Energy / Turn" value={energyPerTurn.toString()} color="#60a5fa" />
+          <StatBox label="Energy Cap" value={energyCap.toString()} color="#a855f7" />
+          <StatBox label="Cards / Turn" value={handSize.toString()} color="#4ade80" />
+          <StatBox label="Deck Size" value={deckSize.toString()} color="#f97316" />
+        </div>
+      </div>
+
+      {/* Types */}
+      <div>
+        <SectionLabel>Types</SectionLabel>
+        <div style={{ display: 'flex', gap: 12 }}>
+          {types.map((type, i) => {
+            const color = TYPE_COLORS[type] || '#888';
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  background: color,
+                  display: 'inline-block',
+                  flexShrink: 0,
+                }} />
+                <span style={{
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  color,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                }}>
+                  {type}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Passive Abilities */}
+      <div>
+        <SectionLabel>Passive Abilities</SectionLabel>
+        {passiveInfos.length === 0 ? (
           <div style={{
-            textAlign: 'center',
+            padding: 16,
+            background: THEME.chrome.backdrop,
+            borderRadius: 4,
             color: THEME.text.tertiary,
+            fontStyle: 'italic',
+            textAlign: 'center',
             fontSize: 13,
-            padding: '12px 0',
-            borderTop: '1px solid ' + THEME.border.subtle,
-            background: '#1a1a24',
           }}>
-            {pokemonIndex + 1} / {partySize}
+            No passive abilities yet
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {passiveInfos.map((info, i) => (
+              <div key={i} style={{
+                padding: '10px 12px',
+                background: THEME.chrome.backdrop,
+                borderRadius: 4,
+                borderLeft: `3px solid ${THEME.accent}`,
+              }}>
+                <div style={{ fontSize: 14, fontWeight: 'bold', color: THEME.accent }}>
+                  {info.name}
+                </div>
+                <div style={{ fontSize: 12, color: THEME.text.secondary, marginTop: 3 }}>
+                  {info.description}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
+    </div>
+  );
+}
 
-      {/* Right Arrow */}
-      {partySize > 1 && !isFromBattle && (
-        <button
-          onClick={handleNext}
-          style={arrowButtonStyle}
-          title="Next Pokemon"
-        >
-          ›
-        </button>
+// ── Skills tab ───────────────────────────────────────────────────────
+
+function SkillsContent({
+  tree, level, exp, canLevel, isFromBattle, passiveInfos, onLevelUp,
+}: {
+  tree: ReturnType<typeof getProgressionTree>;
+  level: number;
+  exp: number;
+  canLevel: boolean;
+  isFromBattle: boolean;
+  passiveInfos: PassiveInfo[];
+  onLevelUp?: () => void;
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Active passives (especially useful for enemy inspection) */}
+      {passiveInfos.length > 0 && (
+        <div>
+          <SectionLabel>Active Passives</SectionLabel>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {passiveInfos.map((passive) => (
+              <div key={passive.id} style={{
+                padding: '10px 12px',
+                borderRadius: 4,
+                background: '#22c55e12',
+                border: '1px solid #22c55e30',
+              }}>
+                <div style={{ fontSize: 14, fontWeight: 'bold', color: '#22c55e' }}>
+                  {passive.name}
+                </div>
+                <div style={{ fontSize: 12, color: THEME.text.secondary, marginTop: 3 }}>
+                  {passive.description}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {passiveInfos.length === 0 && !tree && (
+        <div style={{ color: THEME.text.tertiary, fontStyle: 'italic', textAlign: 'center', padding: 24, fontSize: 13 }}>
+          No passive abilities
+        </div>
+      )}
+
+      {/* Skill tree — disclaimer-style dividers with diamond rail */}
+      {tree && (
+        <div>
+          <SectionLabel>Skill Tree</SectionLabel>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            {tree.rungs.map((rung, i) => {
+              const isUnlocked = level >= rung.level;
+              const isCurrent = level === rung.level;
+              const isNext = level + 1 === rung.level;
+              const diamondColor = isCurrent
+                ? THEME.accent
+                : isUnlocked ? '#22c55e' : THEME.border.medium;
+
+              return (
+                <div key={i} style={{ display: 'flex', gap: 12 }}>
+                  {/* Left rail: connector + diamond */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    width: 14,
+                    flexShrink: 0,
+                  }}>
+                    {i > 0 && (
+                      <div style={{
+                        width: 1,
+                        height: 8,
+                        background: isUnlocked ? '#22c55e50' : THEME.border.subtle,
+                      }} />
+                    )}
+                    <DiamondNode color={diamondColor} size={12} />
+                    {i < tree.rungs.length - 1 && (
+                      <div style={{
+                        width: 1,
+                        flex: 1,
+                        background: isUnlocked ? '#22c55e50' : THEME.border.subtle,
+                      }} />
+                    )}
+                  </div>
+
+                  {/* Right: rung content — disclaimer-style structure */}
+                  <div style={{
+                    flex: 1,
+                    paddingTop: i > 0 ? 10 : 0,
+                    paddingBottom: 10,
+                    borderTop: i > 0 ? `1px solid ${THEME.border.subtle}` : 'none',
+                    opacity: isUnlocked || isNext ? 1 : 0.5,
+                  }}>
+                    <div style={{ paddingLeft: 2 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{
+                          fontSize: 14,
+                          fontWeight: 'bold',
+                          color: isCurrent ? THEME.text.primary : isUnlocked ? '#22c55e' : THEME.text.secondary,
+                        }}>
+                          {rung.name}
+                        </span>
+                        {isCurrent && (
+                          <span style={{
+                            fontSize: 9,
+                            fontWeight: 'bold',
+                            color: THEME.accent,
+                            ...THEME.heading,
+                            letterSpacing: '0.1em',
+                          }}>
+                            CURRENT
+                          </span>
+                        )}
+                        {isNext && canLevel && (
+                          <span style={{
+                            fontSize: 9,
+                            fontWeight: 'bold',
+                            color: THEME.accent,
+                            padding: '2px 6px',
+                            border: `1px dashed ${THEME.accent}60`,
+                            borderRadius: 3,
+                            ...THEME.heading,
+                            letterSpacing: '0.1em',
+                          }}>
+                            NEXT
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 12, color: THEME.text.secondary, marginTop: 2 }}>
+                        {rung.description}
+                      </div>
+                      {rung.passiveId !== 'none' && (
+                        <div
+                          style={{ fontSize: 11, color: '#60a5fa', marginTop: 4 }}
+                          title={PASSIVE_DEFINITIONS[rung.passiveId]?.description || ''}
+                        >
+                          {PASSIVE_DEFINITIONS[rung.passiveId]?.name}: {PASSIVE_DEFINITIONS[rung.passiveId]?.description}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Level up / status */}
+      {tree && (
+        <div style={{ marginTop: 4 }}>
+          {canLevel && onLevelUp && (
+            <button
+              onClick={onLevelUp}
+              style={{
+                width: '100%',
+                padding: '12px 24px',
+                fontSize: 14,
+                ...THEME.button.primary,
+              }}
+            >
+              Level Up (Spend {EXP_PER_LEVEL} EXP)
+            </button>
+          )}
+
+          {!canLevel && !isFromBattle && level < 4 && (
+            <div style={{
+              textAlign: 'center',
+              color: THEME.text.tertiary,
+              fontSize: 13,
+              padding: 8,
+            }}>
+              Need {EXP_PER_LEVEL} EXP to level up (current: {exp})
+            </div>
+          )}
+
+          {level >= 4 && (
+            <div style={{
+              textAlign: 'center',
+              color: '#22c55e',
+              fontSize: 14,
+              fontWeight: 'bold',
+              padding: 8,
+            }}>
+              Max Level Reached
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
 }
 
-// Helper component for stat boxes
-function StatBox({ label, value, icon, color }: { label: string; value: string; icon: string; color: string }) {
+// ── Deck tab ─────────────────────────────────────────────────────────
+
+function DeckContent({ deck, deckCards }: { deck: string[]; deckCards: MoveDefinition[] }) {
   return (
-    <div style={{
-      padding: 12,
-      background: '#1e1e2e',
-      borderRadius: 8,
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10,
-    }}>
-      <div style={{ fontSize: 20 }}>{icon}</div>
-      <div>
-        <div style={{ fontSize: 12, color: THEME.text.tertiary }}>{label}</div>
-        <div style={{ fontSize: 18, fontWeight: 'bold', color }}>{value}</div>
+    <div>
+      <div style={{ fontSize: 13, color: THEME.text.tertiary, marginBottom: 16, textAlign: 'center' }}>
+        {deck.length} card{deck.length !== 1 ? 's' : ''} in deck
       </div>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+        gap: 12,
+        justifyItems: 'center',
+      }}>
+        {deckCards.map((card: MoveDefinition, i: number) => (
+          <CardPreview
+            key={`${card.id}-${i}`}
+            card={card}
+            showHoverEffect={false}
+          />
+        ))}
+      </div>
+      {deck.length === 0 && (
+        <div style={{
+          textAlign: 'center',
+          padding: 32,
+          color: THEME.text.tertiary,
+          fontStyle: 'italic',
+          fontSize: 13,
+        }}>
+          No cards in deck
+        </div>
+      )}
     </div>
   );
 }
 
-// Helper component for type badges
-const TYPE_COLORS: Record<string, string> = {
-  normal: '#a8a878',
-  fire: '#f08030',
-  water: '#6890f0',
-  grass: '#78c850',
-  electric: '#f8d030',
-  poison: '#a040a0',
-  flying: '#a890f0',
-  psychic: '#f85888',
-  dark: '#705848',
-  fighting: '#c03028',
-  ice: '#98d8d8',
-  bug: '#a8b820',
-  dragon: '#7038f8',
-  ghost: '#705898',
-  rock: '#b8a038',
-  ground: '#e0c068',
-  steel: '#b8b8d0',
-  item: '#4ade80',
-};
+// ── Shared helpers ───────────────────────────────────────────────────
 
-function TypeBadge({ type }: { type: string }) {
-  const color = TYPE_COLORS[type] || '#888';
+function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
-      padding: '6px 14px',
-      borderRadius: 6,
-      background: `${color}33`,
-      color: color,
-      fontWeight: 'bold',
-      fontSize: 13,
-      textTransform: 'uppercase',
+      fontSize: 9,
+      color: THEME.text.tertiary,
+      ...THEME.heading,
+      letterSpacing: '0.12em',
+      marginBottom: 8,
     }}>
-      {type}
+      {children}
+    </div>
+  );
+}
+
+function StatBox({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <div style={{
+      padding: '10px 12px',
+      background: THEME.chrome.backdrop,
+      borderRadius: 4,
+      borderLeft: `3px solid ${color}`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}>
+      <span style={{ fontSize: 12, color: THEME.text.secondary }}>{label}</span>
+      <span style={{ fontSize: 16, fontWeight: 'bold', color }}>{value}</span>
     </div>
   );
 }

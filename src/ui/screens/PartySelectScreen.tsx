@@ -3,9 +3,9 @@ import type { PokemonData, Position, Row, Column } from '../../engine/types';
 import { STARTER_POKEMON } from '../../data/loaders';
 import { POKEMON_COSTS, STARTING_GOLD } from '../../data/shop';
 import { ScreenShell } from '../components/ScreenShell';
-import { Flourish } from '../components/Flourish';
 import { PokemonTile } from '../components/PokemonTile';
 import { THEME } from '../theme';
+import { GoldCoin } from '../components/GoldCoin';
 
 interface Props {
   onStart: (party: PokemonData[], positions: Position[], gold: number) => void;
@@ -73,7 +73,7 @@ function PokemonCard({
       />
       <div style={{
         position: 'absolute',
-        bottom: 4,
+        top: 4,
         right: 4,
         padding: '2px 6px',
         borderRadius: 4,
@@ -82,7 +82,7 @@ function PokemonCard({
         fontSize: 11,
         fontWeight: 'bold',
       }}>
-        {cost}g
+        {cost}<GoldCoin size={10} />
       </div>
 
       {/* Playstyle tooltip on hover */}
@@ -336,7 +336,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
             fontSize: 15,
             fontWeight: 'bold',
           }}>
-            {gold}g
+            {gold}<GoldCoin size={14} />
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -364,36 +364,35 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
     );
 
     return (
-      <ScreenShell header={selectHeader} bodyStyle={{ padding: '24px 16px 48px' }}>
+      <ScreenShell header={selectHeader} bodyStyle={{ padding: '24px 16px 48px' }} ambient ambientTint="rgba(250,204,21,0.02)">
         <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
           <p style={{ color: THEME.text.secondary, margin: 0, textAlign: 'center' }}>
             Select 1-4 Pokemon for battle. Leftover gold carries into the run!
           </p>
 
-          {COST_TIERS.map(tier => {
+          {COST_TIERS.map((tier, tierIdx) => {
             const tierPokemon = getPokemonByTier(tier.cost);
             if (tierPokemon.length === 0) return null;
-            const isStarters = tier.cost === 250;
+            const isFirst = tierIdx === 0;
 
             return (
-              <div
-                key={tier.cost}
-                style={{
-                  width: '100%',
-                  padding: isStarters ? 0 : 20,
-                  background: isStarters ? 'transparent' : THEME.bg.panelDark,
-                  borderRadius: 12,
-                  border: isStarters ? 'none' : `1px solid ${THEME.border.subtle}`,
-                }}
-              >
-                {/* Tier header: label + cost badge */}
+              <div key={tier.cost} style={{ width: '100%' }}>
+                {/* Disclaimer-style section header */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
                   gap: 10,
+                  justifyContent: 'center',
                   marginBottom: 12,
+                  ...(isFirst ? {} : { marginTop: 20, paddingTop: 16, borderTop: `1px solid ${THEME.border.subtle}` }),
                 }}>
+                  <div style={{
+                    width: 5,
+                    height: 5,
+                    background: tier.color,
+                    transform: 'rotate(45deg)',
+                    flexShrink: 0,
+                  }} />
                   <div style={{
                     fontSize: 13,
                     color: tier.color,
@@ -411,16 +410,14 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
                     fontSize: 12,
                     fontWeight: 'bold',
                   }}>
-                    {tier.cost}g each
+                    {tier.cost}<GoldCoin size={11} /> each
                   </div>
                 </div>
-                <Flourish variant="heading" color={isStarters ? tier.color : THEME.text.tertiary} />
                 <div style={{
                   display: 'flex',
                   gap: 16,
                   flexWrap: 'wrap',
                   justifyContent: 'center',
-                  marginTop: 12,
                 }}>
                   {tierPokemon.map(pokemon => (
                     <PokemonCard
@@ -515,7 +512,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
   };
 
   return (
-    <ScreenShell header={positionHeader} bodyStyle={{ padding: '24px 16px 48px' }}>
+    <ScreenShell header={positionHeader} bodyStyle={{ padding: '24px 16px 48px' }} ambient ambientTint="rgba(250,204,21,0.02)">
       <div style={{ maxWidth: 600, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
         <p style={{ color: THEME.text.secondary, margin: 0, textAlign: 'center' }}>
           Drag Pokemon into formation

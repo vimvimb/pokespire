@@ -5,6 +5,7 @@ import { getMove, getPokemon } from '../../data/loaders';
 import { CardPreview } from '../components/CardPreview';
 import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
+import { GoldCoin } from '../components/GoldCoin';
 import { getSpriteSize } from '../../data/heights';
 
 interface Props {
@@ -107,7 +108,7 @@ export function MoveDeleterScreen({ run, onForgetCard, onClose, onRestart }: Pro
           fontSize: 16,
           fontWeight: 'bold',
         }}>
-          {run.gold}g
+          {run.gold}<GoldCoin size={14} />
         </div>
         <button
           onClick={onClose}
@@ -139,7 +140,7 @@ export function MoveDeleterScreen({ run, onForgetCard, onClose, onRestart }: Pro
       inset: 0,
       zIndex: 100,
     }}>
-      <ScreenShell header={header}>
+      <ScreenShell header={header} ambient>
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -231,7 +232,7 @@ export function MoveDeleterScreen({ run, onForgetCard, onClose, onRestart }: Pro
                       : 'none',
                   }}
                 >
-                  Forget ({CARD_FORGET_COST}g)
+                  Forget ({CARD_FORGET_COST}<GoldCoin size={12} />)
                 </button>
               )}
 

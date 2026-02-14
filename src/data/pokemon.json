@@ -187,7 +187,7 @@
     "name": "Raichu",
     "types": ["electric"],
     "maxHp": 48,
-    "baseSpeed": 6,
+    "baseSpeed": 8,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
@@ -204,7 +204,7 @@
   "rattata": {
     "name": "Rattata",
     "types": ["normal"],
-    "maxHp": 25,
+    "maxHp": 23,
     "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
@@ -281,7 +281,7 @@
   "raticate": {
     "name": "Raticate",
     "types": ["normal"],
-    "maxHp": 45,
+    "maxHp": 38,
     "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
@@ -395,7 +395,7 @@
     "name": "Mewtwo",
     "types": ["psychic"],
     "maxHp": 200,
-    "baseSpeed": 12,
+    "baseSpeed": 10,
     "energyPerTurn": 5,
     "energyCap": 12,
     "handSize": 6,
@@ -420,7 +420,8 @@
     "deck": [
       "scratch", "scratch",
       "bite", "bite",
-      "slash",
+      "defend", "defend",
+      "pay-day",
       "fake-out",
       "pay-day",
       "swift"
@@ -723,7 +724,7 @@
     "name": "Butterfree",
     "types": ["bug", "flying"],
     "maxHp": 38,
-    "baseSpeed": 7,
+    "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
@@ -761,7 +762,7 @@
     "name": "Beedrill",
     "types": ["bug", "poison"],
     "maxHp": 36,
-    "baseSpeed": 8,
+    "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
@@ -798,7 +799,7 @@
     "name": "Gyarados",
     "types": ["water", "flying"],
     "maxHp": 65,
-    "baseSpeed": 7,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
@@ -832,7 +833,24 @@
   "magmar": {
     "name": "Magmar",
     "types": ["fire"],
-    "maxHp": 48,
+    "maxHp": 42,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "defend", "defend", "defend",
+      "karate-chop", "karate-chop",
+      "ember", "ember", "ember",
+      "fire-punch", "fire-punch"
+    ],
+    "abilities": [],
+    "description": "Stokes the flames. The more an enemy burns, the harder every hit lands."
+  },
+  "magmortar": {
+    "name": "Magmortar",
+    "types": ["fire"],
+    "maxHp": 57,
     "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
@@ -849,7 +867,24 @@
   "electabuzz": {
     "name": "Electabuzz",
     "types": ["electric"],
-    "maxHp": 42,
+    "maxHp": 40,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "defend", "defend", "defend",
+      "karate-chop", "karate-chop",
+      "thunder-shock", "thunder-shock", "thunder-shock",
+      "thunder-punch", "thunder-punch"
+    ],
+    "abilities": [],
+    "description": "Paralyzes targets, then every attack \u2014 any type \u2014 hits them harder."
+  },
+  "electivire": {
+    "name": "Electivire",
+    "types": ["electric"],
+    "maxHp": 55,
     "baseSpeed": 7,
     "energyPerTurn": 3,
     "energyCap": 10,
@@ -867,7 +902,7 @@
     "name": "Dratini",
     "types": ["dragon"],
     "maxHp": 35,
-    "baseSpeed": 5,
+    "baseSpeed": 4,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
@@ -885,7 +920,7 @@
     "name": "Dragonair",
     "types": ["dragon"],
     "maxHp": 45,
-    "baseSpeed": 6,
+    "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
@@ -902,7 +937,7 @@
     "name": "Dragonite",
     "types": ["dragon", "flying"],
     "maxHp": 80,
-    "baseSpeed": 6,
+    "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
@@ -969,7 +1004,7 @@
     "name": "Sandslash",
     "types": ["ground"],
     "maxHp": 54,
-    "baseSpeed": 4,
+    "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
@@ -978,6 +1013,400 @@
       "scratch", "scratch", "scratch",
       "sand-attack", "sand-attack",
       "bone-club", "bone-club"
+    ],
+    "abilities": []
+  },
+  "gastly": {
+    "name": "Gastly",
+    "types": ["ghost", "poison"],
+    "maxHp": 22,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 8,
+    "handSize": 4,
+    "deck": [
+      "lick", "lick",
+      "confuse-ray", "confuse-ray",
+      "double-team", "double-team",
+      "poison-gas", "poison-gas",
+      "shadow-punch", "shadow-punch"
+    ],
+    "abilities": ["intangible"],
+    "description": "Goes incorporeal to avoid damage, then attacks from the shadows."
+  },
+  "haunter": {
+    "name": "Haunter",
+    "types": ["ghost", "poison"],
+    "maxHp": 35,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "lick", "lick",
+      "confuse-ray", "confuse-ray",
+      "double-team", "double-team",
+      "poison-gas", "poison-gas",
+      "shadow-punch", "shadow-punch"
+    ],
+    "abilities": []
+  },
+  "gengar": {
+    "name": "Gengar",
+    "types": ["ghost", "poison"],
+    "maxHp": 48,
+    "baseSpeed": 8,
+    "energyPerTurn": 3,
+    "energyCap": 12,
+    "handSize": 5,
+    "deck": [
+      "lick", "lick",
+      "confuse-ray", "confuse-ray",
+      "double-team", "double-team",
+      "poison-gas", "poison-gas",
+      "shadow-punch", "shadow-punch"
+    ],
+    "abilities": []
+  },
+  "clefairy": {
+    "name": "Clefairy",
+    "types": ["fairy"],
+    "maxHp": 35,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "pound", "pound", "pound",
+      "defend", "defend",
+      "disarming-voice", "disarming-voice",
+      "fairy-wind",
+      "charm",
+      "moonlight"
+    ],
+    "abilities": [],
+    "description": "Absorbs attacks with starlit evasion, then enfeebles enemies who dare strike."
+  },
+  "clefable": {
+    "name": "Clefable",
+    "types": ["fairy"],
+    "maxHp": 50,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "pound", "pound", "pound",
+      "defend", "defend",
+      "disarming-voice", "disarming-voice",
+      "fairy-wind",
+      "charm",
+      "moonlight"
+    ],
+    "abilities": [],
+    "description": "A mystical fairy that guards allies and shrugs off harmful effects."
+  },
+
+  "machop": {
+    "name": "Machop",
+    "types": ["fighting"],
+    "maxHp": 50,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "karate-chop", "karate-chop", "karate-chop",
+      "defend", "defend",
+      "low-kick", "low-kick",
+      "double-kick",
+      "counter",
+      "rolling-kick"
+    ],
+    "abilities": [],
+    "description": "Eschews defense. Employs long physical combos and explosive finishes."
+  },
+  "machoke": {
+    "name": "Machoke",
+    "types": ["fighting"],
+    "maxHp": 55,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "karate-chop", "karate-chop", "karate-chop",
+      "defend", "defend",
+      "low-kick", "low-kick",
+      "double-kick",
+      "counter",
+      "rolling-kick"
+    ],
+    "abilities": [],
+    "description": "A powerful wrestler that strips enemy defenses and builds momentum."
+  },
+  "machamp": {
+    "name": "Machamp",
+    "types": ["fighting"],
+    "maxHp": 60,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "karate-chop", "karate-chop", "karate-chop",
+      "defend", "defend",
+      "low-kick", "low-kick",
+      "double-kick",
+      "counter",
+      "rolling-kick"
+    ],
+    "abilities": [],
+    "description": "A four-armed champion that unleashes devastating finishing blows."
+  },
+  "vulpix": {
+    "name": "Vulpix",
+    "types": ["fire"],
+    "maxHp": 42,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "fire-spin", "fire-spin",
+      "extrasensory", "extrasensory",
+      "defend", "defend",
+      "ember",
+      "confuse-ray",
+      "ember",
+      "hex"
+    ],
+    "abilities": [],
+    "description": "A mystical fox that curses foes with burns and weakness, then feeds on their suffering."
+  },
+  "ninetales": {
+    "name": "Ninetales",
+    "types": ["fire"],
+    "maxHp": 52,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "fire-spin", "fire-spin",
+      "extrasensory", "extrasensory",
+      "defend", "defend",
+      "ember",
+      "confuse-ray",
+      "ember",
+      "hex"
+    ],
+    "abilities": [],
+    "description": "A mystical fox that curses foes and feeds on their suffering."
+  },
+  "oddish": {
+    "name": "Oddish",
+    "types": ["grass", "poison"],
+    "maxHp": 38,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "vine-whip", "vine-whip",
+      "absorb", "absorb",
+      "defend", "defend",
+      "poison-powder",
+      "stun-spore",
+      "mega-drain",
+      "acid"
+    ],
+    "abilities": [],
+    "description": "A toxic weed that poisons foes and drains their life force."
+  },
+  "gloom": {
+    "name": "Gloom",
+    "types": ["grass", "poison"],
+    "maxHp": 45,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "vine-whip", "vine-whip",
+      "absorb", "absorb",
+      "defend", "defend",
+      "poison-powder",
+      "stun-spore",
+      "mega-drain",
+      "acid"
+    ],
+    "abilities": [],
+    "description": "Its noxious stench weakens nearby foes while it saps their strength."
+  },
+  "vileplume": {
+    "name": "Vileplume",
+    "types": ["grass", "poison"],
+    "maxHp": 55,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "vine-whip", "vine-whip",
+      "absorb", "absorb",
+      "defend", "defend",
+      "poison-powder",
+      "stun-spore",
+      "mega-drain",
+      "acid"
+    ],
+    "abilities": [],
+    "description": "A blooming healer that sustains allies and drains enemies dry."
+  },
+  "meowth": {
+    "name": "Meowth",
+    "types": ["normal"],
+    "maxHp": 40,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "scratch", "scratch", "scratch",
+      "defend", "defend",
+      "bite", "bite",
+      "fake-out",
+      "fury-swipes",
+      "pay-day"
+    ],
+    "abilities": [],
+    "description": "A cunning cat that earns gold and exploits cheap, precise attacks."
+  },
+  "paras": {
+    "name": "Paras",
+    "types": ["bug", "grass"],
+    "maxHp": 28,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "scratch", "scratch", "scratch",
+      "defend", "defend",
+      "absorb", "absorb",
+      "stun-spore",
+      "leech-life",
+      "bug-bite"
+    ],
+    "abilities": [],
+    "description": "A parasitic fungus fighter that punishes foes who stand too close."
+  },
+  "parasect": {
+    "name": "Parasect",
+    "types": ["bug", "grass"],
+    "maxHp": 55,
+    "baseSpeed": 2,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "scratch", "scratch", "scratch",
+      "defend", "defend",
+      "absorb", "absorb",
+      "stun-spore",
+      "leech-life",
+      "bug-bite"
+    ],
+    "abilities": []
+  },
+  "zubat": {
+    "name": "Zubat",
+    "types": ["poison", "flying"],
+    "maxHp": 26,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "bite", "bite", "bite",
+      "defend", "defend",
+      "leech-life",
+      "poison-sting",
+      "gust",
+      "wing-attack", "wing-attack"
+    ],
+    "abilities": [],
+    "description": "A swift blood-drainer that leeches life from foes in the front row."
+  },
+  "golbat": {
+    "name": "Golbat",
+    "types": ["poison", "flying"],
+    "maxHp": 43,
+    "baseSpeed": 8,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "bite", "bite", "bite",
+      "defend", "defend",
+      "leech-life",
+      "poison-sting",
+      "gust",
+      "wing-attack", "wing-attack"
+    ],
+    "abilities": []
+  },
+  "crobat": {
+    "name": "Crobat",
+    "types": ["poison", "flying"],
+    "maxHp": 55,
+    "baseSpeed": 10,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "bite", "bite", "bite",
+      "defend", "defend",
+      "leech-life",
+      "poison-sting",
+      "gust",
+      "wing-attack", "wing-attack"
+    ],
+    "abilities": []
+  },
+  "jigglypuff": {
+    "name": "Jigglypuff",
+    "types": ["normal", "fairy"],
+    "maxHp": 34,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "defend", "defend",
+      "defense-curl", "defense-curl",
+      "sing", "sing",
+      "disarming-voice", "disarming-voice",
+      "pound", "pound"
+    ],
+    "abilities": [],
+    "description": "A lullaby singer that puts foes to sleep, then punishes their slumber."
+  },
+  "wigglytuff": {
+    "name": "Wigglytuff",
+    "types": ["normal", "fairy"],
+    "maxHp": 70,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "defend", "defend",
+      "defense-curl", "defense-curl",
+      "sing", "sing",
+      "disarming-voice", "disarming-voice",
+      "pound", "pound"
     ],
     "abilities": []
   }

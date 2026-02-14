@@ -23,6 +23,7 @@ export const TYPE_COLORS: Record<MoveType, string> = {
   rock: '#b8a038',
   ground: '#e0c068',
   steel: '#b8b8d0',
+  fairy: '#ee99ac',
   item: '#4ade80',
 };
 

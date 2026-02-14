@@ -19,6 +19,8 @@ interface RawMoveData {
   pools?: string[];
   isItem?: boolean;
   singleUse?: boolean;
+  uncollectible?: boolean;
+  goldOnHit?: boolean;
 }
 
 // Type for raw pokemon data from JSON (without id)
@@ -52,6 +54,8 @@ export const MOVES: Record<string, MoveDefinition> = Object.fromEntries(
       pools: move.pools as MoveType[] | undefined,
       isItem: move.isItem ?? false,
       singleUse: move.singleUse ?? false,
+      uncollectible: move.uncollectible ?? false,
+      goldOnHit: move.goldOnHit ?? false,
     },
   ])
 );
@@ -103,6 +107,15 @@ export const STARTER_POKEMON: Record<string, PokemonData> = {
   dratini: POKEMON.dratini,
   spearow: POKEMON.spearow,
   sandshrew: POKEMON.sandshrew,
+  gastly: POKEMON.gastly,
+  clefairy: POKEMON.clefairy,
+  machop: POKEMON.machop,
+  vulpix: POKEMON.vulpix,
+  oddish: POKEMON.oddish,
+  meowth: POKEMON.meowth,
+  jigglypuff: POKEMON.jigglypuff,
+  paras: POKEMON.paras,
+  zubat: POKEMON.zubat,
 };
 
 /** Enemy Pokemon */

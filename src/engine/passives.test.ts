@@ -10,7 +10,7 @@ import {
   processToxicHorn,
   checkThickHide,
   checkThickFat,
-  checkUnderdog,
+  checkProletariat,
   checkAngerPoint,
   hasRockHead,
   // Battle start hooks
@@ -205,19 +205,19 @@ describe('Passive Abilities', () => {
     });
   });
 
-  describe('Underdog', () => {
+  describe('Proletariat', () => {
     it('returns +2 for Basic 1-cost cards', () => {
-      const attacker = createTestCombatant({ passiveIds: ['underdog'] });
+      const attacker = createTestCombatant({ passiveIds: ['proletariat'] });
       const card = getMove('tackle'); // Should be Basic rarity, costs 1
 
-      expect(checkUnderdog(attacker, card)).toBe(2);
+      expect(checkProletariat(attacker, card)).toBe(2);
     });
 
-    it('returns 0 if combatant lacks underdog', () => {
+    it('returns 0 if combatant lacks proletariat', () => {
       const attacker = createTestCombatant({ passiveIds: [] });
       const card = getMove('tackle');
 
-      expect(checkUnderdog(attacker, card)).toBe(0);
+      expect(checkProletariat(attacker, card)).toBe(0);
     });
   });
 
@@ -754,7 +754,7 @@ describe('Passive Abilities', () => {
 
       const result = checkCounterCurrent(state, attacker, target);
 
-      expect(result.bonusDamage).toBe(3); // (10 - 4) / 2 = 3
+      expect(result.bonusDamage).toBe(6); // 10 - 4 = 6
     });
 
     it('returns 0 against faster enemies', () => {
@@ -776,7 +776,7 @@ describe('Passive Abilities', () => {
 
       const result = checkStaticField(state, attacker, target);
 
-      expect(result.reduction).toBe(3); // (10 - 4) / 2 = 3
+      expect(result.reduction).toBe(6); // 10 - 4 = 6
     });
   });
 

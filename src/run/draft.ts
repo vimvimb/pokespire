@@ -42,7 +42,7 @@ const TYPE_POOL_CHANCE = 0.75;
  */
 function getCardsInPool(poolType: MoveType): MoveDefinition[] {
   return Object.values(MOVES).filter(move =>
-    move.pools?.includes(poolType) && !move.isItem
+    move.pools?.includes(poolType) && !move.isItem && !move.uncollectible
   );
 }
 
@@ -50,7 +50,7 @@ function getCardsInPool(poolType: MoveType): MoveDefinition[] {
  * Get all cards (global pool).
  */
 function getAllCards(): MoveDefinition[] {
-  return Object.values(MOVES).filter(move => !move.isItem);
+  return Object.values(MOVES).filter(move => !move.isItem && !move.uncollectible);
 }
 
 /**

@@ -18,8 +18,11 @@ import { useBattleEffects, BattleEffectsLayer } from '../components/BattleEffect
 import type { BattlePhase } from '../hooks/useBattle';
 import type { RunState } from '../../run/types';
 import { getBattleSpriteScale } from '../../data/heights';
+import { Flourish } from '../components/Flourish';
 import { THEME } from '../theme';
-import battleBackground from '../../../assets/backgrounds/rocket_lab_act_1_v4.png';
+import battleBgAct1 from '../../../assets/backgrounds/rocket_lab_act_1_v4.png';
+import battleBgAct2 from '../../../assets/backgrounds/rocket_lab_act_2.png';
+import battleBgAct3 from '../../../assets/backgrounds/rocket_lab_act_3.png';
 
 export type BattleResult = 'victory' | 'defeat';
 
@@ -34,7 +37,7 @@ interface Props {
   onEndTurn: () => void;
   onSwitchPosition?: (targetPosition: Position) => void;
   onRestart: () => void;
-  onBattleEnd?: (result: BattleResult, combatants: Combatant[]) => void;
+  onBattleEnd?: (result: BattleResult, combatants: Combatant[], goldEarned?: number) => void;
   runState?: RunState;
   onBackToSandboxConfig?: () => void;  // Only present in sandbox mode
 }
@@ -853,30 +856,33 @@ export function BattleScreen({
   // Progress through victory stages
   useEffect(() => {
     if (victoryStage === 'celebrating') {
-      const timer = setTimeout(() => setVictoryStage('draft_message'), 2000);
+      const timer = setTimeout(() => setVictoryStage('draft_message'), 1000);
       return () => clearTimeout(timer);
     }
     if (victoryStage === 'draft_message') {
-      const timer = setTimeout(() => setVictoryStage('transitioning'), 1800);
+      const timer = setTimeout(() => setVictoryStage('transitioning'), 1200);
       return () => clearTimeout(timer);
     }
     if (victoryStage === 'transitioning' && onBattleEnd && !battleEndCalledRef.current) {
       battleEndCalledRef.current = true;
-      onBattleEnd('victory', state.combatants);
+      onBattleEnd('victory', state.combatants, state.goldEarned);
     }
-  }, [victoryStage, onBattleEnd, state.combatants]);
+  }, [victoryStage, onBattleEnd, state.combatants, state.goldEarned]);
 
   // Handle defeat immediately (no celebration needed)
   useEffect(() => {
     if (phase === 'defeat' && onBattleEnd && !battleEndCalledRef.current) {
       battleEndCalledRef.current = true;
-      onBattleEnd('defeat', state.combatants);
+      onBattleEnd('defeat', state.combatants, state.goldEarned);
     }
     // Reset ref when game is not over (for next battle)
     if (!gameOver) {
       battleEndCalledRef.current = false;
     }
   }, [gameOver, phase, state.combatants, onBattleEnd]);
+
+  const act = runState?.currentAct ?? 1;
+  const battleBackground = act === 3 ? battleBgAct3 : act === 2 ? battleBgAct2 : battleBgAct1;
 
   return (
     <div style={{
@@ -1073,62 +1079,94 @@ export function BattleScreen({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(0,0,0,0.75)',
-            gap: 24,
+            background: 'rgba(0,0,0,0)',
+            gap: 20,
+            zIndex: 50,
           }}>
-            {/* Victory text with animation */}
-            <div style={{
-              fontSize: victoryStage === 'celebrating' ? 64 : 48,
-              fontWeight: 'bold',
-              color: THEME.accent,
-              textShadow: '0 0 20px rgba(250, 204, 21, 0.6), 0 0 40px rgba(250, 204, 21, 0.4)',
-              animation: victoryStage === 'celebrating' ? 'victoryPulse 0.6s ease-in-out infinite alternate' : 'none',
-              transition: 'font-size 0.3s ease',
-            }}>
-              VICTORY!
+            {/* Dark backdrop that fades in */}
+            <div className="battle-victory-backdrop" style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(2, 4, 8, 0.8)',
+            }} />
+
+            {/* Content */}
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+              <div
+                className="battle-victory-title"
+                style={{
+                  fontSize: 56,
+                  fontWeight: 'bold',
+                  color: THEME.accent,
+                  textShadow: '0 0 30px rgba(250, 204, 21, 0.4), 0 0 60px rgba(250, 204, 21, 0.15)',
+                  ...THEME.heading,
+                  letterSpacing: '0.2em',
+                }}
+              >
+                VICTORY
+              </div>
+
+              <div className="battle-victory-flourish">
+                <Flourish variant="divider" width={200} color={THEME.accent} />
+              </div>
+
+              {/* Draft message — appears after title settles */}
+              {(victoryStage === 'draft_message' || victoryStage === 'transitioning') && (
+                <div
+                  className="battle-victory-draft-msg"
+                  style={{
+                    fontSize: 18,
+                    color: THEME.text.secondary,
+                    textAlign: 'center',
+                    letterSpacing: '0.05em',
+                    marginTop: 4,
+                  }}
+                >
+                  Choose a new card for each Pokemon...
+                </div>
+              )}
             </div>
 
-            {/* Sparkle effects during celebration */}
-            {victoryStage === 'celebrating' && (
-              <div style={{
-                display: 'flex',
-                gap: 16,
-                fontSize: 32,
-                animation: 'sparkle 0.8s ease-in-out infinite',
-              }}>
-                <span style={{ animationDelay: '0s' }}>✦</span>
-                <span style={{ animationDelay: '0.2s' }}>✧</span>
-                <span style={{ animationDelay: '0.4s' }}>✦</span>
-              </div>
-            )}
-
-            {/* Draft message */}
-            {(victoryStage === 'draft_message' || victoryStage === 'transitioning') && (
-              <div style={{
-                fontSize: 24,
-                color: '#a5f3fc',
-                fontWeight: 500,
-                textAlign: 'center',
-                animation: 'fadeSlideIn 0.5s ease-out',
-                textShadow: '0 0 10px rgba(165, 243, 252, 0.4)',
-              }}>
-                Choose a new card for each Pokemon!
-              </div>
-            )}
-
-            {/* CSS animations */}
             <style>{`
-              @keyframes victoryPulse {
-                from { transform: scale(1); }
-                to { transform: scale(1.08); }
+              .battle-victory-backdrop {
+                animation: bvBackdropIn 0.6s ease-out forwards;
+                opacity: 0;
               }
-              @keyframes sparkle {
-                0%, 100% { opacity: 0.4; transform: scale(0.8); }
-                50% { opacity: 1; transform: scale(1.2); }
+              @keyframes bvBackdropIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
               }
-              @keyframes fadeSlideIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
+              .battle-victory-title {
+                animation: bvTitleIn 0.7s ease-out forwards;
+                opacity: 0;
+              }
+              @keyframes bvTitleIn {
+                from {
+                  opacity: 0;
+                  transform: translateY(-8px) scale(0.97);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0) scale(1);
+                }
+              }
+              .battle-victory-flourish {
+                animation: bvFadeIn 0.4s ease-out 0.3s forwards;
+                opacity: 0;
+              }
+              .battle-victory-draft-msg {
+                animation: bvFadeIn 0.4s ease-out forwards;
+                opacity: 0;
+              }
+              @keyframes bvFadeIn {
+                from {
+                  opacity: 0;
+                  transform: translateY(6px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0);
+                }
               }
             `}</style>
           </div>
@@ -1143,31 +1181,51 @@ export function BattleScreen({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'rgba(0,0,0,0.7)',
-            gap: 16,
+            zIndex: 50,
           }}>
-            <div style={{
-              fontSize: 52,
-              fontWeight: 'bold',
-              color: THEME.status.damage,
-            }}>
-              DEFEAT
+            <div className="battle-defeat-backdrop" style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(2, 4, 8, 0.8)',
+            }} />
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+              <div
+                className="battle-defeat-title"
+                style={{
+                  fontSize: 56,
+                  fontWeight: 'bold',
+                  color: THEME.status.damage,
+                  textShadow: '0 0 30px rgba(239, 68, 68, 0.4), 0 0 60px rgba(239, 68, 68, 0.15)',
+                  ...THEME.heading,
+                  letterSpacing: '0.2em',
+                }}
+              >
+                DEFEAT
+              </div>
+              <Flourish variant="heading" width={100} color={THEME.status.damage} />
+              <button
+                onClick={onRestart}
+                style={{
+                  padding: '12px 32px',
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  ...THEME.button.secondary,
+                  marginTop: 8,
+                }}
+              >
+                Main Menu
+              </button>
             </div>
-            <button
-              onClick={onRestart}
-              style={{
-                padding: '12px 32px',
-                fontSize: 17,
-                fontWeight: 'bold',
-                borderRadius: 8,
-                border: 'none',
-                background: THEME.accent,
-                color: '#000',
-                cursor: 'pointer',
-              }}
-            >
-              Play Again
-            </button>
+            <style>{`
+              .battle-defeat-backdrop {
+                animation: bvBackdropIn 0.6s ease-out forwards;
+                opacity: 0;
+              }
+              .battle-defeat-title {
+                animation: bvTitleIn 0.7s ease-out forwards;
+                opacity: 0;
+              }
+            `}</style>
           </div>
         )}
       </div>

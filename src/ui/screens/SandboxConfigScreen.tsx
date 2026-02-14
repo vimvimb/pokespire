@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import type { PokemonData, Position, Row, Column, MoveType, CardRarity } from '../../engine/types';
+import type { PokemonData, Position, Row, Column, MoveType, CardRarity, StatusType } from '../../engine/types';
 import { getPokemon, getMove, MOVES } from '../../data/loaders';
 import {
   PROGRESSION_TREES,
@@ -10,6 +10,7 @@ import {
 } from '../../run/progression';
 import { CardPreview } from '../components/CardPreview';
 import { Flourish } from '../components/Flourish';
+import { DexFrame } from '../components/DexFrame';
 import { PokemonTile, TYPE_COLORS } from '../components/PokemonTile';
 import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
@@ -21,12 +22,31 @@ const AVAILABLE_POKEMON = Object.keys(PROGRESSION_TREES);
 const ALL_TYPES: MoveType[] = [
   'normal', 'fire', 'water', 'grass', 'electric', 'poison',
   'flying', 'psychic', 'dark', 'fighting', 'ice', 'bug',
-  'dragon', 'ghost', 'rock', 'ground', 'steel', 'item',
+  'dragon', 'ghost', 'rock', 'ground', 'steel', 'fairy', 'item',
 ];
 
 const ALL_RARITIES: CardRarity[] = [
   'basic', 'common', 'uncommon', 'rare', 'epic', 'legendary',
 ];
+
+const ALL_STATUSES: StatusType[] = [
+  'burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt',
+  'strength', 'evasion', 'haste',
+];
+
+const STATUS_COLORS: Record<StatusType, string> = {
+  burn: '#f97316',
+  poison: '#a855f7',
+  paralysis: '#facc15',
+  slow: '#60a5fa',
+  enfeeble: '#f87171',
+  sleep: '#94a3b8',
+  leech: '#4ade80',
+  strength: '#ef4444',
+  evasion: '#67e8f9',
+  haste: '#fbbf24',
+  taunt: '#dc2626',
+};
 
 
 // ── Exported interfaces (preserved for App.tsx compatibility) ──────
@@ -144,6 +164,23 @@ function FilterButton({ label, isSelected, onClick, color }: {
   );
 }
 
+// ── Section Header (matches PokeDex/CardDex) ─────────────────────
+
+function SectionLabel({ label, color }: { label: string; color?: string }) {
+  return (
+    <div style={{
+      fontSize: 10,
+      color: color ?? THEME.text.tertiary,
+      ...THEME.heading,
+      letterSpacing: '0.12em',
+      textAlign: 'center',
+      marginBottom: 6,
+    }}>
+      {label}
+    </div>
+  );
+}
+
 // ── DeckEditorModal ────────────────────────────────────────────────
 
 function DeckEditorModal({
@@ -159,6 +196,7 @@ function DeckEditorModal({
 }) {
   const [selectedType, setSelectedType] = useState<MoveType | 'all'>('all');
   const [selectedRarity, setSelectedRarity] = useState<CardRarity | 'all'>('all');
+  const [selectedStatus, setSelectedStatus] = useState<StatusType | 'all'>('all');
   const [searchText, setSearchText] = useState('');
 
   const filteredCards = useMemo(() => {
@@ -168,6 +206,12 @@ function DeckEditorModal({
       .filter(card => {
         if (selectedType !== 'all' && card.type !== selectedType) return false;
         if (selectedRarity !== 'all' && card.rarity !== selectedRarity) return false;
+        if (selectedStatus !== 'all') {
+          const appliesStatus = card.effects.some(e =>
+            (e.type === 'apply_status' || e.type === 'apply_status_self') && e.status === selectedStatus
+          );
+          if (!appliesStatus) return false;
+        }
         if (searchText && !card.name.toLowerCase().includes(searchText.toLowerCase())) return false;
         return true;
       })
@@ -180,7 +224,7 @@ function DeckEditorModal({
         if (rarityCompare !== 0) return rarityCompare;
         return a.name.localeCompare(b.name);
       });
-  }, [selectedType, selectedRarity, searchText]);
+  }, [selectedType, selectedRarity, selectedStatus, searchText]);
 
   const addCard = (cardId: string) => onUpdateDeck([...currentDeck, cardId]);
   const removeCard = (index: number) => onUpdateDeck(currentDeck.filter((_, i) => i !== index));
@@ -300,6 +344,13 @@ function DeckEditorModal({
               <FilterButton key={rarity} label={rarity} isSelected={selectedRarity === rarity} onClick={() => setSelectedRarity(rarity)} color={THEME.text.secondary} />
             ))}
           </div>
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: 11, color: THEME.text.tertiary, marginRight: 4 }}>Status:</span>
+            <FilterButton label="All" isSelected={selectedStatus === 'all'} onClick={() => setSelectedStatus('all')} color={THEME.text.secondary} />
+            {ALL_STATUSES.map(status => (
+              <FilterButton key={status} label={status} isSelected={selectedStatus === status} onClick={() => setSelectedStatus(status)} color={STATUS_COLORS[status]} />
+            ))}
+          </div>
         </div>
 
         <div style={{ padding: '8px 20px', fontSize: 12, color: THEME.text.tertiary }}>
@@ -354,6 +405,7 @@ function FormationSlot({
     ? makeSpriteUrl(formId, side === 'player' ? 'back' : 'front')
     : null;
 
+  const sideColor = side === 'player' ? THEME.status.heal : THEME.status.damage;
   const borderColor = isSelected
     ? THEME.accent
     : dragOver
@@ -364,12 +416,12 @@ function FormationSlot({
 
   const borderStyle = pokemon || isSelected || dragOver ? 'solid' : 'dashed';
   const bg = isSelected
-    ? THEME.bg.elevated
+    ? `${THEME.accent}10`
     : dragOver
-      ? `${THEME.status.energy}15`
+      ? `${THEME.status.energy}10`
       : pokemon
         ? THEME.bg.panel
-        : THEME.bg.base;
+        : 'transparent';
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -388,6 +440,7 @@ function FormationSlot({
 
   return (
     <div
+      className="sbx-slot"
       onClick={onClick}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -400,7 +453,7 @@ function FormationSlot({
         alignItems: 'center',
         justifyContent: 'center',
         background: bg,
-        border: `2px ${borderStyle} ${borderColor}`,
+        border: `1.5px ${borderStyle} ${borderColor}`,
         borderRadius: 8,
         cursor: pokemon ? 'pointer' : 'default',
         position: 'relative',
@@ -413,38 +466,76 @@ function FormationSlot({
             <img
               src={sprite}
               alt={formId || ''}
-              style={{ width: 60, height: 60, imageRendering: 'pixelated', objectFit: 'contain' }}
+              style={{
+                width: 60,
+                height: 60,
+                imageRendering: 'pixelated',
+                objectFit: 'contain',
+                filter: isSelected ? `drop-shadow(0 0 6px ${THEME.accent}40)` : 'none',
+                transition: 'filter 0.2s',
+              }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           )}
-          <div style={{ fontSize: 11, color: THEME.text.primary, fontWeight: 'bold' }}>
+          <div style={{
+            fontSize: 10,
+            color: isSelected ? THEME.accent : THEME.text.primary,
+            fontWeight: 'bold',
+            ...THEME.heading,
+            letterSpacing: '0.08em',
+          }}>
             Lv.{pokemon.level}
           </div>
           {/* HP indicators */}
           <div style={{ display: 'flex', gap: 2, position: 'absolute', top: 3, right: 3 }}>
             {pokemon.has999Hp && (
-              <span style={{ fontSize: 9, background: THEME.status.heal, color: '#000', padding: '1px 3px', borderRadius: 2, fontWeight: 'bold' }}>999</span>
+              <span style={{
+                fontSize: 8,
+                background: `${THEME.status.heal}30`,
+                color: THEME.status.heal,
+                padding: '1px 4px',
+                borderRadius: 3,
+                fontWeight: 'bold',
+                border: `1px solid ${THEME.status.heal}40`,
+              }}>999</span>
             )}
             {pokemon.startAt50Percent && (
-              <span style={{ fontSize: 9, background: '#fcd34d', color: '#000', padding: '1px 3px', borderRadius: 2, fontWeight: 'bold' }}>50%</span>
+              <span style={{
+                fontSize: 8,
+                background: '#fcd34d20',
+                color: '#fcd34d',
+                padding: '1px 4px',
+                borderRadius: 3,
+                fontWeight: 'bold',
+                border: '1px solid #fcd34d40',
+              }}>50%</span>
             )}
           </div>
           <button
+            className="sbx-remove-btn"
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
             style={{
               position: 'absolute', top: -8, left: -8,
-              width: 20, height: 20, borderRadius: '50%',
-              background: THEME.status.damage, border: 'none',
-              color: '#fff', cursor: 'pointer', fontSize: 12,
+              width: 18, height: 18, borderRadius: '50%',
+              background: 'transparent',
+              border: `1.5px solid ${THEME.status.damage}60`,
+              color: THEME.status.damage,
+              cursor: 'pointer', fontSize: 10,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.15s',
             }}
           >
             x
           </button>
         </>
       ) : (
-        <div style={{ fontSize: 11, color: THEME.text.tertiary }}>
-          {dragOver ? 'Drop here' : 'Empty'}
+        <div style={{
+          fontSize: 10,
+          color: dragOver ? THEME.status.energy : THEME.text.tertiary,
+          ...THEME.heading,
+          letterSpacing: '0.06em',
+        }}>
+          {dragOver ? 'Drop' : 'Empty'}
         </div>
       )}
     </div>
@@ -476,10 +567,17 @@ function FormationGrid({
   const colLabels = side === 'player' ? ['Back', 'Front'] : ['Front', 'Back'];
 
   return (
-    <div style={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
+    <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
       {colOrder.map((row, ci) => (
         <div key={row} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-          <div style={{ fontSize: 9, color: THEME.text.tertiary, ...THEME.heading }}>{colLabels[ci]}</div>
+          <div style={{
+            fontSize: 9,
+            color: THEME.text.tertiary,
+            ...THEME.heading,
+            letterSpacing: '0.1em',
+          }}>
+            {colLabels[ci]}
+          </div>
           {positions.map(col => {
             const pokemon = team.find(p => p.position.row === row && p.position.column === col);
             return (
@@ -519,140 +617,176 @@ function InlineDetailEditor({
   const currentDeck = pokemon.customDeck ?? defaultDeck;
   const isCustomDeck = pokemon.customDeck !== null;
   const pokemonData = getPokemon(formId);
+  const primaryColor = TYPE_COLORS[pokemonData.types[0]];
 
   return (
-    <div style={{
-      padding: '14px 20px',
-      background: THEME.bg.panel,
-      border: `1px solid ${THEME.border.medium}`,
-      borderRadius: 8,
-      display: 'flex',
-      gap: 20,
-      alignItems: 'flex-start',
-      flexWrap: 'wrap',
-    }}>
-      {/* Sprite + Name */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80 }}>
-        <img
-          src={makeSpriteUrl(formId)}
-          alt={formId}
-          style={{ width: 56, height: 56, imageRendering: 'pixelated', objectFit: 'contain' }}
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-        />
-        <div style={{ fontSize: 13, fontWeight: 'bold', color: THEME.accent, marginTop: 4 }}>
-          {pokemonData.name}
+    <DexFrame>
+      <div className="sbx-editor" style={{
+        padding: '18px 24px 22px',
+        display: 'flex',
+        gap: 24,
+        alignItems: 'flex-start',
+        flexWrap: 'wrap',
+      }}>
+        {/* Sprite + Name */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80, gap: 4 }}>
+          <img
+            src={makeSpriteUrl(formId)}
+            alt={formId}
+            style={{
+              width: 56,
+              height: 56,
+              imageRendering: 'pixelated',
+              objectFit: 'contain',
+              filter: `drop-shadow(0 0 6px ${primaryColor}30)`,
+            }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+          <div style={{
+            fontSize: 14,
+            fontWeight: 'bold',
+            color: THEME.accent,
+            ...THEME.heading,
+            letterSpacing: '0.1em',
+          }}>
+            {pokemonData.name}
+          </div>
+          <Flourish variant="heading" width={50} color={primaryColor} />
         </div>
-      </div>
 
-      {/* Level — preserves customDeck */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div style={{ fontSize: 11, color: THEME.text.tertiary, ...THEME.heading }}>Level</div>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {[1, 2, 3, 4].map(l => (
+        {/* Level — preserves customDeck */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ fontSize: 10, color: THEME.text.tertiary, ...THEME.heading, letterSpacing: '0.1em' }}>Level</div>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {[1, 2, 3, 4].map(l => {
+              const isActive = pokemon.level === l;
+              const levelColor = getLevelColor(l);
+              return (
+                <button
+                  key={l}
+                  className="sbx-level-btn"
+                  onClick={() => onUpdate({ ...pokemon, level: l })}
+                  style={{
+                    width: 30, height: 30,
+                    border: isActive ? `1.5px solid ${levelColor}` : `1px solid ${THEME.border.subtle}`,
+                    background: isActive ? `${levelColor}20` : 'transparent',
+                    color: isActive ? levelColor : THEME.text.tertiary,
+                    borderRadius: 6,
+                    fontSize: 13,
+                    fontWeight: 'bold',
+                    padding: 0,
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.15s',
+                    boxShadow: isActive ? `0 0 8px ${levelColor}20` : 'none',
+                  }}
+                >
+                  {l}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Passives */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 120 }}>
+          <div style={{ fontSize: 10, color: THEME.text.tertiary, ...THEME.heading, letterSpacing: '0.1em' }}>Passives</div>
+          {passives.length === 0 ? (
+            <div style={{ fontSize: 12, color: THEME.text.tertiary, fontStyle: 'italic' }}>None</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {passives.map(p => {
+                const def = PASSIVE_DEFINITIONS[p as PassiveId];
+                return (
+                  <div key={p} style={{ fontSize: 12, lineHeight: 1.4 }}>
+                    <span style={{ color: THEME.accent, fontWeight: 'bold' }}>
+                      {def?.name ?? p}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* HP toggles */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ fontSize: 10, color: THEME.text.tertiary, ...THEME.heading, letterSpacing: '0.1em' }}>HP</div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+            <input
+              type="checkbox" checked={pokemon.has999Hp}
+              onChange={(e) => onUpdate({ ...pokemon, has999Hp: e.target.checked })}
+              style={{ width: 14, height: 14, accentColor: THEME.status.heal }}
+            />
+            <span style={{ fontSize: 12, color: THEME.status.heal }}>999 HP</span>
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+            <input
+              type="checkbox" checked={pokemon.startAt50Percent}
+              onChange={(e) => onUpdate({ ...pokemon, startAt50Percent: e.target.checked })}
+              style={{ width: 14, height: 14, accentColor: '#fcd34d' }}
+            />
+            <span style={{ fontSize: 12, color: '#fcd34d' }}>Start 50%</span>
+          </label>
+        </div>
+
+        {/* Deck preview + Edit */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minWidth: 160 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 10, color: THEME.text.tertiary, ...THEME.heading, letterSpacing: '0.1em' }}>
+              Deck ({currentDeck.length}){isCustomDeck ? ' *' : ''}
+            </div>
             <button
-              key={l}
-              onClick={() => onUpdate({ ...pokemon, level: l })}
-              style={{
-                width: 30, height: 30,
-                ...(pokemon.level === l ? THEME.button.primary : THEME.button.secondary),
-                fontSize: 13, padding: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
+              onClick={onOpenDeckEditor}
+              style={{ padding: '3px 10px', ...THEME.button.primary, fontSize: 10 }}
             >
-              {l}
+              Edit Deck
             </button>
-          ))}
+          </div>
+          <div style={{
+            display: 'flex', flexWrap: 'wrap', gap: 3,
+            maxHeight: 56, overflowY: 'auto',
+            padding: 6, background: 'rgba(0,0,0,0.15)', borderRadius: 4,
+            border: `1px solid ${THEME.border.subtle}`,
+          }}>
+            {currentDeck.map((cardId, i) => {
+              const card = getMove(cardId);
+              return (
+                <div
+                  key={`${cardId}-${i}`}
+                  style={{
+                    fontSize: 10, padding: '2px 5px',
+                    background: `${TYPE_COLORS[card.type]}15`,
+                    border: `1px solid ${TYPE_COLORS[card.type]}35`,
+                    borderRadius: 3, color: THEME.text.primary,
+                  }}
+                >
+                  {card.name}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* Passives */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 120 }}>
-        <div style={{ fontSize: 11, color: THEME.text.tertiary, ...THEME.heading }}>Passives</div>
-        {passives.length === 0 ? (
-          <div style={{ fontSize: 12, color: THEME.text.tertiary, fontStyle: 'italic' }}>None</div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {passives.map(p => (
-              <div key={p} style={{ fontSize: 12, color: THEME.text.secondary }}>
-                {PASSIVE_DEFINITIONS[p as PassiveId]?.name ?? p}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* HP toggles */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <div style={{ fontSize: 11, color: THEME.text.tertiary, ...THEME.heading }}>HP</div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-          <input
-            type="checkbox" checked={pokemon.has999Hp}
-            onChange={(e) => onUpdate({ ...pokemon, has999Hp: e.target.checked })}
-            style={{ width: 14, height: 14, accentColor: THEME.status.heal }}
-          />
-          <span style={{ fontSize: 12, color: THEME.status.heal }}>999 HP</span>
-        </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-          <input
-            type="checkbox" checked={pokemon.startAt50Percent}
-            onChange={(e) => onUpdate({ ...pokemon, startAt50Percent: e.target.checked })}
-            style={{ width: 14, height: 14, accentColor: '#fcd34d' }}
-          />
-          <span style={{ fontSize: 12, color: '#fcd34d' }}>Start 50%</span>
-        </label>
-      </div>
-
-      {/* Deck preview + Edit */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 160 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 11, color: THEME.text.tertiary, ...THEME.heading }}>
-            Deck ({currentDeck.length}){isCustomDeck ? ' *' : ''}
-          </div>
+        {/* Remove */}
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignSelf: 'center' }}>
           <button
-            onClick={onOpenDeckEditor}
-            style={{ padding: '3px 10px', ...THEME.button.primary, fontSize: 11 }}
+            className="sbx-remove-detail-btn"
+            onClick={onRemove}
+            style={{
+              padding: '6px 14px',
+              ...THEME.button.secondary,
+              color: THEME.status.damage,
+              borderColor: THEME.status.damage + '40',
+              fontSize: 11,
+              transition: 'all 0.15s',
+            }}
           >
-            Edit Deck
+            Remove
           </button>
         </div>
-        <div style={{
-          display: 'flex', flexWrap: 'wrap', gap: 3,
-          maxHeight: 56, overflowY: 'auto',
-          padding: 6, background: THEME.bg.base, borderRadius: 4,
-        }}>
-          {currentDeck.map((cardId, i) => {
-            const card = getMove(cardId);
-            return (
-              <div
-                key={`${cardId}-${i}`}
-                style={{
-                  fontSize: 10, padding: '2px 5px',
-                  background: `${TYPE_COLORS[card.type]}22`,
-                  border: `1px solid ${TYPE_COLORS[card.type]}44`,
-                  borderRadius: 3, color: THEME.text.primary,
-                }}
-              >
-                {card.name}
-              </div>
-            );
-          })}
-        </div>
       </div>
-
-      {/* Remove */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignSelf: 'center' }}>
-        <button
-          onClick={onRemove}
-          style={{
-            padding: '6px 14px', ...THEME.button.secondary,
-            color: THEME.status.damage, borderColor: THEME.status.damage + '55',
-            fontSize: 12,
-          }}
-        >
-          Remove
-        </button>
-      </div>
-    </div>
+    </DexFrame>
   );
 }
 
@@ -680,6 +814,16 @@ function PokemonRosterTile({
       onDragEnd={onDragEnd}
     />
   );
+}
+
+function getLevelColor(level: number): string {
+  switch (level) {
+    case 1: return '#4ade80';
+    case 2: return '#60a5fa';
+    case 3: return '#a855f7';
+    case 4: return '#facc15';
+    default: return '#64748b';
+  }
 }
 
 // ── Root: SandboxConfigScreen ──────────────────────────────────────
@@ -913,108 +1057,133 @@ export function SandboxConfigScreen({
   );
 
   return (
-    <ScreenShell header={headerBar} bodyStyle={{ padding: '20px 16px 48px' }}>
+    <ScreenShell header={headerBar} ambient>
+      <div style={{
+        maxWidth: 1200,
+        margin: '0 auto',
+        padding: '24px 24px 48px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 20,
+      }}>
         {/* ── Battlefield row: [Player Grid] [Roster] [Enemy Grid] ── */}
-        <div style={{
+        <div className="sbx-battlefield" style={{
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'flex-start',
+          alignItems: 'stretch',
           gap: 20,
         }}>
           {/* Player side */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 'bold', color: THEME.status.heal, ...THEME.heading }}>
-              Your Team ({playerTeam.length}/6)
-            </span>
-            <FormationGrid
-              team={playerTeam}
-              side="player"
-              editingId={editingSide === 'player' ? editingPokemonId : null}
-              onSlotClick={(r, c) => handleSlotClick('player', r, c)}
-              onRemove={(r, c) => handleRemove('player', r, c)}
-              onDrop={(r, c, id) => handleDrop('player', r, c, id)}
-            />
+          <div className="sbx-team-panel" style={{ animationDelay: '0ms' }}>
+            <DexFrame>
+              <div style={{ padding: '16px 18px 20px' }}>
+                <SectionLabel label={`Your Team (${playerTeam.length}/6)`} color={THEME.status.heal} />
+                <Flourish variant="heading" width={60} color={`${THEME.status.heal}60`} />
+                <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+                  <FormationGrid
+                    team={playerTeam}
+                    side="player"
+                    editingId={editingSide === 'player' ? editingPokemonId : null}
+                    onSlotClick={(r, c) => handleSlotClick('player', r, c)}
+                    onRemove={(r, c) => handleRemove('player', r, c)}
+                    onDrop={(r, c, id) => handleDrop('player', r, c, id)}
+                  />
+                </div>
+              </div>
+            </DexFrame>
           </div>
 
           {/* Shared roster (center) */}
-          <div style={{
-            flex: 1,
-            maxWidth: 480,
-            minWidth: 200,
-            padding: '12px',
-            background: THEME.bg.panel,
-            border: `1px solid ${THEME.border.subtle}`,
-            borderRadius: 8,
-            alignSelf: 'stretch',
-            display: 'flex',
-            flexDirection: 'column',
-          }}>
-            <div style={{ textAlign: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 11, color: THEME.text.tertiary, ...THEME.heading }}>
-                Pokemon Roster
-              </span>
-              <div style={{ fontSize: 10, color: THEME.text.tertiary, marginTop: 2 }}>
-                Drag to either team
+          <div className="sbx-roster-panel" style={{ flex: 1, maxWidth: 480, minWidth: 200 }}>
+            <DexFrame>
+              <div style={{
+                padding: '16px 14px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+              }}>
+                <SectionLabel label="Pokemon Roster" />
+                <div style={{
+                  fontSize: 10,
+                  color: THEME.text.tertiary,
+                  textAlign: 'center',
+                  marginBottom: 8,
+                }}>
+                  Drag to either team
+                </div>
+                <Flourish variant="heading" width={60} color={THEME.border.medium} />
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 6,
+                  justifyContent: 'center',
+                  marginTop: 12,
+                  flex: 1,
+                  overflowY: 'auto',
+                }}>
+                  {AVAILABLE_POKEMON.map((pokemonId, i) => (
+                    <div
+                      key={pokemonId}
+                      className="sbx-roster-tile"
+                      style={{ animationDelay: `${i * 20}ms` }}
+                    >
+                      <PokemonRosterTile
+                        pokemonId={pokemonId}
+                        onDragStart={(e) => handleDragStart(e, pokemonId)}
+                        onDragEnd={() => {}}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            <Flourish variant="heading" color={THEME.text.tertiary} />
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 6,
-              justifyContent: 'center',
-              marginTop: 8,
-              flex: 1,
-              overflowY: 'auto',
-            }}>
-              {AVAILABLE_POKEMON.map(pokemonId => (
-                <PokemonRosterTile
-                  key={pokemonId}
-                  pokemonId={pokemonId}
-                  onDragStart={(e) => handleDragStart(e, pokemonId)}
-                  onDragEnd={() => {}}
-                />
-              ))}
-            </div>
+            </DexFrame>
           </div>
 
           {/* Enemy side */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 'bold', color: THEME.status.damage, ...THEME.heading }}>
-              Enemy Team ({enemyTeam.length}/6)
-            </span>
-            <FormationGrid
-              team={enemyTeam}
-              side="enemy"
-              editingId={editingSide === 'enemy' ? editingPokemonId : null}
-              onSlotClick={(r, c) => handleSlotClick('enemy', r, c)}
-              onRemove={(r, c) => handleRemove('enemy', r, c)}
-              onDrop={(r, c, id) => handleDrop('enemy', r, c, id)}
-            />
+          <div className="sbx-team-panel" style={{ animationDelay: '60ms' }}>
+            <DexFrame>
+              <div style={{ padding: '16px 18px 20px' }}>
+                <SectionLabel label={`Enemy Team (${enemyTeam.length}/6)`} color={THEME.status.damage} />
+                <Flourish variant="heading" width={60} color={`${THEME.status.damage}60`} />
+                <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+                  <FormationGrid
+                    team={enemyTeam}
+                    side="enemy"
+                    editingId={editingSide === 'enemy' ? editingPokemonId : null}
+                    onSlotClick={(r, c) => handleSlotClick('enemy', r, c)}
+                    onRemove={(r, c) => handleRemove('enemy', r, c)}
+                    onDrop={(r, c, id) => handleDrop('enemy', r, c, id)}
+                  />
+                </div>
+              </div>
+            </DexFrame>
           </div>
         </div>
 
         {/* ── Inline editor (below the battlefield row) ── */}
-        <div style={{ maxWidth: 960, margin: '16px auto 0' }}>
-          {playerEditingPokemon && (
-            <InlineDetailEditor
-              key={playerEditingPokemon.id}
-              pokemon={playerEditingPokemon}
-              onUpdate={(p) => handleUpdatePokemon('player', p)}
-              onRemove={() => handleRemoveEditing('player')}
-              onOpenDeckEditor={() => setShowDeckEditor(true)}
-            />
-          )}
-          {enemyEditingPokemon && (
-            <InlineDetailEditor
-              key={enemyEditingPokemon.id}
-              pokemon={enemyEditingPokemon}
-              onUpdate={(p) => handleUpdatePokemon('enemy', p)}
-              onRemove={() => handleRemoveEditing('enemy')}
-              onOpenDeckEditor={() => setShowDeckEditor(true)}
-            />
-          )}
-        </div>
+        {(playerEditingPokemon || enemyEditingPokemon) && (
+          <div className="sbx-editor-panel">
+            {playerEditingPokemon && (
+              <InlineDetailEditor
+                key={playerEditingPokemon.id}
+                pokemon={playerEditingPokemon}
+                onUpdate={(p) => handleUpdatePokemon('player', p)}
+                onRemove={() => handleRemoveEditing('player')}
+                onOpenDeckEditor={() => setShowDeckEditor(true)}
+              />
+            )}
+            {enemyEditingPokemon && (
+              <InlineDetailEditor
+                key={enemyEditingPokemon.id}
+                pokemon={enemyEditingPokemon}
+                onUpdate={(p) => handleUpdatePokemon('enemy', p)}
+                onRemove={() => handleRemoveEditing('enemy')}
+                onOpenDeckEditor={() => setShowDeckEditor(true)}
+              />
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Deck Editor Modal */}
       {showDeckEditor && editingPokemon && (
@@ -1025,6 +1194,67 @@ export function SandboxConfigScreen({
           onClose={() => setShowDeckEditor(false)}
         />
       )}
+
+      {/* Animations */}
+      <style>{`
+        .sbx-battlefield {
+          animation: sbxFadeIn 0.3s ease-out forwards;
+          opacity: 0;
+        }
+        .sbx-team-panel {
+          animation: sbxSlideIn 0.25s ease-out forwards;
+          opacity: 0;
+        }
+        .sbx-roster-panel {
+          animation: sbxFadeIn 0.3s ease-out 0.05s forwards;
+          opacity: 0;
+        }
+        .sbx-roster-tile {
+          animation: sbxTileIn 0.2s ease-out forwards;
+          opacity: 0;
+        }
+        .sbx-editor-panel {
+          animation: sbxEditorIn 0.2s ease-out forwards;
+          opacity: 0;
+        }
+        .sbx-editor {
+          animation: sbxFadeIn 0.15s ease-out forwards;
+          opacity: 0;
+        }
+        @keyframes sbxFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes sbxSlideIn {
+          from { opacity: 0; transform: translateX(-5px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes sbxTileIn {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes sbxEditorIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .sbx-slot {
+          transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+        .sbx-slot:hover {
+          box-shadow: inset 0 0 12px rgba(250, 204, 21, 0.06);
+        }
+        .sbx-remove-btn:hover {
+          background: ${THEME.status.damage}20 !important;
+          border-color: ${THEME.status.damage} !important;
+        }
+        .sbx-remove-detail-btn:hover {
+          background: ${THEME.status.damage}15 !important;
+          border-color: ${THEME.status.damage}80 !important;
+        }
+        .sbx-level-btn:hover {
+          background: rgba(255, 255, 255, 0.04) !important;
+        }
+      `}</style>
     </ScreenShell>
   );
 }

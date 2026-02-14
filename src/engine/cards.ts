@@ -3,13 +3,13 @@ import { getMove, isParentalBondCopy } from '../data/loaders';
 import { getCombatant, snapshotSpeeds, checkSpeedChangesAndRebuild } from './combat';
 import { applyCardDamage, applyHeal, applyBypassDamage, getBloomingCycleReduction } from './damage';
 import type { DamageModifiers } from './damage';
-import { applyStatus, getStatusImmunitySource } from './status';
+import { applyStatus, getStatusImmunitySource, decayEvasionOnHit, getStatusStacks } from './status';
 import { getEffectiveFrontRow, isInEffectiveFrontRow } from './position';
 import {
   checkBlazeStrike, checkFortifiedCannons, checkCounterCurrent, checkStaticField,
   onDamageDealt, onDamageTaken, onStatusApplied,
   checkGustForce, checkKeenEye, hasWhippingWinds, checkPredatorsPatience, checkThickHide, checkThickFat,
-  checkUnderdog, checkAngerPoint, checkScrappy, checkSheerForce,
+  checkProletariat, checkAngerPoint, checkScrappy, checkSheerForce,
   checkQuickFeet, checkHustleMultiplier, checkHustleCostIncrease, checkHypnoticGazeCostIncrease,
   checkRelentless, checkPoisonPoint, isAttackCard,
   processToxicHorn, processProtectiveToxins, isPoisoned, sheerForceBlocksStatus,
@@ -18,7 +18,22 @@ import {
   checkSearingFury, checkVoltFury,
   checkMultiscale, checkDragonsMajesty,
   checkSharpBeak, checkSniper,
-  checkFortifiedSpines
+  checkFortifiedSpines,
+  checkNightAssassin,
+  triggerCounterStance,
+  checkFriendGuard,
+  checkRapidStrike,
+  checkFinisher,
+  checkMalice,
+  checkHexMastery,
+  getTotalDebuffStacks,
+  checkTechnician,
+  checkAristocrat,
+  checkLullaby,
+  checkRudeAwakening,
+  checkBlindAggression,
+  checkDrySkin,
+  checkSporeMastery
 } from './passives';
 import { shuffle, MAX_HAND_SIZE } from './deck';
 import { getTypeEffectiveness, getEffectivenessLabel } from './typeChart';
@@ -52,11 +67,15 @@ export function playCard(
 
   const card = getMove(cardId);
 
-  // Calculate effective cost (accounting for Inferno/Surge Momentum, Quick Feet, Hustle, Hypnotic Gaze)
+  // Calculate effective cost (accounting for Inferno/Surge Momentum, Quick Feet, Rapid Strike, Hustle, Hypnotic Gaze)
   const hasInfernoReduction = combatant.turnFlags.infernoMomentumReducedIndex === handIndex;
   const hasSurgeReduction = combatant.turnFlags.surgeMomentumReducedIndex === handIndex;
   const hasDragonsReduction = combatant.turnFlags.dragonsMajestyReducedIndex === handIndex;
   const quickFeetReduction = checkQuickFeet(combatant, card);
+  const rapidStrikeReduction = checkRapidStrike(combatant, card, handIndex);
+  const hexMasteryReduction = checkHexMastery(combatant, card);
+  const lullabyReduction = checkLullaby(combatant, card);
+  const sporeMasteryReduction = checkSporeMastery(combatant, card);
   const hustleCostIncrease = checkHustleCostIncrease(combatant, card);
   const hypnoticGazeCostIncrease = checkHypnoticGazeCostIncrease(combatant, card);
 
@@ -65,6 +84,10 @@ export function playCard(
   if (hasSurgeReduction) effectiveCost -= 3;
   if (hasDragonsReduction) effectiveCost -= 3;
   effectiveCost -= quickFeetReduction;
+  effectiveCost -= rapidStrikeReduction;
+  effectiveCost -= hexMasteryReduction;
+  effectiveCost -= lullabyReduction;
+  effectiveCost -= sporeMasteryReduction;
   effectiveCost += hustleCostIncrease;
   effectiveCost += hypnoticGazeCostIncrease;
   effectiveCost = Math.max(0, effectiveCost);
@@ -129,6 +152,12 @@ export function playCard(
     }
   }
 
+  // Update Rapid Strike hand size tracking when a card from the original hand is removed
+  const rapidStrikeHandSize = combatant.costModifiers['rapidStrikeHandSize'] ?? 0;
+  if (rapidStrikeHandSize > 0 && handIndex < rapidStrikeHandSize) {
+    combatant.costModifiers['rapidStrikeHandSize'] = rapidStrikeHandSize - 1;
+  }
+
   // Remove from hand
   combatant.hand.splice(handIndex, 1);
 
@@ -173,12 +202,37 @@ export function playCard(
     message: `${combatant.name} plays ${card.name} (cost ${effectiveCost}).`,
   });
 
+  // Finisher: Check if this card triggers Finisher (first attack with effective cost >= 3)
+  const finisherWasUsedBefore = combatant.turnFlags.finisherUsedThisTurn;
+  const { shouldApply: isFinisher, logs: finisherLogs } = checkFinisher(state, combatant, card, effectiveCost);
+  logs.push(...finisherLogs);
+
+  // Store finisher state so buildDamageModifiers can read it
+  combatant.costModifiers['_finisherActive'] = isFinisher ? 1 : 0;
+
   // Resolve effects on each target, tracking damage to poisoned enemies
   let totalDamageToPoisoned = 0;
   for (const target of targets) {
     const result = resolveEffects(state, combatant, target, card);
     logs.push(...result.logs);
     totalDamageToPoisoned += result.damageToPoisoned;
+  }
+
+  // Clear finisher flag from cost modifiers
+  delete combatant.costModifiers['_finisherActive'];
+
+  // Finisher: Clear all Strength after card resolves
+  if (isFinisher && !finisherWasUsedBefore && combatant.turnFlags.finisherUsedThisTurn) {
+    const strengthStatus = combatant.statuses.find(s => s.type === 'strength');
+    if (strengthStatus && strengthStatus.stacks > 0) {
+      const clearedStacks = strengthStatus.stacks;
+      combatant.statuses = combatant.statuses.filter(s => s.type !== 'strength');
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `Finisher: ${combatant.name}'s ${clearedStacks} Strength consumed!`,
+      });
+    }
   }
 
   // Toxic Horn: Gain Strength from damage to poisoned enemies
@@ -215,14 +269,14 @@ export function playCard(
     });
   }
 
-  // Great Leap: When you play Splash, gain 3 Evasion
+  // Great Leap: When you play Splash, gain 2 Evasion
   const baseCardIdForSplash = cardId.replace('__parental', '');
   if (baseCardIdForSplash === 'splash' && combatant.passiveIds.includes('great_leap')) {
-    applyStatus(state, combatant, 'evasion', 3, combatant.id);
+    applyStatus(state, combatant, 'evasion', 2, combatant.id);
     logs.push({
       round: state.round,
       combatantId: combatant.id,
-      message: `Great Leap: ${combatant.name} gains 3 Evasion from Splash!`,
+      message: `Great Leap: ${combatant.name} gains 2 Evasion from Splash!`,
     });
   }
 
@@ -233,6 +287,16 @@ export function playCard(
       round: state.round,
       combatantId: combatant.id,
       message: `Tyrant's Tantrum: ${combatant.name} gains ${effectiveCost} Strength!`,
+    });
+  }
+
+  // Phase Form: When you play a Ghost-type card, gain Evasion equal to its cost
+  if (card.type === 'ghost' && combatant.passiveIds.includes('phase_form') && card.cost > 0) {
+    applyStatus(state, combatant, 'evasion', card.cost, combatant.id);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Phase Form: ${combatant.name} gains ${card.cost} Evasion from ${card.name}!`,
     });
   }
 
@@ -462,6 +526,16 @@ function buildDamageModifiers(
     });
   }
 
+  // Friend Guard: Allies take 2 less damage from all attacks
+  const friendGuardReduction = checkFriendGuard(state, target);
+  if (friendGuardReduction > 0) {
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Friend Guard: -${friendGuardReduction} damage!`,
+    });
+  }
+
   // Thick Fat: Take 25% less damage from Fire and Ice attacks
   const thickFatMultiplier = checkThickFat(target, card.type);
   if (thickFatMultiplier < 1.0) {
@@ -469,6 +543,16 @@ function buildDamageModifiers(
       round: state.round,
       combatantId: target.id,
       message: `Thick Fat: -25% damage (${card.type} attack)!`,
+    });
+  }
+
+  // Dry Skin: Take 25% more damage from Fire attacks
+  const drySkinMultiplier = checkDrySkin(target, card.type);
+  if (drySkinMultiplier > 1.0) {
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Dry Skin: +25% damage (Fire attack)!`,
     });
   }
 
@@ -482,13 +566,13 @@ function buildDamageModifiers(
     });
   }
 
-  // Underdog: Common rarity cards that cost 1 deal +2 damage
-  const underdogBonus = checkUnderdog(source, card);
-  if (underdogBonus > 0) {
+  // Proletariat: Common rarity cards that cost 1 deal +2 damage
+  const proletariatBonus = checkProletariat(source, card);
+  if (proletariatBonus > 0) {
     logs.push({
       round: state.round,
       combatantId: source.id,
-      message: `Underdog: +${underdogBonus} damage (common 1-cost)!`,
+      message: `Proletariat: +${proletariatBonus} damage (common 1-cost)!`,
     });
   }
 
@@ -542,6 +626,16 @@ function buildDamageModifiers(
     });
   }
 
+  // Blind Aggression: +2 damage to enemies in the same column
+  const blindAggressionBonus = checkBlindAggression(source, target);
+  if (blindAggressionBonus > 0) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Blind Aggression: +${blindAggressionBonus} damage (same column)!`,
+    });
+  }
+
   // Poison Barb: Your Poison-type attacks deal +2 damage
   const poisonBarbBonus = checkPoisonBarb(source, card);
   if (poisonBarbBonus > 0) {
@@ -592,6 +686,36 @@ function buildDamageModifiers(
     });
   }
 
+  // Night Assassin: Damage cards deal bonus damage equal to evasion stacks (max +15)
+  const nightAssassinBonus = checkNightAssassin(source, card);
+  if (nightAssassinBonus > 0) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Night Assassin: +${nightAssassinBonus} damage (${nightAssassinBonus} Evasion)!`,
+    });
+  }
+
+  // Malice: Attacks deal bonus damage equal to target's Burn + Enfeeble stacks
+  const maliceBonus = checkMalice(source, target);
+  if (maliceBonus > 0) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Malice: +${maliceBonus} damage (target's Burn + Enfeeble)!`,
+    });
+  }
+
+  // Finisher: First attack with effective cost >= 3 deals double damage
+  const isFinisher = (source.costModifiers['_finisherActive'] ?? 0) === 1;
+  if (isFinisher) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Finisher: x2 damage!`,
+    });
+  }
+
   // Sniper: First attack each turn ignores evasion and block
   const { ignoreEvasion: sniperIgnoreEvasion, ignoreBlock: sniperIgnoreBlock, logs: sniperLogs } = checkSniper(state, source, card);
   logs.push(...sniperLogs);
@@ -603,6 +727,36 @@ function buildDamageModifiers(
       round: state.round,
       combatantId: source.id,
       message: `Hustle: x1.3 damage!`,
+    });
+  }
+
+  // Technician: 1-cost cards deal 30% more damage
+  const technicianMultiplier = checkTechnician(source, card);
+  if (technicianMultiplier > 1) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Technician: x1.3 damage (1-cost card)!`,
+    });
+  }
+
+  // Aristocrat: Epic rarity cards deal 30% more damage
+  const aristocratMultiplier = checkAristocrat(source, card);
+  if (aristocratMultiplier > 1) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Aristocrat: x1.3 damage (Epic card)!`,
+    });
+  }
+
+  // Rude Awakening: Double damage to sleeping targets
+  const rudeAwakeningMultiplier = checkRudeAwakening(source, target);
+  if (rudeAwakeningMultiplier > 1) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Rude Awakening: x2 damage (target is asleep)!`,
     });
   }
 
@@ -639,12 +793,13 @@ function buildDamageModifiers(
     });
   }
 
-  // Combine Anger Point, Sheer Force, and Reckless multipliers
-  const combinedMultiplier = angerPointMultiplier * sheerForceMultiplier * recklessMultiplier * dragonsMajestyMultiplier;
+  // Combine Anger Point, Sheer Force, Reckless, Dragon's Majesty, and Rude Awakening multipliers
+  const combinedMultiplier = angerPointMultiplier * sheerForceMultiplier * recklessMultiplier * dragonsMajestyMultiplier * rudeAwakeningMultiplier;
 
   return {
     isBlazeStrike,
     isSwarmStrike,
+    isFinisher,
     fortifiedCannonsBonus: fortifiedCannonsBonus,
     fortifiedSpinesBonus: fortifiedSpinesBonus,
     bloomingCycleReduction: getBloomingCycleReduction(state, source),
@@ -656,12 +811,17 @@ function buildDamageModifiers(
     voltFuryBonus,
     sharpBeakBonus,
     thickHideReduction,
-    thickFatMultiplier,
+    friendGuardReduction,
+    thickFatMultiplier: thickFatMultiplier * drySkinMultiplier,  // Combine type-based target multipliers
     multiscaleMultiplier,
-    underdogBonus,
+    proletariatBonus,
     ragingBullMultiplier: combinedMultiplier,  // Now includes Anger Point + Sheer Force
     hustleMultiplier,  // 1.3x multiplier for attacks
-    familyFuryBonus: scrappyBonus + relentlessBonus,  // Combine flat bonuses
+    technicianMultiplier,  // 1.3x for 1-cost cards
+    aristocratMultiplier,  // 1.3x for Epic cards
+    familyFuryBonus: scrappyBonus + relentlessBonus + blindAggressionBonus,  // Combine flat bonuses
+    nightAssassinBonus,
+    maliceBonus,
     poisonBarbBonus,
     adaptabilityBonus,
     typeEffectiveness,
@@ -685,19 +845,25 @@ function buildDamageBreakdown(r: ReturnType<typeof applyCardDamage>): string {
   if (r.searingFuryBonus > 0) parts.push(`+${r.searingFuryBonus} Searing`);
   if (r.voltFuryBonus > 0) parts.push(`+${r.voltFuryBonus} Volt`);
   if (r.sharpBeakBonus > 0) parts.push(`+${r.sharpBeakBonus} Sharp Beak`);
-  if (r.underdogBonus > 0) parts.push(`+${r.underdogBonus} Underdog`);
+  if (r.nightAssassinBonus > 0) parts.push(`+${r.nightAssassinBonus} Assassin`);
+  if (r.maliceBonus > 0) parts.push(`+${r.maliceBonus} Malice`);
+  if (r.proletariatBonus > 0) parts.push(`+${r.proletariatBonus} Proletariat`);
   if (r.familyFuryBonus > 0) parts.push(`+${r.familyFuryBonus} Fury`);
   if (r.enfeeble > 0) parts.push(`-${r.enfeeble} Enfeeble`);
   if (r.blazeStrikeMultiplier > 1) parts.push(`x${r.blazeStrikeMultiplier} Blaze`);
   if (r.swarmStrikeMultiplier > 1) parts.push(`x${r.swarmStrikeMultiplier} Swarm`);
+  if (r.finisherMultiplier > 1) parts.push(`x${r.finisherMultiplier} Finisher`);
   if (r.poisonBarbBonus > 0) parts.push(`+${r.poisonBarbBonus} Barb`);
   if (r.adaptabilityBonus > 0) parts.push(`+${r.adaptabilityBonus} Adapt`);
   if (r.ragingBullMultiplier > 1) parts.push(`x${r.ragingBullMultiplier.toFixed(2)}`);
   if (r.hustleMultiplier > 1) parts.push(`x${r.hustleMultiplier.toFixed(1)} Hustle`);
+  if (r.technicianMultiplier > 1) parts.push(`x${r.technicianMultiplier.toFixed(1)} Tech`);
+  if (r.aristocratMultiplier > 1) parts.push(`x${r.aristocratMultiplier.toFixed(1)} Aristocrat`);
   if (r.typeEffectiveness !== 1.0) parts.push(`x${r.typeEffectiveness.toFixed(2)} Type`);
   if (r.bloomingCycleReduction > 0) parts.push(`-${r.bloomingCycleReduction} Blooming`);
   if (r.staticFieldReduction > 0) parts.push(`-${r.staticFieldReduction} Static`);
   if (r.thickHideReduction > 0) parts.push(`-${r.thickHideReduction} Hide`);
+  if (r.friendGuardReduction > 0) parts.push(`-${r.friendGuardReduction} Guard`);
   if (r.thickFatMultiplier < 1.0) parts.push(`x0.75 Fat`);
   if (r.multiscaleMultiplier < 1.0) parts.push(`x0.50 Multiscale`);
   if (r.evasion > 0) parts.push(`-${r.evasion} Evasion`);
@@ -752,6 +918,33 @@ function resolveEffects(
     return { logs, damageToPoisoned: 0 };
   }
 
+  // Dry Skin: Immune to Water-type attacks, heal for base damage instead
+  if (target.passiveIds.includes('dry_skin') && card.type === 'water') {
+    let healBasis = 0;
+    for (const effect of card.effects) {
+      if (effect.type === 'damage' || effect.type === 'recoil' || effect.type === 'heal_on_hit' || effect.type === 'self_ko') {
+        healBasis += effect.value;
+      } else if (effect.type === 'multi_hit') {
+        healBasis += effect.value * effect.hits;
+      }
+    }
+    if (healBasis > 0) {
+      const healed = applyHeal(target, healBasis);
+      logs.push({
+        round: state.round,
+        combatantId: target.id,
+        message: `Dry Skin: ${target.name} heals ${healed} HP from Water! (HP: ${target.hp}/${target.maxHp})`,
+      });
+    } else {
+      logs.push({
+        round: state.round,
+        combatantId: target.id,
+        message: `Dry Skin: ${target.name} is immune to Water attacks!`,
+      });
+    }
+    return { logs, damageToPoisoned: 0 };
+  }
+
   const targetWasPoisoned = isPoisoned(target);  // Check before any damage
 
   for (const effect of card.effects) {
@@ -762,11 +955,13 @@ function resolveEffects(
         // Build all damage modifiers
         const mods = buildDamageModifiers(state, source, target, card, logs, false);
 
-        // Check for bonus damage condition (e.g., Flail)
+        // Check for bonus damage condition (e.g., Flail, Hex)
         let damageValue = effect.value;
         if (effect.bonusValue && effect.bonusCondition) {
           if (effect.bonusCondition === 'user_below_half_hp' && source.hp < source.maxHp * 0.5) {
             damageValue += effect.bonusValue;
+          } else if (effect.bonusCondition === 'target_debuff_stacks') {
+            damageValue += effect.bonusValue * getTotalDebuffStacks(target);
           }
         }
 
@@ -782,6 +977,16 @@ function resolveEffects(
           combatantId: target.id,
           message: dmgMsg,
         });
+
+        // Gold on Hit: Gain gold equal to damage dealt (Pay Day)
+        if (card.goldOnHit && r.hpDamage > 0) {
+          state.goldEarned += r.hpDamage;
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `Pay Day: Earned ${r.hpDamage} gold! (Total: ${state.goldEarned})`,
+          });
+        }
 
         // Trigger post-damage passive effects (e.g., Kindling, Numbing Strike)
         if (r.hpDamage > 0) {
@@ -817,6 +1022,11 @@ function resolveEffects(
           const takenLogs = onDamageTaken(state, source, target, r.hpDamage, card);
           logs.push(...takenLogs);
         }
+        // Counter Stance triggers on any attack, before evasion decays
+        const counterLogs = triggerCounterStance(state, source, target);
+        logs.push(...counterLogs);
+        // Evasion decays on any attack, even if fully absorbed
+        decayEvasionOnHit(target);
 
         if (!target.alive) {
           logs.push({
@@ -866,6 +1076,11 @@ function resolveEffects(
             const takenLogs = onDamageTaken(state, source, target, r.hpDamage, card);
             logs.push(...takenLogs);
           }
+          // Counter Stance triggers on any attack, before evasion decays
+          const counterLogsMulti = triggerCounterStance(state, source, target);
+          logs.push(...counterLogsMulti);
+          // Evasion decays on any attack, even if fully absorbed
+          decayEvasionOnHit(target);
         }
 
         // Track total damage to poisoned enemies for Toxic Horn / Protective Toxins
@@ -901,7 +1116,9 @@ function resolveEffects(
         });
 
         // Heal the source based on damage dealt (after block)
-        const healAmount = Math.floor(r.hpDamage * effect.healPercent);
+        // Verdant Drain: heal_on_hit heals for 100% instead of the card's healPercent
+        const effectiveHealPercent = source.passiveIds.includes('verdant_drain') ? 1.0 : effect.healPercent;
+        const healAmount = Math.floor(r.hpDamage * effectiveHealPercent);
         if (healAmount > 0 && source.alive) {
           const healed = applyHeal(source, healAmount);
           logs.push({
@@ -941,6 +1158,11 @@ function resolveEffects(
           const takenLogs = onDamageTaken(state, source, target, r.hpDamage, card);
           logs.push(...takenLogs);
         }
+        // Counter Stance triggers on any attack, before evasion decays
+        const counterLogsHeal = triggerCounterStance(state, source, target);
+        logs.push(...counterLogsHeal);
+        // Evasion decays on any attack, even if fully absorbed
+        decayEvasionOnHit(target);
 
         if (!target.alive) {
           logs.push({
@@ -998,6 +1220,11 @@ function resolveEffects(
           const takenLogs = onDamageTaken(state, source, target, r.hpDamage, card);
           logs.push(...takenLogs);
         }
+        // Counter Stance triggers on any attack, before evasion decays
+        const counterLogsRecoil = triggerCounterStance(state, source, target);
+        logs.push(...counterLogsRecoil);
+        // Evasion decays on any attack, even if fully absorbed
+        decayEvasionOnHit(target);
 
         if (!target.alive) {
           logs.push({
@@ -1145,6 +1372,11 @@ function resolveEffects(
           const takenLogs = onDamageTaken(state, source, target, r.hpDamage, card);
           logs.push(...takenLogs);
         }
+        // Counter Stance triggers on any attack, before evasion decays
+        const counterLogsSelfKo = triggerCounterStance(state, source, target);
+        logs.push(...counterLogsSelfKo);
+        // Evasion decays on any attack, even if fully absorbed
+        decayEvasionOnHit(target);
 
         if (!target.alive) {
           logs.push({
@@ -1265,7 +1497,7 @@ function resolveEffects(
       case 'cleanse': {
         // Remove debuffs (highest stacks first), from target for ally-targeting cards
         const cleanseRecipient = card.range === 'any_ally' ? target : source;
-        const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech'];
+        const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt'];
         const debuffs = cleanseRecipient.statuses
           .filter(s => debuffTypes.includes(s.type))
           .sort((a, b) => b.stacks - a.stacks);
@@ -1369,11 +1601,19 @@ function resolveEffects(
 
 /**
  * Get playable cards from a combatant's hand (cards they can afford).
+ * When Taunted, only attack cards are playable.
  */
 export function getPlayableCards(combatant: Combatant): string[] {
-  return combatant.hand.filter((_cardId, idx) => {
+  const hasTaunt = getStatusStacks(combatant, 'taunt') > 0;
+  return combatant.hand.filter((cardId, idx) => {
     const effectiveCost = getEffectiveCost(combatant, idx);
-    return combatant.energy >= effectiveCost;
+    if (combatant.energy < effectiveCost) return false;
+    // Taunt restricts to attack cards only
+    if (hasTaunt) {
+      const card = getMove(cardId);
+      if (!isAttackCard(card)) return false;
+    }
+    return true;
   });
 }
 
@@ -1402,6 +1642,18 @@ export function getEffectiveCost(combatant: Combatant, handIndex: number): numbe
 
   // Quick Feet: First attack each turn costs 1 less
   cost -= checkQuickFeet(combatant, card);
+
+  // Rapid Strike: 1-cost attacks in hand at turn start cost 0
+  cost -= checkRapidStrike(combatant, card, handIndex);
+
+  // Hex Mastery: Hex costs 0
+  cost -= checkHexMastery(combatant, card);
+
+  // Lullaby: Sing costs 1
+  cost -= checkLullaby(combatant, card);
+
+  // Spore Mastery: Spore costs 0
+  cost -= checkSporeMastery(combatant, card);
 
   // Hustle: Attacks cost +1
   cost += checkHustleCostIncrease(combatant, card);

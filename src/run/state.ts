@@ -1,5 +1,6 @@
 import type { PokemonData, Position, Column, Row, Combatant } from '../engine/types';
-import type { RunState, RunPokemon, MapNode, BattleNode, ActTransitionNode, CardRemovalNode, EventType } from './types';
+import type { RunState, RunPokemon, MapNode, BattleNode, ActTransitionNode, CardRemovalNode } from './types';
+import { getEventsForAct } from '../data/events';
 import { getPokemon, getMove } from '../data/loaders';
 import { STARTING_GOLD } from '../data/shop';
 import { ACT1_NODES, ACT2_NODES, ACT3_NODES, getNodeById } from './nodes';
@@ -51,6 +52,8 @@ export function createRunState(
       exp: 0, // No starting EXP - first EXP comes from first battle
       passiveIds: initialPassives,
       knockedOut: false,
+      energyModifier: 0,
+      drawModifier: 0,
     };
   });
 
@@ -70,8 +73,8 @@ export function createRunState(
   const partyBaseFormIds = party.map(p => p.id);
   nodes = assignRecruitPokemon(nodes, recruitSeed, partyBaseFormIds);
 
-  // Randomize event types for detour events (e.g., detour-tc-event)
-  nodes = assignRandomEventTypes(nodes, actualSeed);
+  // Assign random events from Act 1 pool (no repeats)
+  const { nodes: eventNodes, seenEventIds } = assignRandomEvents(nodes, 1, actualSeed, []);
 
   return {
     seed: actualSeed,
@@ -80,10 +83,11 @@ export function createRunState(
     graveyard: [],
     currentNodeId: 's0-spawn', // Start at spawn
     visitedNodeIds: ['s0-spawn'],
-    nodes,
+    nodes: eventNodes,
     currentAct: 1,
     recruitSeed,
     gold: startingGold,
+    seenEventIds,
   };
 }
 
@@ -204,15 +208,16 @@ export function transitionToAct2(run: RunState): RunState {
   ];
   act2Nodes = assignRecruitPokemon(act2Nodes, run.recruitSeed + 99999, excludeIds);
 
-  // Randomize event types for detour events (e.g., detour-a2-tc-event)
-  act2Nodes = assignRandomEventTypes(act2Nodes, run.seed);
+  // Assign random events from Act 2 pool (no repeats across run)
+  const { nodes: eventNodes, seenEventIds } = assignRandomEvents(act2Nodes, 2, run.seed, run.seenEventIds);
 
   return {
     ...run,
     currentAct: 2,
     currentNodeId: 'a2-s0-spawn',
     visitedNodeIds: ['a2-s0-spawn'],
-    nodes: act2Nodes,
+    nodes: eventNodes,
+    seenEventIds,
   };
 }
 
@@ -220,8 +225,9 @@ export function transitionToAct2(run: RunState): RunState {
  * Create a test run state that starts at Act 2 with a leveled, healthy party.
  * Used for dev testing only.
  */
-export function createAct2TestState(): RunState {
-  const starters = ['charmander', 'squirtle', 'bulbasaur', 'pikachu'];
+/** Create a level 4 test party with a dead Ivysaur in the graveyard. */
+function createTestPartyRun(gold: number): RunState {
+  const starters = ['charizard', 'arcanine', 'magmar', 'electabuzz'];
   const positions: Position[] = [
     { row: 'front', column: 0 },
     { row: 'front', column: 2 },
@@ -230,21 +236,28 @@ export function createAct2TestState(): RunState {
   ];
 
   const party = starters.map(id => getPokemon(id));
-  let run = createRunState(party, positions, Date.now(), 300);
+  let run = createRunState(party, positions, Date.now(), gold);
 
-  // Give enough EXP for 2 level-ups (level 3) and apply them
+  // Level up to 4
   run = {
     ...run,
-    party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL * 2 })),
+    party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL * 3 })),
   };
-  for (let lvl = 0; lvl < 2; lvl++) {
+  for (let lvl = 0; lvl < 3; lvl++) {
     for (let i = 0; i < run.party.length; i++) {
       run = applyLevelUp(run, i);
     }
   }
 
-  // Full heal and transition to Act 2
-  run = applyFullHealAll(run);
+  // Add a dead Ivysaur to the graveyard
+  const ivysaur = createRecruitPokemon('ivysaur', 4);
+  run = { ...run, graveyard: [{ ...ivysaur, currentHp: 0, knockedOut: true }] };
+
+  return applyFullHealAll(run);
+}
+
+export function createAct2TestState(): RunState {
+  const run = createTestPartyRun(300);
   return transitionToAct2(run);
 }
 
@@ -264,15 +277,16 @@ export function transitionToAct3(run: RunState): RunState {
 
   // No recruits in Act 3
 
-  // Randomize event types for detour events
-  act3Nodes = assignRandomEventTypes(act3Nodes, run.seed + 200000);
+  // Assign random events from Act 3 pool (no repeats across run)
+  const { nodes: eventNodes, seenEventIds } = assignRandomEvents(act3Nodes, 3, run.seed + 200000, run.seenEventIds);
 
   return {
     ...run,
     currentAct: 3,
     currentNodeId: 'a3-s0-spawn',
     visitedNodeIds: ['a3-s0-spawn'],
-    nodes: act3Nodes,
+    nodes: eventNodes,
+    seenEventIds,
   };
 }
 
@@ -281,30 +295,7 @@ export function transitionToAct3(run: RunState): RunState {
  * Used for dev testing only.
  */
 export function createAct3TestState(): RunState {
-  const starters = ['charmander', 'squirtle', 'bulbasaur', 'pikachu'];
-  const positions: Position[] = [
-    { row: 'front', column: 0 },
-    { row: 'front', column: 2 },
-    { row: 'back', column: 0 },
-    { row: 'back', column: 2 },
-  ];
-
-  const party = starters.map(id => getPokemon(id));
-  let run = createRunState(party, positions, Date.now(), 500);
-
-  // Give enough EXP for 3 level-ups (level 4) and apply them
-  run = {
-    ...run,
-    party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL * 3 })),
-  };
-  for (let lvl = 0; lvl < 3; lvl++) {
-    for (let i = 0; i < run.party.length; i++) {
-      run = applyLevelUp(run, i);
-    }
-  }
-
-  // Full heal and transition to Act 3
-  run = applyFullHealAll(run);
+  const run = createTestPartyRun(500);
   return transitionToAct3(run);
 }
 
@@ -510,6 +501,76 @@ export function addCardToDeck(
 }
 
 // ============================================================
+// Event Modifier Helpers
+// ============================================================
+
+/**
+ * Apply a permanent energy-per-turn modifier to a specific Pokemon.
+ */
+export function applyEnergyModifier(
+  run: RunState,
+  pokemonIndex: number,
+  amount: number
+): RunState {
+  const newParty = run.party.map((pokemon, i) => {
+    if (i !== pokemonIndex) return pokemon;
+    return { ...pokemon, energyModifier: pokemon.energyModifier + amount };
+  });
+  return { ...run, party: newParty };
+}
+
+/**
+ * Apply a permanent hand-size modifier to a specific Pokemon.
+ */
+export function applyDrawModifier(
+  run: RunState,
+  pokemonIndex: number,
+  amount: number
+): RunState {
+  const newParty = run.party.map((pokemon, i) => {
+    if (i !== pokemonIndex) return pokemon;
+    return { ...pokemon, drawModifier: pokemon.drawModifier + amount };
+  });
+  return { ...run, party: newParty };
+}
+
+/**
+ * Add Dazed curse cards to a specific Pokemon's deck.
+ */
+export function addDazedCards(
+  run: RunState,
+  pokemonIndex: number,
+  count: number
+): RunState {
+  const newParty = run.party.map((pokemon, i) => {
+    if (i !== pokemonIndex) return pokemon;
+    const newDeck = [...pokemon.deck];
+    for (let j = 0; j < count; j++) {
+      newDeck.push('dazed');
+    }
+    return { ...pokemon, deck: newDeck };
+  });
+  return { ...run, party: newParty };
+}
+
+/**
+ * Apply flat damage to a specific Pokemon (clamped to 1 HP min if alive).
+ */
+export function applyDamage(
+  run: RunState,
+  pokemonIndex: number,
+  amount: number
+): RunState {
+  const newParty = run.party.map((pokemon, i) => {
+    if (i !== pokemonIndex) return pokemon;
+    if (pokemon.knockedOut || pokemon.currentHp <= 0) return pokemon;
+    const newHp = Math.max(1, pokemon.currentHp - amount);
+    return { ...pokemon, currentHp: newHp };
+  });
+  return { ...run, party: newParty };
+}
+
+// ============================================================
 // Gold Economy
 // ============================================================
 
@@ -519,6 +580,17 @@ export function getBattleGoldReward(node: BattleNode, act: number): number {
   const actBonus = (act - 1) * 15;
   const bossBonus = (node.enemyHpMultiplier ?? 1) > 1 ? 25 : 0;
   return base + actBonus + bossBonus;
+}
+
+/**
+ * Apply Pickup passive gold bonus.
+ * Pickup: Earn 25% more gold from battles (applied to base reward only).
+ * Checks if any party member has the 'pickup' passive.
+ */
+export function applyPickupBonus(run: RunState, baseGold: number): number {
+  const hasPickup = run.party.some(p => p.passiveIds.includes('pickup'));
+  if (!hasPickup) return baseGold;
+  return Math.floor(baseGold * 1.25);
 }
 
 export function addGold(run: RunState, amount: number): RunState {
@@ -601,6 +673,28 @@ export function moveKnockedOutToGraveyard(run: RunState): RunState {
   };
 }
 
+/**
+ * Revive a Pokemon from the graveyard at a given HP percent.
+ * Adds to bench (party slots are fixed formation).
+ */
+export function reviveFromGraveyard(run: RunState, graveyardIndex: number, hpPercent: number): RunState {
+  const pokemon = run.graveyard[graveyardIndex];
+  if (!pokemon) return run;
+
+  const revived = {
+    ...pokemon,
+    currentHp: Math.max(1, Math.floor(pokemon.maxHp * hpPercent)),
+    knockedOut: false,
+    deck: [...pokemon.deck, 'spectral-form'],
+  };
+
+  return {
+    ...run,
+    graveyard: run.graveyard.filter((_, i) => i !== graveyardIndex),
+    bench: [...run.bench, revived],
+  };
+}
+
 // ============================================================
 // Battle Helpers
 // ============================================================
@@ -616,6 +710,8 @@ export function getRunPokemonData(runPokemon: RunPokemon): PokemonData {
     id: runPokemon.formId,
     maxHp: runPokemon.maxHp,
     deck: [...runPokemon.deck],
+    energyModifier: runPokemon.energyModifier,
+    drawModifier: runPokemon.drawModifier,
   };
 }
 
@@ -877,6 +973,14 @@ const RECRUIT_POOL_ALL = [
   'dratini',
   'spearow',
   'sandshrew',
+  'clefairy',
+  'machop',
+  'vulpix',
+  'oddish',
+  'meowth',
+  'jigglypuff',
+  'paras',
+  'zubat',
 ];
 
 /** Simple seeded RNG (Lehmer / Park-Miller). Returns value in [0, 1) and next seed. */
@@ -918,22 +1022,42 @@ export function assignRecruitPokemon(
 }
 
 /**
- * Assign random event types to detour event nodes (IDs starting with 'detour-').
- * Picks randomly from train, meditate, forget using seeded RNG.
+ * Assign random events from an act's event pool to all event nodes.
+ * No repeats across the entire run (uses seenEventIds to track).
+ * Returns updated nodes and the new seenEventIds list.
  */
-function assignRandomEventTypes(nodes: MapNode[], seed: number): MapNode[] {
-  const eventTypes: EventType[] = ['train', 'meditate', 'forget'];
+export function assignRandomEvents(
+  nodes: MapNode[],
+  act: number,
+  seed: number,
+  seenEventIds: string[]
+): { nodes: MapNode[]; seenEventIds: string[] } {
+  const actEvents = getEventsForAct(act);
+  const available = actEvents.filter(e => !seenEventIds.includes(e.id));
   let currentSeed = Math.max(1, Math.abs(seed + 77777));
+  const newSeen = [...seenEventIds];
+  const usedThisAct = new Set<string>();
 
-  return nodes.map(node => {
-    if (node.type !== 'event' || !node.id.startsWith('detour-')) return node;
+  const newNodes = nodes.map(node => {
+    if (node.type !== 'event') return node;
+    // Skip nodes that already have an assigned eventId
+    if ((node as Record<string, unknown>).eventId && (node as Record<string, unknown>).eventId !== '') return node;
+
+    // Filter to events not yet used
+    const pool = available.filter(e => !usedThisAct.has(e.id));
+    if (pool.length === 0) return node;
 
     const { value, nextSeed } = seededRandom(currentSeed);
     currentSeed = nextSeed;
 
-    const picked = eventTypes[Math.floor(value * eventTypes.length)];
-    return { ...node, eventType: picked };
+    const picked = pool[Math.floor(value * pool.length)];
+    usedThisAct.add(picked.id);
+    newSeen.push(picked.id);
+
+    return { ...node, eventId: picked.id };
   });
+
+  return { nodes: newNodes, seenEventIds: newSeen };
 }
 
 /**
@@ -1001,6 +1125,8 @@ export function createRecruitPokemon(pokemonId: string, level: number, exp: numb
     exp,
     passiveIds: passiveIds as import('./progression').PassiveId[],
     knockedOut: false,
+    energyModifier: 0,
+    drawModifier: 0,
   };
 }
 
@@ -1043,6 +1169,11 @@ export function migrateRunState(run: RunState): RunState {
     migrated = { ...migrated, gold: 500 };
   }
 
+  // Add seenEventIds if missing (pre-event-overhaul saves)
+  if (!migrated.seenEventIds) {
+    migrated = { ...migrated, seenEventIds: [] };
+  }
+
   // Add x,y to nodes if missing (pre-free-form saves)
   const needsCoords = migrated.nodes.some(n => n.x === undefined || n.y === undefined);
   if (needsCoords) {
@@ -1055,6 +1186,41 @@ export function migrateRunState(run: RunState): RunState {
       })),
     };
   }
+
+  // Migrate old eventType field to eventId on event nodes
+  const needsEventMigration = migrated.nodes.some(
+    n => n.type === 'event' && !(n as Record<string, unknown>).eventId && (n as Record<string, unknown>).eventType
+  );
+  if (needsEventMigration) {
+    migrated = {
+      ...migrated,
+      nodes: migrated.nodes.map(n => {
+        if (n.type !== 'event') return n;
+        const legacy = n as Record<string, unknown>;
+        // Map old eventTypes to reasonable default event IDs
+        const typeToDefault: Record<string, string> = {
+          train: 'training_camp',
+          meditate: 'meditation_chamber',
+          forget: 'move_tutor',
+        };
+        const eventId = (legacy.eventId as string) || typeToDefault[(legacy.eventType as string) ?? 'train'] || 'training_camp';
+        return { ...n, eventId } as typeof n;
+      }),
+    };
+  }
+
+  // Add energyModifier and drawModifier to party/bench/graveyard if missing
+  const migrateRunPokemon = (p: RunPokemon): RunPokemon => ({
+    ...p,
+    energyModifier: p.energyModifier ?? 0,
+    drawModifier: p.drawModifier ?? 0,
+  });
+  migrated = {
+    ...migrated,
+    party: migrated.party.map(migrateRunPokemon),
+    bench: migrated.bench.map(migrateRunPokemon),
+    graveyard: migrated.graveyard.map(migrateRunPokemon),
+  };
 
   return migrated;
 }

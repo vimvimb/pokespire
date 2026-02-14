@@ -5,6 +5,7 @@ import { getMove, getPokemon } from '../../data/loaders';
 import { CardPreview } from '../components/CardPreview';
 import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
+import { GoldCoin } from '../components/GoldCoin';
 import { getSpriteSize } from '../../data/heights';
 
 interface Props {
@@ -183,7 +184,7 @@ export function ShopScreen({ run, onPurchase, onClose }: Props) {
           fontSize: 16,
           fontWeight: 'bold',
         }}>
-          {run.gold}g
+          {run.gold}<GoldCoin size={14} />
         </div>
         <button
           onClick={onClose}
@@ -205,7 +206,7 @@ export function ShopScreen({ run, onPurchase, onClose }: Props) {
       inset: 0,
       zIndex: 100,
     }}>
-      <ScreenShell header={header}>
+      <ScreenShell header={header} ambient>
         <div style={{
           display: 'flex',
           flexDirection: 'column',
@@ -382,7 +383,7 @@ export function ShopScreen({ run, onPurchase, onClose }: Props) {
                         fontWeight: 'bold',
                         whiteSpace: 'nowrap',
                       }}>
-                        {item.goldCost}g
+                        {item.goldCost}<GoldCoin size={11} />
                       </div>
                     </div>
                   );

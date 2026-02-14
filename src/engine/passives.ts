@@ -12,8 +12,9 @@
  */
 
 import type { CombatState, Combatant, LogEntry, MoveDefinition, MoveType } from './types';
-import { applyStatus, getEffectiveSpeed } from './status';
+import { applyStatus, getEffectiveSpeed, getStatusStacks } from './status';
 import { applyHeal, applyBypassDamage } from './damage';
+import { isInEffectiveFrontRow } from './position';
 
 // ============================================================
 // Helper Functions
@@ -151,6 +152,19 @@ export function onBattleStart(state: CombatState): LogEntry[] {
     });
   }
 
+  // Lucky Star: Gain 4 Evasion at start of combat
+  for (const combatant of state.combatants) {
+    if (!combatant.alive) continue;
+    if (!combatant.passiveIds.includes('lucky_star')) continue;
+
+    applyStatus(state, combatant, 'evasion', 4, combatant.id);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Lucky Star: ${combatant.name} gains 4 Evasion!`,
+    });
+  }
+
   // Intimidate: Apply 2 Enfeeble to all enemies at battle start
   for (const combatant of state.combatants) {
     if (!combatant.alive) continue;
@@ -275,6 +289,24 @@ export function onTurnStart(
       combatantId: combatant.id,
       message: `Charge: ${combatant.name} gains 1 Strength!`,
     });
+  }
+
+  // Intangible: Gain 2 Evasion at the start of your turn
+  if (combatant.passiveIds.includes('intangible')) {
+    applyStatus(state, combatant, 'evasion', 2, combatant.id);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Intangible: ${combatant.name} gains 2 Evasion!`,
+    });
+  }
+
+  // Reset Finisher flag at turn start
+  combatant.turnFlags.finisherUsedThisTurn = false;
+
+  // Rapid Strike: snapshot hand size at turn start so only original cards get the discount
+  if (combatant.passiveIds.includes('rapid_strike')) {
+    combatant.costModifiers['rapidStrikeHandSize'] = combatant.hand.length;
   }
 
   // Reset Relentless bonus counter at turn start
@@ -416,6 +448,61 @@ export function onDamageDealt(
     }
   }
 
+  // No Guard: When you deal unblocked damage, strip own defenses for Strength
+  if (attacker.passiveIds.includes('no_guard') && damageDealt > 0) {
+    // Strip 1 Evasion from self
+    const evasionStatus = attacker.statuses.find(s => s.type === 'evasion');
+    if (evasionStatus && evasionStatus.stacks > 0) {
+      evasionStatus.stacks -= 1;
+      if (evasionStatus.stacks <= 0) {
+        attacker.statuses = attacker.statuses.filter(s => s.type !== 'evasion');
+      }
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `No Guard: ${attacker.name} loses 1 Evasion!`,
+      });
+    }
+
+    // Strip 1 Block from self
+    if (attacker.block > 0) {
+      attacker.block -= 1;
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `No Guard: ${attacker.name} loses 1 Block!`,
+      });
+    }
+
+    // Gain 1 Strength
+    applyStatus(state, attacker, 'strength', 1, attacker.id);
+    logs.push({
+      round: state.round,
+      combatantId: attacker.id,
+      message: `No Guard: ${attacker.name} gains 1 Strength!`,
+    });
+  }
+
+  // Vampiricism: Unblocked front-row attacks apply +1 Leech
+  if (attacker.passiveIds.includes('vampiricism') && card.range === 'front_enemy' && damageDealt > 0 && target.alive) {
+    applyStatus(state, target, 'leech', 1, attacker.id);
+    logs.push({
+      round: state.round,
+      combatantId: attacker.id,
+      message: `Vampiricism: +1 Leech applied to ${target.name}!`,
+    });
+  }
+
+  // Zephyr King: Flying attacks grant +1 Haste to self
+  if (attacker.passiveIds.includes('zephyr_king') && card.type === 'flying' && damageDealt > 0) {
+    applyStatus(state, attacker, 'haste', 1, attacker.id);
+    logs.push({
+      round: state.round,
+      combatantId: attacker.id,
+      message: `Zephyr King: ${attacker.name} gains 1 Haste!`,
+    });
+  }
+
   // Numbing Strike: Unblocked Electric attacks apply +1 Paralysis
   if (attacker.passiveIds.includes('numbing_strike') && card.type === 'electric' && damageDealt > 0) {
     applyStatus(state, target, 'paralysis', 1, attacker.id);
@@ -423,6 +510,16 @@ export function onDamageDealt(
       round: state.round,
       combatantId: attacker.id,
       message: `Numbing Strike: +1 Paralysis applied to ${target.name}!`,
+    });
+  }
+
+  // Mysticism: Unblocked Psychic attacks inflict 1 Enfeeble
+  if (attacker.passiveIds.includes('mysticism') && card.type === 'psychic' && damageDealt > 0 && target.alive) {
+    applyStatus(state, target, 'enfeeble', 1, attacker.id);
+    logs.push({
+      round: state.round,
+      combatantId: attacker.id,
+      message: `Mysticism: +1 Enfeeble applied to ${target.name}!`,
     });
   }
 
@@ -485,8 +582,20 @@ export function onStatusApplied(
     }
   }
 
+  // Guts: When an enemy applies a debuff to you, gain 1 Strength (once per application, not per stack)
+  const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt'];
+  if (target.passiveIds.includes('guts') &&
+      source.side !== target.side &&
+      debuffTypes.includes(statusType)) {
+    applyStatusDirect(state, target, 'strength', 1, target.id);
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Guts: ${target.name} gains 1 Strength from the debuff!`,
+    });
+  }
+
   // Compound Eyes: When you apply a debuff to an enemy, gain 1 Evasion
-  const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech'];
   if (source.passiveIds.includes('compound_eyes') &&
       debuffTypes.includes(statusType) &&
       source.side !== target.side) {
@@ -558,7 +667,7 @@ export function onTurnEnd(
 
   // Shed Skin: At end of turn, remove 1 stack from ALL debuffs
   if (combatant.passiveIds.includes('shed_skin') && combatant.alive) {
-    const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech'];
+    const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt'];
     const debuffs = combatant.statuses.filter(s => debuffTypes.includes(s.type));
     if (debuffs.length > 0) {
       const expiredTypes: string[] = [];
@@ -582,6 +691,28 @@ export function onTurnEnd(
             message: `${type} on ${combatant.name} expired.`,
           });
         }
+      }
+    }
+  }
+
+  // Stench: Enemy directly facing this combatant gains 2 Poison
+  if (combatant.passiveIds.includes('stench') && combatant.alive) {
+    // Only applies if this combatant is in the effective front row
+    if (isInEffectiveFrontRow(state, combatant)) {
+      // Find the enemy in the effective front row in the same column
+      const facingEnemy = state.combatants.find(c =>
+        c.alive &&
+        c.side !== combatant.side &&
+        isInEffectiveFrontRow(state, c) &&
+        c.position.column === combatant.position.column
+      );
+      if (facingEnemy) {
+        applyStatus(state, facingEnemy, 'poison', 2, combatant.id);
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Stench: ${facingEnemy.name} gains 2 Poison from ${combatant.name}'s stench!`,
+        });
       }
     }
   }
@@ -658,6 +789,26 @@ export function onDamageTaken(
     });
   }
 
+  // Effect Spore: When hit by a front-row attack, apply Paralysis 1 to the attacker
+  if (target.passiveIds.includes('effect_spore') && target.alive && attacker.alive && card.range === 'front_enemy') {
+    applyStatus(state, attacker, 'paralysis', 1, target.id);
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Effect Spore: ${attacker.name} is paralyzed by ${target.name}!`,
+    });
+  }
+
+  // Cute Charm: When hit by a front-row attack, apply Enfeeble 1 to the attacker
+  if (target.passiveIds.includes('cute_charm') && target.alive && attacker.alive && card.range === 'front_enemy') {
+    applyStatus(state, attacker, 'enfeeble', 1, target.id);
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Cute Charm: ${attacker.name} is enfeebled by ${target.name}!`,
+    });
+  }
+
   // Spiked Hide: When hit by a front-row attack, deal 2 damage back to the attacker
   if (target.passiveIds.includes('spiked_hide') && target.alive && attacker.alive && card.range === 'front_enemy') {
     applyBypassDamage(attacker, 2);
@@ -703,6 +854,38 @@ export function onDamageTaken(
     }
   }
 
+  return logs;
+}
+
+/**
+ * Counter Stance: Deal damage to attacker equal to target's current Evasion stacks.
+ * Called separately from onDamageTaken so it triggers even when evasion fully absorbs damage.
+ * Must be called BEFORE decayEvasionOnHit so it reads pre-decay stacks.
+ */
+export function triggerCounterStance(
+  state: CombatState,
+  attacker: Combatant,
+  target: Combatant
+): LogEntry[] {
+  const logs: LogEntry[] = [];
+  if (!target.passiveIds.includes('counter_stance') || !target.alive || !attacker.alive) return logs;
+
+  const evasionStacks = getStatusStacks(target, 'evasion');
+  if (evasionStacks > 0) {
+    applyBypassDamage(attacker, evasionStacks);
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Counter Stance: ${attacker.name} takes ${evasionStacks} damage from ${target.name}'s Evasion!`,
+    });
+    if (!attacker.alive) {
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `${attacker.name} was KO'd by Counter Stance!`,
+      });
+    }
+  }
   return logs;
 }
 
@@ -803,14 +986,14 @@ export function checkThickFat(target: Combatant, moveType?: MoveType): number {
 }
 
 /**
- * Check Underdog bonus damage.
- * Underdog: Basic or Common rarity cards that cost 1 deal +2 damage.
+ * Check Proletariat bonus damage.
+ * Proletariat: Basic or Common rarity cards that cost 1 deal +2 damage.
  */
-export function checkUnderdog(
+export function checkProletariat(
   attacker: Combatant,
   card: MoveDefinition
 ): number {
-  if (attacker.passiveIds.includes('underdog') &&
+  if (attacker.passiveIds.includes('proletariat') &&
       (card.rarity === 'common' || card.rarity === 'basic') &&
       card.cost === 1) {
     return 2;
@@ -989,7 +1172,7 @@ export function checkFortifiedSpines(
 
 /**
  * Check if Counter-Current should provide bonus damage.
- * Counter-Current: Deal bonus damage to slower enemies (floor((yourSpeed - theirSpeed) / 2)).
+ * Counter-Current: Deal bonus damage to slower enemies equal to the speed difference.
  */
 export function checkCounterCurrent(
   state: CombatState,
@@ -1009,7 +1192,7 @@ export function checkCounterCurrent(
     return { bonusDamage: 0, logs };
   }
 
-  const bonus = Math.floor((attackerSpeed - targetSpeed) / 2);
+  const bonus = attackerSpeed - targetSpeed;
   if (bonus > 0) {
     logs.push({
       round: state.round,
@@ -1022,8 +1205,8 @@ export function checkCounterCurrent(
 }
 
 /**
- * Check if Static Field should reduce incoming damage.
- * Static Field: Take reduced damage from slower enemies (floor((yourSpeed - theirSpeed) / 2)).
+ * Check if Swift Guard should reduce incoming damage.
+ * Swift Guard: Take reduced damage from slower enemies equal to the speed difference.
  */
 export function checkStaticField(
   state: CombatState,
@@ -1043,12 +1226,12 @@ export function checkStaticField(
     return { reduction: 0, logs };
   }
 
-  const reduction = Math.floor((targetSpeed - attackerSpeed) / 2);
+  const reduction = targetSpeed - attackerSpeed;
   if (reduction > 0) {
     logs.push({
       round: state.round,
       combatantId: target.id,
-      message: `Static Field: -${reduction} damage (speed ${targetSpeed} vs ${attackerSpeed})!`,
+      message: `Swift Guard: -${reduction} damage (speed ${targetSpeed} vs ${attackerSpeed})!`,
     });
   }
 
@@ -1358,6 +1541,93 @@ export function checkTintedLens(attacker: Combatant, typeEffectiveness: number):
 }
 
 /**
+ * Check Night Assassin bonus damage.
+ * Night Assassin: Damage cards deal bonus damage equal to evasion stacks (max +15).
+ */
+export function checkNightAssassin(source: Combatant, card: MoveDefinition): number {
+  if (!source.passiveIds.includes('night_assassin')) return 0;
+  const isDamageCard = card.effects.some(e =>
+    e.type === 'damage' || e.type === 'multi_hit' || e.type === 'heal_on_hit' ||
+    e.type === 'recoil' || e.type === 'self_ko'
+  );
+  if (!isDamageCard) return 0;
+  const evasionStacks = getStatusStacks(source, 'evasion');
+  return Math.min(evasionStacks, 15);
+}
+
+/**
+ * Check Friend Guard damage reduction.
+ * Friend Guard: Allies take 2 less damage from all attacks.
+ * Returns the reduction if any ally of the target has Friend Guard.
+ */
+export function checkFriendGuard(
+  state: CombatState,
+  target: Combatant
+): number {
+  const hasAllyWithFriendGuard = state.combatants.some(c =>
+    c.alive &&
+    c.side === target.side &&
+    c.id !== target.id &&
+    c.passiveIds.includes('friend_guard')
+  );
+  return hasAllyWithFriendGuard ? 2 : 0;
+}
+
+/**
+ * Check Rapid Strike cost reduction.
+ * Rapid Strike: 1-cost attack cards in hand at turn start cost 0.
+ * Cards drawn mid-turn do NOT get the discount.
+ * Returns cost reduction (0 or 1).
+ */
+export function checkRapidStrike(
+  combatant: Combatant,
+  card: MoveDefinition,
+  handIndex: number
+): number {
+  if (!combatant.passiveIds.includes('rapid_strike')) return 0;
+  if (card.cost !== 1) return 0;
+  if (!isAttackCard(card)) return 0;
+  // Only apply to cards that were in hand at turn start
+  const originalHandSize = combatant.costModifiers['rapidStrikeHandSize'] ?? 0;
+  if (handIndex >= originalHandSize) return 0;
+  return 1;
+}
+
+/**
+ * Check Finisher effect.
+ * Finisher: First attack card with effective cost >= 3 this turn deals double damage.
+ * Returns whether the multiplier should apply.
+ * dryRun=true avoids setting the flag (for preview calculations).
+ */
+export function checkFinisher(
+  state: CombatState,
+  attacker: Combatant,
+  card: MoveDefinition,
+  effectiveCost: number,
+  dryRun: boolean = false
+): { shouldApply: boolean; logs: LogEntry[] } {
+  const logs: LogEntry[] = [];
+
+  const hasFinisher = attacker.passiveIds.includes('finisher');
+  const isAttack = isAttackCard(card);
+  const notUsed = !attacker.turnFlags.finisherUsedThisTurn;
+
+  if (hasFinisher && isAttack && notUsed && effectiveCost >= 3) {
+    if (!dryRun) {
+      attacker.turnFlags.finisherUsedThisTurn = true;
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `Finisher: ${card.name} deals double damage!`,
+      });
+    }
+    return { shouldApply: true, logs };
+  }
+
+  return { shouldApply: false, logs };
+}
+
+/**
  * Lightning Rod: Redirects Electric attacks targeting allies in the same row.
  * Returns the combatant who should receive the attack (redirected target or original).
  * Also returns whether redirection occurred for damage reduction.
@@ -1388,4 +1658,134 @@ export function checkLightningRod(
 
   // Redirect to the first ally with Lightning Rod
   return { target: allies[0], redirected: true };
+}
+
+/**
+ * Check Malice bonus damage.
+ * Malice: Attacks deal bonus damage equal to the target's Burn + Enfeeble stacks.
+ * Returns the bonus damage amount.
+ */
+export function checkMalice(
+  source: Combatant,
+  target: Combatant
+): number {
+  if (!source.passiveIds.includes('malice')) return 0;
+  const burnStacks = getStatusStacks(target, 'burn');
+  const enfeebleStacks = getStatusStacks(target, 'enfeeble');
+  return burnStacks + enfeebleStacks;
+}
+
+/**
+ * Check Hex Mastery cost reduction.
+ * Hex Mastery: Hex costs 0.
+ * Returns the cost reduction.
+ */
+export function checkHexMastery(
+  combatant: Combatant,
+  card: MoveDefinition
+): number {
+  if (!combatant.passiveIds.includes('hex_mastery')) return 0;
+  if (card.id !== 'hex') return 0;
+  return card.cost; // Reduce by full cost to make it 0
+}
+
+/**
+ * Check Technician damage multiplier.
+ * Technician: Your 1-cost cards deal 30% more damage.
+ * Uses base cost (card.cost), not effective cost.
+ * Returns 1.3 if active, 1.0 otherwise.
+ */
+export function checkTechnician(attacker: Combatant, card: MoveDefinition): number {
+  if (attacker.passiveIds.includes('technician') && card.cost === 1) {
+    return 1.3;
+  }
+  return 1.0;
+}
+
+/**
+ * Check Aristocrat damage multiplier.
+ * Aristocrat: Your Epic rarity cards deal 30% more damage.
+ * Returns 1.3 if active, 1.0 otherwise.
+ */
+export function checkAristocrat(attacker: Combatant, card: MoveDefinition): number {
+  if (attacker.passiveIds.includes('aristocrat') && card.rarity === 'epic') {
+    return 1.3;
+  }
+  return 1.0;
+}
+
+/**
+ * Check Lullaby cost reduction.
+ * Lullaby: Sing costs 1 energy (reduce by 1 from base cost of 2).
+ */
+export function checkLullaby(
+  combatant: Combatant,
+  card: MoveDefinition
+): number {
+  if (!combatant.passiveIds.includes('lullaby')) return 0;
+  if (card.id !== 'sing') return 0;
+  return 1; // Reduce cost by 1 (2 → 1)
+}
+
+/**
+ * Check Rude Awakening damage multiplier.
+ * Rude Awakening: Your attacks deal double damage to sleeping targets.
+ * Returns 2.0 if active, 1.0 otherwise.
+ */
+export function checkRudeAwakening(
+  attacker: Combatant,
+  target: Combatant
+): number {
+  if (!attacker.passiveIds.includes('rude_awakening')) return 1.0;
+  const sleepStacks = target.statuses.find(s => s.type === 'sleep')?.stacks ?? 0;
+  return sleepStacks > 0 ? 2.0 : 1.0;
+}
+
+/**
+ * Check Blind Aggression bonus damage.
+ * Blind Aggression: +2 damage to enemies in the same column as you.
+ */
+export function checkBlindAggression(
+  attacker: Combatant,
+  target: Combatant
+): number {
+  if (!attacker.passiveIds.includes('blind_aggression')) return 0;
+  if (attacker.position.column === target.position.column) return 2;
+  return 0;
+}
+
+/**
+ * Check Dry Skin fire vulnerability.
+ * Dry Skin: Take 25% more damage from Fire attacks.
+ * Returns 1.25 for fire, 1.0 otherwise.
+ */
+export function checkDrySkin(target: Combatant, moveType?: MoveType): number {
+  if (target.passiveIds.includes('dry_skin') && moveType === 'fire') {
+    return 1.25;
+  }
+  return 1.0;
+}
+
+/**
+ * Check Spore Mastery cost reduction.
+ * Spore Mastery: Spore costs 0.
+ */
+export function checkSporeMastery(
+  combatant: Combatant,
+  card: MoveDefinition
+): number {
+  if (!combatant.passiveIds.includes('spore_mastery')) return 0;
+  if (card.id !== 'spore') return 0;
+  return card.cost; // Reduce by full cost to make it 0
+}
+
+/**
+ * Get total debuff stacks on a combatant.
+ * Used by Hex card for scaling damage.
+ */
+export function getTotalDebuffStacks(combatant: Combatant): number {
+  const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt'];
+  return combatant.statuses
+    .filter(s => debuffTypes.includes(s.type))
+    .reduce((total, s) => total + s.stacks, 0);
 }

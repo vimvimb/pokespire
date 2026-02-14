@@ -53,7 +53,7 @@ export function RecruitScreen({ run, node, battleResult, onStartFight, onRecruit
   );
 
   return (
-    <ScreenShell header={header}>
+    <ScreenShell header={header} ambient>
       <div style={{
         display: 'flex',
         flexDirection: 'column',

@@ -492,13 +492,13 @@
     "cost": 1,
     "type": "normal",
     "range": "front_enemy",
-    "vanish": false,
+    "vanish": true,
     "effects": [
-      { "type": "damage", "value": 6 }
+      { "type": "damage", "value": 8 }
     ],
-    "rarity": "basic",
-    "pools": ["normal"],
-    "description": "Deal 6 damage. (Front row)"
+    "rarity": "epic",
+    "goldOnHit": true,
+    "description": "Deal 8 damage. Gain gold equal to damage dealt. Vanish."
   },
   "egg-bomb": {
     "name": "Egg Bomb",
@@ -677,26 +677,26 @@
     "cost": 1,
     "type": "normal",
     "range": "self",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       { "type": "apply_status_self", "status": "evasion", "stacks": 3 }
     ],
     "rarity": "common",
     "pools": ["normal"],
-    "description": "Gain Evasion 3."
+    "description": "Gain Evasion 3. Vanish."
   },
   "minimize": {
     "name": "Minimize",
     "cost": 1,
     "type": "normal",
     "range": "self",
-    "vanish": false,
+    "vanish": true,
     "effects": [
-      { "type": "apply_status_self", "status": "evasion", "stacks": 5 }
+      { "type": "apply_status_self", "status": "evasion", "stacks": 4 }
     ],
     "rarity": "uncommon",
     "pools": ["normal"],
-    "description": "Gain Evasion 5."
+    "description": "Gain Evasion 4. Vanish."
   },
   "harden": {
     "name": "Harden",
@@ -729,7 +729,7 @@
     "cost": 2,
     "type": "normal",
     "range": "self",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       { "type": "heal", "value": 20 }
     ],
@@ -742,7 +742,7 @@
     "cost": 2,
     "type": "normal",
     "range": "self",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       { "type": "heal", "value": 20 }
     ],
@@ -808,14 +808,14 @@
     "cost": 1,
     "type": "normal",
     "range": "self",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       { "type": "apply_status_self", "status": "strength", "stacks": 2 },
       { "type": "apply_status_self", "status": "evasion", "stacks": 2 }
     ],
     "rarity": "uncommon",
     "pools": ["normal"],
-    "description": "Gain Strength 2 and Evasion 2."
+    "description": "Gain Strength 2 and Evasion 2. Vanish."
   },
   "substitute": {
     "name": "Substitute",
@@ -1278,6 +1278,33 @@
     "pools": ["fighting"],
     "description": "Deal 33 damage. (Front row)"
   },
+  "bulk-up": {
+    "name": "Bulk Up",
+    "cost": 1,
+    "type": "fighting",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "apply_status_self", "status": "strength", "stacks": 2 },
+      { "type": "block", "value": 4 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["fighting"],
+    "description": "Gain 2 Strength and 4 Block."
+  },
+  "cross-chop": {
+    "name": "Cross Chop",
+    "cost": 3,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 25 }
+    ],
+    "rarity": "rare",
+    "pools": ["fighting"],
+    "description": "Deal 25 damage. (Front row)"
+  },
 
   "fire-spin": {
     "name": "Fire Spin",
@@ -1378,7 +1405,7 @@
     "cost": 2,
     "type": "fire",
     "range": "self",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       { "type": "heal", "value": 20 }
     ],
@@ -1500,11 +1527,11 @@
     "vanish": false,
     "effects": [
       { "type": "damage", "value": 5 },
-      { "type": "apply_status", "status": "paralysis", "stacks": 2 }
+      { "type": "apply_status", "status": "paralysis", "stacks": 1 }
     ],
     "rarity": "basic",
     "pools": ["ghost"],
-    "description": "Deal 5 damage. Apply Paralysis 2. (Front row)"
+    "description": "Deal 5 damage. Apply Paralysis 1. (Front row)"
   },
   "night-shade": {
     "name": "Night Shade",
@@ -1532,6 +1559,19 @@
     "rarity": "common",
     "pools": ["ghost"],
     "description": "Apply Weak 2 and Slow 2."
+  },
+  "hex": {
+    "name": "Hex",
+    "cost": 2,
+    "type": "ghost",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 8, "bonusValue": 1, "bonusCondition": "target_debuff_stacks" }
+    ],
+    "rarity": "rare",
+    "pools": ["ghost"],
+    "description": "Deal 8 damage plus 1 per debuff stack on the target."
   },
 
   "vine-whip": {
@@ -1572,6 +1612,19 @@
     "rarity": "common",
     "pools": ["grass"],
     "description": "Deal 7 damage. Heal 50% of damage dealt."
+  },
+  "giga-drain": {
+    "name": "Giga Drain",
+    "cost": 3,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "heal_on_hit", "value": 22, "healPercent": 0.5 }
+    ],
+    "rarity": "epic",
+    "pools": ["grass"],
+    "description": "Deal 22 damage. Heal 50% of damage dealt."
   },
   "leech-seed": {
     "name": "Leech Seed",
@@ -1634,7 +1687,7 @@
     "effects": [
       { "type": "apply_status", "status": "sleep", "stacks": 1 }
     ],
-    "rarity": "rare",
+    "rarity": "epic",
     "pools": ["grass"],
     "description": "Apply Sleep 1."
   },
@@ -1924,14 +1977,14 @@
     "cost": 1,
     "type": "poison",
     "range": "self",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       { "type": "block", "value": 10 },
       { "type": "apply_status_self", "status": "evasion", "stacks": 2 }
     ],
     "rarity": "uncommon",
     "pools": ["poison"],
-    "description": "Gain 10 Block and Evasion 2."
+    "description": "Gain 10 Block and Evasion 2. Vanish."
   },
 
   "confusion": {
@@ -1946,6 +1999,19 @@
     "rarity": "common",
     "pools": ["psychic"],
     "description": "Deal 7 damage."
+  },
+  "extrasensory": {
+    "name": "Extrasensory",
+    "cost": 1,
+    "type": "psychic",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 10 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["psychic"],
+    "description": "Deal 10 damage."
   },
   "psybeam": {
     "name": "Psybeam",
@@ -2032,11 +2098,11 @@
     "range": "self",
     "vanish": true,
     "effects": [
-      { "type": "draw_cards", "count": 1 }
+      { "type": "apply_status_self", "status": "haste", "stacks": 3 }
     ],
-    "rarity": "common",
+    "rarity": "rare",
     "pools": ["psychic"],
-    "description": "Draw 1 card. Vanish."
+    "description": "Gain 3 Haste. Vanish."
   },
   "teleport": {
     "name": "Teleport",
@@ -2069,14 +2135,14 @@
     "cost": 2,
     "type": "psychic",
     "range": "self",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       { "type": "block", "value": 12 },
       { "type": "apply_status_self", "status": "evasion", "stacks": 2 }
     ],
     "rarity": "uncommon",
     "pools": ["psychic"],
-    "description": "Gain 12 Block and Evasion 2."
+    "description": "Gain 12 Block and Evasion 2. Vanish."
   },
   "reflect": {
     "name": "Reflect",
@@ -2563,5 +2629,220 @@
       { "type": "draw_cards", "count": 2 }
     ],
     "description": "Draw 2 cards. Single use."
+  },
+  "shadow-punch": {
+    "name": "Shadow Punch",
+    "cost": 1,
+    "type": "ghost",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 8 }
+    ],
+    "rarity": "common",
+    "pools": ["ghost"],
+    "description": "Deal 8 damage. Never misses. (Front row)"
+  },
+  "shadow-ball": {
+    "name": "Shadow Ball",
+    "cost": 2,
+    "type": "ghost",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 15 },
+      { "type": "apply_status", "status": "enfeeble", "stacks": 1 }
+    ],
+    "rarity": "rare",
+    "pools": ["ghost"],
+    "description": "Deal 15 damage. Apply Weak 1."
+  },
+  "ominous-wind": {
+    "name": "Ominous Wind",
+    "cost": 3,
+    "type": "ghost",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 15 },
+      { "type": "apply_status_self", "status": "strength", "stacks": 2 },
+      { "type": "apply_status_self", "status": "haste", "stacks": 2 }
+    ],
+    "rarity": "epic",
+    "pools": ["ghost"],
+    "description": "Deal 15 damage to ALL enemies. Gain Strength 2 and Haste 2."
+  },
+  "dazed": {
+    "name": "Dazed",
+    "cost": 0,
+    "type": "normal",
+    "range": "self",
+    "vanish": true,
+    "singleUse": true,
+    "uncollectible": true,
+    "effects": [],
+    "description": "Your mind is foggy. This card does nothing. Vanishes after use."
+  },
+  "spectral-form": {
+    "name": "Spectral Form",
+    "cost": 0,
+    "type": "ghost",
+    "range": "self",
+    "vanish": true,
+    "uncollectible": true,
+    "effects": [
+      { "type": "apply_status_self", "status": "evasion", "stacks": 5 }
+    ],
+    "description": "A ghostly veil clings to this Pokémon. Gain Evasion 5. Vanishes after use."
+  },
+
+  "disarming-voice": {
+    "name": "Disarming Voice",
+    "cost": 1,
+    "type": "fairy",
+    "range": "any_enemy",
+    "vanish": false,
+    "rarity": "common",
+    "pools": ["fairy"],
+    "effects": [
+      { "type": "damage", "value": 8 }
+    ],
+    "description": "A charming cry deals 8 damage."
+  },
+  "fairy-wind": {
+    "name": "Fairy Wind",
+    "cost": 1,
+    "type": "fairy",
+    "range": "any_enemy",
+    "vanish": false,
+    "rarity": "common",
+    "pools": ["fairy"],
+    "effects": [
+      { "type": "damage", "value": 6 },
+      { "type": "apply_status", "status": "enfeeble", "stacks": 1 }
+    ],
+    "description": "A fairy breeze deals 6 damage and applies Enfeeble 1."
+  },
+  "charm": {
+    "name": "Charm",
+    "cost": 1,
+    "type": "fairy",
+    "range": "front_enemy",
+    "vanish": false,
+    "rarity": "common",
+    "pools": ["fairy"],
+    "effects": [
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 }
+    ],
+    "description": "A cute display applies Enfeeble 2."
+  },
+  "moonlight": {
+    "name": "Moonlight",
+    "cost": 2,
+    "type": "fairy",
+    "range": "self",
+    "vanish": true,
+    "rarity": "uncommon",
+    "pools": ["fairy"],
+    "effects": [
+      { "type": "heal", "value": 12 },
+      { "type": "cleanse", "count": 1 }
+    ],
+    "description": "Heal 12 HP and cleanse 1 debuff."
+  },
+  "follow-me": {
+    "name": "Follow Me",
+    "cost": 1,
+    "type": "fairy",
+    "range": "self",
+    "vanish": false,
+    "rarity": "uncommon",
+    "pools": ["fairy"],
+    "effects": [
+      { "type": "block", "value": 5 },
+      { "type": "apply_status_self", "status": "taunt", "stacks": 2 }
+    ],
+    "description": "Gain 5 Block. Apply Taunt 2 to self (can only play attack cards)."
+  },
+  "moonblast": {
+    "name": "Moonblast",
+    "cost": 2,
+    "type": "fairy",
+    "range": "any_enemy",
+    "vanish": false,
+    "rarity": "rare",
+    "pools": ["fairy"],
+    "effects": [
+      { "type": "damage", "value": 15 }
+    ],
+    "description": "A brilliant moonbeam deals 15 damage."
+  },
+  "sweet-kiss": {
+    "name": "Sweet Kiss",
+    "cost": 2,
+    "type": "fairy",
+    "range": "front_enemy",
+    "vanish": false,
+    "rarity": "uncommon",
+    "pools": ["fairy"],
+    "effects": [
+      { "type": "apply_status", "status": "taunt", "stacks": 2 },
+      { "type": "apply_status", "status": "enfeeble", "stacks": 1 }
+    ],
+    "description": "A sweet kiss applies Taunt 2 and Enfeeble 1 to an enemy."
+  },
+  "dazzling-gleam": {
+    "name": "Dazzling Gleam",
+    "cost": 3,
+    "type": "fairy",
+    "range": "all_enemies",
+    "vanish": false,
+    "rarity": "rare",
+    "pools": ["fairy"],
+    "effects": [
+      { "type": "damage", "value": 11 }
+    ],
+    "description": "A brilliant flash deals 11 damage to all enemies."
+  },
+  "cosmic-power": {
+    "name": "Cosmic Power",
+    "cost": 2,
+    "type": "fairy",
+    "range": "self",
+    "vanish": false,
+    "rarity": "rare",
+    "pools": ["fairy"],
+    "effects": [
+      { "type": "block", "value": 8 },
+      { "type": "apply_status_self", "status": "evasion", "stacks": 1 }
+    ],
+    "description": "Channel cosmic energy. Gain 8 Block and 1 Evasion."
+  },
+  "play-rough": {
+    "name": "Play Rough",
+    "cost": 3,
+    "type": "fairy",
+    "range": "front_enemy",
+    "vanish": false,
+    "rarity": "epic",
+    "pools": ["fairy"],
+    "effects": [
+      { "type": "damage", "value": 28 },
+      { "type": "apply_status", "status": "enfeeble", "stacks": 2 }
+    ],
+    "description": "A rough and tumble assault deals 20 damage and applies Enfeeble 2."
+  },
+  "fury-cutter": {
+    "name": "Fury Cutter",
+    "cost": 1,
+    "type": "bug",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "multi_hit", "value": 3, "hits": 3 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["bug"],
+    "description": "Slash rapidly. Deal 3 damage x3 hits. (Front row)"
   }
 }

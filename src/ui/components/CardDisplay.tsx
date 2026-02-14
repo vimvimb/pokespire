@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import type { MoveDefinition, Combatant, MoveType, CardRarity } from '../../engine/types';
-import { getStatusStacks } from '../../engine/status';
-import { hasSTAB, STAB_BONUS } from '../../engine/damage';
 import { isParentalBondCopy } from '../../data/loaders';
+import { calculateHandPreview } from '../../engine/preview';
 import { getEffectiveCost } from '../../engine/cards';
 import { THEME } from '../theme';
 import { CardTypeMotif } from './CardTypeMotif';
@@ -56,6 +55,7 @@ export const MOVE_TYPE_COLORS: Record<MoveType, string> = {
   rock: '#b8a038',
   ground: '#e0c068',
   steel: '#b8b8d0',
+  fairy: '#ee99ac',
   item: '#4ade80',
 };
 
@@ -83,60 +83,7 @@ const RARITY_COLORS: Record<CardRarity, string | null> = {
 
 /** Build a live description reflecting current modifiers from passives. */
 function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered: boolean): React.ReactNode {
-  const strength = getStatusStacks(combatant, 'strength');
-  const enfeeble = getStatusStacks(combatant, 'enfeeble');
-  const stab = hasSTAB(combatant, card.type) ? STAB_BONUS : 0;
-
-  // Check for Fortified Cannons bonus (water attacks gain +25% of current block)
-  const hasFortifiedCannons = combatant.passiveIds.includes('fortified_cannons');
-  const fortifiedBonus = (hasFortifiedCannons && card.type === 'water' && combatant.block > 0)
-    ? Math.floor(combatant.block * 0.25)
-    : 0;
-
-  // Check for Scrappy bonus (Normal attacks deal +2 damage)
-  const scrappyBonus = (combatant.passiveIds.includes('scrappy') && card.type === 'normal') ? 2 : 0;
-
-  // Check for Hustle bonus (attacks deal +2 damage)
-  const hustleBonus = combatant.passiveIds.includes('hustle') ? 2 : 0;
-
-  // Check for Poison Barb bonus (+2 for Poison attacks)
-  const poisonBarbBonus = (combatant.passiveIds.includes('poison_barb') && card.type === 'poison') ? 2 : 0;
-
-  // Check for Adaptability bonus (+2 extra STAB)
-  const adaptabilityBonus = (combatant.passiveIds.includes('adaptability') && combatant.types.includes(card.type)) ? 2 : 0;
-
-  const additiveMod = strength + stab + fortifiedBonus + scrappyBonus + hustleBonus + poisonBarbBonus + adaptabilityBonus - enfeeble;
-
-  // Check for Blaze Strike multiplier (first fire attack of the turn)
-  const hasBlazeStrike = combatant.passiveIds.includes('blaze_strike');
-  const blazeStrikeActive = hasBlazeStrike && card.type === 'fire' && !combatant.turnFlags.blazeStrikeUsedThisTurn;
-
-  // Check for Swarm Strike multiplier (first bug attack of the turn)
-  const hasSwarmStrike = combatant.passiveIds.includes('swarm_strike');
-  const swarmStrikeActive = hasSwarmStrike && card.type === 'bug' && !combatant.turnFlags.swarmStrikeUsedThisTurn;
-
-  // Check for Raging Bull multiplier (all attacks +50% when below 50% HP)
-  const ragingBullActive = combatant.passiveIds.includes('raging_bull') &&
-    combatant.hp < combatant.maxHp * 0.5;
-
-  let multiplier = 1;
-  if (blazeStrikeActive) multiplier *= 2;
-  if (swarmStrikeActive) multiplier *= 2;
-  if (ragingBullActive) multiplier *= 1.5;
-
-  // Build modifier tags for hover display
-  const tags: string[] = [];
-  if (stab > 0) tags.push(`+${stab} STAB`);
-  if (strength > 0) tags.push(`+${strength} Strength`);
-  if (enfeeble > 0) tags.push(`\u2212${enfeeble} Enfeeble`);
-  if (fortifiedBonus > 0) tags.push(`+${fortifiedBonus} Fort. Cannons`);
-  if (scrappyBonus > 0) tags.push(`+${scrappyBonus} Scrappy`);
-  if (hustleBonus > 0) tags.push(`+${hustleBonus} Hustle`);
-  if (poisonBarbBonus > 0) tags.push(`+${poisonBarbBonus} Barb`);
-  if (adaptabilityBonus > 0) tags.push(`+${adaptabilityBonus} Adapt`);
-  if (blazeStrikeActive) tags.push('x2 Blaze');
-  if (swarmStrikeActive) tags.push('x2 Swarm');
-  if (ragingBullActive) tags.push('x1.5 Rage');
+  const { additive: additiveMod, multiplier, tags } = calculateHandPreview(combatant, card);
 
   const hasDamageEffect = card.effects.some(e =>
     e.type === 'damage' || e.type === 'multi_hit' || e.type === 'heal_on_hit' ||
@@ -148,9 +95,16 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
   for (const effect of card.effects) {
     switch (effect.type) {
       case 'damage': {
-        const afterAdditive = Math.max(effect.value + additiveMod, 1);
+        // Fold user_below_half_hp bonus into base when condition is met
+        let displayBase = effect.value;
+        let conditionActive = false;
+        if (effect.bonusValue && effect.bonusCondition === 'user_below_half_hp' && combatant.hp < combatant.maxHp * 0.5) {
+          displayBase += effect.bonusValue;
+          conditionActive = true;
+        }
+        const afterAdditive = Math.max(displayBase + additiveMod, 1);
         const effective = Math.floor(afterAdditive * multiplier);
-        const changed = additiveMod !== 0 || multiplier > 1;
+        const changed = additiveMod !== 0 || multiplier > 1 || conditionActive;
         parts.push(
           <span key={parts.length}>
             Deal{' '}
@@ -162,6 +116,12 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
               <>{effective}</>
             )}
             {' '}damage.
+            {effect.bonusCondition === 'target_debuff_stacks' && (
+              <span style={{ color: '#c084fc' }}>{' '}+{effect.bonusValue} per debuff on target.</span>
+            )}
+            {effect.bonusCondition === 'user_below_half_hp' && !conditionActive && (
+              <span style={{ opacity: 0.6 }}>{' '}+{effect.bonusValue} below half HP.</span>
+            )}
           </span>
         );
         break;
@@ -195,8 +155,10 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
       case 'heal_on_hit': {
         const afterAdditive = Math.max(effect.value + additiveMod, 1);
         const effective = Math.floor(afterAdditive * multiplier);
-        const healPct = Math.round(effect.healPercent * 100);
+        const hasVerdantDrain = combatant.passiveIds.includes('verdant_drain');
+        const displayHealPct = hasVerdantDrain ? 100 : Math.round(effect.healPercent * 100);
         const changed = additiveMod !== 0 || multiplier > 1;
+        const healChanged = hasVerdantDrain && effect.healPercent < 1.0;
         parts.push(
           <span key={parts.length}>
             Deal{' '}
@@ -205,7 +167,13 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
             ) : (
               <>{effective}</>
             )}
-            {' '}damage. Heal {healPct}% dealt.
+            {' '}damage. Heal{' '}
+            {healChanged ? (
+              <span style={{ color: '#4ade80', fontWeight: 'bold' }}>{displayHealPct}%</span>
+            ) : (
+              <>{displayHealPct}%</>
+            )}
+            {' '}dealt.
           </span>
         );
         break;

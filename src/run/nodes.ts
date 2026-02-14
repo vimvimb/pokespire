@@ -115,10 +115,15 @@ export const ACT1_NODES: MapNode[] = [
   // ============================================
   {
     id: 's2-rest',
-    type: 'rest',
+    type: 'battle',
     stage: 2,
     connectsTo: ['s3-battle-raticate'],
     completed: false,
+    enemies: ['ekans', 'pidgey'],
+    enemyPositions: [
+      { row: 'front', column: 0 },
+      { row: 'front', column: 2 },
+    ],
     x: 0.36, y: 0.33,
   },
   {
@@ -136,15 +141,10 @@ export const ACT1_NODES: MapNode[] = [
   },
   {
     id: 's2-battle-duo-2',
-    type: 'battle',
+    type: 'rest',
     stage: 2,
     connectsTo: ['s3-battle-pidgeotto', 's3-battle-arbok'],
     completed: false,
-    enemies: ['ekans', 'pidgey'],
-    enemyPositions: [
-      { row: 'front', column: 0 },
-      { row: 'front', column: 2 },
-    ],
     x: 0.36, y: 0.70,
   },
 
@@ -189,9 +189,9 @@ export const ACT1_NODES: MapNode[] = [
     id: 's3-event-train',
     type: 'event',
     stage: 3,
-    connectsTo: ['s4-rest', 's4-battle-combo'],
+    connectsTo: ['s4-rest'],
     completed: false,
-    eventType: 'train',
+    eventId: '',
     x: 0.44, y: 0.14,
   },
   {
@@ -200,7 +200,7 @@ export const ACT1_NODES: MapNode[] = [
     stage: 3,
     connectsTo: ['s4-battle-evolved'],
     completed: false,
-    eventType: 'meditate',
+    eventId: '',
     x: 0.41, y: 0.90,
   },
 
@@ -225,7 +225,7 @@ export const ACT1_NODES: MapNode[] = [
     stage: 4,
     connectsTo: ['s5-battle-tauros'],
     completed: false,
-    eventType: 'train',  // Placeholder — randomized per run in createRunState
+    eventId: '',  // Assigned at runtime by assignRandomEvents()
     x: 0.60, y: 0.14,
   },
   {
@@ -258,9 +258,9 @@ export const ACT1_NODES: MapNode[] = [
     id: 's4-event-forget',
     type: 'event',
     stage: 4,
-    connectsTo: ['s5-battle-pidgeot', 's5-battle-snorlax', 's5-battle-kangaskhan'],
+    connectsTo: ['s5-battle-snorlax', 's5-battle-kangaskhan'],
     completed: false,
-    eventType: 'forget',
+    eventId: '',
     x: 0.60, y: 0.90,
   },
 
@@ -496,22 +496,33 @@ export const ACT2_NODES: MapNode[] = [
   },
   {
     id: 'a2-s2-battle-1',
-    type: 'battle',
+    type: 'event',
     stage: 2,
-    connectsTo: ['a2-s3-battle-1', 'a2-s3-battle-2'],
+    connectsTo: ['a2-s3-battle-1', 'a2-s3-battle-3'],
     completed: false,
-    enemies: ['tauros', 'pidgeot'],
+    eventId: 'the_chasm',
+    x: 0.36, y: 0.50,
+  },
+  // Chasm ghost battle — unlocked by choosing "Brave the Chasm" at the event above
+  {
+    id: 'a2-chasm-ghosts',
+    type: 'battle',
+    stage: 3,
+    connectsTo: ['a2-s5-battle-2'],
+    completed: false,
+    enemies: ['gengar', 'haunter', 'gastly'],
     enemyPositions: [
       { row: 'front', column: 0 },
-      { row: 'front', column: 2 },
+      { row: 'front', column: 1 },
+      { row: 'back', column: 1 },
     ],
-    x: 0.36, y: 0.56,
+    x: 0.54, y: 0.50,
   },
   {
     id: 'a2-s2-battle-2',
     type: 'battle',
     stage: 2,
-    connectsTo: ['a2-s3-battle-2', 'a2-s3-battle-3'],
+    connectsTo: ['a2-s3-battle-3'],
     completed: false,
     enemies: ['snorlax'],
     enemyPositions: [{ row: 'front', column: 1 }],
@@ -526,7 +537,7 @@ export const ACT2_NODES: MapNode[] = [
     id: 'a2-s3-battle-1',
     type: 'battle',
     stage: 3,
-    connectsTo: ['a2-s4-battle-1', 'a2-s4-battle-2', 'detour-a2-tc-event'],
+    connectsTo: ['a2-s4-battle-1', 'detour-a2-tc-event'],
     completed: false,
     enemies: ['snorlax', 'kangaskhan'],
     enemyPositions: [
@@ -537,23 +548,10 @@ export const ACT2_NODES: MapNode[] = [
     x: 0.48, y: 0.34,
   },
   {
-    id: 'a2-s3-battle-2',
-    type: 'battle',
-    stage: 3,
-    connectsTo: ['a2-s4-battle-1', 'a2-s4-battle-2'],
-    completed: false,
-    enemies: ['tauros', 'tauros'],
-    enemyPositions: [
-      { row: 'front', column: 0 },
-      { row: 'front', column: 2 },
-    ],
-    x: 0.48, y: 0.44,
-  },
-  {
     id: 'a2-s3-battle-3',
     type: 'battle',
     stage: 3,
-    connectsTo: ['a2-s4-battle-2', 'a2-s4-battle-3', 'a2-s3-event-meditate'],
+    connectsTo: ['a2-s4-battle-3', 'a2-s3-event-meditate'],
     completed: false,
     enemies: ['arbok', 'raticate', 'pidgeotto'],
     enemyPositions: [
@@ -571,9 +569,9 @@ export const ACT2_NODES: MapNode[] = [
     id: 'detour-a2-tc-event',
     type: 'event',
     stage: 3,
-    connectsTo: ['a2-s4-battle-1', 'a2-s4-battle-2'],
+    connectsTo: ['a2-s4-battle-1'],
     completed: false,
-    eventType: 'train',  // Placeholder — randomized per run in transitionToAct2
+    eventId: '',  // Assigned at runtime by assignRandomEvents()
     x: 0.44, y: 0.12,
   },
 
@@ -584,9 +582,9 @@ export const ACT2_NODES: MapNode[] = [
     id: 'a2-s3-event-meditate',
     type: 'event',
     stage: 3,
-    connectsTo: ['a2-s4-battle-2', 'a2-s4-battle-3'],
+    connectsTo: ['a2-s4-battle-3'],
     completed: false,
-    eventType: 'meditate',
+    eventId: '',
     x: 0.48, y: 0.90,
   },
 
@@ -617,24 +615,10 @@ export const ACT2_NODES: MapNode[] = [
     stage: 4,
     connectsTo: ['a2-s5-battle-1', 'a2-s5-battle-2'],
     completed: false,
-    eventType: 'train',
+    eventId: '',
     x: 0.60, y: 0.12,
   },
 
-  {
-    id: 'a2-s4-battle-2',
-    type: 'battle',
-    stage: 4,
-    connectsTo: ['a2-s5-battle-1', 'a2-s5-battle-2', 'a2-s5-battle-3'],
-    completed: false,
-    enemies: ['snorlax', 'tauros', 'kangaskhan'],
-    enemyPositions: [
-      { row: 'front', column: 0 },
-      { row: 'front', column: 1 },
-      { row: 'front', column: 2 },
-    ],
-    x: 0.60, y: 0.44,
-  },
   {
     id: 'a2-s4-battle-3',
     type: 'battle',
@@ -659,7 +643,7 @@ export const ACT2_NODES: MapNode[] = [
     stage: 4,
     connectsTo: ['a2-s5-battle-2', 'a2-s5-battle-3'],
     completed: false,
-    eventType: 'forget',
+    eventId: '',
     x: 0.60, y: 0.90,
   },
 
@@ -952,7 +936,7 @@ export const ACT3_NODES: MapNode[] = [
     stage: 4,
     connectsTo: ['a3-s5-battle-2'],
     completed: false,
-    eventType: 'train',
+    eventId: '',
     x: 0.55, y: 0.44,
   },
   {

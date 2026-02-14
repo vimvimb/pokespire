@@ -3,6 +3,8 @@ import { getCurrentCombatant } from './combat';
 import { getMove } from '../data/loaders';
 import { getValidTargets } from './position';
 import { getEffectiveCost } from './cards';
+import { getStatusStacks } from './status';
+import { isAttackCard } from './passives';
 
 // ============================================================
 // Enemy AI — Score-based greedy card selection
@@ -207,6 +209,7 @@ export function chooseEnemyAction(
 
   // Build list of all playable cards with scores
   const plays: ScoredPlay[] = [];
+  const hasTaunt = getStatusStacks(combatant, 'taunt') > 0;
 
   for (let i = 0; i < hand.length; i++) {
     const cardId = hand[i];
@@ -215,6 +218,9 @@ export function chooseEnemyAction(
 
     // Can't afford
     if (cost > combatant.energy) continue;
+
+    // Taunt restricts to attack cards only
+    if (hasTaunt && !isAttackCard(card)) continue;
 
     // Self-targeting cards
     if (card.range === 'self') {
@@ -246,8 +252,12 @@ export function chooseEnemyAction(
       continue;
     }
 
+    // Taunt: if any valid target has Taunt, force targeting them
+    const tauntTargets = validTargets.filter(t => getStatusStacks(t, 'taunt') > 0);
+    const effectiveTargets = tauntTargets.length > 0 ? tauntTargets : validTargets;
+
     // For single-target cards, pick best target and score against it
-    const bestTarget = chooseBestTarget(validTargets, card);
+    const bestTarget = chooseBestTarget(effectiveTargets, card);
     const score = scorePlay(state, combatant, card, bestTarget);
     if (score > 0) {
       plays.push({ cardId, handIndex: i, card, score, targetId: bestTarget.id });

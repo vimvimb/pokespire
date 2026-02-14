@@ -1,5 +1,6 @@
 import type { MapNode, BattleNode, CardRemovalNode, ActTransitionNode, EventNode, RecruitNode } from '../../../run/types';
 import type { ActMapConfig } from './mapConfig';
+import { ALL_EVENTS } from '../../../data/events';
 import { THEME } from '../../theme';
 
 interface Props {
@@ -176,17 +177,17 @@ function renderContent(node: MapNode, actConfig: ActMapConfig) {
     }
 
     case 'event': {
-      const event = node as EventNode;
-      const eventLabels = {
-        train: { label: 'Training Camp', desc: 'Machoke: +5 Max HP', color: '#60a5fa' },
-        meditate: { label: 'Meditation', desc: 'Medicham: +1 EXP', color: '#a855f7' },
-        forget: { label: 'Move Tutor', desc: 'Hypno: Remove 1 card each', color: '#f43f5e' },
-      };
-      const cfg = eventLabels[event.eventType];
+      const eventNode = node as EventNode;
+      const eventDef = ALL_EVENTS[eventNode.eventId];
+      const eventColor = eventDef ? '#60a5fa' : THEME.text.tertiary;
       return (
         <div>
-          <div style={{ fontWeight: 'bold', marginBottom: 4, color: cfg.color }}>{cfg.label}</div>
-          <div style={{ fontSize: 12, color: THEME.text.secondary }}>{cfg.desc}</div>
+          <div style={{ fontWeight: 'bold', marginBottom: 4, color: eventColor }}>
+            {eventDef?.title ?? 'Event'}
+          </div>
+          <div style={{ fontSize: 12, color: THEME.text.secondary }}>
+            {eventDef ? `${eventDef.choices.length} choices` : 'Unknown event'}
+          </div>
         </div>
       );
     }

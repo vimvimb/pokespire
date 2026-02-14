@@ -180,7 +180,7 @@ export function PokemonSprite({ combatant, isCurrentTurn, isTargetable, onSelect
 
       {/* Health bar with block shield on the right (where HP depletes from) */}
       <div style={{ width: '100%', maxWidth: 120, position: 'relative' }}>
-        <HealthBar current={combatant.hp} max={combatant.maxHp} />
+        <HealthBar current={combatant.hp} max={combatant.maxHp} skewAngle={isEnemy ? 11 : -11} />
         {combatant.block > 0 && (
           <div style={{
             position: 'absolute',

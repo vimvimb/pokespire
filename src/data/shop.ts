@@ -45,15 +45,19 @@ export const STARTING_GOLD = 1000;
 /** Gold cost for each starter Pokemon. */
 export const POKEMON_COSTS: Record<string, number> = {
   // 100g — weak stage 1, need heavy investment
-  caterpie: 100, weedle: 100, rattata: 100, ekans: 100, spearow: 100,
+  caterpie: 100, weedle: 100, rattata: 100, ekans: 100, spearow: 100, paras: 100,
   // 200g — decent lines, modest final forms
-  pidgey: 200, sandshrew: 200, voltorb: 200, magikarp: 200,
+  pidgey: 200, sandshrew: 200, voltorb: 200, magikarp: 200, zubat: 200,
   // 250g — classic starters
   bulbasaur: 250, charmander: 250, squirtle: 250, pikachu: 250,
   // 200g — decent lines, modest final forms (continued)
   'nidoran-m': 200, 'nidoran-f': 200, drowzee: 200,
   // 300g — strong lines with powerful passives
-  growlithe: 300, rhyhorn: 300, electabuzz: 300, magmar: 300,
+  growlithe: 300, rhyhorn: 300, electabuzz: 300, magmar: 300, gastly: 300,
+  // 200g — decent lines, modest final forms (continued)
+  clefairy: 200, vulpix: 200, oddish: 200, meowth: 200, jigglypuff: 200,
+  // 300g — strong lines with powerful passives (continued)
+  machop: 300,
   // 400g — high base stats or legendary potential
   tauros: 400, kangaskhan: 400, snorlax: 400, lapras: 400, dratini: 400,
 };

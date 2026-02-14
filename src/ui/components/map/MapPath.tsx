@@ -54,15 +54,14 @@ export function MapPath({ fromPos, toPos, state }: Props) {
     );
   }
 
-  // Locked — sparse faint dots
+  // Locked — faint solid line showing the route
   return (
     <path
       d={d}
-      stroke="#555"
+      stroke="#8895a7"
       strokeWidth={1.5}
       fill="none"
-      opacity={0.25}
-      strokeDasharray="2 8"
+      opacity={0.18}
     />
   );
 }

@@ -23,6 +23,17 @@ export function removeStatus(combatant: Combatant, type: StatusType): void {
   combatant.statuses = combatant.statuses.filter(s => s.type !== type);
 }
 
+/** Decay evasion by 1 when attacked (called after damage + onDamageTaken). */
+export function decayEvasionOnHit(target: Combatant): void {
+  const evasion = target.statuses.find(s => s.type === 'evasion');
+  if (evasion) {
+    evasion.stacks -= 1;
+    if (evasion.stacks <= 0) {
+      removeStatus(target, 'evasion');
+    }
+  }
+}
+
 /**
  * Apply a status effect to a combatant.
  * Follows the stacking rules from Section 7.1.
@@ -77,6 +88,10 @@ export function getStatusImmunitySource(
   if (type === 'enfeeble' && target.passiveIds.includes('inner_focus')) {
     return 'Inner Focus';
   }
+  // Limber: You cannot be Paralyzed
+  if (type === 'paralysis' && target.passiveIds.includes('limber')) {
+    return 'Limber';
+  }
   return null;
 }
 
@@ -109,6 +124,7 @@ export function applyStatus(
     case 'enfeeble':
     case 'evasion':
     case 'haste':
+    case 'taunt':
       // Additive stacking for all standard statuses
       if (existing) {
         existing.stacks += stacks;
@@ -196,12 +212,20 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
 
       // Burn: deal damage equal to stacks, then decay by 1
       if (status.type === 'burn') {
-        const dmg = applyBypassDamage(c, status.stacks);
-        logs.push({
-          round: state.round,
-          combatantId: c.id,
-          message: `Burn deals ${dmg} damage to ${c.name}. (${status.stacks} → ${status.stacks - 1} stacks)`,
-        });
+        if (c.passiveIds.includes('magic_guard')) {
+          logs.push({
+            round: state.round,
+            combatantId: c.id,
+            message: `Magic Guard: ${c.name} takes no Burn damage! (${status.stacks} → ${status.stacks - 1} stacks)`,
+          });
+        } else {
+          const dmg = applyBypassDamage(c, status.stacks);
+          logs.push({
+            round: state.round,
+            combatantId: c.id,
+            message: `Burn deals ${dmg} damage to ${c.name}. (${status.stacks} → ${status.stacks - 1} stacks)`,
+          });
+        }
         status.stacks -= 1;
         if (status.stacks <= 0) {
           removeStatus(c, 'burn');
@@ -216,41 +240,57 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
       // Poison: deal damage equal to stacks, then escalate by 1
       // Potent Venom: Poison deals double damage
       if (status.type === 'poison') {
-        // Check if any enemy has Potent Venom (to double our poison damage)
-        const hasPotentVenomApplied = status.sourceId
-          ? state.combatants.find(comb => comb.id === status.sourceId)?.passiveIds.includes('potent_venom')
-          : false;
-        const poisonDamage = hasPotentVenomApplied ? status.stacks * 2 : status.stacks;
-        const dmg = applyBypassDamage(c, poisonDamage);
-        const potentNote = hasPotentVenomApplied ? ' (Potent Venom!)' : '';
-        logs.push({
-          round: state.round,
-          combatantId: c.id,
-          message: `Poison deals ${dmg} damage to ${c.name}${potentNote}. (${status.stacks} → ${status.stacks + 1} stacks)`,
-        });
+        if (c.passiveIds.includes('magic_guard')) {
+          logs.push({
+            round: state.round,
+            combatantId: c.id,
+            message: `Magic Guard: ${c.name} takes no Poison damage! (${status.stacks} → ${status.stacks + 1} stacks)`,
+          });
+        } else {
+          // Check if any enemy has Potent Venom (to double our poison damage)
+          const hasPotentVenomApplied = status.sourceId
+            ? state.combatants.find(comb => comb.id === status.sourceId)?.passiveIds.includes('potent_venom')
+            : false;
+          const poisonDamage = hasPotentVenomApplied ? status.stacks * 2 : status.stacks;
+          const dmg = applyBypassDamage(c, poisonDamage);
+          const potentNote = hasPotentVenomApplied ? ' (Potent Venom!)' : '';
+          logs.push({
+            round: state.round,
+            combatantId: c.id,
+            message: `Poison deals ${dmg} damage to ${c.name}${potentNote}. (${status.stacks} → ${status.stacks + 1} stacks)`,
+          });
+        }
         status.stacks += 1; // Poison escalates!
       }
 
       // Leech: deal damage, heal source, decay by 1
       if (status.type === 'leech') {
-        const dmg = applyBypassDamage(c, status.stacks);
-        logs.push({
-          round: state.round,
-          combatantId: c.id,
-          message: `Leech deals ${dmg} damage to ${c.name}. (${status.stacks} → ${status.stacks - 1} stacks)`,
-        });
+        if (c.passiveIds.includes('magic_guard')) {
+          logs.push({
+            round: state.round,
+            combatantId: c.id,
+            message: `Magic Guard: ${c.name} takes no Leech damage! (${status.stacks} → ${status.stacks - 1} stacks)`,
+          });
+        } else {
+          const dmg = applyBypassDamage(c, status.stacks);
+          logs.push({
+            round: state.round,
+            combatantId: c.id,
+            message: `Leech deals ${dmg} damage to ${c.name}. (${status.stacks} → ${status.stacks - 1} stacks)`,
+          });
 
-        // Heal the source
-        if (status.sourceId) {
-          const source = getCombatant(state, status.sourceId);
-          if (source?.alive) {
-            const healed = applyHeal(source, status.stacks);
-            if (healed > 0) {
-              logs.push({
-                round: state.round,
-                combatantId: source.id,
-                message: `${source.name} heals ${healed} HP from Leech.`,
-              });
+          // Heal the source
+          if (status.sourceId) {
+            const source = getCombatant(state, status.sourceId);
+            if (source?.alive) {
+              const healed = applyHeal(source, status.stacks);
+              if (healed > 0) {
+                logs.push({
+                  round: state.round,
+                  combatantId: source.id,
+                  message: `${source.name} heals ${healed} HP from Leech.`,
+                });
+              }
             }
           }
         }
@@ -270,7 +310,7 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
       if (status.type === 'paralysis' || status.type === 'slow' ||
           status.type === 'enfeeble' || status.type === 'strength' ||
           status.type === 'evasion' || status.type === 'sleep' ||
-          status.type === 'haste') {
+          status.type === 'haste' || status.type === 'taunt') {
         const statusName = status.type.charAt(0).toUpperCase() + status.type.slice(1);
         logs.push({
           round: state.round,
@@ -303,6 +343,21 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
               message: `Fortifying Aria: ${ally.name} heals ${healed} HP! (${c.name}'s Block: ${c.block})`,
             });
           }
+        }
+      }
+    }
+
+    // Luna: Heal all allies for 4 HP at end of round
+    if (c.passiveIds.includes('luna') && c.alive) {
+      const allies = state.combatants.filter(a => a.alive && a.side === c.side);
+      for (const ally of allies) {
+        const healed = applyHeal(ally, 4);
+        if (healed > 0) {
+          logs.push({
+            round: state.round,
+            combatantId: c.id,
+            message: `Luna: ${ally.name} heals ${healed} HP! (HP: ${ally.hp}/${ally.maxHp})`,
+          });
         }
       }
     }

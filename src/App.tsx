@@ -16,8 +16,13 @@ import { SandboxConfigScreen } from './ui/screens/SandboxConfigScreen';
 import { ActTransitionScreen } from './ui/screens/ActTransitionScreen';
 import { CardRemovalScreen } from './ui/screens/CardRemovalScreen';
 import { Flourish } from './ui/components/Flourish';
+import { AmbientBackground } from './ui/components/AmbientBackground';
+import { ScreenShell } from './ui/components/ScreenShell';
+import { DexFrame } from './ui/components/DexFrame';
 import { THEME } from './ui/theme';
 import type { SandboxPokemon } from './ui/screens/SandboxConfigScreen';
+import { EventTesterScreen } from './ui/screens/EventTesterScreen';
+import { GhostReviveScreen } from './ui/screens/GhostReviveScreen';
 import type { RunState, RunPokemon, BattleNode, EventNode, RecruitNode } from './run/types';
 import { getPokemon } from './data/loaders';
 import { SHOP_ITEMS, CARD_FORGET_COST } from './data/shop';
@@ -27,8 +32,6 @@ import {
   createAct3TestState,
   applyPartyPercentHeal,
   applyFullHealAll,
-  applyMaxHpBoost,
-  applyExpBoost,
   addCardToDeck,
   syncBattleResults,
   moveKnockedOutToGraveyard,
@@ -52,11 +55,13 @@ import {
   recruitToRoster,
   getRunPokemonData,
   getBattleGoldReward,
+  applyPickupBonus,
   addGold,
   spendGold,
+  reviveFromGraveyard,
 } from './run/state';
 
-type Screen = 'main_menu' | 'select' | 'map' | 'rest' | 'event' | 'recruit' | 'card_draft' | 'battle' | 'run_victory' | 'run_defeat' | 'card_dex' | 'pokedex' | 'sandbox_config' | 'act_transition' | 'card_removal';
+type Screen = 'main_menu' | 'select' | 'map' | 'rest' | 'event' | 'recruit' | 'card_draft' | 'battle' | 'run_victory' | 'run_defeat' | 'card_dex' | 'pokedex' | 'sandbox_config' | 'act_transition' | 'card_removal' | 'event_tester' | 'ghost_revive' | 'disclaimer';
 
 // localStorage keys
 const SAVE_KEY = 'pokespire_save';
@@ -194,35 +199,18 @@ export default function App() {
     setScreen('map');
   }, [runState]);
 
-  // Handle event: train (+5 max HP)
-  const handleEventTrain = useCallback((pokemonIndex: number) => {
-    if (!runState) return;
+  // Handle event completion (new data-driven event system)
+  const handleEventComplete = useCallback((newRun: RunState) => {
+    // Mark the event as seen
+    const currentNode = getCurrentNode(newRun);
+    const eventId = currentNode?.type === 'event' ? (currentNode as EventNode).eventId : '';
+    const updatedRun = eventId && !newRun.seenEventIds.includes(eventId)
+      ? { ...newRun, seenEventIds: [...newRun.seenEventIds, eventId] }
+      : newRun;
 
-    const newRun = applyMaxHpBoost(runState, pokemonIndex, 5);
-    setRunState(newRun);
+    setRunState(updatedRun);
     setScreen('map');
-  }, [runState]);
-
-  // Handle event: meditate (+1 EXP)
-  const handleEventMeditate = useCallback((pokemonIndex: number) => {
-    if (!runState) return;
-
-    const newRun = applyExpBoost(runState, pokemonIndex, 1);
-    setRunState(newRun);
-    setScreen('map');
-  }, [runState]);
-
-  // Handle event: forget cards (remove from deck)
-  const handleEventForget = useCallback((removals: Map<number, number[]>) => {
-    if (!runState) return;
-
-    let newRun = runState;
-    removals.forEach((cardIndices, pokemonIndex) => {
-      newRun = removeCardsFromDeck(newRun, pokemonIndex, cardIndices);
-    });
-    setRunState(newRun);
-    setScreen('map');
-  }, [runState]);
+  }, []);
 
   // Handle card draft completion (happens after battles)
   const handleDraftComplete = useCallback((drafts: Map<number, string | null>) => {
@@ -241,13 +229,16 @@ export default function App() {
     // Check if run is complete
     if (isRunComplete(newRun)) {
       setScreen('run_victory');
+    } else if (newRun.currentNodeId === 'a2-chasm-ghosts') {
+      // Special: Gengar offers to revive a fallen ally after the chasm fight
+      setScreen('ghost_revive');
     } else {
       setScreen('map');
     }
   }, [runState]);
 
   // Handle battle end
-  const handleBattleEnd = useCallback((result: BattleResult, combatants: Combatant[]) => {
+  const handleBattleEnd = useCallback((result: BattleResult, combatants: Combatant[], combatGoldEarned?: number) => {
     if (!runState) return;
 
     // Recruit battles: sync HP back to fighter, return to recruit screen
@@ -300,7 +291,8 @@ export default function App() {
     const currentNode = getCurrentNode(newRun);
     let goldEarned = 0;
     if (currentNode?.type === 'battle') {
-      goldEarned = getBattleGoldReward(currentNode as BattleNode, newRun.currentAct);
+      const baseGold = getBattleGoldReward(currentNode as BattleNode, newRun.currentAct);
+      goldEarned = applyPickupBonus(newRun, baseGold) + (combatGoldEarned ?? 0);
       newRun = addGold(newRun, goldEarned);
     }
 
@@ -509,6 +501,18 @@ export default function App() {
     setHasSavedGame(!!runState);
   }, [runState]);
 
+  // Handle ghost revive (after chasm battle)
+  const handleGhostRevive = useCallback((graveyardIndex: number) => {
+    if (!runState) return;
+    const newRun = reviveFromGraveyard(runState, graveyardIndex, 0.5);
+    setRunState(newRun);
+    setScreen('map');
+  }, [runState]);
+
+  const handleGhostReviveSkip = useCallback(() => {
+    setScreen('map');
+  }, []);
+
   // Abandon run and return to main menu (clears save)
   const handleRestart = useCallback(() => {
     clearSave();
@@ -570,33 +574,8 @@ export default function App() {
 
   // Render based on current screen
   if (screen === 'main_menu') {
-    const menuTextStyle: React.CSSProperties = {
-      padding: '12px 0',
-      fontSize: 22,
-      fontWeight: 'bold',
-      border: 'none',
-      background: 'transparent',
-      color: THEME.text.primary,
-      cursor: 'pointer',
-      letterSpacing: '0.08em',
-      transition: 'all 0.2s',
-      position: 'relative',
-    };
-    const secondaryMenuStyle: React.CSSProperties = {
-      ...menuTextStyle,
-      fontSize: 18,
-      color: THEME.text.secondary,
-    };
-    const hoverIn = (e: React.MouseEvent) => {
-      const t = e.currentTarget as HTMLElement;
-      t.style.color = THEME.accent;
-      t.style.textShadow = `0 0 12px rgba(250, 204, 21, 0.4)`;
-    };
-    const hoverOut = (e: React.MouseEvent, isSecondary = false) => {
-      const t = e.currentTarget as HTMLElement;
-      t.style.color = isSecondary ? THEME.text.secondary : THEME.text.primary;
-      t.style.textShadow = 'none';
-    };
+    // Stagger index for entrance animations (Continue button shifts indices)
+    let menuIdx = 0;
 
     return (
       <div style={{
@@ -608,20 +587,31 @@ export default function App() {
         padding: 32,
         color: THEME.text.primary,
         minHeight: '100dvh',
-        background: THEME.bg.base,
+        position: 'relative',
       }}>
-        <div style={{
-          fontSize: 68,
-          fontWeight: 'bold',
-          color: THEME.accent,
-          textShadow: '0 0 20px rgba(250, 204, 21, 0.5)',
-          ...THEME.heading,
-          letterSpacing: '0.2em',
-        }}>
+        <AmbientBackground />
+
+        {/* Title — fades in and drifts up */}
+        <div
+          className="menu-title"
+          style={{
+            fontSize: 68,
+            fontWeight: 'bold',
+            color: THEME.accent,
+            textShadow: '0 0 30px rgba(250, 204, 21, 0.4), 0 0 60px rgba(250, 204, 21, 0.15)',
+            ...THEME.heading,
+            letterSpacing: '0.2em',
+            position: 'relative',
+            zIndex: 1,
+          }}
+        >
           POKESPIRE
         </div>
 
-        <Flourish variant="divider" width={240} color={THEME.text.tertiary} />
+        {/* Flourish — fades in after title */}
+        <div className="menu-flourish" style={{ position: 'relative', zIndex: 1 }}>
+          <Flourish variant="divider" width={240} color={THEME.text.tertiary} />
+        </div>
 
         <div style={{
           display: 'flex',
@@ -629,101 +619,315 @@ export default function App() {
           alignItems: 'center',
           gap: 4,
           marginTop: 16,
+          position: 'relative',
+          zIndex: 1,
         }}>
+          {/* Continue Run — breathing glow */}
           {hasSavedGame && (
             <button
+              className={`menu-item menu-item-continue`}
               onClick={handleContinue}
-              onMouseEnter={hoverIn}
-              onMouseLeave={(e) => {
-                const t = e.currentTarget as HTMLElement;
-                t.style.color = '#22c55e';
-                t.style.textShadow = 'none';
-              }}
               style={{
-                ...menuTextStyle,
+                padding: '12px 0',
+                fontSize: 22,
+                fontWeight: 'bold',
+                border: 'none',
+                background: 'transparent',
                 color: '#22c55e',
-                border: `1px solid ${THEME.border.subtle}`,
-                borderRadius: 8,
-                padding: '12px 48px',
+                cursor: 'pointer',
+                letterSpacing: '0.08em',
+                position: 'relative',
                 marginBottom: 8,
+                animationDelay: `${(menuIdx++) * 50 + 250}ms`,
               }}
             >
               Continue Run
             </button>
           )}
           <button
+            className="menu-item"
             onClick={() => {
               clearSave();
               setHasSavedGame(false);
               setScreen('select');
             }}
-            onMouseEnter={hoverIn}
-            onMouseLeave={(e) => hoverOut(e)}
-            style={menuTextStyle}
+            style={{
+              padding: '12px 0',
+              fontSize: 22,
+              fontWeight: 'bold',
+              border: 'none',
+              background: 'transparent',
+              color: THEME.text.primary,
+              cursor: 'pointer',
+              letterSpacing: '0.08em',
+              position: 'relative',
+              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+            }}
           >
             {hasSavedGame ? 'New Run' : 'Campaign'}
           </button>
           <button
+            className="menu-item"
             onClick={handleGoToSandbox}
-            onMouseEnter={hoverIn}
-            onMouseLeave={(e) => hoverOut(e, true)}
-            style={secondaryMenuStyle}
+            style={{
+              padding: '12px 0',
+              fontSize: 22,
+              fontWeight: 'bold',
+              border: 'none',
+              background: 'transparent',
+              color: THEME.text.primary,
+              cursor: 'pointer',
+              letterSpacing: '0.08em',
+              position: 'relative',
+              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+            }}
           >
             Sandbox
           </button>
+
+          {/* Separator between play and browse */}
+          <div className="menu-flourish-sep" style={{
+            margin: '8px 0',
+            animationDelay: `${(menuIdx) * 50 + 250}ms`,
+          }}>
+            <Flourish variant="heading" width={120} color={THEME.text.tertiary} />
+          </div>
+
           <button
+            className="menu-item menu-item-secondary"
             onClick={() => setScreen('pokedex')}
-            onMouseEnter={hoverIn}
-            onMouseLeave={(e) => hoverOut(e, true)}
-            style={secondaryMenuStyle}
+            style={{
+              padding: '10px 0',
+              fontSize: 18,
+              fontWeight: 'bold',
+              border: 'none',
+              background: 'transparent',
+              color: THEME.text.secondary,
+              cursor: 'pointer',
+              letterSpacing: '0.08em',
+              position: 'relative',
+              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+            }}
           >
             PokeDex
           </button>
           <button
+            className="menu-item menu-item-secondary"
             onClick={() => setScreen('card_dex')}
-            onMouseEnter={hoverIn}
-            onMouseLeave={(e) => hoverOut(e, true)}
-            style={secondaryMenuStyle}
+            style={{
+              padding: '10px 0',
+              fontSize: 18,
+              fontWeight: 'bold',
+              border: 'none',
+              background: 'transparent',
+              color: THEME.text.secondary,
+              cursor: 'pointer',
+              letterSpacing: '0.08em',
+              position: 'relative',
+              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+            }}
           >
             Card Dex
           </button>
-          <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
+          <button
+            className="menu-item menu-item-tertiary"
+            onClick={() => setScreen('disclaimer')}
+            style={{
+              padding: '8px 0',
+              fontSize: 14,
+              fontWeight: 'bold',
+              border: 'none',
+              background: 'transparent',
+              color: THEME.text.tertiary,
+              cursor: 'pointer',
+              letterSpacing: '0.08em',
+              position: 'relative',
+              marginTop: 8,
+              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+            }}
+          >
+            Disclaimer
+          </button>
+          <div className="menu-item" style={{
+            display: 'flex',
+            gap: 16,
+            marginTop: 16,
+            animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+          }}>
             <button
+              className="menu-item-dev"
               onClick={handleTestAct2}
-              onMouseEnter={hoverIn}
-              onMouseLeave={(e) => hoverOut(e, true)}
               style={{
-                ...secondaryMenuStyle,
+                padding: '6px 0',
                 fontSize: 14,
+                fontWeight: 'bold',
+                border: 'none',
+                background: 'transparent',
                 color: THEME.text.tertiary,
+                cursor: 'pointer',
+                letterSpacing: '0.08em',
                 opacity: 0.6,
+                position: 'relative',
               }}
             >
               Test Act 2
             </button>
             <button
+              className="menu-item-dev"
               onClick={handleTestAct3}
-              onMouseEnter={hoverIn}
-              onMouseLeave={(e) => hoverOut(e, true)}
               style={{
-                ...secondaryMenuStyle,
+                padding: '6px 0',
                 fontSize: 14,
+                fontWeight: 'bold',
+                border: 'none',
+                background: 'transparent',
                 color: THEME.text.tertiary,
+                cursor: 'pointer',
+                letterSpacing: '0.08em',
                 opacity: 0.6,
+                position: 'relative',
               }}
             >
               Test Act 3
             </button>
+            <button
+              className="menu-item-dev"
+              onClick={() => setScreen('event_tester')}
+              style={{
+                padding: '6px 0',
+                fontSize: 14,
+                fontWeight: 'bold',
+                border: 'none',
+                background: 'transparent',
+                color: THEME.text.tertiary,
+                cursor: 'pointer',
+                letterSpacing: '0.08em',
+                opacity: 0.6,
+                position: 'relative',
+              }}
+            >
+              Event Tester
+            </button>
           </div>
         </div>
-        <div style={{
-          fontSize: 14,
-          color: THEME.text.tertiary,
-          marginTop: 16,
-          textAlign: 'center',
-        }}>
-          Browse Pokemon stats, decks, and progression trees
-        </div>
+
+        {/* Menu animations */}
+        <style>{`
+          /* Title entrance */
+          .menu-title {
+            animation: menuTitleIn 0.7s ease-out forwards;
+            opacity: 0;
+          }
+          @keyframes menuTitleIn {
+            from {
+              opacity: 0;
+              transform: translateY(-8px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          /* Flourish entrance */
+          .menu-flourish {
+            animation: menuFadeIn 0.4s ease-out 0.2s forwards;
+            opacity: 0;
+          }
+          .menu-flourish-sep {
+            animation: menuFadeIn 0.3s ease-out forwards;
+            animation-delay: inherit;
+            opacity: 0;
+          }
+          @keyframes menuFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+
+          /* Menu item staggered entrance */
+          .menu-item {
+            animation: menuItemIn 0.3s ease-out forwards;
+            opacity: 0;
+          }
+          @keyframes menuItemIn {
+            from {
+              opacity: 0;
+              transform: translateY(6px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          /* Hover flourish lines extending from text */
+          .menu-item::before,
+          .menu-item::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            height: 1px;
+            background: ${THEME.accent};
+            opacity: 0;
+            transition: all 0.3s ease-out;
+            transform: translateY(-50%);
+          }
+          .menu-item::before {
+            right: 100%;
+            width: 0;
+            margin-right: 12px;
+          }
+          .menu-item::after {
+            left: 100%;
+            width: 0;
+            margin-left: 12px;
+          }
+          .menu-item:hover::before,
+          .menu-item:hover::after {
+            width: 32px;
+            opacity: 0.5;
+          }
+
+          /* Hover glow for menu items */
+          .menu-item:hover {
+            color: ${THEME.accent} !important;
+            text-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+          }
+          .menu-item-secondary:hover {
+            color: ${THEME.accent} !important;
+            text-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+          }
+          .menu-item-tertiary:hover {
+            color: ${THEME.accent} !important;
+            text-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+          }
+          .menu-item-dev {
+            transition: all 0.2s;
+          }
+          .menu-item-dev:hover {
+            color: ${THEME.accent} !important;
+            text-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+            opacity: 1 !important;
+          }
+
+          /* Continue Run breathing glow */
+          .menu-item-continue {
+            text-shadow: 0 0 16px rgba(34, 197, 94, 0.4);
+            animation: menuItemIn 0.3s ease-out forwards, continueBreathe 3s ease-in-out 1s infinite !important;
+          }
+          .menu-item-continue:hover {
+            color: ${THEME.accent} !important;
+            text-shadow: 0 0 12px rgba(250, 204, 21, 0.4) !important;
+          }
+          @keyframes continueBreathe {
+            0%, 100% {
+              text-shadow: 0 0 12px rgba(34, 197, 94, 0.25);
+            }
+            50% {
+              text-shadow: 0 0 24px rgba(34, 197, 94, 0.6), 0 0 48px rgba(34, 197, 94, 0.2);
+            }
+          }
+        `}</style>
       </div>
     );
   }
@@ -734,6 +938,100 @@ export default function App() {
 
   if (screen === 'pokedex') {
     return <PokeDexScreen onBack={() => setScreen('main_menu')} />;
+  }
+
+  if (screen === 'disclaimer') {
+    return (
+      <ScreenShell
+        ambient
+        header={
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '14px 24px',
+            borderBottom: `1px solid ${THEME.border.subtle}`,
+          }}>
+            <button
+              onClick={() => setScreen('main_menu')}
+              style={{ padding: '8px 16px', ...THEME.button.secondary, fontSize: 13 }}
+            >
+              &larr; Back
+            </button>
+            <h1 style={{ margin: 0, color: THEME.accent, fontSize: 22, ...THEME.heading }}>
+              Disclaimer
+            </h1>
+            <div style={{ width: 80 }} />
+          </div>
+        }
+      >
+        <div style={{ maxWidth: 680, margin: '0 auto', padding: '28px 24px 64px' }}>
+          <DexFrame>
+            <div className="disc-content" style={{
+              padding: '28px 32px 36px',
+              lineHeight: 1.7,
+              color: THEME.text.secondary,
+              fontSize: 14,
+            }}>
+              <DisclaimerSection title="Fan Project Notice" first>
+                Pokespire is an unofficial, non-commercial fan project created for educational
+                and entertainment purposes only. It is not affiliated with, endorsed by, sponsored by,
+                or in any way officially connected to Nintendo, The Pokemon Company, Game Freak,
+                or Creatures Inc.
+              </DisclaimerSection>
+
+              <DisclaimerSection title="Intellectual Property">
+                <p style={{ margin: '0 0 8px' }}>
+                  Pokemon, the Pokemon logo, and all related character names, artwork, and trademarks
+                  are the intellectual property of Nintendo, The Pokemon Company, Game Freak, and
+                  Creatures Inc. All rights to these properties are reserved by their respective owners.
+                </p>
+                <p style={{ margin: 0 }}>
+                  This project uses Pokemon names, types, move names, and game mechanics as references
+                  to create a fan-made experience. No copyright or trademark infringement is intended.
+                </p>
+              </DisclaimerSection>
+
+              <DisclaimerSection title="Non-Commercial Use">
+                This project is provided entirely free of charge. It is not sold, licensed, or
+                monetized in any form. No donations, subscriptions, or payments of any kind are
+                accepted. The source code is made available solely for educational and personal use.
+              </DisclaimerSection>
+
+              <DisclaimerSection title="No Distribution of Copyrighted Assets">
+                This project does not distribute, bundle, or host any copyrighted artwork, sprites,
+                music, or other media assets owned by the rights holders. Any visual or audio assets
+                used are either original creations or sourced from publicly available community
+                resources under applicable fair-use terms.
+              </DisclaimerSection>
+
+              <DisclaimerSection title="Disclaimer of Liability">
+                This project is provided &ldquo;as is&rdquo; without warranty of any kind, express or implied.
+                The authors assume no responsibility or liability for any consequences arising from
+                the use or misuse of this project.
+              </DisclaimerSection>
+
+              <DisclaimerSection title="Takedown" last>
+                If any rights holder has concerns about this project, please open an issue on
+                the repository or contact the maintainer directly. The project will be modified
+                or removed promptly upon request.
+              </DisclaimerSection>
+            </div>
+          </DexFrame>
+        </div>
+
+        <style>{`
+          .disc-content {
+            animation: discIn 0.25s ease-out forwards;
+            opacity: 0;
+          }
+          @keyframes discIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+      </ScreenShell>
+    );
   }
 
   if (screen === 'sandbox_config') {
@@ -780,15 +1078,27 @@ if (screen === 'select') {
 
   if (screen === 'event' && runState) {
     const currentNode = getCurrentNode(runState);
-    const eventType = currentNode?.type === 'event' ? (currentNode as EventNode).eventType : 'train';
+    const eventId = currentNode?.type === 'event' ? (currentNode as EventNode).eventId : 'training_camp';
     return (
       <EventScreen
         run={runState}
-        eventType={eventType}
-        onTrain={handleEventTrain}
-        onMeditate={handleEventMeditate}
-        onForget={handleEventForget}
+        eventId={eventId}
+        onComplete={handleEventComplete}
         onRestart={handleMainMenu}
+      />
+    );
+  }
+
+  if (screen === 'event_tester') {
+    return <EventTesterScreen onBack={() => setScreen('main_menu')} />;
+  }
+
+  if (screen === 'ghost_revive' && runState) {
+    return (
+      <GhostReviveScreen
+        run={runState}
+        onRevive={handleGhostRevive}
+        onSkip={handleGhostReviveSkip}
       />
     );
   }
@@ -1042,6 +1352,47 @@ if (screen === 'select') {
           Try to Recover from Save
         </button>
       )}
+    </div>
+  );
+}
+
+// ── Disclaimer Section ──────────────────────────────────────────────
+
+function DisclaimerSection({ title, children, first, last }: {
+  title: string;
+  children: React.ReactNode;
+  first?: boolean;
+  last?: boolean;
+}) {
+  return (
+    <div style={{ marginBottom: last ? 0 : 20 }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        marginBottom: 8,
+        ...(first ? {} : { marginTop: 20, paddingTop: 16, borderTop: `1px solid ${THEME.border.subtle}` }),
+      }}>
+        <div style={{
+          width: 4,
+          height: 4,
+          background: THEME.border.medium,
+          transform: 'rotate(45deg)',
+          flexShrink: 0,
+        }} />
+        <h2 style={{
+          margin: 0,
+          fontSize: 14,
+          color: THEME.text.primary,
+          ...THEME.heading,
+          letterSpacing: '0.08em',
+        }}>
+          {title}
+        </h2>
+      </div>
+      <div style={{ paddingLeft: 14 }}>
+        {children}
+      </div>
     </div>
   );
 }

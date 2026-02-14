@@ -46,6 +46,7 @@ const MOVE_TYPE_COLORS: Record<MoveType, string> = {
   rock: '#b8a038',
   ground: '#e0c068',
   steel: '#b8b8d0',
+  fairy: '#ee99ac',
   item: '#4ade80',
 };
 
@@ -77,9 +78,15 @@ function buildDescription(card: MoveDefinition): React.ReactNode {
 
   for (const effect of card.effects) {
     switch (effect.type) {
-      case 'damage':
-        parts.push(<span key={parts.length}>Deal {effect.value} damage.</span>);
+      case 'damage': {
+        const bonusText = effect.bonusCondition === 'target_debuff_stacks'
+          ? ` (+${effect.bonusValue} per debuff on target)`
+          : effect.bonusCondition === 'user_below_half_hp'
+            ? ` (+${effect.bonusValue} below half HP)`
+            : '';
+        parts.push(<span key={parts.length}>Deal {effect.value} damage{bonusText}.</span>);
         break;
+      }
       case 'block':
         parts.push(<span key={parts.length}>Gain {effect.value} Block.</span>);
         break;

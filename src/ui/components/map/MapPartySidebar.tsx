@@ -4,6 +4,7 @@ import { getPokemon } from '../../../data/loaders';
 import { canPokemonLevelUp, EXP_PER_LEVEL } from '../../../run/state';
 import { getSpriteSize } from '../../../data/heights';
 import { THEME } from '../../theme';
+import { GoldCoin } from '../GoldCoin';
 
 interface Props {
   party: RunPokemon[];
@@ -185,7 +186,7 @@ export function MapPartySidebar({ party, bench, graveyard, gold, onPokemonClick,
         marginBottom: 4,
       }}>
         <span style={{ fontSize: 13, color: '#facc15', fontWeight: 'bold' }}>
-          {gold}g
+          {gold}<GoldCoin size={12} />
         </span>
       </div>
 

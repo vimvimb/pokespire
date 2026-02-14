@@ -35,7 +35,7 @@ function createCombatant(
     speed: data.baseSpeed,
     baseSpeed: data.baseSpeed,
     energy: 0,           // Section 5.2: start at 0
-    energyPerTurn: data.energyPerTurn,
+    energyPerTurn: data.energyPerTurn + (data.energyModifier ?? 0),
     energyCap: data.energyCap,
     block: 0,
     statuses: [],
@@ -43,7 +43,7 @@ function createCombatant(
     discardPile: [],
     hand: [],
     vanishedPile: [],
-    handSize: data.handSize,
+    handSize: data.handSize + (data.drawModifier ?? 0),
     alive: true,
     // Passive ability system - defaults
     passiveIds: [],
@@ -59,6 +59,7 @@ function createCombatant(
       dragonsMajestyReducedIndex: null,
       sniperUsedThisTurn: false,
       hasSwitchedThisTurn: false,
+      finisherUsedThisTurn: false,
     },
     costModifiers: {},
   };
@@ -112,6 +113,7 @@ export function createCombatState(
     log: [],
     statusApplyCounter: 0,
     slipstreamProtectedIds: [],
+    goldEarned: 0,
   };
 
   // Build initial turn order

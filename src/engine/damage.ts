@@ -16,6 +16,7 @@ export interface DamageResult {
   stab: number;
   blazeStrikeMultiplier: number;  // 2 if Blaze Strike triggered, 1 otherwise
   swarmStrikeMultiplier: number;  // 2 if Swarm Strike triggered, 1 otherwise
+  finisherMultiplier: number;     // 2 if Finisher triggered, 1 otherwise
   fortifiedCannonsBonus: number;  // Bonus from Fortified Cannons (Water + Block)
   fortifiedSpinesBonus: number;   // Bonus from Fortified Spines (Ground + Block)
   bloomingCycleReduction: number; // Damage reduction from Blooming Cycle
@@ -25,16 +26,21 @@ export interface DamageResult {
   predatorsPatienceBonus: number;  // Bonus from Predator's Patience
   searingFuryBonus: number;        // Bonus from Searing Fury (+N per Burn stack)
   voltFuryBonus: number;           // Bonus from Volt Fury (+N per Paralysis stack)
+  nightAssassinBonus: number;       // Bonus from Night Assassin (+evasion stacks, max 15)
   sharpBeakBonus: number;          // Bonus from Sharp Beak (+1 for Flying)
   thickHideReduction: number;     // Reduction from Thick Hide (-2 all)
+  friendGuardReduction: number;   // Reduction from Friend Guard (-2 if ally has it)
   thickFatMultiplier: number;     // Multiplier from Thick Fat (0.75 for Fire/Ice)
   multiscaleMultiplier: number;  // Multiplier from Multiscale (0.5 above 75% HP)
-  underdogBonus: number;         // Bonus from Underdog (+2 for common 1-cost cards)
+  proletariatBonus: number;         // Bonus from Proletariat (+2 for common 1-cost cards)
   ragingBullMultiplier: number;   // Multiplier from Raging Bull (1.5x Normal below 50% HP)
   hustleMultiplier: number;       // Multiplier from Hustle (1.3x for attacks)
+  technicianMultiplier: number;   // Multiplier from Technician (1.3x for 1-cost cards)
+  aristocratMultiplier: number;   // Multiplier from Aristocrat (1.3x for Epic cards)
   familyFuryBonus: number;        // Bonus from Family Fury (+2 per damaged ally)
   poisonBarbBonus: number;        // Bonus from Poison Barb (+2 for Poison attacks)
   adaptabilityBonus: number;      // Bonus from Adaptability (+2 extra STAB)
+  maliceBonus: number;            // Bonus from Malice (target's Burn + Enfeeble stacks)
   typeEffectiveness: number;      // Type matchup multiplier (1.25x super effective, 0.75x not effective)
   evasion: number;
   afterEvasion: number;
@@ -52,6 +58,7 @@ export function hasSTAB(combatant: Combatant, moveType: MoveType): boolean {
 export interface DamageModifiers {
   isBlazeStrike?: boolean;
   isSwarmStrike?: boolean;
+  isFinisher?: boolean;
   fortifiedCannonsBonus?: number;
   fortifiedSpinesBonus?: number;
   bloomingCycleReduction?: number;
@@ -63,14 +70,19 @@ export interface DamageModifiers {
   voltFuryBonus?: number;
   sharpBeakBonus?: number;
   thickHideReduction?: number;
+  friendGuardReduction?: number;
   thickFatMultiplier?: number;
   multiscaleMultiplier?: number;
-  underdogBonus?: number;
+  proletariatBonus?: number;
   ragingBullMultiplier?: number;
   hustleMultiplier?: number;
+  technicianMultiplier?: number;
+  aristocratMultiplier?: number;
   familyFuryBonus?: number;
   poisonBarbBonus?: number;
   adaptabilityBonus?: number;
+  nightAssassinBonus?: number;
+  maliceBonus?: number;
   typeEffectiveness?: number;  // Type matchup multiplier
   ignoreEvasion?: boolean;  // For Scrappy / Sniper
   ignoreBlock?: boolean;    // For Sniper
@@ -101,18 +113,21 @@ export function applyCardDamage(
   const searingFuryBonus = mods.searingFuryBonus ?? 0;
   const voltFuryBonus = mods.voltFuryBonus ?? 0;
   const sharpBeakBonus = mods.sharpBeakBonus ?? 0;
-  const underdogBonus = mods.underdogBonus ?? 0;
+  const proletariatBonus = mods.proletariatBonus ?? 0;
   const familyFuryBonus = mods.familyFuryBonus ?? 0;
   const poisonBarbBonus = mods.poisonBarbBonus ?? 0;
   const adaptabilityBonus = mods.adaptabilityBonus ?? 0;
+  const nightAssassinBonus = mods.nightAssassinBonus ?? 0;
+  const maliceBonus = mods.maliceBonus ?? 0;
 
-  let rawDamage = baseDamage + strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + counterBonus + keenEyeBonus + predatorsPatienceBonus + searingFuryBonus + voltFuryBonus + sharpBeakBonus + underdogBonus + familyFuryBonus + poisonBarbBonus + adaptabilityBonus - enfeeble;
+  let rawDamage = baseDamage + strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + counterBonus + keenEyeBonus + predatorsPatienceBonus + searingFuryBonus + voltFuryBonus + sharpBeakBonus + proletariatBonus + familyFuryBonus + poisonBarbBonus + adaptabilityBonus + nightAssassinBonus + maliceBonus - enfeeble;
   rawDamage = Math.max(rawDamage, 1); // floor at 1
 
-  // Step 1.5: Apply strike multipliers (Blaze Strike / Swarm Strike — mutually exclusive)
+  // Step 1.5: Apply strike multipliers (Blaze Strike / Swarm Strike / Finisher — mutually exclusive)
   const blazeStrikeMultiplier = mods.isBlazeStrike ? 2 : 1;
   const swarmStrikeMultiplier = mods.isSwarmStrike ? 2 : 1;
-  rawDamage = rawDamage * Math.max(blazeStrikeMultiplier, swarmStrikeMultiplier);
+  const finisherMultiplier = mods.isFinisher ? 2 : 1;
+  rawDamage = rawDamage * Math.max(blazeStrikeMultiplier, swarmStrikeMultiplier, finisherMultiplier);
 
   // Step 1.6: Apply Raging Bull multiplier (Normal attacks +50% below 50% HP)
   const ragingBullMultiplier = mods.ragingBullMultiplier ?? 1.0;
@@ -122,6 +137,14 @@ export function applyCardDamage(
   const hustleMultiplier = mods.hustleMultiplier ?? 1.0;
   rawDamage = Math.floor(rawDamage * hustleMultiplier);
 
+  // Step 1.63: Apply Technician multiplier (1-cost cards deal 30% more damage)
+  const technicianMultiplier = mods.technicianMultiplier ?? 1.0;
+  rawDamage = Math.floor(rawDamage * technicianMultiplier);
+
+  // Step 1.64: Apply Aristocrat multiplier (Epic cards deal 30% more damage)
+  const aristocratMultiplier = mods.aristocratMultiplier ?? 1.0;
+  rawDamage = Math.floor(rawDamage * aristocratMultiplier);
+
   // Step 1.65: Apply Type Effectiveness multiplier
   const typeEffectiveness = mods.typeEffectiveness ?? 1.0;
   rawDamage = Math.floor(rawDamage * typeEffectiveness);
@@ -130,8 +153,9 @@ export function applyCardDamage(
   const bloomingReduction = mods.bloomingCycleReduction ?? 0;
   const staticReduction = mods.staticFieldReduction ?? 0;
   const thickHideReduction = mods.thickHideReduction ?? 0;
+  const friendGuardReduction = mods.friendGuardReduction ?? 0;
 
-  rawDamage = Math.max(rawDamage - bloomingReduction - staticReduction - thickHideReduction, 0);
+  rawDamage = Math.max(rawDamage - bloomingReduction - staticReduction - thickHideReduction - friendGuardReduction, 0);
 
   // Step 1.8: Apply Thick Fat multiplier (25% reduction for Fire/Ice)
   const thickFatMultiplier = mods.thickFatMultiplier ?? 1.0;
@@ -178,6 +202,7 @@ export function applyCardDamage(
     stab,
     blazeStrikeMultiplier,
     swarmStrikeMultiplier,
+    finisherMultiplier,
     fortifiedCannonsBonus,
     fortifiedSpinesBonus,
     bloomingCycleReduction: bloomingReduction,
@@ -189,14 +214,19 @@ export function applyCardDamage(
     voltFuryBonus,
     sharpBeakBonus,
     thickHideReduction: thickHideReduction,
+    friendGuardReduction: friendGuardReduction,
     thickFatMultiplier: thickFatMultiplier,
     multiscaleMultiplier: multiscaleMultiplier,
-    underdogBonus: underdogBonus,
+    proletariatBonus: proletariatBonus,
     ragingBullMultiplier: ragingBullMultiplier,
     hustleMultiplier: hustleMultiplier,
+    technicianMultiplier: technicianMultiplier,
+    aristocratMultiplier: aristocratMultiplier,
     familyFuryBonus: familyFuryBonus,
+    nightAssassinBonus: nightAssassinBonus,
     poisonBarbBonus: poisonBarbBonus,
     adaptabilityBonus: adaptabilityBonus,
+    maliceBonus: maliceBonus,
     typeEffectiveness: typeEffectiveness,
     evasion,
     afterEvasion,

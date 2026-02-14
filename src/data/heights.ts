@@ -31,7 +31,6 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   kangaskhan: 80,
   mewtwo: 122,
 
-  // Giovanni's team
   persian: 16,  // Real: 32kg, reduced 20% for sprite scaling
 
   // Rhyhorn line
@@ -39,13 +38,13 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   rhydon: 46,   // Real: 120kg, reduced ~30% for sprite scaling
 
   // Nidoking line
-  'nidoran-m': 6.5, // Real: 9kg, reduced 10% for sprite scaling
-  nidorino: 19.5,
+  'nidoran-m': 5.6, // Real: 9kg, reduced ~5% sprite size
+  nidorino: 10,     // Real: 19.5kg, reduced ~20% sprite size
   nidoking: 26,   // Real: 62kg, reduced 25% for sprite scaling
 
   // Nidoqueen line
-  'nidoran-f': 5,   // Real: 7kg, reduced 10% for sprite scaling
-  nidorina: 20,
+  'nidoran-f': 4.3, // Real: 7kg, reduced ~5% sprite size
+  nidorina: 10.2,   // Real: 20kg, reduced ~20% sprite size
   nidoqueen: 17,  // Real: 60kg, reduced 35% for sprite scaling
 
   // Drowzee line
@@ -75,9 +74,11 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   // Lapras
   lapras: 80,     // Real: 220kg, reduced for sprite scaling
 
-  // Magmar & Electabuzz
-  magmar: 40,     // Real: 44.5kg, reduced for sprite scaling
-  electabuzz: 28, // Real: 30kg, reduced for sprite scaling
+  // Magmar & Electabuzz lines
+  magmar: 40,      // Real: 44.5kg, reduced for sprite scaling
+  magmortar: 60,   // Real: 68kg, reduced for sprite scaling
+  electabuzz: 28,  // Real: 30kg, reduced for sprite scaling
+  electivire: 68,  // Real: 138.6kg, reduced for sprite scaling, +15% sprite size
 
   // Dratini line
   dratini: 5.7,   // Real: 3.3kg, increased for sprite scaling (+20%)
@@ -88,9 +89,48 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   spearow: 4,     // Real: 2kg, increased for sprite scaling
   fearow: 128,    // Real: 38kg, increased for sprite scaling (+80% visual size)
 
+  // Gastly line (ghosts are ~0.1kg real — scaled up to match Nidoking-tier)
+  gastly: 9.7,    // ~80% of Haunter's size
+  haunter: 19,    // ~90% of Gengar's size
+  gengar: 26,     // Same size as Nidoking
+
   // Sandshrew line
   sandshrew: 6,   // Real: 12kg, reduced for sprite scaling (-20%)
   sandslash: 30,  // Real: 29.5kg
+
+  // Clefairy line
+  clefairy: 4,    // Real: 7.5kg, reduced 20% sprite scale
+  clefable: 20,   // Real: 40kg, reduced 20% sprite scale
+
+  // Machop line
+  machop: 10,     // Real: 19.5kg, reduced for sprite scaling
+  machoke: 22,    // Real: 70.5kg, reduced for sprite scaling
+  machamp: 35,    // Real: 130kg, reduced for sprite scaling
+
+  // Vulpix line
+  vulpix: 10,     // Real: 9.9kg
+  ninetales: 20,  // Real: 19.9kg
+
+  // Oddish line
+  oddish: 5,      // Real: 5.4kg
+  gloom: 9,       // Real: 8.6kg
+  vileplume: 19,  // Real: 18.6kg
+
+  // Meowth line
+  meowth: 4,      // Real: 4.2kg
+
+  // Zubat line
+  zubat: 7.5,      // Real: 7.5kg
+  golbat: 44,      // Real: 55kg, +30% sprite size
+  crobat: 104,     // Real: 75kg, +68% sprite size
+
+  // Paras line
+  paras: 5.4,      // Real: 5.4kg
+  parasect: 25,    // Real: 29.5kg, reduced for sprite scaling
+
+  // Jigglypuff line
+  jigglypuff: 5.5, // Real: 5.5kg
+  wigglytuff: 35,  // Real: 12kg, increased +50% sprite size
 };
 
 // Reference Pokemon and base sprite size

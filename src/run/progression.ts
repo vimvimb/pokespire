@@ -33,7 +33,7 @@ export type PassiveId =
   | 'scurry'
   | 'quick_feet'
   | 'relentless'
-  | 'underdog'
+  | 'proletariat'
   | 'hustle'
   // Ekans line
   | 'shed_skin'
@@ -54,7 +54,7 @@ export type PassiveId =
   | 'parental_bond'
   | 'protective_instinct'
   | 'family_fury'
-  // Persian (Giovanni)
+  // Meowth/Persian line (shared with Giovanni boss)
   | 'technician'
   // Nidoking line - "Rampage"
   | 'poison_point'  // Already exists for Ekans, shared with Nido lines
@@ -115,7 +115,51 @@ export type PassiveId =
   // Sandshrew/Sandslash line
   | 'spiked_hide'
   | 'bristling_rampart'
-  | 'fortified_spines';
+  | 'fortified_spines'
+  // Gastly/Gengar line
+  | 'intangible'
+  | 'counter_stance'
+  | 'phase_form'
+  | 'night_assassin'
+  // Clefairy/Clefable line
+  | 'lucky_star'
+  | 'cute_charm'
+  | 'friend_guard'
+  | 'magic_guard'
+  // Machop/Machoke/Machamp line
+  | 'guts'
+  | 'no_guard'
+  | 'rapid_strike'
+  | 'finisher'
+  // Vulpix/Ninetales line
+  | 'mysticism'
+  | 'malice'
+  | 'hex_mastery'
+  // Oddish/Gloom/Vileplume line
+  | 'effect_spore'
+  | 'stench'
+  | 'luna'
+  | 'verdant_drain'
+  // Meowth/Persian line (player)
+  | 'pickup'
+  | 'limber'
+  // 'technician' already defined under Persian (Giovanni)
+  | 'aristocrat'
+  // Jigglypuff/Wigglytuff line
+  // cute_charm shared with Clefairy line
+  // friend_guard shared with Clefairy line
+  | 'lullaby'
+  | 'rude_awakening'
+  // Paras/Parasect line
+  // effect_spore shared with Oddish line
+  | 'blind_aggression'
+  | 'dry_skin'
+  | 'spore_mastery'
+  // Zubat/Golbat/Crobat line
+  // inner_focus shared with Drowzee line
+  // static_field shared with Pikachu line (renamed to Swift Guard)
+  | 'vampiricism'
+  | 'zephyr_king';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -193,12 +237,12 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
     description: 'Unblocked Electric attacks apply +1 Paralysis.',
   },
   static_field: {
-    name: 'Static Field',
-    description: 'Take reduced damage from slower enemies (floor((yourSpeed - theirSpeed) / 2)).',
+    name: 'Swift Guard',
+    description: 'Your speed advantage over attackers reduces their damage to you.',
   },
   counter_current: {
     name: 'Counter-Current',
-    description: 'Deal bonus damage to slower enemies (floor((yourSpeed - theirSpeed) / 2)).',
+    description: 'Your speed advantage over a target increases your damage to them.',
   },
   // Pidgey line
   gust_force: {
@@ -230,8 +274,8 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
     name: 'Relentless',
     description: 'Each card you play this turn gives your next attack +1 damage.',
   },
-  underdog: {
-    name: 'Underdog',
+  proletariat: {
+    name: 'Proletariat',
     description: 'Basic or Common rarity cards that cost 1 deal +2 damage.',
   },
   hustle: {
@@ -302,10 +346,22 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
     name: 'Family Fury',
     description: 'When below 50% HP, ALL your attacks trigger Parental Bond.',
   },
-  // Persian (Giovanni) - placeholder passives
+  // Meowth/Persian line
+  pickup: {
+    name: 'Pickup',
+    description: 'Earn 25% more gold from battles.',
+  },
+  limber: {
+    name: 'Limber',
+    description: 'You cannot be Paralyzed.',
+  },
   technician: {
     name: 'Technician',
-    description: '+5 Max HP (placeholder passive).',
+    description: 'Your 1-cost cards deal 30% more damage.',
+  },
+  aristocrat: {
+    name: 'Aristocrat',
+    description: 'Your Epic rarity cards deal 30% more damage.',
   },
   // Nidoking line - "Rampage"
   // anger_point shared with Tauros (L2)
@@ -412,7 +468,7 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   // Magikarp/Gyarados line
   great_leap: {
     name: 'Great Leap',
-    description: 'When you play Splash, gain 3 Evasion.',
+    description: 'When you play Splash, gain 2 Evasion.',
   },
   moxie: {
     name: 'Moxie',
@@ -482,6 +538,116 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   fortified_spines: {
     name: 'Fortified Spines',
     description: 'Your Ground attacks deal bonus damage equal to 25% of your current Block.',
+  },
+  // Gastly/Gengar line
+  intangible: {
+    name: 'Intangible',
+    description: 'At the start of your turn, gain Evasion 2.',
+  },
+  counter_stance: {
+    name: 'Counter Stance',
+    description: 'When an enemy attacks you, deal damage equal to your Evasion stacks.',
+  },
+  phase_form: {
+    name: 'Phase Form',
+    description: 'When you play a Ghost-type card, gain Evasion equal to its energy cost.',
+  },
+  night_assassin: {
+    name: 'Night Assassin',
+    description: 'Your damage cards deal bonus damage equal to your Evasion stacks (max +15).',
+  },
+  // Clefairy/Clefable line
+  lucky_star: {
+    name: 'Lucky Star',
+    description: 'At the start of combat, gain 4 Evasion.',
+  },
+  cute_charm: {
+    name: 'Cute Charm',
+    description: 'When hit by a front-row attack, apply Enfeeble 1 to the attacker.',
+  },
+  friend_guard: {
+    name: 'Friend Guard',
+    description: 'Allies take 2 less damage from all attacks.',
+  },
+  magic_guard: {
+    name: 'Magic Guard',
+    description: 'Immune to status tick damage (Burn, Poison, Leech deal no damage).',
+  },
+  // Machop/Machoke/Machamp line
+  guts: {
+    name: 'Guts',
+    description: 'When an enemy applies a debuff to you, gain 1 Strength.',
+  },
+  no_guard: {
+    name: 'No Guard',
+    description: 'When you deal unblocked damage, strip 1 Evasion and 1 Block from yourself. Gain 1 Strength.',
+  },
+  rapid_strike: {
+    name: 'Rapid Strike',
+    description: '1-cost attack cards in hand at the start of your turn cost 0.',
+  },
+  finisher: {
+    name: 'Finisher',
+    description: 'Your first attack with effective cost 3+ each turn deals double damage, then clears all your Strength.',
+  },
+  mysticism: {
+    name: 'Mysticism',
+    description: 'Your unblocked Psychic attacks inflict 1 Enfeeble.',
+  },
+  malice: {
+    name: 'Malice',
+    description: 'Your attacks deal bonus damage equal to the target\'s Burn + Enfeeble stacks.',
+  },
+  hex_mastery: {
+    name: 'Hex Mastery',
+    description: 'Hex costs 0.',
+  },
+  effect_spore: {
+    name: 'Effect Spore',
+    description: 'When hit by a front-row attack, inflict 1 Paralysis on the attacker.',
+  },
+  stench: {
+    name: 'Stench',
+    description: 'At end of your turn, the enemy directly facing you gains 2 Poison.',
+  },
+  luna: {
+    name: 'Luna',
+    description: 'At end of round, heal all allies for 4 HP.',
+  },
+  verdant_drain: {
+    name: 'Verdant Drain',
+    description: 'Your drain attacks heal for 100% of damage dealt instead of 50%.',
+  },
+  // Jigglypuff/Wigglytuff line
+  lullaby: {
+    name: 'Lullaby',
+    description: 'Sing costs 1 energy.',
+  },
+  rude_awakening: {
+    name: 'Rude Awakening',
+    description: 'Your attacks deal double damage to sleeping targets.',
+  },
+  // Paras/Parasect line
+  blind_aggression: {
+    name: 'Blind Aggression',
+    description: 'Your attacks deal +2 damage to enemies in the same column as you.',
+  },
+  dry_skin: {
+    name: 'Dry Skin',
+    description: 'Immune to Water attacks (heal for base damage). Take 25% more damage from Fire.',
+  },
+  spore_mastery: {
+    name: 'Spore Mastery',
+    description: 'Spore costs 0 energy.',
+  },
+  // Zubat/Golbat/Crobat line
+  vampiricism: {
+    name: 'Vampiricism',
+    description: 'Unblocked front-row attacks apply +1 Leech.',
+  },
+  zephyr_king: {
+    name: 'Zephyr King',
+    description: 'Your Flying attacks grant you 1 Haste.',
   },
 };
 
@@ -712,9 +878,9 @@ export const RATTATA_PROGRESSION: ProgressionTree = {
     {
       level: 3,
       name: 'Raticate',
-      description: 'Evolve to Raticate. Gain Underdog.',
+      description: 'Evolve to Raticate. Gain Proletariat.',
       evolvesTo: 'raticate',
-      passiveId: 'underdog',
+      passiveId: 'proletariat',
       hpBoost: 0,
       cardsToAdd: [],
     },
@@ -880,45 +1046,6 @@ export const KANGASKHAN_PROGRESSION: ProgressionTree = {
       name: 'Kangaskhan (Mastered)',
       description: 'Gain Family Fury.',
       passiveId: 'family_fury',
-      hpBoost: 5,
-      cardsToAdd: [],
-    },
-  ],
-};
-
-// Persian progression tree (Giovanni's Pokemon - placeholder)
-export const PERSIAN_PROGRESSION: ProgressionTree = {
-  baseFormId: 'persian',
-  rungs: [
-    {
-      level: 1,
-      name: 'Persian',
-      description: 'Starting form with Technician passive.',
-      passiveId: 'technician',
-      hpBoost: 0,
-      cardsToAdd: [],
-    },
-    {
-      level: 2,
-      name: 'Persian',
-      description: '+5 Max HP.',
-      passiveId: 'technician',
-      hpBoost: 5,
-      cardsToAdd: [],
-    },
-    {
-      level: 3,
-      name: 'Persian',
-      description: '+5 Max HP.',
-      passiveId: 'technician',
-      hpBoost: 5,
-      cardsToAdd: [],
-    },
-    {
-      level: 4,
-      name: 'Persian (Mastered)',
-      description: '+5 Max HP.',
-      passiveId: 'technician',
       hpBoost: 5,
       cardsToAdd: [],
     },
@@ -1356,8 +1483,9 @@ export const MAGMAR_PROGRESSION: ProgressionTree = {
     },
     {
       level: 4,
-      name: 'Magmar (Mastered)',
-      description: 'Add Fire Blast. Gain Inferno Momentum.',
+      name: 'Magmortar',
+      description: 'Evolve to Magmortar. Add Fire Blast. Gain Inferno Momentum.',
+      evolvesTo: 'magmortar',
       passiveId: 'inferno_momentum',
       hpBoost: 0,
       cardsToAdd: ['fire-blast'],
@@ -1395,8 +1523,9 @@ export const ELECTABUZZ_PROGRESSION: ProgressionTree = {
     },
     {
       level: 4,
-      name: 'Electabuzz (Mastered)',
-      description: 'Add Thunder. Gain Surge Momentum.',
+      name: 'Electivire',
+      description: 'Evolve to Electivire. Add Thunder. Gain Surge Momentum.',
+      evolvesTo: 'electivire',
       passiveId: 'surge_momentum',
       hpBoost: 0,
       cardsToAdd: ['thunder'],
@@ -1469,8 +1598,8 @@ export const SPEAROW_PROGRESSION: ProgressionTree = {
     {
       level: 3,
       name: 'Fearow',
-      description: 'Gain Underdog. Add Rage.',
-      passiveId: 'underdog',
+      description: 'Gain Proletariat. Add Rage.',
+      passiveId: 'proletariat',
       hpBoost: 0,
       cardsToAdd: ['rage'],
     },
@@ -1525,6 +1654,370 @@ export const SANDSHREW_PROGRESSION: ProgressionTree = {
   ],
 };
 
+// Gastly progression tree - evasion-centric ghost assassin
+export const GASTLY_PROGRESSION: ProgressionTree = {
+  baseFormId: 'gastly',
+  rungs: [
+    {
+      level: 1,
+      name: 'Gastly',
+      description: 'Starting form with Intangible.',
+      passiveId: 'intangible',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Haunter',
+      description: 'Evolve to Haunter. Add Minimize. Gain Counter Stance.',
+      evolvesTo: 'haunter',
+      passiveId: 'counter_stance',
+      hpBoost: 0,
+      cardsToAdd: ['minimize'],
+    },
+    {
+      level: 3,
+      name: 'Gengar',
+      description: 'Evolve to Gengar. Add Shadow Ball. Gain Phase Form.',
+      evolvesTo: 'gengar',
+      passiveId: 'phase_form',
+      hpBoost: 0,
+      cardsToAdd: ['shadow-ball'],
+    },
+    {
+      level: 4,
+      name: 'Gengar (Mastered)',
+      description: 'Gain Night Assassin.',
+      passiveId: 'night_assassin',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
+// Clefairy progression tree - fairy support, evasion + enfeeble theme
+export const CLEFAIRY_PROGRESSION: ProgressionTree = {
+  baseFormId: 'clefairy',
+  rungs: [
+    {
+      level: 1,
+      name: 'Clefairy',
+      description: 'Starting form with Lucky Star passive.',
+      passiveId: 'lucky_star',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Clefable',
+      description: 'Evolve to Clefable (+15 HP). Add Follow Me. Gain Cute Charm.',
+      evolvesTo: 'clefable',
+      passiveId: 'cute_charm',
+      hpBoost: 0,
+      cardsToAdd: ['follow-me'],
+    },
+    {
+      level: 3,
+      name: 'Clefable',
+      description: 'Gain Friend Guard.',
+      passiveId: 'friend_guard',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 4,
+      name: 'Clefable (Mastered)',
+      description: 'Add Moonblast. Gain Magic Guard.',
+      passiveId: 'magic_guard',
+      hpBoost: 0,
+      cardsToAdd: ['moonblast'],
+    },
+  ],
+};
+
+// Machop progression tree - aggressive Strength-stacking brawler
+export const MACHOP_PROGRESSION: ProgressionTree = {
+  baseFormId: 'machop',
+  rungs: [
+    {
+      level: 1,
+      name: 'Machop',
+      description: 'Starting form with Guts passive.',
+      passiveId: 'guts',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Machoke',
+      description: 'Evolve to Machoke. Add Bulk Up. Gain No Guard.',
+      evolvesTo: 'machoke',
+      passiveId: 'no_guard',
+      hpBoost: 0,
+      cardsToAdd: ['bulk-up'],
+    },
+    {
+      level: 3,
+      name: 'Machamp',
+      description: 'Evolve to Machamp. Add Cross Chop. Gain Rapid Strike.',
+      evolvesTo: 'machamp',
+      passiveId: 'rapid_strike',
+      hpBoost: 0,
+      cardsToAdd: ['cross-chop'],
+    },
+    {
+      level: 4,
+      name: 'Machamp (Mastered)',
+      description: 'Gain Finisher.',
+      passiveId: 'finisher',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
+// Vulpix progression tree - debuff stacker, exploits burn + enfeeble
+export const VULPIX_PROGRESSION: ProgressionTree = {
+  baseFormId: 'vulpix',
+  rungs: [
+    {
+      level: 1,
+      name: 'Vulpix',
+      description: 'Starting form with Flame Body passive.',
+      passiveId: 'flame_body',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Ninetales',
+      description: 'Evolve to Ninetales. Add Psychic. Gain Mysticism.',
+      evolvesTo: 'ninetales',
+      passiveId: 'mysticism',
+      hpBoost: 0,
+      cardsToAdd: ['psychic'],
+    },
+    {
+      level: 3,
+      name: 'Ninetales',
+      description: 'Add Hex. Gain Malice.',
+      passiveId: 'malice',
+      hpBoost: 0,
+      cardsToAdd: ['hex'],
+    },
+    {
+      level: 4,
+      name: 'Ninetales (Mastered)',
+      description: 'Gain Hex Mastery.',
+      passiveId: 'hex_mastery',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
+// Oddish progression tree - poison/drain support, heals team
+export const ODDISH_PROGRESSION: ProgressionTree = {
+  baseFormId: 'oddish',
+  rungs: [
+    {
+      level: 1,
+      name: 'Oddish',
+      description: 'Starting form with Effect Spore passive.',
+      passiveId: 'effect_spore',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Gloom',
+      description: 'Evolve to Gloom. Gain Stench.',
+      evolvesTo: 'gloom',
+      passiveId: 'stench',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 3,
+      name: 'Vileplume',
+      description: 'Evolve to Vileplume. Add Moonlight. Gain Luna.',
+      evolvesTo: 'vileplume',
+      passiveId: 'luna',
+      hpBoost: 0,
+      cardsToAdd: ['moonlight'],
+    },
+    {
+      level: 4,
+      name: 'Vileplume (Mastered)',
+      description: 'Add Giga Drain. Gain Verdant Drain.',
+      passiveId: 'verdant_drain',
+      hpBoost: 0,
+      cardsToAdd: ['giga-drain'],
+    },
+  ],
+};
+
+// Meowth progression tree - gold earner, precise cheap attacks
+export const MEOWTH_PROGRESSION: ProgressionTree = {
+  baseFormId: 'meowth',
+  rungs: [
+    {
+      level: 1,
+      name: 'Meowth',
+      description: 'Starting form with Pickup passive.',
+      passiveId: 'pickup',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Persian',
+      description: 'Evolve to Persian. Gain Limber.',
+      evolvesTo: 'persian',
+      passiveId: 'limber',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 3,
+      name: 'Persian',
+      description: 'Add Pay Day. Gain Technician.',
+      passiveId: 'technician',
+      hpBoost: 0,
+      cardsToAdd: ['pay-day'],
+    },
+    {
+      level: 4,
+      name: 'Persian (Mastered)',
+      description: 'Gain Aristocrat.',
+      passiveId: 'aristocrat',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
+// Jigglypuff progression tree - sleep support, punishes slumbering foes
+export const JIGGLYPUFF_PROGRESSION: ProgressionTree = {
+  baseFormId: 'jigglypuff',
+  rungs: [
+    {
+      level: 1,
+      name: 'Jigglypuff',
+      description: 'Starting form with Cute Charm passive.',
+      passiveId: 'cute_charm',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Wigglytuff',
+      description: 'Evolve to Wigglytuff (+36 HP). Add Body Slam. Gain Friend Guard.',
+      evolvesTo: 'wigglytuff',
+      passiveId: 'friend_guard',
+      hpBoost: 0,
+      cardsToAdd: ['body-slam'],
+    },
+    {
+      level: 3,
+      name: 'Wigglytuff',
+      description: 'Add Play Rough. Gain Lullaby (Sing costs 1).',
+      passiveId: 'lullaby',
+      hpBoost: 0,
+      cardsToAdd: ['play-rough'],
+    },
+    {
+      level: 4,
+      name: 'Wigglytuff (Mastered)',
+      description: 'Gain Rude Awakening (double damage to sleeping targets).',
+      passiveId: 'rude_awakening',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
+// Paras progression tree - fungus-infected aggressor with status control
+export const PARAS_PROGRESSION: ProgressionTree = {
+  baseFormId: 'paras',
+  rungs: [
+    {
+      level: 1,
+      name: 'Paras',
+      description: 'Starting form with Effect Spore passive.',
+      passiveId: 'effect_spore',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Parasect',
+      description: 'Evolve to Parasect (+27 HP). Add Fury Cutter. Gain Blind Aggression.',
+      evolvesTo: 'parasect',
+      passiveId: 'blind_aggression',
+      hpBoost: 0,
+      cardsToAdd: ['fury-cutter'],
+    },
+    {
+      level: 3,
+      name: 'Parasect',
+      description: 'Add Spore. Gain Dry Skin (heal from Water, weak to Fire).',
+      passiveId: 'dry_skin',
+      hpBoost: 0,
+      cardsToAdd: ['spore'],
+    },
+    {
+      level: 4,
+      name: 'Parasect (Mastered)',
+      description: 'Gain Spore Mastery (Spore costs 0).',
+      passiveId: 'spore_mastery',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
+// Zubat progression tree - speed-based vampire bat
+export const ZUBAT_PROGRESSION: ProgressionTree = {
+  baseFormId: 'zubat',
+  rungs: [
+    {
+      level: 1,
+      name: 'Zubat',
+      description: 'Starting form with Inner Focus passive.',
+      passiveId: 'inner_focus',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Golbat',
+      description: 'Evolve to Golbat (+17 HP). Add Fly. Gain Vampiricism.',
+      evolvesTo: 'golbat',
+      passiveId: 'vampiricism',
+      hpBoost: 0,
+      cardsToAdd: ['fly'],
+    },
+    {
+      level: 3,
+      name: 'Crobat',
+      description: 'Evolve to Crobat (+12 HP). Add Agility. Gain Swift Guard.',
+      evolvesTo: 'crobat',
+      passiveId: 'static_field',
+      hpBoost: 0,
+      cardsToAdd: ['agility'],
+    },
+    {
+      level: 4,
+      name: 'Crobat (Mastered)',
+      description: 'Gain Zephyr King (Flying attacks grant Haste).',
+      passiveId: 'zephyr_king',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
 // All progression trees indexed by base form ID
 export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   charmander: CHARMANDER_PROGRESSION,
@@ -1537,7 +2030,6 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   tauros: TAUROS_PROGRESSION,
   snorlax: SNORLAX_PROGRESSION,
   kangaskhan: KANGASKHAN_PROGRESSION,
-  persian: PERSIAN_PROGRESSION,
   'nidoran-m': NIDORAN_M_PROGRESSION,
   'nidoran-f': NIDORAN_F_PROGRESSION,
   rhyhorn: RHYHORN_PROGRESSION,
@@ -1553,6 +2045,15 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   dratini: DRATINI_PROGRESSION,
   spearow: SPEAROW_PROGRESSION,
   sandshrew: SANDSHREW_PROGRESSION,
+  gastly: GASTLY_PROGRESSION,
+  clefairy: CLEFAIRY_PROGRESSION,
+  machop: MACHOP_PROGRESSION,
+  vulpix: VULPIX_PROGRESSION,
+  oddish: ODDISH_PROGRESSION,
+  meowth: MEOWTH_PROGRESSION,
+  jigglypuff: JIGGLYPUFF_PROGRESSION,
+  paras: PARAS_PROGRESSION,
+  zubat: ZUBAT_PROGRESSION,
 };
 
 /**
@@ -1619,6 +2120,39 @@ export function getProgressionTree(pokemonId: string): ProgressionTree | null {
   if (pokemonId === 'sandslash') {
     return SANDSHREW_PROGRESSION;
   }
+  if (pokemonId === 'haunter' || pokemonId === 'gengar') {
+    return GASTLY_PROGRESSION;
+  }
+  if (pokemonId === 'clefable') {
+    return CLEFAIRY_PROGRESSION;
+  }
+  if (pokemonId === 'machoke' || pokemonId === 'machamp') {
+    return MACHOP_PROGRESSION;
+  }
+  if (pokemonId === 'persian') {
+    return MEOWTH_PROGRESSION;
+  }
+  if (pokemonId === 'ninetales') {
+    return VULPIX_PROGRESSION;
+  }
+  if (pokemonId === 'gloom' || pokemonId === 'vileplume') {
+    return ODDISH_PROGRESSION;
+  }
+  if (pokemonId === 'wigglytuff') {
+    return JIGGLYPUFF_PROGRESSION;
+  }
+  if (pokemonId === 'parasect') {
+    return PARAS_PROGRESSION;
+  }
+  if (pokemonId === 'golbat' || pokemonId === 'crobat') {
+    return ZUBAT_PROGRESSION;
+  }
+  if (pokemonId === 'magmortar') {
+    return MAGMAR_PROGRESSION;
+  }
+  if (pokemonId === 'electivire') {
+    return ELECTABUZZ_PROGRESSION;
+  }
   return null;
 }
 
@@ -1679,6 +2213,39 @@ export function getBaseFormId(pokemonId: string): string {
   }
   if (pokemonId === 'sandslash') {
     return 'sandshrew';
+  }
+  if (pokemonId === 'haunter' || pokemonId === 'gengar') {
+    return 'gastly';
+  }
+  if (pokemonId === 'clefable') {
+    return 'clefairy';
+  }
+  if (pokemonId === 'machoke' || pokemonId === 'machamp') {
+    return 'machop';
+  }
+  if (pokemonId === 'persian') {
+    return 'meowth';
+  }
+  if (pokemonId === 'ninetales') {
+    return 'vulpix';
+  }
+  if (pokemonId === 'gloom' || pokemonId === 'vileplume') {
+    return 'oddish';
+  }
+  if (pokemonId === 'wigglytuff') {
+    return 'jigglypuff';
+  }
+  if (pokemonId === 'parasect') {
+    return 'paras';
+  }
+  if (pokemonId === 'golbat' || pokemonId === 'crobat') {
+    return 'zubat';
+  }
+  if (pokemonId === 'magmortar') {
+    return 'magmar';
+  }
+  if (pokemonId === 'electivire') {
+    return 'electabuzz';
   }
   return pokemonId;
 }

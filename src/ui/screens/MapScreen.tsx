@@ -169,6 +169,11 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
                 const toPos = nodePositions.get(targetId);
                 if (!toPos) return null;
                 const pState = getPathState(node.id, targetId, visitedNodeIds, availableNodeIds);
+                // Hide detour return paths (detour → main) when locked to avoid messy cross-map lines.
+                // The entry paths (main → detour) and internal paths (detour → detour) still render.
+                if (pState === 'locked' && node.id.includes('detour') && !targetId.includes('detour')) {
+                  return null;
+                }
                 return (
                   <MapPath
                     key={`${node.id}-${targetId}`}
@@ -196,6 +201,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
                 state={nState}
                 isBoss={isBoss}
                 nodeSize={node.size}
+                eventId={node.type === 'event' ? node.eventId : undefined}
                 onMouseEnter={() => setHoveredNode(node)}
                 onMouseLeave={() => setHoveredNode(null)}
                 onClick={() => {

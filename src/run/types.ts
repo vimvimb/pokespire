@@ -20,6 +20,8 @@ export interface RunPokemon {
   exp: number;                // Accumulated experience
   passiveIds: PassiveId[];    // All accumulated passive abilities
   knockedOut: boolean;        // True if Pokemon was KO'd (kept for future resurrection features)
+  energyModifier: number;     // Permanent energy per turn modifier from events (default 0)
+  drawModifier: number;       // Permanent hand size modifier from events (default 0)
 }
 
 /**
@@ -36,6 +38,7 @@ export interface RunState {
   currentAct: number;         // 1 = Act 1, 2 = Act 2
   recruitSeed: number;        // Separate seed for recruit encounter RNG
   gold: number;               // PokeGold currency
+  seenEventIds: string[];     // Event IDs already encountered this run (no repeats)
 }
 
 // --- Node Types ---
@@ -80,11 +83,9 @@ export interface ActTransitionNode extends BaseNode {
   nextAct: number;            // Act number to transition to
 }
 
-export type EventType = 'train' | 'meditate' | 'forget';
-
 export interface EventNode extends BaseNode {
   type: 'event';
-  eventType: EventType;       // Which event: train (+5 HP), meditate (+1 EXP), forget (remove cards)
+  eventId: string;            // ID referencing an EventDefinition from src/data/events.ts
 }
 
 export interface RecruitNode extends BaseNode {

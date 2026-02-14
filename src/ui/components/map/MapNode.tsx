@@ -1,4 +1,5 @@
 import { MapNodeIcon } from './MapNodeIcon';
+import { EventIcon } from '../EventIcon';
 
 export type NodeState = 'current' | 'visited' | 'available' | 'locked';
 
@@ -8,6 +9,7 @@ interface Props {
   state: NodeState;
   isBoss: boolean;
   nodeSize?: 'small' | 'normal' | 'large';
+  eventId?: string;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onClick: () => void;
@@ -33,6 +35,7 @@ export function MapNode({
   state,
   isBoss,
   nodeSize = 'normal',
+  eventId,
   onMouseEnter,
   onMouseLeave,
   onClick,
@@ -145,12 +148,16 @@ export function MapNode({
         left: '50%',
         transform: 'translate(-50%, -50%)',
       }}>
-        <MapNodeIcon
-          nodeType={nodeType}
-          isBoss={isBoss}
-          color={iconColor}
-          size={isBoss ? 28 : 24}
-        />
+        {nodeType === 'event' && eventId ? (
+          <EventIcon eventId={eventId} color={iconColor} size={24} />
+        ) : (
+          <MapNodeIcon
+            nodeType={nodeType}
+            isBoss={isBoss}
+            color={iconColor}
+            size={isBoss ? 28 : 24}
+          />
+        )}
       </div>
 
       <style>{`

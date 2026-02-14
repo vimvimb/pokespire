@@ -46,7 +46,7 @@ export function RestScreen({ run, onHeal, onRestart }: Props) {
   );
 
   return (
-    <ScreenShell header={header}>
+    <ScreenShell header={header} ambient>
       <div style={{
         display: 'flex',
         flexDirection: 'column',

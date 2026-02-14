@@ -61,7 +61,7 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
   },
   poison: {
     grass: SUPER_EFFECTIVE,
-    // fairy: SUPER_EFFECTIVE, // Fairy not in MoveType
+    fairy: SUPER_EFFECTIVE,
     poison: NOT_EFFECTIVE,
     ground: NOT_EFFECTIVE,
     rock: NOT_EFFECTIVE,
@@ -86,7 +86,7 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
     ghost: SUPER_EFFECTIVE,
     dark: NOT_EFFECTIVE,
     fighting: NOT_EFFECTIVE,
-    // fairy: NOT_EFFECTIVE, // Fairy not in MoveType
+    fairy: NOT_EFFECTIVE,
   },
   fighting: {
     normal: SUPER_EFFECTIVE,
@@ -98,7 +98,7 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
     flying: NOT_EFFECTIVE,
     psychic: NOT_EFFECTIVE,
     bug: NOT_EFFECTIVE,
-    // fairy: NOT_EFFECTIVE, // Fairy not in MoveType
+    fairy: NOT_EFFECTIVE,
     ghost: IMMUNE_REPLACEMENT, // Would be immune in Pokemon
   },
   ice: {
@@ -120,10 +120,12 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
     flying: NOT_EFFECTIVE,
     ghost: NOT_EFFECTIVE,
     steel: NOT_EFFECTIVE,
+    fairy: NOT_EFFECTIVE,
   },
   dragon: {
     dragon: SUPER_EFFECTIVE,
     steel: NOT_EFFECTIVE,
+    fairy: IMMUNE_REPLACEMENT, // Would be immune in Pokemon
   },
   ghost: {
     psychic: SUPER_EFFECTIVE,
@@ -152,10 +154,19 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
   steel: {
     rock: SUPER_EFFECTIVE,
     ice: SUPER_EFFECTIVE,
+    fairy: SUPER_EFFECTIVE,
     fire: NOT_EFFECTIVE,
     water: NOT_EFFECTIVE,
     electric: NOT_EFFECTIVE,
     steel: NOT_EFFECTIVE,
+  },
+  fairy: {
+    fighting: SUPER_EFFECTIVE,
+    dragon: SUPER_EFFECTIVE,
+    dark: SUPER_EFFECTIVE,
+    poison: NOT_EFFECTIVE,
+    steel: NOT_EFFECTIVE,
+    fire: NOT_EFFECTIVE,
   },
   item: {}, // Items don't deal damage, no type interactions
 };
