@@ -1447,199 +1447,6 @@ export function BattleScreen({
               return null;
             return <EnemyHandPreview combatant={hoveredEnemy} />;
           })()}
-
-        {/* Victory celebration overlay */}
-        {phase === "victory" && victoryStage && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "rgba(0,0,0,0)",
-              gap: 20,
-              zIndex: 50,
-            }}
-          >
-            {/* Dark backdrop that fades in */}
-            <div
-              className="battle-victory-backdrop"
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "rgba(2, 4, 8, 0.8)",
-              }}
-            />
-
-            {/* Content */}
-            <div
-              style={{
-                position: "relative",
-                zIndex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 16,
-              }}
-            >
-              <div
-                className="battle-victory-title"
-                style={{
-                  fontSize: 56,
-                  fontWeight: "bold",
-                  color: THEME.accent,
-                  textShadow:
-                    "0 0 30px rgba(250, 204, 21, 0.4), 0 0 60px rgba(250, 204, 21, 0.15)",
-                  ...THEME.heading,
-                  letterSpacing: "0.2em",
-                }}
-              >
-                VICTORY
-              </div>
-
-              <div className="battle-victory-flourish">
-                <Flourish variant="divider" width={200} color={THEME.accent} />
-              </div>
-
-              {/* Draft message — appears after title settles */}
-              {(victoryStage === "draft_message" ||
-                victoryStage === "transitioning") && (
-                <div
-                  className="battle-victory-draft-msg"
-                  style={{
-                    fontSize: 18,
-                    color: THEME.text.secondary,
-                    textAlign: "center",
-                    letterSpacing: "0.05em",
-                    marginTop: 4,
-                  }}
-                >
-                  Choose a new card for each Pokemon...
-                </div>
-              )}
-            </div>
-
-            <style>{`
-              .battle-victory-backdrop {
-                animation: bvBackdropIn 0.6s ease-out forwards;
-                opacity: 0;
-              }
-              @keyframes bvBackdropIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-              }
-              .battle-victory-title {
-                animation: bvTitleIn 0.7s ease-out forwards;
-                opacity: 0;
-              }
-              @keyframes bvTitleIn {
-                from {
-                  opacity: 0;
-                  transform: translateY(-8px) scale(0.97);
-                }
-                to {
-                  opacity: 1;
-                  transform: translateY(0) scale(1);
-                }
-              }
-              .battle-victory-flourish {
-                animation: bvFadeIn 0.4s ease-out 0.3s forwards;
-                opacity: 0;
-              }
-              .battle-victory-draft-msg {
-                animation: bvFadeIn 0.4s ease-out forwards;
-                opacity: 0;
-              }
-              @keyframes bvFadeIn {
-                from {
-                  opacity: 0;
-                  transform: translateY(6px);
-                }
-                to {
-                  opacity: 1;
-                  transform: translateY(0);
-                }
-              }
-            `}</style>
-          </div>
-        )}
-
-        {/* Defeat overlay */}
-        {phase === "defeat" && (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 50,
-            }}
-          >
-            <div
-              className="battle-defeat-backdrop"
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "rgba(2, 4, 8, 0.8)",
-              }}
-            />
-            <div
-              style={{
-                position: "relative",
-                zIndex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 16,
-              }}
-            >
-              <div
-                className="battle-defeat-title"
-                style={{
-                  fontSize: 56,
-                  fontWeight: "bold",
-                  color: THEME.status.damage,
-                  textShadow:
-                    "0 0 30px rgba(239, 68, 68, 0.4), 0 0 60px rgba(239, 68, 68, 0.15)",
-                  ...THEME.heading,
-                  letterSpacing: "0.2em",
-                }}
-              >
-                DEFEAT
-              </div>
-              <Flourish
-                variant="heading"
-                width={100}
-                color={THEME.status.damage}
-              />
-              <button
-                onClick={onRestart}
-                style={{
-                  padding: "12px 32px",
-                  fontSize: 16,
-                  ...THEME.button.secondary,
-                  marginTop: 8,
-                }}
-              >
-                Main Menu
-              </button>
-            </div>
-            <style>{`
-              .battle-defeat-backdrop {
-                animation: bvBackdropIn 0.6s ease-out forwards;
-                opacity: 0;
-              }
-              .battle-defeat-title {
-                animation: bvTitleIn 0.7s ease-out forwards;
-                opacity: 0;
-              }
-            `}</style>
-          </div>
-        )}
       </div>
 
       {/* Battle effects layer - full screen overlay for correct viewport positioning */}
@@ -2158,6 +1965,199 @@ export function BattleScreen({
             readOnly
           />
         ))}
+
+      {/* Victory celebration overlay - root level for full-screen coverage */}
+      {phase === "victory" && victoryStage && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(0,0,0,0)",
+            gap: 20,
+            zIndex: 50,
+          }}
+        >
+          {/* Dark backdrop that fades in */}
+          <div
+            className="battle-victory-backdrop"
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(2, 4, 8, 0.8)",
+            }}
+          />
+
+          {/* Content */}
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
+            <div
+              className="battle-victory-title"
+              style={{
+                fontSize: 56,
+                fontWeight: "bold",
+                color: THEME.accent,
+                textShadow:
+                  "0 0 30px rgba(250, 204, 21, 0.4), 0 0 60px rgba(250, 204, 21, 0.15)",
+                ...THEME.heading,
+                letterSpacing: "0.2em",
+              }}
+            >
+              VICTORY
+            </div>
+
+            <div className="battle-victory-flourish">
+              <Flourish variant="divider" width={200} color={THEME.accent} />
+            </div>
+
+            {/* Draft message — appears after title settles */}
+            {(victoryStage === "draft_message" ||
+              victoryStage === "transitioning") && (
+              <div
+                className="battle-victory-draft-msg"
+                style={{
+                  fontSize: 18,
+                  color: THEME.text.secondary,
+                  textAlign: "center",
+                  letterSpacing: "0.05em",
+                  marginTop: 4,
+                }}
+              >
+                Choose a new card for each Pokemon...
+              </div>
+            )}
+          </div>
+
+          <style>{`
+            .battle-victory-backdrop {
+              animation: bvBackdropIn 0.6s ease-out forwards;
+              opacity: 0;
+            }
+            @keyframes bvBackdropIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+            .battle-victory-title {
+              animation: bvTitleIn 0.7s ease-out forwards;
+              opacity: 0;
+            }
+            @keyframes bvTitleIn {
+              from {
+                opacity: 0;
+                transform: translateY(-8px) scale(0.97);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+              }
+            }
+            .battle-victory-flourish {
+              animation: bvFadeIn 0.4s ease-out 0.3s forwards;
+              opacity: 0;
+            }
+            .battle-victory-draft-msg {
+              animation: bvFadeIn 0.4s ease-out forwards;
+              opacity: 0;
+            }
+            @keyframes bvFadeIn {
+              from {
+                opacity: 0;
+                transform: translateY(6px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+          `}</style>
+        </div>
+      )}
+
+      {/* Defeat overlay - root level for full-screen coverage */}
+      {phase === "defeat" && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 50,
+          }}
+        >
+          <div
+            className="battle-defeat-backdrop"
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(2, 4, 8, 0.8)",
+            }}
+          />
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
+            <div
+              className="battle-defeat-title"
+              style={{
+                fontSize: 56,
+                fontWeight: "bold",
+                color: THEME.status.damage,
+                textShadow:
+                  "0 0 30px rgba(239, 68, 68, 0.4), 0 0 60px rgba(239, 68, 68, 0.15)",
+                ...THEME.heading,
+                letterSpacing: "0.2em",
+              }}
+            >
+              DEFEAT
+            </div>
+            <Flourish
+              variant="heading"
+              width={100}
+              color={THEME.status.damage}
+            />
+            <button
+              onClick={onRestart}
+              style={{
+                padding: "12px 32px",
+                fontSize: 16,
+                ...THEME.button.secondary,
+                marginTop: 8,
+              }}
+            >
+              Main Menu
+            </button>
+          </div>
+          <style>{`
+            .battle-defeat-backdrop {
+              animation: bvBackdropIn 0.6s ease-out forwards;
+              opacity: 0;
+            }
+            .battle-defeat-title {
+              animation: bvTitleIn 0.7s ease-out forwards;
+              opacity: 0;
+            }
+          `}</style>
+        </div>
+      )}
     </div>
   );
 }
