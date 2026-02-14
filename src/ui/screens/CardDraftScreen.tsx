@@ -1,14 +1,15 @@
-import { useState, useMemo } from 'react';
-import type { RunState } from '../../run/types';
-import { getPokemon, getMove } from '../../data/loaders';
-import { createRng } from '../../run/rng';
-import { sampleDraftCards } from '../../run/draft';
-import { CardPreview } from '../components/CardPreview';
-import { PokemonDetailsPanel } from '../components/PokemonDetailsPanel';
-import { AmbientBackground } from '../components/AmbientBackground';
-import { Flourish } from '../components/Flourish';
-import { THEME } from '../theme';
-import { GoldCoin } from '../components/GoldCoin';
+import { useState, useMemo, useRef, useEffect } from "react";
+import type { RunState } from "../../run/types";
+import { getPokemon, getMove } from "../../data/loaders";
+import { createRng } from "../../run/rng";
+import { sampleDraftCards } from "../../run/draft";
+import { CardPreview } from "../components/CardPreview";
+import { PokemonDetailsPanel } from "../components/PokemonDetailsPanel";
+import { AmbientBackground } from "../components/AmbientBackground";
+import { Flourish } from "../components/Flourish";
+import { THEME } from "../theme";
+import { GoldCoin } from "../components/GoldCoin";
+import { playSound } from "../utils/sound";
 
 interface Props {
   run: RunState;
@@ -19,13 +20,32 @@ interface Props {
 
 const CARDS_PER_DRAFT = 3;
 
-export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }: Props) {
+export function CardDraftScreen({
+  run,
+  onDraftComplete,
+  onRestart,
+  goldEarned,
+}: Props) {
   // Track which Pokemon we're drafting for (index into party)
   const [currentDraftIndex, setCurrentDraftIndex] = useState(0);
   // Track drafted cards: Map<pokemonIndex, cardId | null (skip)>
   const [drafts, setDrafts] = useState<Map<number, string | null>>(new Map());
   // Track which Pokemon's details panel is open (null = none)
-  const [detailsPokemonIndex, setDetailsPokemonIndex] = useState<number | null>(null);
+  const [detailsPokemonIndex, setDetailsPokemonIndex] = useState<number | null>(
+    null,
+  );
+  const [isDelayed, setIsDelayed] = useState(false);
+  const delayTimeoutRef = useRef<number | null>(null);
+
+  // Clear timeout on unmount
+  useEffect(
+    () => () => {
+      if (delayTimeoutRef.current !== null) {
+        clearTimeout(delayTimeoutRef.current);
+      }
+    },
+    [],
+  );
 
   // Get alive party members to draft for
   const alivePokemonIndices = run.party
@@ -35,13 +55,16 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
 
   // Get current Pokemon being drafted for
   const currentPokemonIndex = alivePokemonIndices[currentDraftIndex];
-  const currentPokemon = currentPokemonIndex !== undefined ? run.party[currentPokemonIndex] : null;
+  const currentPokemon =
+    currentPokemonIndex !== undefined ? run.party[currentPokemonIndex] : null;
 
   // Generate card options using seeded RNG with type-based pools
   const cardOptions = useMemo(() => {
     if (currentPokemon === null) return [];
 
-    const nodeHash = run.currentNodeId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const nodeHash = run.currentNodeId
+      .split("")
+      .reduce((acc, c) => acc + c.charCodeAt(0), 0);
     const draftSeed = run.seed + nodeHash * 1000 + currentPokemonIndex * 100;
     const rng = createRng(draftSeed);
 
@@ -49,17 +72,30 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
     const types = pokemonData.types;
 
     return sampleDraftCards(rng, types, currentPokemon.level, CARDS_PER_DRAFT);
-  }, [run.seed, run.currentNodeId, currentPokemonIndex, currentDraftIndex, currentPokemon]);
+  }, [run.seed, run.currentNodeId, currentPokemonIndex, currentPokemon]);
 
   const handleSelectCard = (cardId: string | null) => {
-    const newDrafts = new Map(drafts);
-    newDrafts.set(currentPokemonIndex, cardId);
-    setDrafts(newDrafts);
+    const doSelect = () => {
+      const newDrafts = new Map(drafts);
+      newDrafts.set(currentPokemonIndex, cardId);
+      setDrafts(newDrafts);
+      if (currentDraftIndex + 1 >= alivePokemonIndices.length) {
+        onDraftComplete(newDrafts);
+      } else {
+        setCurrentDraftIndex(currentDraftIndex + 1);
+      }
+    };
 
-    if (currentDraftIndex + 1 >= alivePokemonIndices.length) {
-      onDraftComplete(newDrafts);
+    if (cardId !== null) {
+      playSound("draw_card");
+      setIsDelayed(true);
+      delayTimeoutRef.current = window.setTimeout(() => {
+        delayTimeoutRef.current = null;
+        setIsDelayed(false);
+        doSelect();
+      }, 350);
     } else {
-      setCurrentDraftIndex(currentDraftIndex + 1);
+      doSelect();
     }
   };
 
@@ -72,27 +108,29 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
   const basePokemon = getPokemon(currentPokemon.formId);
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 24,
-      padding: '40px 32px 48px',
-      color: THEME.text.primary,
-      minHeight: '100dvh',
-      overflowY: 'auto',
-      position: 'relative',
-    }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 24,
+        padding: "40px 32px 48px",
+        color: THEME.text.primary,
+        minHeight: "100dvh",
+        overflowY: "auto",
+        position: "relative",
+      }}
+    >
       <AmbientBackground tint="rgba(250, 204, 21, 0.015)" />
 
       {/* Main Menu button */}
       <button
         onClick={onRestart}
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: 16,
           right: 16,
-          padding: '8px 16px',
+          padding: "8px 16px",
           fontSize: 13,
           ...THEME.button.secondary,
           zIndex: 2,
@@ -102,64 +140,83 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
       </button>
 
       {/* ── Header ── */}
-      <div className="draft-header" style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 8,
-        position: 'relative',
-        zIndex: 1,
-      }}>
-        <h1 style={{
-          fontSize: 28,
-          margin: 0,
-          color: THEME.accent,
-          ...THEME.heading,
-          letterSpacing: '0.15em',
-        }}>
+      <div
+        className="draft-header"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 8,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <h1
+          style={{
+            fontSize: 28,
+            margin: 0,
+            color: THEME.accent,
+            ...THEME.heading,
+            letterSpacing: "0.15em",
+          }}
+        >
           Card Draft
         </h1>
         <Flourish variant="heading" width={100} color={THEME.text.tertiary} />
 
         {/* Gold earned banner */}
         {goldEarned && goldEarned > 0 && (
-          <div className="draft-gold" style={{
-            padding: '4px 16px',
-            borderRadius: 6,
-            background: 'rgba(250, 204, 21, 0.08)',
-            border: `1px solid rgba(250, 204, 21, 0.2)`,
-            color: THEME.accent,
-            fontSize: 13,
-            fontWeight: 'bold',
-            letterSpacing: '0.05em',
-          }}>
-            +{goldEarned}<GoldCoin size={12} /> earned
+          <div
+            className="draft-gold"
+            style={{
+              padding: "4px 16px",
+              borderRadius: 6,
+              background: "rgba(250, 204, 21, 0.08)",
+              border: `1px solid rgba(250, 204, 21, 0.2)`,
+              color: THEME.accent,
+              fontSize: 13,
+              fontWeight: "bold",
+              letterSpacing: "0.05em",
+            }}
+          >
+            +{goldEarned}
+            <GoldCoin size={12} /> earned
           </div>
         )}
       </div>
 
       {/* ── Progress dots ── */}
-      <div className="draft-progress" style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        position: 'relative',
-        zIndex: 1,
-      }}>
+      <div
+        className="draft-progress"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         {alivePokemonIndices.map((_, i) => {
           const isDone = i < currentDraftIndex;
           const isCurrent = i === currentDraftIndex;
           return (
-            <div key={i} style={{
-              width: isCurrent ? 10 : 8,
-              height: isCurrent ? 10 : 8,
-              borderRadius: '50%',
-              background: isDone ? THEME.accent
-                : isCurrent ? THEME.text.primary
-                : THEME.border.medium,
-              transition: 'all 0.2s',
-              boxShadow: isCurrent ? `0 0 8px ${THEME.text.primary}40` : 'none',
-            }} />
+            <div
+              key={i}
+              style={{
+                width: isCurrent ? 10 : 8,
+                height: isCurrent ? 10 : 8,
+                borderRadius: "50%",
+                background: isDone
+                  ? THEME.accent
+                  : isCurrent
+                    ? THEME.text.primary
+                    : THEME.border.medium,
+                transition: "all 0.2s",
+                boxShadow: isCurrent
+                  ? `0 0 8px ${THEME.text.primary}40`
+                  : "none",
+              }}
+            />
           );
         })}
       </div>
@@ -170,17 +227,17 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
         className="draft-pokemon"
         onClick={() => setDetailsPokemonIndex(currentPokemonIndex)}
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
           gap: 6,
-          padding: '16px 24px',
+          padding: "16px 24px",
           background: THEME.chrome.backdrop,
           borderRadius: 12,
           border: `1px solid ${THEME.border.medium}`,
-          cursor: 'pointer',
-          transition: 'border-color 0.2s, box-shadow 0.2s',
-          position: 'relative',
+          cursor: "pointer",
+          transition: "border-color 0.2s, box-shadow 0.2s",
+          position: "relative",
           zIndex: 1,
         }}
         onMouseEnter={(e) => {
@@ -189,7 +246,7 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.borderColor = THEME.border.medium;
-          e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.boxShadow = "none";
         }}
       >
         <img
@@ -198,17 +255,19 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
           style={{
             width: 72,
             height: 72,
-            imageRendering: 'pixelated',
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 0 6px rgba(250, 204, 21, 0.15))',
+            imageRendering: "pixelated",
+            objectFit: "contain",
+            filter: "drop-shadow(0 0 6px rgba(250, 204, 21, 0.15))",
           }}
         />
-        <div style={{
-          fontSize: 18,
-          fontWeight: 'bold',
-          ...THEME.heading,
-          letterSpacing: '0.1em',
-        }}>
+        <div
+          style={{
+            fontSize: 18,
+            fontWeight: "bold",
+            ...THEME.heading,
+            letterSpacing: "0.1em",
+          }}
+        >
           {basePokemon.name}
         </div>
         <div style={{ fontSize: 12, color: THEME.text.tertiary }}>
@@ -220,14 +279,17 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
       </div>
 
       {/* ── Prompt ── */}
-      <p className="draft-prompt" style={{
-        color: THEME.text.secondary,
-        margin: 0,
-        textAlign: 'center',
-        fontSize: 15,
-        position: 'relative',
-        zIndex: 1,
-      }}>
+      <p
+        className="draft-prompt"
+        style={{
+          color: THEME.text.secondary,
+          margin: 0,
+          textAlign: "center",
+          fontSize: 15,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         Choose a card to add to {basePokemon.name}'s deck
       </p>
 
@@ -236,13 +298,14 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
         key={`draft-options-${currentDraftIndex}`}
         className="draft-cards"
         style={{
-          display: 'flex',
+          display: "flex",
           gap: 20,
-          flexWrap: 'wrap',
-          justifyContent: 'center',
+          flexWrap: "wrap",
+          justifyContent: "center",
           paddingBottom: 12,
-          position: 'relative',
+          position: "relative",
           zIndex: 1,
+          pointerEvents: isDelayed ? "none" : "auto",
         }}
       >
         {cardOptions.slice(0, CARDS_PER_DRAFT).map((cardId, idx) => {
@@ -265,12 +328,13 @@ export function CardDraftScreen({ run, onDraftComplete, onRestart, goldEarned }:
       {/* ── Skip Button ── */}
       <button
         className="draft-skip-btn"
+        disabled={isDelayed}
         onClick={() => handleSelectCard(null)}
         style={{
-          padding: '10px 28px',
+          padding: "10px 28px",
           fontSize: 14,
           ...THEME.button.secondary,
-          position: 'relative',
+          position: "relative",
           zIndex: 1,
         }}
       >

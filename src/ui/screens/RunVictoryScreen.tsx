@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import type { RunState } from '../../run/types';
 import { getPokemon } from '../../data/loaders';
 import { PASSIVE_DEFINITIONS } from '../../run/progression';
@@ -5,6 +6,7 @@ import { AmbientBackground } from '../components/AmbientBackground';
 import { Flourish } from '../components/Flourish';
 import { THEME } from '../theme';
 import { GoldCoin } from '../components/GoldCoin';
+import { playSound } from '../utils/sound';
 
 interface Props {
   run: RunState;
@@ -12,6 +14,9 @@ interface Props {
 }
 
 export function RunVictoryScreen({ run, onNewRun }: Props) {
+  useEffect(() => {
+    playSound('win_final');
+  }, []);
   // Combine party + graveyard so KO'd Pokemon still appear on the victory screen
   const fullRoster = [
     ...run.party.map(p => ({ ...p, fallen: false })),
