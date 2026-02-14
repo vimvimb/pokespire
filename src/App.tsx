@@ -17,6 +17,7 @@ import { ActTransitionScreen } from './ui/screens/ActTransitionScreen';
 import { CardRemovalScreen } from './ui/screens/CardRemovalScreen';
 import { Flourish } from './ui/components/Flourish';
 import { AmbientBackground } from './ui/components/AmbientBackground';
+import { playSound } from './ui/utils/sound';
 import { ScreenShell } from './ui/components/ScreenShell';
 import { DexFrame } from './ui/components/DexFrame';
 import { THEME } from './ui/theme';
@@ -125,6 +126,13 @@ export default function App() {
   useEffect(() => {
     saveGame(screen, runState);
   }, [screen, runState]);
+
+  // Play defeat sound when entering run_defeat screen
+  useEffect(() => {
+    if (screen === 'run_defeat') {
+      playSound('lose_final');
+    }
+  }, [screen]);
 
   // Continue saved game
   const handleContinue = useCallback(() => {
