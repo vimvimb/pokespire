@@ -988,8 +988,10 @@ export function BattleScreen({
     const prev = prevStatusRef.current;
     // Only diff if we have a previous snapshot (skip initial render)
     if (prev.size > 0) {
-      let healSoundPlayed = false;
-      let debuffSoundPlayed = false;
+      const BUFF_STATUSES = new Set(["strength", "haste", "evasion"]);
+      const STATUS_CONDITION_TYPES = new Set(["burn", "poison", "paralysis", "sleep", "leech"]);
+      const STAT_LOWER_TYPES = new Set(["enfeeble", "slow", "taunt"]);
+      let statusSoundPlayed = false;
       for (const c of state.combatants) {
         const prevStatuses = prev.get(c.id);
         const currStatuses = currentSnapshot.get(c.id)!;
@@ -1003,21 +1005,18 @@ export function BattleScreen({
               statusType,
               stacks: stacks - prevStacks,
             });
-            // Play heal sound once for buff status applications (self-beneficial)
-            if (
-              !healSoundPlayed &&
-              ["strength", "haste", "evasion"].includes(statusType)
-            ) {
-              playSound("heal");
-              healSoundPlayed = true;
-            }
-            // Play debuff sound once for debuff status applications
-            if (
-              !debuffSoundPlayed &&
-              !["strength", "haste", "evasion"].includes(statusType)
-            ) {
-              playSound("debuff");
-              debuffSoundPlayed = true;
+            // Play one status sound per diff cycle: raise_stat for buffs, debuff for conditions, lower_stat for stat-lower
+            if (!statusSoundPlayed) {
+              if (BUFF_STATUSES.has(statusType)) {
+                playSound("raise_stat");
+                statusSoundPlayed = true;
+              } else if (STATUS_CONDITION_TYPES.has(statusType)) {
+                playSound("debuff");
+                statusSoundPlayed = true;
+              } else if (STAT_LOWER_TYPES.has(statusType)) {
+                playSound("lower_stat");
+                statusSoundPlayed = true;
+              }
             }
           }
         }
@@ -1037,7 +1036,7 @@ export function BattleScreen({
     if (prev.size > 0) {
       for (const c of state.combatants) {
         if (prev.get(c.id) === true && !c.alive) {
-          playSound("debuff");
+          playSound("lower_stat");
           break; // Play once per diff cycle
         }
       }
