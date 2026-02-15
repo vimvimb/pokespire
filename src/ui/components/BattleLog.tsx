@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, memo } from 'react';
 import type { LogEntry } from '../../engine/types';
 import { THEME } from '../theme';
 
@@ -6,7 +6,7 @@ interface Props {
   logs: LogEntry[];
 }
 
-export function BattleLog({ logs }: Props) {
+function BattleLogInner({ logs }: Props) {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -73,3 +73,5 @@ export function BattleLog({ logs }: Props) {
     </div>
   );
 }
+
+export const BattleLog = memo(BattleLogInner);

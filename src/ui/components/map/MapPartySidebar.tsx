@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import type { RunPokemon } from '../../../run/types';
 import { getPokemon } from '../../../data/loaders';
 import { canPokemonLevelUp, EXP_PER_LEVEL } from '../../../run/state';
@@ -136,7 +136,7 @@ function PokemonRow({ pokemon, isDead, canLevel, onClick, isSwapTarget, onSwapCl
   );
 }
 
-export function MapPartySidebar({ party, bench, graveyard, gold, onPokemonClick, onSwap, onPromote, onRearrange, onOpenShop, onOpenMoveDeleter }: Props) {
+function MapPartySidebarInner({ party, bench, graveyard, gold, onPokemonClick, onSwap, onPromote, onRearrange, onOpenShop, onOpenMoveDeleter }: Props) {
   // Swap mode: when party is full and a bench Pokemon is clicked, highlight party members to swap with
   const [swapBenchIndex, setSwapBenchIndex] = useState<number | null>(null);
   const [showGraveyard, setShowGraveyard] = useState(false);
@@ -479,3 +479,5 @@ export function MapPartySidebar({ party, bench, graveyard, gold, onPokemonClick,
     </div>
   );
 }
+
+export const MapPartySidebar = memo(MapPartySidebarInner);

@@ -24,7 +24,8 @@ export function EnemyHandPreview({ combatant }: Props) {
     });
 
     // Trigger entrance animation on next frame
-    requestAnimationFrame(() => setVisible(true));
+    const frameId = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(frameId);
   }, [combatant.id]);
 
   if (!position || combatant.hand.length === 0) return null;

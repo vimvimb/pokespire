@@ -358,7 +358,7 @@ function DeckEditorModal({
         </div>
 
         {/* Card Grid */}
-        <div style={{ flex: 1, overflow: 'auto', padding: '0 20px 20px' }}>
+        <div style={{ flex: 1, overflow: 'auto', padding: '20px 20px 20px' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',

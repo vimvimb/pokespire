@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import type { MoveDefinition, Combatant, MoveType, CardRarity } from '../../engine/types';
 import { isParentalBondCopy } from '../../data/loaders';
 import { calculateHandPreview } from '../../engine/preview';
@@ -275,7 +275,7 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
   );
 }
 
-export function CardDisplay({ cardId, handIndex, card, combatant, canAfford, isSelected, onClick, onDragStart, onDragEnd, isDragging }: Props) {
+function CardDisplayInner({ cardId, handIndex, card, combatant, canAfford, isSelected, onClick, onDragStart, onDragEnd, isDragging }: Props) {
   const [isHovered, setIsHovered] = useState(false);
   const primaryEffect = card.effects[0]?.type || 'damage';
   const effectColor = EFFECT_COLORS[primaryEffect] || '#888';
@@ -542,3 +542,5 @@ export function CardDisplay({ cardId, handIndex, card, combatant, canAfford, isS
     </div>
   );
 }
+
+export const CardDisplay = memo(CardDisplayInner);

@@ -1,33 +1,65 @@
-import { useState, useCallback, useEffect } from 'react';
-import type { PokemonData, Position, Combatant } from './engine/types';
-import { useBattle } from './ui/hooks/useBattle';
-import { PartySelectScreen } from './ui/screens/PartySelectScreen';
-import { BattleScreen } from './ui/screens/BattleScreen';
-import type { BattleResult } from './ui/screens/BattleScreen';
-import { MapScreen } from './ui/screens/MapScreen';
-import { RestScreen } from './ui/screens/RestScreen';
-import { EventScreen } from './ui/screens/EventScreen';
-import { RecruitScreen } from './ui/screens/RecruitScreen';
-import { CardDraftScreen } from './ui/screens/CardDraftScreen';
-import { RunVictoryScreen } from './ui/screens/RunVictoryScreen';
-import { CardDexScreen } from './ui/screens/CardDexScreen';
-import { PokeDexScreen } from './ui/screens/PokeDexScreen';
-import { SandboxConfigScreen } from './ui/screens/SandboxConfigScreen';
-import { ActTransitionScreen } from './ui/screens/ActTransitionScreen';
-import { CardRemovalScreen } from './ui/screens/CardRemovalScreen';
-import { Flourish } from './ui/components/Flourish';
-import { AmbientBackground } from './ui/components/AmbientBackground';
-import { ScreenShell } from './ui/components/ScreenShell';
-import { DexFrame } from './ui/components/DexFrame';
-import { THEME } from './ui/theme';
-import type { SandboxPokemon } from './ui/screens/SandboxConfigScreen';
-import { EventTesterScreen } from './ui/screens/EventTesterScreen';
-import { GhostReviveScreen } from './ui/screens/GhostReviveScreen';
-import type { RunState, RunPokemon, BattleNode, EventNode, RecruitNode } from './run/types';
-import { getPokemon } from './data/loaders';
-import { SHOP_ITEMS, CARD_FORGET_COST } from './data/shop';
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  lazy,
+  Suspense,
+} from "react";
+import type { PokemonData, Position, Combatant } from "./engine/types";
+import { useBattle } from "./ui/hooks/useBattle";
+import { PartySelectScreen } from "./ui/screens/PartySelectScreen";
+import { BattleScreen } from "./ui/screens/BattleScreen";
+import type { BattleResult } from "./ui/screens/BattleScreen";
+import { MapScreen } from "./ui/screens/MapScreen";
+import { RestScreen } from "./ui/screens/RestScreen";
+import { EventScreen } from "./ui/screens/EventScreen";
+import { RecruitScreen } from "./ui/screens/RecruitScreen";
+import { CardDraftScreen } from "./ui/screens/CardDraftScreen";
+import { RunVictoryScreen } from "./ui/screens/RunVictoryScreen";
+import type { SandboxPokemon } from "./ui/screens/SandboxConfigScreen";
+import { ActTransitionScreen } from "./ui/screens/ActTransitionScreen";
+import { CardRemovalScreen } from "./ui/screens/CardRemovalScreen";
+import { Flourish } from "./ui/components/Flourish";
+import { AmbientBackground } from "./ui/components/AmbientBackground";
+import { playSound } from "./ui/utils/sound";
+import { playMusic, getMusicForScreen } from "./ui/utils/music";
+import { ScreenShell } from "./ui/components/ScreenShell";
+import { DexFrame } from "./ui/components/DexFrame";
+import { THEME } from "./ui/theme";
+const CardDexScreen = lazy(() =>
+  import("./ui/screens/CardDexScreen").then((m) => ({
+    default: m.CardDexScreen,
+  })),
+);
+const PokeDexScreen = lazy(() =>
+  import("./ui/screens/PokeDexScreen").then((m) => ({
+    default: m.PokeDexScreen,
+  })),
+);
+const SandboxConfigScreen = lazy(() =>
+  import("./ui/screens/SandboxConfigScreen").then((m) => ({
+    default: m.SandboxConfigScreen,
+  })),
+);
+const EventTesterScreen = lazy(() =>
+  import("./ui/screens/EventTesterScreen").then((m) => ({
+    default: m.EventTesterScreen,
+  })),
+);
+import { GhostReviveScreen } from "./ui/screens/GhostReviveScreen";
+import type {
+  RunState,
+  RunPokemon,
+  BattleNode,
+  EventNode,
+  RecruitNode,
+} from "./run/types";
+import { getPokemon } from "./data/loaders";
+import { SHOP_ITEMS, CARD_FORGET_COST } from "./data/shop";
 import {
   createRunState,
+  createAct1BossTestState,
   createAct2TestState,
   createAct3TestState,
   createAct1BossTestState,
@@ -62,12 +94,32 @@ import {
   addGold,
   spendGold,
   reviveFromGraveyard,
-} from './run/state';
+} from "./run/state";
+import { getActMapConfig } from "./ui/components/map/mapConfig";
 
-type Screen = 'main_menu' | 'select' | 'map' | 'rest' | 'event' | 'recruit' | 'card_draft' | 'battle' | 'run_victory' | 'run_defeat' | 'card_dex' | 'pokedex' | 'sandbox_config' | 'act_transition' | 'card_removal' | 'event_tester' | 'ghost_revive' | 'disclaimer' | 'debugging';
+type Screen =
+  | "main_menu"
+  | "select"
+  | "map"
+  | "rest"
+  | "event"
+  | "recruit"
+  | "card_draft"
+  | "battle"
+  | "run_victory"
+  | "run_defeat"
+  | "card_dex"
+  | "pokedex"
+  | "sandbox_config"
+  | "act_transition"
+  | "card_removal"
+  | "event_tester"
+  | "ghost_revive"
+  | "disclaimer"
+  | "debugging";
 
 // localStorage keys
-const SAVE_KEY = 'pokespire_save';
+const SAVE_KEY = "pokespire_save";
 
 interface SaveData {
   screen: Screen;
@@ -77,13 +129,22 @@ interface SaveData {
 
 function saveGame(screen: Screen, runState: RunState | null) {
   // Only save during active runs (not menus, not sandbox)
-  const savableScreens: Screen[] = ['map', 'rest', 'event', 'recruit', 'card_draft', 'battle', 'act_transition', 'card_removal'];
+  const savableScreens: Screen[] = [
+    "map",
+    "rest",
+    "event",
+    "recruit",
+    "card_draft",
+    "battle",
+    "act_transition",
+    "card_removal",
+  ];
   if (runState && savableScreens.includes(screen)) {
     const saveData: SaveData = { screen, runState, savedAt: Date.now() };
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
     } catch (e) {
-      console.warn('Failed to save game:', e);
+      console.warn("Failed to save game:", e);
     }
   }
 }
@@ -95,7 +156,7 @@ function loadGame(): SaveData | null {
       return JSON.parse(saved) as SaveData;
     }
   } catch (e) {
-    console.warn('Failed to load save:', e);
+    console.warn("Failed to load save:", e);
   }
   return null;
 }
@@ -105,29 +166,60 @@ function clearSave() {
 }
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('main_menu');
+  const [screen, setScreen] = useState<Screen>("main_menu");
   const [runState, setRunState] = useState<RunState | null>(null);
   const [isSandboxBattle, setIsSandboxBattle] = useState(false);
   const [isRecruitBattle, setIsRecruitBattle] = useState(false);
-  const [recruitFighterIndex, setRecruitFighterIndex] = useState<number | null>(null);
-  const [recruitBattleResult, setRecruitBattleResult] = useState<'pending' | 'victory' | 'defeat' | null>(null);
-  const [sandboxPlayerTeam, setSandboxPlayerTeam] = useState<SandboxPokemon[]>([]);
-  const [sandboxEnemyTeam, setSandboxEnemyTeam] = useState<SandboxPokemon[]>([]);
-  const [hasSavedGame, setHasSavedGame] = useState(false);
-  const [lastGoldEarned, setLastGoldEarned] = useState<number | undefined>(undefined);
-  const [pendingBattleNodeId, setPendingBattleNodeId] = useState<string | null>(null);
+  const [recruitFighterIndex, setRecruitFighterIndex] = useState<number | null>(
+    null,
+  );
+  const [recruitBattleResult, setRecruitBattleResult] = useState<
+    "pending" | "victory" | "defeat" | null
+  >(null);
+  const [sandboxPlayerTeam, setSandboxPlayerTeam] = useState<SandboxPokemon[]>(
+    [],
+  );
+  const [sandboxEnemyTeam, setSandboxEnemyTeam] = useState<SandboxPokemon[]>(
+    [],
+  );
+  const [hasSavedGame, setHasSavedGame] = useState(() => loadGame() !== null);
+  const [lastGoldEarned, setLastGoldEarned] = useState<number | undefined>(
+    undefined,
+  );
+  const [pendingBattleNodeId, setPendingBattleNodeId] = useState<string | null>(
+    null,
+  );
   const battle = useBattle();
 
-  // Check for saved game and prologue status on mount
+  const latestSaveRef = useRef({ screen, runState });
+
+  // Save game whenever screen or runState changes (debounced to avoid blocking on rapid updates)
   useEffect(() => {
-    const saved = loadGame();
-    setHasSavedGame(saved !== null);
+    latestSaveRef.current = { screen, runState };
+    const timer = setTimeout(() => saveGame(screen, runState), 2000);
+    return () => clearTimeout(timer);
+  }, [screen, runState]);
+
+  // Flush on actual unmount only
+  useEffect(() => {
+    return () => {
+      const { screen: s, runState: r } = latestSaveRef.current;
+      saveGame(s, r);
+    };
   }, []);
 
-  // Save game whenever screen or runState changes
+  // Play defeat sound when entering run_defeat screen
   useEffect(() => {
-    saveGame(screen, runState);
-  }, [screen, runState]);
+    if (screen === "run_defeat") {
+      playSound("lose_final");
+    }
+  }, [screen]);
+
+  // Background music: play the correct track for the current screen and game state
+  useEffect(() => {
+    const track = getMusicForScreen(screen, runState, pendingBattleNodeId);
+    playMusic(track);
+  }, [screen, runState, pendingBattleNodeId]);
 
   // Continue saved game
   const handleContinue = useCallback(() => {
@@ -137,8 +229,8 @@ export default function App() {
       const run = saved.runState ? migrateRunState(saved.runState) : null;
       setRunState(run);
       // If saved during battle, go to map instead (can't restore battle state)
-      if (saved.screen === 'battle') {
-        setScreen('map');
+      if (saved.screen === "battle") {
+        setScreen("map");
       } else {
         setScreen(saved.screen);
       }
@@ -146,52 +238,58 @@ export default function App() {
   }, []);
 
   // Start a new run after party selection
-  const handleStart = useCallback((party: PokemonData[], positions: Position[], gold: number) => {
-    const run = createRunState(party, positions, Date.now(), gold);
-    setRunState(run);
-    setScreen('map');
-  }, []);
+  const handleStart = useCallback(
+    (party: PokemonData[], positions: Position[], gold: number) => {
+      const run = createRunState(party, positions, Date.now(), gold);
+      setRunState(run);
+      setScreen("map");
+    },
+    [],
+  );
 
   // Handle node selection on the map
-  const handleSelectNode = useCallback((nodeId: string) => {
-    if (!runState) return;
+  const handleSelectNode = useCallback(
+    (nodeId: string) => {
+      if (!runState) return;
 
-    // Check node type before advancing — battle nodes defer moveToNode until victory
-    const targetNode = runState.nodes.find(n => n.id === nodeId);
-    if (!targetNode) return;
+      // Check node type before advancing — battle nodes defer moveToNode until victory
+      const targetNode = runState.nodes.find((n) => n.id === nodeId);
+      if (!targetNode) return;
 
-    if (targetNode.type === 'battle') {
-      // Don't call moveToNode yet — if the game crashes mid-battle,
-      // the save retains pre-battle state so the player can retry
-      battle.startBattleFromRun(runState, targetNode as BattleNode);
-      setPendingBattleNodeId(nodeId);
-      setScreen('battle');
-      return;
-    }
+      if (targetNode.type === "battle") {
+        // Don't call moveToNode yet — if the game crashes mid-battle,
+        // the save retains pre-battle state so the player can retry
+        battle.startBattleFromRun(runState, targetNode as BattleNode);
+        setPendingBattleNodeId(nodeId);
+        setScreen("battle");
+        return;
+      }
 
-    // For all other node types, advance immediately (grants EXP, marks completed)
-    const newRun = moveToNode(runState, nodeId);
-    setRunState(newRun);
+      // For all other node types, advance immediately (grants EXP, marks completed)
+      const newRun = moveToNode(runState, nodeId);
+      setRunState(newRun);
 
-    const node = getCurrentNode(newRun);
-    if (!node) return;
+      const node = getCurrentNode(newRun);
+      if (!node) return;
 
-    if (node.type === 'rest') {
-      setScreen('rest');
-    } else if (node.type === 'event') {
-      setScreen('event');
-    } else if (node.type === 'act_transition') {
-      setScreen('act_transition');
-    } else if (node.type === 'card_removal') {
-      setScreen('card_removal');
-    } else if (node.type === 'recruit') {
-      setRecruitBattleResult(null);
-      setRecruitFighterIndex(null);
-      setIsRecruitBattle(false);
-      setScreen('recruit');
-    }
-    // spawn nodes don't have a screen
-  }, [runState, battle]);
+      if (node.type === "rest") {
+        setScreen("rest");
+      } else if (node.type === "event") {
+        setScreen("event");
+      } else if (node.type === "act_transition") {
+        setScreen("act_transition");
+      } else if (node.type === "card_removal") {
+        setScreen("card_removal");
+      } else if (node.type === "recruit") {
+        setRecruitBattleResult(null);
+        setRecruitFighterIndex(null);
+        setIsRecruitBattle(false);
+        setScreen("recruit");
+      }
+      // spawn nodes don't have a screen
+    },
+    [runState, battle],
+  );
 
   // Handle rest: Chansey heals whole party 30%
   const handleRestHeal = useCallback(() => {
@@ -199,177 +297,215 @@ export default function App() {
 
     const newRun = applyPartyPercentHeal(runState, 0.3);
     setRunState(newRun);
-    setScreen('map');
+    setScreen("map");
   }, [runState]);
 
   // Handle event completion (new data-driven event system)
   const handleEventComplete = useCallback((newRun: RunState) => {
     // Mark the event as seen
     const currentNode = getCurrentNode(newRun);
-    const eventId = currentNode?.type === 'event' ? (currentNode as EventNode).eventId : '';
-    const updatedRun = eventId && !newRun.seenEventIds.includes(eventId)
-      ? { ...newRun, seenEventIds: [...newRun.seenEventIds, eventId] }
-      : newRun;
+    const eventId =
+      currentNode?.type === "event" ? (currentNode as EventNode).eventId : "";
+    const updatedRun =
+      eventId && !newRun.seenEventIds.includes(eventId)
+        ? { ...newRun, seenEventIds: [...newRun.seenEventIds, eventId] }
+        : newRun;
 
     setRunState(updatedRun);
-    setScreen('map');
+    setScreen("map");
   }, []);
 
   // Handle card draft completion (happens after battles)
-  const handleDraftComplete = useCallback((drafts: Map<number, string | null>) => {
-    if (!runState) return;
+  const handleDraftComplete = useCallback(
+    (drafts: Map<number, string | null>) => {
+      if (!runState) return;
 
-    // Add drafted cards to decks
-    let newRun = runState;
-    drafts.forEach((cardId, pokemonIndex) => {
-      if (cardId !== null) {
-        newRun = addCardToDeck(newRun, pokemonIndex, cardId);
+      // Add drafted cards to decks
+      let newRun = runState;
+      drafts.forEach((cardId, pokemonIndex) => {
+        if (cardId !== null) {
+          newRun = addCardToDeck(newRun, pokemonIndex, cardId);
+        }
+      });
+
+      setRunState(newRun);
+
+      // Check if run is complete
+      if (isRunComplete(newRun)) {
+        setScreen("run_victory");
+      } else if (newRun.currentNodeId === "a2-chasm-ghosts") {
+        // Special: Gengar offers to revive a fallen ally after the chasm fight
+        setScreen("ghost_revive");
+      } else {
+        setScreen("map");
       }
-    });
-
-    setRunState(newRun);
-
-    // Check if run is complete
-    if (isRunComplete(newRun)) {
-      setScreen('run_victory');
-    } else if (newRun.currentNodeId === 'a2-chasm-ghosts') {
-      // Special: Gengar offers to revive a fallen ally after the chasm fight
-      setScreen('ghost_revive');
-    } else {
-      setScreen('map');
-    }
-  }, [runState]);
+    },
+    [runState],
+  );
 
   // Handle battle end
-  const handleBattleEnd = useCallback((result: BattleResult, combatants: Combatant[], combatGoldEarned?: number) => {
-    if (!runState) return;
+  const handleBattleEnd = useCallback(
+    (
+      result: BattleResult,
+      combatants: Combatant[],
+      combatGoldEarned?: number,
+    ) => {
+      if (!runState) return;
 
-    // Recruit battles: sync HP back to fighter, return to recruit screen
-    if (isRecruitBattle && recruitFighterIndex !== null) {
-      const playerCombatant = combatants.find(c => c.side === 'player');
-      let newParty = runState.party;
-      if (playerCombatant) {
-        const newHp = Math.max(0, playerCombatant.hp);
-        const isKO = newHp <= 0 || !playerCombatant.alive;
-        newParty = runState.party.map((p, i) => {
-          if (i !== recruitFighterIndex) return p;
-          return { ...p, currentHp: newHp, knockedOut: p.knockedOut || isKO };
-        });
-        let updatedRun = moveKnockedOutToGraveyard({ ...runState, party: newParty });
-        setRunState(updatedRun);
-        newParty = updatedRun.party;
-      }
+      // Recruit battles: sync HP back to fighter, return to recruit screen
+      if (isRecruitBattle && recruitFighterIndex !== null) {
+        const playerCombatant = combatants.find((c) => c.side === "player");
+        let newParty = runState.party;
+        if (playerCombatant) {
+          const newHp = Math.max(0, playerCombatant.hp);
+          const isKO = newHp <= 0 || !playerCombatant.alive;
+          newParty = runState.party.map((p, i) => {
+            if (i !== recruitFighterIndex) return p;
+            return { ...p, currentHp: newHp, knockedOut: p.knockedOut || isKO };
+          });
+          const updatedRun = moveKnockedOutToGraveyard({
+            ...runState,
+            party: newParty,
+          });
+          setRunState(updatedRun);
+          newParty = updatedRun.party;
+        }
 
-      // Check for full party wipe
-      const allDead = newParty.every(p => p.currentHp <= 0 || p.knockedOut);
-      if (allDead) {
+        // Check for full party wipe
+        const allDead = newParty.every((p) => p.currentHp <= 0 || p.knockedOut);
+        if (allDead) {
+          setIsRecruitBattle(false);
+          setScreen("run_defeat");
+          return;
+        }
+
+        setRecruitBattleResult(result === "victory" ? "victory" : "defeat");
         setIsRecruitBattle(false);
-        setScreen('run_defeat');
+        setScreen("recruit");
         return;
       }
 
-      setRecruitBattleResult(result === 'victory' ? 'victory' : 'defeat');
-      setIsRecruitBattle(false);
-      setScreen('recruit');
-      return;
-    }
+      if (result === "defeat") {
+        setPendingBattleNodeId(null);
+        setScreen("run_defeat");
+        return;
+      }
 
-    if (result === 'defeat') {
+      // Advance the node NOW (deferred from handleSelectNode for battle nodes)
+      let newRun = pendingBattleNodeId
+        ? moveToNode(runState, pendingBattleNodeId)
+        : runState;
       setPendingBattleNodeId(null);
-      setScreen('run_defeat');
-      return;
-    }
 
-    // Advance the node NOW (deferred from handleSelectNode for battle nodes)
-    let newRun = pendingBattleNodeId
-      ? moveToNode(runState, pendingBattleNodeId)
-      : runState;
-    setPendingBattleNodeId(null);
+      // Sync HP from battle back to run state, then move KO'd to graveyard
+      newRun = syncBattleResults(newRun, combatants);
+      newRun = moveKnockedOutToGraveyard(newRun);
 
-    // Sync HP from battle back to run state, then move KO'd to graveyard
-    newRun = syncBattleResults(newRun, combatants);
-    newRun = moveKnockedOutToGraveyard(newRun);
+      // Award gold for battle
+      const currentNode = getCurrentNode(newRun);
+      let goldEarned = 0;
+      if (currentNode?.type === "battle") {
+        const baseGold = getBattleGoldReward(
+          currentNode as BattleNode,
+          newRun.currentAct,
+        );
+        goldEarned =
+          applyPickupBonus(newRun, baseGold) + (combatGoldEarned ?? 0);
+        newRun = addGold(newRun, goldEarned);
+      }
 
-    // Award gold for battle
-    const currentNode = getCurrentNode(newRun);
-    let goldEarned = 0;
-    if (currentNode?.type === 'battle') {
-      const baseGold = getBattleGoldReward(currentNode as BattleNode, newRun.currentAct);
-      goldEarned = applyPickupBonus(newRun, baseGold) + (combatGoldEarned ?? 0);
-      newRun = addGold(newRun, goldEarned);
-    }
-
-    // Check if this was the final boss (Mewtwo in Act 3)
-    if (isRunComplete(newRun)) {
-      setScreen('run_victory');
-      setRunState(newRun);
-    } else if (isAct2Complete(newRun)) {
-      // Giovanni defeated in Act 2 - full heal and go to act transition
-      newRun = applyFullHealAll(newRun);
-      setRunState(newRun);
-      setScreen('act_transition');
-    } else if (isAct1Complete(newRun)) {
-      // Ariana defeated - full heal and go to act transition
-      newRun = applyFullHealAll(newRun);
-      setRunState(newRun);
-      setScreen('act_transition');
-    } else {
-      setRunState(newRun);
-      setLastGoldEarned(goldEarned > 0 ? goldEarned : undefined);
-      // Go to card draft after battle
-      setScreen('card_draft');
-    }
-  }, [runState, isRecruitBattle, recruitFighterIndex, pendingBattleNodeId]);
+      // Check if this was the final boss (Mewtwo in Act 3)
+      if (isRunComplete(newRun)) {
+        setScreen("run_victory");
+        setRunState(newRun);
+      } else if (isAct2Complete(newRun)) {
+        // Giovanni defeated in Act 2 - full heal and go to act transition
+        newRun = applyFullHealAll(newRun);
+        setRunState(newRun);
+        setScreen("act_transition");
+      } else if (isAct1Complete(newRun)) {
+        // Ariana defeated - full heal and go to act transition
+        newRun = applyFullHealAll(newRun);
+        setRunState(newRun);
+        setScreen("act_transition");
+      } else {
+        setRunState(newRun);
+        setLastGoldEarned(goldEarned > 0 ? goldEarned : undefined);
+        // Go to card draft after battle
+        setScreen("card_draft");
+      }
+    },
+    [runState, isRecruitBattle, recruitFighterIndex, pendingBattleNodeId],
+  );
 
   // Handle card selection during battle
-  const handleSelectCard = useCallback((cardIndex: number | null) => {
-    if (cardIndex === null || !battle.state) {
-      battle.setPendingCardIndex(null);
-      return;
-    }
-    battle.setPendingCardIndex(cardIndex);
-  }, [battle]);
+  const handleSelectCard = useCallback(
+    (cardIndex: number | null) => {
+      if (cardIndex === null || !battle.state) {
+        battle.setPendingCardIndex(null);
+        return;
+      }
+      battle.setPendingCardIndex(cardIndex);
+    },
+    [battle],
+  );
 
   // Handle target selection during battle
-  const handleSelectTarget = useCallback((targetId: string) => {
-    if (battle.pendingCardIndex !== null) {
-      battle.playCard(battle.pendingCardIndex, targetId || undefined);
-    }
-  }, [battle]);
+  const handleSelectTarget = useCallback(
+    (targetId: string) => {
+      if (battle.pendingCardIndex !== null) {
+        battle.playCard(battle.pendingCardIndex, targetId || undefined);
+      }
+    },
+    [battle],
+  );
 
   // Handle direct card play (for drag-and-drop, bypasses two-step selection)
-  const handlePlayCard = useCallback((cardIndex: number, targetId?: string) => {
-    battle.playCard(cardIndex, targetId);
-  }, [battle]);
+  const handlePlayCard = useCallback(
+    (cardIndex: number, targetId?: string) => {
+      battle.playCard(cardIndex, targetId);
+    },
+    [battle],
+  );
 
   // Handle level-up from map screen
-  const handleLevelUp = useCallback((pokemonIndex: number) => {
-    if (!runState) return;
-    const newRun = applyLevelUp(runState, pokemonIndex);
-    setRunState(newRun);
-  }, [runState]);
+  const handleLevelUp = useCallback(
+    (pokemonIndex: number) => {
+      if (!runState) return;
+      const newRun = applyLevelUp(runState, pokemonIndex);
+      setRunState(newRun);
+    },
+    [runState],
+  );
 
   // Handle shop purchase
-  const handlePurchase = useCallback((moveId: string, pokemonIndex: number) => {
-    if (!runState) return;
-    const item = SHOP_ITEMS.find(i => i.moveId === moveId);
-    if (!item) return;
-    const afterSpend = spendGold(runState, item.goldCost);
-    if (!afterSpend) return;
-    const afterAdd = addCardToDeck(afterSpend, pokemonIndex, moveId);
-    setRunState(afterAdd);
-  }, [runState]);
+  const handlePurchase = useCallback(
+    (moveId: string, pokemonIndex: number) => {
+      if (!runState) return;
+      const item = SHOP_ITEMS.find((i) => i.moveId === moveId);
+      if (!item) return;
+      const afterSpend = spendGold(runState, item.goldCost);
+      if (!afterSpend) return;
+      const afterAdd = addCardToDeck(afterSpend, pokemonIndex, moveId);
+      setRunState(afterAdd);
+    },
+    [runState],
+  );
 
   // Handle card removal from Hypno's Parlor
-  const handleForgetCard = useCallback((pokemonIndex: number, cardIndex: number, source: 'party' | 'bench') => {
-    if (!runState) return;
-    const afterSpend = spendGold(runState, CARD_FORGET_COST);
-    if (!afterSpend) return;
-    const afterRemove = source === 'party'
-      ? removeCardsFromDeck(afterSpend, pokemonIndex, [cardIndex])
-      : removeCardFromBench(afterSpend, pokemonIndex, [cardIndex]);
-    setRunState(afterRemove);
-  }, [runState]);
+  const handleForgetCard = useCallback(
+    (pokemonIndex: number, cardIndex: number, source: "party" | "bench") => {
+      if (!runState) return;
+      const afterSpend = spendGold(runState, CARD_FORGET_COST);
+      if (!afterSpend) return;
+      const afterRemove =
+        source === "party"
+          ? removeCardsFromDeck(afterSpend, pokemonIndex, [cardIndex])
+          : removeCardFromBench(afterSpend, pokemonIndex, [cardIndex]);
+      setRunState(afterRemove);
+    },
+    [runState],
+  );
 
   // Handle act transition - continue to next act
   const handleActTransitionContinue = useCallback(() => {
@@ -381,139 +517,172 @@ export default function App() {
       newRun = transitionToAct3(runState);
     }
     setRunState(newRun);
-    setScreen('map');
+    setScreen("map");
   }, [runState]);
 
   // Handle card removal completion
-  const handleCardRemovalComplete = useCallback((removals: Map<number, number[]>) => {
-    if (!runState) return;
+  const handleCardRemovalComplete = useCallback(
+    (removals: Map<number, number[]>) => {
+      if (!runState) return;
 
-    let newRun = runState;
-    removals.forEach((cardIndices, pokemonIndex) => {
-      newRun = removeCardsFromDeck(newRun, pokemonIndex, cardIndices);
-    });
+      let newRun = runState;
+      removals.forEach((cardIndices, pokemonIndex) => {
+        newRun = removeCardsFromDeck(newRun, pokemonIndex, cardIndices);
+      });
 
-    setRunState(newRun);
-    setScreen('map');
-  }, [runState]);
+      setRunState(newRun);
+      setScreen("map");
+    },
+    [runState],
+  );
 
   // Handle card removal skip
   const handleCardRemovalSkip = useCallback(() => {
-    setScreen('map');
+    setScreen("map");
   }, []);
 
   // Handle swap between party and bench
-  const handleSwap = useCallback((partyIndex: number, benchIndex: number) => {
-    if (!runState) return;
-    const newRun = swapPartyAndBench(runState, partyIndex, benchIndex);
-    setRunState(newRun);
-  }, [runState]);
+  const handleSwap = useCallback(
+    (partyIndex: number, benchIndex: number) => {
+      if (!runState) return;
+      const newRun = swapPartyAndBench(runState, partyIndex, benchIndex);
+      setRunState(newRun);
+    },
+    [runState],
+  );
 
   // Handle promoting a bench Pokemon to the active party
-  const handlePromote = useCallback((benchIndex: number) => {
-    if (!runState) return;
-    const emptyPos = findEmptyPosition(runState.party);
-    if (!emptyPos) return;
-    const newRun = promoteFromBench(runState, benchIndex, emptyPos);
-    setRunState(newRun);
-  }, [runState]);
+  const handlePromote = useCallback(
+    (benchIndex: number) => {
+      if (!runState) return;
+      const emptyPos = findEmptyPosition(runState.party);
+      if (!emptyPos) return;
+      const newRun = promoteFromBench(runState, benchIndex, emptyPos);
+      setRunState(newRun);
+    },
+    [runState],
+  );
 
   // Handle rearranging party formation (including promote/demote from modal)
-  const handleRearrange = useCallback((newParty: RunPokemon[], newBench: RunPokemon[]) => {
-    if (!runState) return;
-    setRunState({ ...runState, party: newParty, bench: newBench });
-  }, [runState]);
+  const handleRearrange = useCallback(
+    (newParty: RunPokemon[], newBench: RunPokemon[]) => {
+      if (!runState) return;
+      setRunState({ ...runState, party: newParty, bench: newBench });
+    },
+    [runState],
+  );
 
   // Handle starting a 1v1 recruit fight
-  const handleRecruitFight = useCallback((partyIndex: number) => {
-    if (!runState) return;
+  const handleRecruitFight = useCallback(
+    (partyIndex: number) => {
+      if (!runState) return;
 
-    const currentNode = getCurrentNode(runState);
-    if (!currentNode || currentNode.type !== 'recruit') return;
-    const recruitNode = currentNode as RecruitNode;
+      const currentNode = getCurrentNode(runState);
+      if (!currentNode || currentNode.type !== "recruit") return;
+      const recruitNode = currentNode as RecruitNode;
 
-    const fighter = runState.party[partyIndex];
-    const recruitLevel = getRecruitLevel(runState);
-    const recruitMon = createRecruitPokemon(recruitNode.pokemonId, recruitLevel);
+      const fighter = runState.party[partyIndex];
+      const recruitLevel = getRecruitLevel(runState);
+      const recruitMon = createRecruitPokemon(
+        recruitNode.pokemonId,
+        recruitLevel,
+      );
 
-    // Build enemy data at recruit level with proper HP and deck
-    const enemyData = getPokemon(recruitMon.formId);
-    const enemyWithHp = {
-      ...enemyData,
-      maxHp: recruitMon.maxHp,
-      deck: [...recruitMon.deck],
-    };
+      // Build enemy data at recruit level with proper HP and deck
+      const enemyData = getPokemon(recruitMon.formId);
+      const enemyWithHp = {
+        ...enemyData,
+        maxHp: recruitMon.maxHp,
+        deck: [...recruitMon.deck],
+      };
 
-    // Start 1v1 battle: fighter vs wild Pokemon (with passives from progression tree)
-    const fighterData = getRunPokemonData(fighter);
-    battle.startConfiguredBattle(
-      [fighterData],
-      [enemyWithHp],
-      [fighter.position],
-      [{ row: 'front', column: 1 }],
-      new Map([[0, fighter.passiveIds]]),
-      new Map([[0, recruitMon.passiveIds]]),
-      new Map([['player-0', { maxHp: fighter.maxHp, startPercent: fighter.currentHp / fighter.maxHp }]])
-    );
+      // Start 1v1 battle: fighter vs wild Pokemon (with passives from progression tree)
+      const fighterData = getRunPokemonData(fighter);
+      battle.startConfiguredBattle(
+        [fighterData],
+        [enemyWithHp],
+        [fighter.position],
+        [{ row: "front", column: 1 }],
+        new Map([[0, fighter.passiveIds]]),
+        new Map([[0, recruitMon.passiveIds]]),
+        new Map([
+          [
+            "player-0",
+            {
+              maxHp: fighter.maxHp,
+              startPercent: fighter.currentHp / fighter.maxHp,
+            },
+          ],
+        ]),
+      );
 
-    setIsRecruitBattle(true);
-    setRecruitFighterIndex(partyIndex);
-    setRecruitBattleResult('pending');
-    setScreen('battle');
-  }, [runState, battle]);
+      setIsRecruitBattle(true);
+      setRecruitFighterIndex(partyIndex);
+      setRecruitBattleResult("pending");
+      setScreen("battle");
+    },
+    [runState, battle],
+  );
 
   // Handle recruit confirm (add to bench)
   const handleRecruitConfirm = useCallback(() => {
     if (!runState) return;
 
     const currentNode = getCurrentNode(runState);
-    if (!currentNode || currentNode.type !== 'recruit') return;
+    if (!currentNode || currentNode.type !== "recruit") return;
     const recruitNode = currentNode as RecruitNode;
 
     const level = getRecruitLevel(runState);
-    const matchingExp = Math.min(...runState.party.map(p => p.exp));
-    const newPokemon = createRecruitPokemon(recruitNode.pokemonId, level, matchingExp);
+    const matchingExp = Math.min(...runState.party.map((p) => p.exp));
+    const newPokemon = createRecruitPokemon(
+      recruitNode.pokemonId,
+      level,
+      matchingExp,
+    );
     let newRun = recruitToRoster(runState, newPokemon);
 
     // Mark the node as recruited
     newRun = {
       ...newRun,
-      nodes: newRun.nodes.map(n =>
-        n.id === recruitNode.id && n.type === 'recruit'
+      nodes: newRun.nodes.map((n) =>
+        n.id === recruitNode.id && n.type === "recruit"
           ? { ...n, recruited: true }
-          : n
+          : n,
       ),
     };
 
     setRunState(newRun);
     setRecruitBattleResult(null);
     setRecruitFighterIndex(null);
-    setScreen('map');
+    setScreen("map");
   }, [runState]);
 
   // Handle recruit decline (skip recruitment, back to map)
   const handleRecruitDecline = useCallback(() => {
     setRecruitBattleResult(null);
     setRecruitFighterIndex(null);
-    setScreen('map');
+    setScreen("map");
   }, []);
 
   // Return to main menu (preserves save)
   const handleMainMenu = useCallback(() => {
-    setScreen('main_menu');
+    setScreen("main_menu");
     setHasSavedGame(!!runState);
   }, [runState]);
 
   // Handle ghost revive (after chasm battle)
-  const handleGhostRevive = useCallback((graveyardIndex: number) => {
-    if (!runState) return;
-    const newRun = reviveFromGraveyard(runState, graveyardIndex, 0.5);
-    setRunState(newRun);
-    setScreen('map');
-  }, [runState]);
+  const handleGhostRevive = useCallback(
+    (graveyardIndex: number) => {
+      if (!runState) return;
+      const newRun = reviveFromGraveyard(runState, graveyardIndex, 0.5);
+      setRunState(newRun);
+      setScreen("map");
+    },
+    [runState],
+  );
 
   const handleGhostReviveSkip = useCallback(() => {
-    setScreen('map');
+    setScreen("map");
   }, []);
 
   // Abandon run and return to main menu (clears save)
@@ -521,12 +690,12 @@ export default function App() {
     clearSave();
     setHasSavedGame(false);
     setRunState(null);
-    setScreen('main_menu');
+    setScreen("main_menu");
   }, []);
 
   // Go to sandbox configuration screen
   const handleGoToSandbox = useCallback(() => {
-    setScreen('sandbox_config');
+    setScreen("sandbox_config");
   }, []);
 
   // Start a test run at Act 2 with a leveled party
@@ -534,7 +703,7 @@ export default function App() {
     clearSave();
     const run = createAct2TestState();
     setRunState(run);
-    setScreen('map');
+    setScreen("map");
   }, []);
 
   // Start a test run at Act 3 with a leveled party
@@ -542,78 +711,114 @@ export default function App() {
     clearSave();
     const run = createAct3TestState();
     setRunState(run);
-    setScreen('map');
+    setScreen("map");
   }, []);
 
-  // Boss test shortcuts
+  // Boss test shortcuts (map-based — drop before boss node)
   const handleTestAct1Boss = useCallback(() => {
     clearSave();
     const run = createAct1BossTestState();
     setRunState(run);
-    setScreen('map');
+    setScreen("map");
   }, []);
 
   const handleTestAct2Boss = useCallback(() => {
     clearSave();
     const run = createAct2BossTestState();
     setRunState(run);
-    setScreen('map');
+    setScreen("map");
   }, []);
 
   const handleTestAct3Boss = useCallback(() => {
     clearSave();
     const run = createAct3BossTestState();
     setRunState(run);
-    setScreen('map');
+    setScreen("map");
   }, []);
 
+  // Jump straight to a boss fight from Event Tester
+  const handleStartBossBattle = useCallback(
+    (act: 1 | 2 | 3) => {
+      clearSave();
+      const run =
+        act === 1
+          ? createAct1BossTestState()
+          : act === 2
+            ? createAct2TestState()
+            : createAct3TestState();
+      const { bossNodeId } = getActMapConfig(act);
+      const bossNode = run.nodes.find(
+        (n) => n.id === bossNodeId && n.type === "battle",
+      );
+      if (!bossNode) return;
+      setRunState(run);
+      battle.startBattleFromRun(run, bossNode as BattleNode);
+      setPendingBattleNodeId(bossNodeId);
+      setScreen("battle");
+    },
+    [battle],
+  );
+
   // Start a configured sandbox battle
-  const handleStartSandboxBattle = useCallback((
-    players: PokemonData[],
-    enemies: PokemonData[],
-    playerPositions: Position[],
-    enemyPositions: Position[],
-    playerPassives: Map<number, string[]>,
-    enemyPassives: Map<number, string[]>,
-    hpOverrides: Map<string, { maxHp?: number; startPercent?: number }>
-  ) => {
-    battle.startConfiguredBattle(
-      players, enemies, playerPositions, enemyPositions,
-      playerPassives, enemyPassives, hpOverrides
-    );
-    setIsSandboxBattle(true);
-    setScreen('battle');
-  }, [battle]);
+  const handleStartSandboxBattle = useCallback(
+    (
+      players: PokemonData[],
+      enemies: PokemonData[],
+      playerPositions: Position[],
+      enemyPositions: Position[],
+      playerPassives: Map<number, string[]>,
+      enemyPassives: Map<number, string[]>,
+      hpOverrides: Map<string, { maxHp?: number; startPercent?: number }>,
+    ) => {
+      battle.startConfiguredBattle(
+        players,
+        enemies,
+        playerPositions,
+        enemyPositions,
+        playerPassives,
+        enemyPassives,
+        hpOverrides,
+      );
+      setIsSandboxBattle(true);
+      setScreen("battle");
+    },
+    [battle],
+  );
 
   // Go back to sandbox config (from sandbox battle)
   const handleBackToSandboxConfig = useCallback(() => {
     setIsSandboxBattle(false);
-    setScreen('sandbox_config');
+    setScreen("sandbox_config");
   }, []);
 
   // Update sandbox config state (called by SandboxConfigScreen)
-  const handleSandboxConfigChange = useCallback((playerTeam: SandboxPokemon[], enemyTeam: SandboxPokemon[]) => {
-    setSandboxPlayerTeam(playerTeam);
-    setSandboxEnemyTeam(enemyTeam);
-  }, []);
+  const handleSandboxConfigChange = useCallback(
+    (playerTeam: SandboxPokemon[], enemyTeam: SandboxPokemon[]) => {
+      setSandboxPlayerTeam(playerTeam);
+      setSandboxEnemyTeam(enemyTeam);
+    },
+    [],
+  );
 
   // Render based on current screen
-  if (screen === 'main_menu') {
+  if (screen === "main_menu") {
     // Stagger index for entrance animations (Continue button shifts indices)
     let menuIdx = 0;
 
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 24,
-        padding: 32,
-        color: THEME.text.primary,
-        minHeight: '100dvh',
-        position: 'relative',
-      }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 24,
+          padding: 32,
+          color: THEME.text.primary,
+          minHeight: "100dvh",
+          position: "relative",
+        }}
+      >
         <AmbientBackground />
 
         {/* Title — fades in and drifts up */}
@@ -621,12 +826,13 @@ export default function App() {
           className="menu-title"
           style={{
             fontSize: 68,
-            fontWeight: 'bold',
+            fontWeight: "bold",
             color: THEME.accent,
-            textShadow: '0 0 30px rgba(250, 204, 21, 0.4), 0 0 60px rgba(250, 204, 21, 0.15)',
+            textShadow:
+              "0 0 30px rgba(250, 204, 21, 0.4), 0 0 60px rgba(250, 204, 21, 0.15)",
             ...THEME.heading,
-            letterSpacing: '0.2em',
-            position: 'relative',
+            letterSpacing: "0.2em",
+            position: "relative",
             zIndex: 1,
           }}
         >
@@ -634,36 +840,41 @@ export default function App() {
         </div>
 
         {/* Flourish — fades in after title */}
-        <div className="menu-flourish" style={{ position: 'relative', zIndex: 1 }}>
+        <div
+          className="menu-flourish"
+          style={{ position: "relative", zIndex: 1 }}
+        >
           <Flourish variant="divider" width={240} color={THEME.text.tertiary} />
         </div>
 
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 4,
-          marginTop: 16,
-          position: 'relative',
-          zIndex: 1,
-        }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 4,
+            marginTop: 16,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
           {/* Continue Run — breathing glow */}
           {hasSavedGame && (
             <button
               className={`menu-item menu-item-continue`}
               onClick={handleContinue}
               style={{
-                padding: '12px 0',
+                padding: "12px 0",
                 fontSize: 22,
-                fontWeight: 'bold',
-                border: 'none',
-                background: 'transparent',
-                color: '#22c55e',
-                cursor: 'pointer',
-                letterSpacing: '0.08em',
-                position: 'relative',
+                fontWeight: "bold",
+                border: "none",
+                background: "transparent",
+                color: "#22c55e",
+                cursor: "pointer",
+                letterSpacing: "0.08em",
+                position: "relative",
                 marginBottom: 8,
-                animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+                animationDelay: `${menuIdx++ * 50 + 250}ms`,
               }}
             >
               Continue Run
@@ -674,120 +885,127 @@ export default function App() {
             onClick={() => {
               clearSave();
               setHasSavedGame(false);
-              setScreen('select');
+              setScreen("select");
             }}
             style={{
-              padding: '12px 0',
+              padding: "12px 0",
               fontSize: 22,
-              fontWeight: 'bold',
-              border: 'none',
-              background: 'transparent',
+              fontWeight: "bold",
+              border: "none",
+              background: "transparent",
               color: THEME.text.primary,
-              cursor: 'pointer',
-              letterSpacing: '0.08em',
-              position: 'relative',
-              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+              cursor: "pointer",
+              letterSpacing: "0.08em",
+              position: "relative",
+              animationDelay: `${menuIdx++ * 50 + 250}ms`,
             }}
           >
-            {hasSavedGame ? 'New Run' : 'Campaign'}
+            {hasSavedGame ? "New Run" : "Campaign"}
           </button>
           <button
             className="menu-item"
             onClick={handleGoToSandbox}
             style={{
-              padding: '12px 0',
+              padding: "12px 0",
               fontSize: 22,
-              fontWeight: 'bold',
-              border: 'none',
-              background: 'transparent',
+              fontWeight: "bold",
+              border: "none",
+              background: "transparent",
               color: THEME.text.primary,
-              cursor: 'pointer',
-              letterSpacing: '0.08em',
-              position: 'relative',
-              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+              cursor: "pointer",
+              letterSpacing: "0.08em",
+              position: "relative",
+              animationDelay: `${menuIdx++ * 50 + 250}ms`,
             }}
           >
             Sandbox
           </button>
 
           {/* Separator between play and browse */}
-          <div className="menu-flourish-sep" style={{
-            margin: '8px 0',
-            animationDelay: `${(menuIdx) * 50 + 250}ms`,
-          }}>
-            <Flourish variant="heading" width={120} color={THEME.text.tertiary} />
+          <div
+            className="menu-flourish-sep"
+            style={{
+              margin: "8px 0",
+              animationDelay: `${menuIdx * 50 + 250}ms`,
+            }}
+          >
+            <Flourish
+              variant="heading"
+              width={120}
+              color={THEME.text.tertiary}
+            />
           </div>
 
           <button
             className="menu-item menu-item-secondary"
-            onClick={() => setScreen('pokedex')}
+            onClick={() => setScreen("pokedex")}
             style={{
-              padding: '10px 0',
+              padding: "10px 0",
               fontSize: 18,
-              fontWeight: 'bold',
-              border: 'none',
-              background: 'transparent',
+              fontWeight: "bold",
+              border: "none",
+              background: "transparent",
               color: THEME.text.secondary,
-              cursor: 'pointer',
-              letterSpacing: '0.08em',
-              position: 'relative',
-              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+              cursor: "pointer",
+              letterSpacing: "0.08em",
+              position: "relative",
+              animationDelay: `${menuIdx++ * 50 + 250}ms`,
             }}
           >
             PokeDex
           </button>
           <button
             className="menu-item menu-item-secondary"
-            onClick={() => setScreen('card_dex')}
+            onClick={() => setScreen("card_dex")}
             style={{
-              padding: '10px 0',
+              padding: "10px 0",
               fontSize: 18,
-              fontWeight: 'bold',
-              border: 'none',
-              background: 'transparent',
+              fontWeight: "bold",
+              border: "none",
+              background: "transparent",
               color: THEME.text.secondary,
-              cursor: 'pointer',
-              letterSpacing: '0.08em',
-              position: 'relative',
-              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+              cursor: "pointer",
+              letterSpacing: "0.08em",
+              position: "relative",
+              animationDelay: `${menuIdx++ * 50 + 250}ms`,
             }}
           >
             Card Dex
           </button>
           <button
             className="menu-item menu-item-tertiary"
-            onClick={() => setScreen('disclaimer')}
+            onClick={() => setScreen("disclaimer")}
             style={{
-              padding: '8px 0',
+              padding: "8px 0",
               fontSize: 14,
-              fontWeight: 'bold',
-              border: 'none',
-              background: 'transparent',
+              fontWeight: "bold",
+              border: "none",
+              background: "transparent",
               color: THEME.text.tertiary,
-              cursor: 'pointer',
-              letterSpacing: '0.08em',
-              position: 'relative',
+              cursor: "pointer",
+              letterSpacing: "0.08em",
+              position: "relative",
               marginTop: 8,
-              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+              animationDelay: `${menuIdx++ * 50 + 250}ms`,
             }}
           >
-            Disclaimer
+            Disclaimer & Credits
           </button>
           <button
             className="menu-item menu-item-tertiary"
-            onClick={() => setScreen('debugging')}
+            onClick={() => setScreen("debugging")}
             style={{
-              padding: '8px 0',
+              padding: "8px 0",
               fontSize: 14,
-              fontWeight: 'bold',
-              border: 'none',
-              background: 'transparent',
+              fontWeight: "bold",
+              border: "none",
+              background: "transparent",
               color: THEME.text.tertiary,
-              cursor: 'pointer',
-              letterSpacing: '0.08em',
-              position: 'relative',
+              cursor: "pointer",
+              letterSpacing: "0.08em",
+              position: "relative",
               opacity: 0.6,
-              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+              animationDelay: `${menuIdx++ * 50 + 250}ms`,
             }}
           >
             Debugging
@@ -915,139 +1133,279 @@ export default function App() {
     );
   }
 
-  if (screen === 'card_dex') {
-    return <CardDexScreen onBack={() => setScreen('main_menu')} />;
+  if (screen === "card_dex") {
+    return (
+      <Suspense
+        fallback={
+          <div
+            style={{
+              height: "100dvh",
+              background: THEME.bg.base,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Loading...
+          </div>
+        }
+      >
+        <CardDexScreen onBack={() => setScreen("main_menu")} />
+      </Suspense>
+    );
   }
 
-  if (screen === 'pokedex') {
-    return <PokeDexScreen onBack={() => setScreen('main_menu')} />;
+  if (screen === "pokedex") {
+    return (
+      <Suspense
+        fallback={
+          <div
+            style={{
+              height: "100dvh",
+              background: THEME.bg.base,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Loading...
+          </div>
+        }
+      >
+        <PokeDexScreen onBack={() => setScreen("main_menu")} />
+      </Suspense>
+    );
   }
 
-  if (screen === 'debugging') {
+  if (screen === "debugging") {
     const devBtnStyle = {
-      padding: '12px 20px',
+      padding: "12px 20px",
       fontSize: 14,
-      fontWeight: 'bold' as const,
+      fontWeight: "bold" as const,
       border: `1px solid ${THEME.border.subtle}`,
       borderRadius: 8,
       background: THEME.bg.card,
       color: THEME.text.secondary,
-      cursor: 'pointer',
-      letterSpacing: '0.06em',
-      width: '100%',
+      cursor: "pointer",
+      letterSpacing: "0.06em",
+      width: "100%",
     };
     return (
       <ScreenShell
         ambient
         header={
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '14px 24px',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "14px 24px",
             borderBottom: `1px solid ${THEME.border.subtle}`,
           }}>
             <button
-              onClick={() => setScreen('main_menu')}
-              style={{ padding: '8px 16px', ...THEME.button.secondary, fontSize: 13 }}
+              onClick={() => setScreen("main_menu")}
+              style={{ padding: "8px 16px", ...THEME.button.secondary, fontSize: 13 }}
             >
               Back
             </button>
-            <span style={{ color: THEME.text.primary, fontWeight: 'bold', fontSize: 16, letterSpacing: '0.08em' }}>
+            <span style={{ color: THEME.text.primary, fontWeight: "bold", fontSize: 16, letterSpacing: "0.08em" }}>
               Debugging
             </span>
             <div style={{ width: 60 }} />
           </div>
         }
-        bodyStyle={{ padding: '24px 16px 48px' }}
+        bodyStyle={{ padding: "24px 16px 48px" }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 360, margin: '0 auto' }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 360, margin: "0 auto" }}>
           <button onClick={handleTestAct2} style={devBtnStyle}>Test Act 2</button>
           <button onClick={handleTestAct3} style={devBtnStyle}>Test Act 3</button>
           <button onClick={handleTestAct1Boss} style={devBtnStyle}>Test Act 1 Boss</button>
           <button onClick={handleTestAct2Boss} style={devBtnStyle}>Test Act 2 Boss</button>
           <button onClick={handleTestAct3Boss} style={devBtnStyle}>Test Act 3 Boss</button>
-          <button onClick={() => setScreen('event_tester')} style={devBtnStyle}>Event Tester</button>
+          <button onClick={() => setScreen("event_tester")} style={devBtnStyle}>Event Tester</button>
         </div>
       </ScreenShell>
     );
   }
 
-  if (screen === 'disclaimer') {
+  if (screen === "disclaimer") {
     return (
       <ScreenShell
         ambient
         header={
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '14px 24px',
-            borderBottom: `1px solid ${THEME.border.subtle}`,
-          }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "14px 24px",
+              borderBottom: `1px solid ${THEME.border.subtle}`,
+            }}
+          >
             <button
-              onClick={() => setScreen('main_menu')}
-              style={{ padding: '8px 16px', ...THEME.button.secondary, fontSize: 13 }}
+              onClick={() => setScreen("main_menu")}
+              style={{
+                padding: "8px 16px",
+                ...THEME.button.secondary,
+                fontSize: 13,
+              }}
             >
               &larr; Back
             </button>
-            <h1 style={{ margin: 0, color: THEME.accent, fontSize: 22, ...THEME.heading }}>
+            <h1
+              style={{
+                margin: 0,
+                color: THEME.accent,
+                fontSize: 22,
+                ...THEME.heading,
+              }}
+            >
               Disclaimer
             </h1>
             <div style={{ width: 80 }} />
           </div>
         }
       >
-        <div style={{ maxWidth: 680, margin: '0 auto', padding: '28px 24px 64px' }}>
+        <div
+          style={{ maxWidth: 680, margin: "0 auto", padding: "28px 24px 64px" }}
+        >
           <DexFrame>
-            <div className="disc-content" style={{
-              padding: '28px 32px 36px',
-              lineHeight: 1.7,
-              color: THEME.text.secondary,
-              fontSize: 14,
-            }}>
+            <div
+              className="disc-content"
+              style={{
+                padding: "28px 32px 36px",
+                lineHeight: 1.7,
+                color: THEME.text.secondary,
+                fontSize: 14,
+              }}
+            >
               <DisclaimerSection title="Fan Project Notice" first>
-                Pokespire is an unofficial, non-commercial fan project created for educational
-                and entertainment purposes only. It is not affiliated with, endorsed by, sponsored by,
-                or in any way officially connected to Nintendo, The Pokemon Company, Game Freak,
-                or Creatures Inc.
+                Pokespire is an unofficial, non-commercial fan project created
+                for educational and entertainment purposes only. It is not
+                affiliated with, endorsed by, sponsored by, or in any way
+                officially connected to Nintendo, The Pokemon Company, Game
+                Freak, or Creatures Inc.
               </DisclaimerSection>
 
               <DisclaimerSection title="Intellectual Property">
-                <p style={{ margin: '0 0 8px' }}>
-                  Pokemon, the Pokemon logo, and all related character names, artwork, and trademarks
-                  are the intellectual property of Nintendo, The Pokemon Company, Game Freak, and
-                  Creatures Inc. All rights to these properties are reserved by their respective owners.
+                <p style={{ margin: "0 0 8px" }}>
+                  Pokemon, the Pokemon logo, and all related character names,
+                  artwork, and trademarks are the intellectual property of
+                  Nintendo, The Pokemon Company, Game Freak, and Creatures Inc.
+                  All rights to these properties are reserved by their
+                  respective owners.
                 </p>
                 <p style={{ margin: 0 }}>
-                  This project uses Pokemon names, types, move names, and game mechanics as references
-                  to create a fan-made experience. No copyright or trademark infringement is intended.
+                  This project uses Pokemon names, types, move names, and game
+                  mechanics as references to create a fan-made experience. No
+                  copyright or trademark infringement is intended.
                 </p>
               </DisclaimerSection>
 
               <DisclaimerSection title="Non-Commercial Use">
-                This project is provided entirely free of charge. It is not sold, licensed, or
-                monetized in any form. No donations, subscriptions, or payments of any kind are
-                accepted. The source code is made available solely for educational and personal use.
+                This project is provided entirely free of charge. It is not
+                sold, licensed, or monetized in any form. No donations,
+                subscriptions, or payments of any kind are accepted. The source
+                code is made available solely for educational and personal use.
               </DisclaimerSection>
 
               <DisclaimerSection title="No Distribution of Copyrighted Assets">
-                This project does not distribute, bundle, or host any copyrighted artwork, sprites,
-                music, or other media assets owned by the rights holders. Any visual or audio assets
-                used are either original creations or sourced from publicly available community
-                resources under applicable fair-use terms.
+                This project does not distribute, bundle, or host any
+                copyrighted artwork, sprites, music, or other media assets owned
+                by the rights holders. Any visual or audio assets used are
+                either original creations or sourced from publicly available
+                community resources under applicable fair-use terms.
               </DisclaimerSection>
 
               <DisclaimerSection title="Disclaimer of Liability">
-                This project is provided &ldquo;as is&rdquo; without warranty of any kind, express or implied.
-                The authors assume no responsibility or liability for any consequences arising from
+                This project is provided &ldquo;as is&rdquo; without warranty of
+                any kind, express or implied. The authors assume no
+                responsibility or liability for any consequences arising from
                 the use or misuse of this project.
               </DisclaimerSection>
 
               <DisclaimerSection title="Takedown" last>
-                If any rights holder has concerns about this project, please open an issue on
-                the repository or contact the maintainer directly. The project will be modified
-                or removed promptly upon request.
+                If any rights holder has concerns about this project, please
+                open an issue on the repository or contact the maintainer
+                directly. The project will be modified or removed promptly upon
+                request.
+              </DisclaimerSection>
+
+              <DisclaimerSection title="Credits">
+                <p style={{ margin: "0 0 12px" }}>
+                  Background music by{" "}
+                  <a
+                    href="https://soundcloud.com/glitchxcity/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: THEME.accent }}
+                  >
+                    GlitchxCity
+                  </a>
+                  .
+                </p>
+                <p style={{ margin: "0 0 8px" }}>Sound effects by:</p>
+                <ul style={{ margin: "0 0 0 20px", padding: 0 }}>
+                  <li style={{ marginBottom: 4 }}>
+                    <a
+                      href="https://pixabay.com/users/freesound_community-46691455/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: THEME.accent }}
+                    >
+                      freesound community
+                    </a>
+                  </li>
+                  <li style={{ marginBottom: 4 }}>
+                    <a
+                      href="https://pixabay.com/users/astralsynthesizer-50776509/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: THEME.accent }}
+                    >
+                      AstralSynthesizer
+                    </a>
+                  </li>
+                  <li style={{ marginBottom: 4 }}>
+                    <a
+                      href="https://pixabay.com/users/universfield-28281460/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: THEME.accent }}
+                    >
+                      Universfield
+                    </a>
+                  </li>
+                  <li style={{ marginBottom: 4 }}>
+                    <a
+                      href="https://pixabay.com/users/scratchonix-50592769/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: THEME.accent }}
+                    >
+                      Scratchonix
+                    </a>
+                  </li>
+                  <li style={{ marginBottom: 4 }}>
+                    <a
+                      href="https://pixabay.com/users/edimar_ramide-50233661/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: THEME.accent }}
+                    >
+                      Edimar Ramide
+                    </a>
+                  </li>
+                  <li style={{ marginBottom: 4 }}>
+                    <a
+                      href="https://pixabay.com/users/yo-tu-45000291/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: THEME.accent }}
+                    >
+                      Yo-Tu
+                    </a>
+                  </li>
+                </ul>
               </DisclaimerSection>
             </div>
           </DexFrame>
@@ -1067,23 +1425,41 @@ export default function App() {
     );
   }
 
-  if (screen === 'sandbox_config') {
+  if (screen === "sandbox_config") {
     return (
-      <SandboxConfigScreen
-        onStartBattle={handleStartSandboxBattle}
-        onBack={() => setScreen('main_menu')}
-        initialPlayerTeam={sandboxPlayerTeam}
-        initialEnemyTeam={sandboxEnemyTeam}
-        onConfigChange={handleSandboxConfigChange}
-      />
+      <Suspense
+        fallback={
+          <div
+            style={{
+              height: "100dvh",
+              background: THEME.bg.base,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Loading...
+          </div>
+        }
+      >
+        <SandboxConfigScreen
+          onStartBattle={handleStartSandboxBattle}
+          onBack={() => setScreen("main_menu")}
+          initialPlayerTeam={sandboxPlayerTeam}
+          initialEnemyTeam={sandboxEnemyTeam}
+          onConfigChange={handleSandboxConfigChange}
+        />
+      </Suspense>
     );
   }
 
-if (screen === 'select') {
-    return <PartySelectScreen onStart={handleStart} onRestart={handleRestart} />;
+  if (screen === "select") {
+    return (
+      <PartySelectScreen onStart={handleStart} onRestart={handleRestart} />
+    );
   }
 
-  if (screen === 'map' && runState) {
+  if (screen === "map" && runState) {
     return (
       <MapScreen
         run={runState}
@@ -1099,7 +1475,7 @@ if (screen === 'select') {
     );
   }
 
-  if (screen === 'rest' && runState) {
+  if (screen === "rest" && runState) {
     return (
       <RestScreen
         run={runState}
@@ -1109,9 +1485,12 @@ if (screen === 'select') {
     );
   }
 
-  if (screen === 'event' && runState) {
+  if (screen === "event" && runState) {
     const currentNode = getCurrentNode(runState);
-    const eventId = currentNode?.type === 'event' ? (currentNode as EventNode).eventId : 'training_camp';
+    const eventId =
+      currentNode?.type === "event"
+        ? (currentNode as EventNode).eventId
+        : "training_camp";
     return (
       <EventScreen
         run={runState}
@@ -1122,11 +1501,32 @@ if (screen === 'select') {
     );
   }
 
-  if (screen === 'event_tester') {
-    return <EventTesterScreen onBack={() => setScreen('main_menu')} />;
+  if (screen === "event_tester") {
+    return (
+      <Suspense
+        fallback={
+          <div
+            style={{
+              height: "100dvh",
+              background: THEME.bg.base,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Loading...
+          </div>
+        }
+      >
+        <EventTesterScreen
+              onBack={() => setScreen("main_menu")}
+              onStartBossBattle={handleStartBossBattle}
+            />
+      </Suspense>
+    );
   }
 
-  if (screen === 'ghost_revive' && runState) {
+  if (screen === "ghost_revive" && runState) {
     return (
       <GhostReviveScreen
         run={runState}
@@ -1136,9 +1536,9 @@ if (screen === 'select') {
     );
   }
 
-  if (screen === 'recruit' && runState) {
+  if (screen === "recruit" && runState) {
     const currentNode = getCurrentNode(runState);
-    if (currentNode?.type === 'recruit') {
+    if (currentNode?.type === "recruit") {
       return (
         <RecruitScreen
           run={runState}
@@ -1152,11 +1552,11 @@ if (screen === 'select') {
       );
     }
     // Fallback to map if node not found
-    setScreen('map');
+    setScreen("map");
     return null;
   }
 
-  if (screen === 'card_draft' && runState) {
+  if (screen === "card_draft" && runState) {
     return (
       <CardDraftScreen
         run={runState}
@@ -1167,7 +1567,7 @@ if (screen === 'select') {
     );
   }
 
-  if (screen === 'battle' && battle.state) {
+  if (screen === "battle" && battle.state) {
     return (
       <BattleScreen
         state={battle.state}
@@ -1182,12 +1582,14 @@ if (screen === 'select') {
         onRestart={handleMainMenu}
         onBattleEnd={handleBattleEnd}
         runState={runState ?? undefined}
-        onBackToSandboxConfig={isSandboxBattle ? handleBackToSandboxConfig : undefined}
+        onBackToSandboxConfig={
+          isSandboxBattle ? handleBackToSandboxConfig : undefined
+        }
       />
     );
   }
 
-  if (screen === 'act_transition' && runState) {
+  if (screen === "act_transition" && runState) {
     return (
       <ActTransitionScreen
         run={runState}
@@ -1197,7 +1599,7 @@ if (screen === 'select') {
     );
   }
 
-  if (screen === 'card_removal' && runState) {
+  if (screen === "card_removal" && runState) {
     const cardRemovalNode = getCurrentCardRemovalNode(runState);
     if (cardRemovalNode) {
       return (
@@ -1211,54 +1613,60 @@ if (screen === 'select') {
       );
     }
     // Fallback to map if node not found
-    setScreen('map');
+    setScreen("map");
     return null;
   }
 
-  if (screen === 'run_victory' && runState) {
+  if (screen === "run_victory" && runState) {
     return <RunVictoryScreen run={runState} onNewRun={handleRestart} />;
   }
 
-  if (screen === 'run_defeat') {
+  if (screen === "run_defeat") {
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 32,
-        padding: 32,
-        color: THEME.text.primary,
-        minHeight: '100dvh',
-        background: THEME.bg.base,
-      }}>
-        <div style={{
-          fontSize: 64,
-          fontWeight: 'bold',
-          color: '#ef4444',
-          letterSpacing: THEME.heading.letterSpacing,
-        }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 32,
+          padding: 32,
+          color: THEME.text.primary,
+          minHeight: "100dvh",
+          background: THEME.bg.base,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 64,
+            fontWeight: "bold",
+            color: "#ef4444",
+            letterSpacing: THEME.heading.letterSpacing,
+          }}
+        >
           RUN OVER
         </div>
         <Flourish variant="heading" color="#ef4444" />
-        <div style={{
-          fontSize: 24,
-          color: THEME.text.secondary,
-          textAlign: 'center',
-        }}>
+        <div
+          style={{
+            fontSize: 24,
+            color: THEME.text.secondary,
+            textAlign: "center",
+          }}
+        >
           Your party was defeated...
         </div>
         <button
           onClick={handleRestart}
           style={{
-            padding: '16px 48px',
+            padding: "16px 48px",
             fontSize: 18,
-            fontWeight: 'bold',
+            fontWeight: "bold",
             borderRadius: 8,
-            border: 'none',
+            border: "none",
             background: THEME.accent,
-            color: '#000',
-            cursor: 'pointer',
+            color: "#000",
+            cursor: "pointer",
           }}
         >
           Try Again
@@ -1271,17 +1679,19 @@ if (screen === 'select') {
   const debugState = {
     screen,
     hasRunState: runState !== null,
-    runState: runState ? {
-      currentAct: runState.currentAct,
-      currentNodeId: runState.currentNodeId,
-      partySize: runState.party.length,
-      party: runState.party.map(p => ({
-        formId: p.formId,
-        currentHp: p.currentHp,
-        maxHp: p.maxHp,
-        knockedOut: p.knockedOut,
-      })),
-    } : null,
+    runState: runState
+      ? {
+          currentAct: runState.currentAct,
+          currentNodeId: runState.currentNodeId,
+          partySize: runState.party.length,
+          party: runState.party.map((p) => ({
+            formId: p.formId,
+            currentHp: p.currentHp,
+            maxHp: p.maxHp,
+            knockedOut: p.knockedOut,
+          })),
+        }
+      : null,
     hasBattleState: battle.state !== null,
     battlePhase: battle.phase,
     isSandboxBattle,
@@ -1294,60 +1704,69 @@ if (screen === 'select') {
       timestamp: new Date().toISOString(),
     };
     navigator.clipboard.writeText(JSON.stringify(fullDebug, null, 2));
-    alert('Debug info copied to clipboard!');
+    alert("Debug info copied to clipboard!");
   };
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 24,
-      padding: 32,
-      color: THEME.text.primary,
-      minHeight: '100dvh',
-      background: THEME.bg.base,
-    }}>
-      <div style={{
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#f59e0b',
-      }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 24,
+        padding: 32,
+        color: THEME.text.primary,
+        minHeight: "100dvh",
+        background: THEME.bg.base,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 32,
+          fontWeight: "bold",
+          color: "#f59e0b",
+        }}
+      >
         Unexpected State
       </div>
-      <div style={{
-        fontSize: 16,
-        color: THEME.text.secondary,
-        textAlign: 'center',
-        maxWidth: 500,
-      }}>
-        The game reached an unexpected state. This info can help debug the issue:
+      <div
+        style={{
+          fontSize: 16,
+          color: THEME.text.secondary,
+          textAlign: "center",
+          maxWidth: 500,
+        }}
+      >
+        The game reached an unexpected state. This info can help debug the
+        issue:
       </div>
-      <pre style={{
-        background: THEME.bg.panel,
-        padding: 16,
-        borderRadius: 8,
-        fontSize: 12,
-        color: '#a5f3fc',
-        maxWidth: '90vw',
-        overflow: 'auto',
-        maxHeight: 300,
-      }}>
+      <pre
+        style={{
+          background: THEME.bg.panel,
+          padding: 16,
+          borderRadius: 8,
+          fontSize: 12,
+          color: "#a5f3fc",
+          maxWidth: "90vw",
+          overflow: "auto",
+          maxHeight: 300,
+        }}
+      >
         {JSON.stringify(debugState, null, 2)}
       </pre>
-      <div style={{ display: 'flex', gap: 16 }}>
+      <div style={{ display: "flex", gap: 16 }}>
         <button
           onClick={copyDebugInfo}
           style={{
-            padding: '12px 24px',
+            padding: "12px 24px",
             fontSize: 16,
-            fontWeight: 'bold',
+            fontWeight: "bold",
             borderRadius: 8,
             border: `2px solid ${THEME.border.bright}`,
-            background: 'transparent',
+            background: "transparent",
             color: THEME.text.secondary,
-            cursor: 'pointer',
+            cursor: "pointer",
           }}
         >
           Copy Debug Info
@@ -1355,14 +1774,14 @@ if (screen === 'select') {
         <button
           onClick={handleRestart}
           style={{
-            padding: '12px 24px',
+            padding: "12px 24px",
             fontSize: 16,
-            fontWeight: 'bold',
+            fontWeight: "bold",
             borderRadius: 8,
-            border: 'none',
+            border: "none",
             background: THEME.accent,
-            color: '#000',
-            cursor: 'pointer',
+            color: "#000",
+            cursor: "pointer",
           }}
         >
           Return to Menu
@@ -1372,14 +1791,14 @@ if (screen === 'select') {
         <button
           onClick={handleContinue}
           style={{
-            padding: '12px 24px',
+            padding: "12px 24px",
             fontSize: 16,
-            fontWeight: 'bold',
+            fontWeight: "bold",
             borderRadius: 8,
-            border: '2px solid #22c55e',
-            background: 'transparent',
-            color: '#22c55e',
-            cursor: 'pointer',
+            border: "2px solid #22c55e",
+            background: "transparent",
+            color: "#22c55e",
+            cursor: "pointer",
           }}
         >
           Try to Recover from Save
@@ -1391,7 +1810,12 @@ if (screen === 'select') {
 
 // ── Disclaimer Section ──────────────────────────────────────────────
 
-function DisclaimerSection({ title, children, first, last }: {
+function DisclaimerSection({
+  title,
+  children,
+  first,
+  last,
+}: {
   title: string;
   children: React.ReactNode;
   first?: boolean;
@@ -1399,33 +1823,43 @@ function DisclaimerSection({ title, children, first, last }: {
 }) {
   return (
     <div style={{ marginBottom: last ? 0 : 20 }}>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-        marginBottom: 8,
-        ...(first ? {} : { marginTop: 20, paddingTop: 16, borderTop: `1px solid ${THEME.border.subtle}` }),
-      }}>
-        <div style={{
-          width: 4,
-          height: 4,
-          background: THEME.border.medium,
-          transform: 'rotate(45deg)',
-          flexShrink: 0,
-        }} />
-        <h2 style={{
-          margin: 0,
-          fontSize: 14,
-          color: THEME.text.primary,
-          ...THEME.heading,
-          letterSpacing: '0.08em',
-        }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 8,
+          ...(first
+            ? {}
+            : {
+                marginTop: 20,
+                paddingTop: 16,
+                borderTop: `1px solid ${THEME.border.subtle}`,
+              }),
+        }}
+      >
+        <div
+          style={{
+            width: 4,
+            height: 4,
+            background: THEME.border.medium,
+            transform: "rotate(45deg)",
+            flexShrink: 0,
+          }}
+        />
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 14,
+            color: THEME.text.primary,
+            ...THEME.heading,
+            letterSpacing: "0.08em",
+          }}
+        >
           {title}
         </h2>
       </div>
-      <div style={{ paddingLeft: 14 }}>
-        {children}
-      </div>
+      <div style={{ paddingLeft: 14 }}>{children}</div>
     </div>
   );
 }

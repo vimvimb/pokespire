@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { MapNodeIcon } from './MapNodeIcon';
 import { EventIcon } from '../EventIcon';
 
@@ -29,7 +30,7 @@ const STATE_COLORS: Record<NodeState, string> = {
  * Inspired by Hollow Knight map markers — a simple circle
  * with an irregular hand-drawn outer ring and subtle notch marks.
  */
-export function MapNode({
+function MapNodeInner({
   nodeType,
   position,
   state,
@@ -169,6 +170,8 @@ export function MapNode({
     </div>
   );
 }
+
+export const MapNode = memo(MapNodeInner);
 
 /**
  * Generate a slightly irregular circle path using cubic beziers.

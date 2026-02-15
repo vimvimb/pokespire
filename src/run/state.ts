@@ -256,6 +256,14 @@ function createTestPartyRun(gold: number): RunState {
   return applyFullHealAll(run);
 }
 
+/**
+ * Create a test run state for Act 1 with a leveled, healthy party.
+ * Used for dev testing (e.g. jumping to Ariana boss fight).
+ */
+export function createAct1BossTestState(): RunState {
+  return createTestPartyRun(150);
+}
+
 export function createAct2TestState(): RunState {
   const run = createTestPartyRun(300);
   return transitionToAct2(run);

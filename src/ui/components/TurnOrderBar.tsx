@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useCallback } from 'react';
+import { useRef, useLayoutEffect, useCallback, memo } from 'react';
 import type { CombatState } from '../../engine/types';
 import { getCombatant } from '../../engine/combat';
 import { getEffectiveSpeed } from '../../engine/status';
@@ -11,7 +11,7 @@ interface Props {
 // Duration of the shuffle animation in ms
 const ANIM_DURATION = 400;
 
-export function TurnOrderBar({ state }: Props) {
+function TurnOrderBarInner({ state }: Props) {
   // Track DOM elements by combatantId
   const entryRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   // Previous order snapshot (combatantIds in order)
@@ -30,6 +30,8 @@ export function TurnOrderBar({ state }: Props) {
   }, []);
 
   // FLIP: after React updates the DOM but before browser paints
+  const frameIdRef = useRef<number | null>(null);
+
   useLayoutEffect(() => {
     const currentOrder = state.turnOrder.map(e => e.combatantId);
     const prevOrder = prevOrderRef.current;
@@ -70,7 +72,7 @@ export function TurnOrderBar({ state }: Props) {
         }
 
         // FLIP Play: animate drop → slide → rise using rAF
-        requestAnimationFrame(() => {
+        const outerId = requestAnimationFrame(() => {
           const startTime = performance.now();
 
           const animate = (now: number) => {
@@ -97,9 +99,10 @@ export function TurnOrderBar({ state }: Props) {
             }
 
             if (t < 1) {
-              requestAnimationFrame(animate);
+              frameIdRef.current = requestAnimationFrame(animate);
             } else {
               // Clean up
+              frameIdRef.current = null;
               for (const { id, el } of movedEntries) {
                 el.style.transform = '';
                 el.style.transition = '';
@@ -108,8 +111,16 @@ export function TurnOrderBar({ state }: Props) {
             }
           };
 
-          requestAnimationFrame(animate);
+          frameIdRef.current = requestAnimationFrame(animate);
         });
+
+        return () => {
+          cancelAnimationFrame(outerId);
+          if (frameIdRef.current !== null) {
+            cancelAnimationFrame(frameIdRef.current);
+            frameIdRef.current = null;
+          }
+        };
       }
     }
 
@@ -188,3 +199,5 @@ export function TurnOrderBar({ state }: Props) {
     </div>
   );
 }
+
+export const TurnOrderBar = memo(TurnOrderBarInner);
