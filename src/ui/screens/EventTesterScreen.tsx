@@ -12,6 +12,7 @@ import { THEME } from '../theme';
 
 interface Props {
   onBack: () => void;
+  onStartBossBattle?: (act: 1 | 2 | 3) => void;
 }
 
 function createMockRunState(): RunState {
@@ -42,7 +43,7 @@ function createMockRunState(): RunState {
   return run;
 }
 
-export function EventTesterScreen({ onBack }: Props) {
+export function EventTesterScreen({ onBack, onStartBossBattle }: Props) {
   const [mockRun, setMockRun] = useState<RunState>(createMockRunState);
   const [selectedEvent, setSelectedEvent] = useState<EventDefinition | null>(null);
   const [lastResult, setLastResult] = useState<string | null>(null);
@@ -186,6 +187,53 @@ export function EventTesterScreen({ onBack }: Props) {
             whiteSpace: 'pre-line',
           }}>
             Last result: {lastResult}
+          </div>
+        )}
+
+        {/* Boss Fights */}
+        {onStartBossBattle && (
+          <div style={{ marginBottom: 24 }}>
+            <h2 style={{
+              fontSize: 18,
+              color: THEME.accent,
+              marginBottom: 12,
+              letterSpacing: THEME.heading.letterSpacing,
+              textTransform: THEME.heading.textTransform,
+            }}>
+              Boss Fights
+            </h2>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              {([1, 2, 3] as const).map(act => {
+                const bossNames = { 1: 'Ariana', 2: 'Giovanni', 3: 'Mewtwo' } as const;
+                const actColor = actColors[act];
+                return (
+                  <button
+                    key={act}
+                    onClick={() => onStartBossBattle(act)}
+                    style={{
+                      padding: '12px 20px',
+                      borderRadius: 8,
+                      border: `1px solid ${actColor}44`,
+                      background: THEME.bg.panel,
+                      color: THEME.text.primary,
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                      transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = actColor;
+                      e.currentTarget.style.boxShadow = `0 0 8px ${actColor}33`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = `${actColor}44`;
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  >
+                    Act {act} — {bossNames[act]}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 

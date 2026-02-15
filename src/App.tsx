@@ -59,6 +59,7 @@ import { getPokemon } from "./data/loaders";
 import { SHOP_ITEMS, CARD_FORGET_COST } from "./data/shop";
 import {
   createRunState,
+  createAct1BossTestState,
   createAct2TestState,
   createAct3TestState,
   applyPartyPercentHeal,
@@ -91,6 +92,7 @@ import {
   spendGold,
   reviveFromGraveyard,
 } from "./run/state";
+import { getActMapConfig } from "./ui/components/map/mapConfig";
 
 type Screen =
   | "main_menu"
@@ -707,6 +709,29 @@ export default function App() {
     setRunState(run);
     setScreen("map");
   }, []);
+
+  // Jump straight to a boss fight from Event Tester
+  const handleStartBossBattle = useCallback(
+    (act: 1 | 2 | 3) => {
+      clearSave();
+      const run =
+        act === 1
+          ? createAct1BossTestState()
+          : act === 2
+            ? createAct2TestState()
+            : createAct3TestState();
+      const { bossNodeId } = getActMapConfig(act);
+      const bossNode = run.nodes.find(
+        (n) => n.id === bossNodeId && n.type === "battle",
+      );
+      if (!bossNode) return;
+      setRunState(run);
+      battle.startBattleFromRun(run, bossNode as BattleNode);
+      setPendingBattleNodeId(bossNodeId);
+      setScreen("battle");
+    },
+    [battle],
+  );
 
   // Start a configured sandbox battle
   const handleStartSandboxBattle = useCallback(
@@ -1462,7 +1487,10 @@ export default function App() {
           </div>
         }
       >
-        <EventTesterScreen onBack={() => setScreen("main_menu")} />
+        <EventTesterScreen
+              onBack={() => setScreen("main_menu")}
+              onStartBossBattle={handleStartBossBattle}
+            />
       </Suspense>
     );
   }
