@@ -1,4 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  lazy,
+  Suspense,
+} from "react";
 import type { PokemonData, Position, Combatant } from "./engine/types";
 import { useBattle } from "./ui/hooks/useBattle";
 import { PartySelectScreen } from "./ui/screens/PartySelectScreen";
@@ -10,9 +17,7 @@ import { EventScreen } from "./ui/screens/EventScreen";
 import { RecruitScreen } from "./ui/screens/RecruitScreen";
 import { CardDraftScreen } from "./ui/screens/CardDraftScreen";
 import { RunVictoryScreen } from "./ui/screens/RunVictoryScreen";
-import { CardDexScreen } from "./ui/screens/CardDexScreen";
-import { PokeDexScreen } from "./ui/screens/PokeDexScreen";
-import { SandboxConfigScreen } from "./ui/screens/SandboxConfigScreen";
+import type { SandboxPokemon } from "./ui/screens/SandboxConfigScreen";
 import { ActTransitionScreen } from "./ui/screens/ActTransitionScreen";
 import { CardRemovalScreen } from "./ui/screens/CardRemovalScreen";
 import { Flourish } from "./ui/components/Flourish";
@@ -22,8 +27,26 @@ import { playMusic, getMusicForScreen } from "./ui/utils/music";
 import { ScreenShell } from "./ui/components/ScreenShell";
 import { DexFrame } from "./ui/components/DexFrame";
 import { THEME } from "./ui/theme";
-import type { SandboxPokemon } from "./ui/screens/SandboxConfigScreen";
-import { EventTesterScreen } from "./ui/screens/EventTesterScreen";
+const CardDexScreen = lazy(() =>
+  import("./ui/screens/CardDexScreen").then((m) => ({
+    default: m.CardDexScreen,
+  })),
+);
+const PokeDexScreen = lazy(() =>
+  import("./ui/screens/PokeDexScreen").then((m) => ({
+    default: m.PokeDexScreen,
+  })),
+);
+const SandboxConfigScreen = lazy(() =>
+  import("./ui/screens/SandboxConfigScreen").then((m) => ({
+    default: m.SandboxConfigScreen,
+  })),
+);
+const EventTesterScreen = lazy(() =>
+  import("./ui/screens/EventTesterScreen").then((m) => ({
+    default: m.EventTesterScreen,
+  })),
+);
 import { GhostReviveScreen } from "./ui/screens/GhostReviveScreen";
 import type {
   RunState,
@@ -162,10 +185,22 @@ export default function App() {
   );
   const battle = useBattle();
 
-  // Save game whenever screen or runState changes
+  const latestSaveRef = useRef({ screen, runState });
+
+  // Save game whenever screen or runState changes (debounced to avoid blocking on rapid updates)
   useEffect(() => {
-    saveGame(screen, runState);
+    latestSaveRef.current = { screen, runState };
+    const timer = setTimeout(() => saveGame(screen, runState), 2000);
+    return () => clearTimeout(timer);
   }, [screen, runState]);
+
+  // Flush on actual unmount only
+  useEffect(() => {
+    return () => {
+      const { screen: s, runState: r } = latestSaveRef.current;
+      saveGame(s, r);
+    };
+  }, []);
 
   // Play defeat sound when entering run_defeat screen
   useEffect(() => {
@@ -1093,11 +1128,47 @@ export default function App() {
   }
 
   if (screen === "card_dex") {
-    return <CardDexScreen onBack={() => setScreen("main_menu")} />;
+    return (
+      <Suspense
+        fallback={
+          <div
+            style={{
+              height: "100dvh",
+              background: THEME.bg.base,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Loading...
+          </div>
+        }
+      >
+        <CardDexScreen onBack={() => setScreen("main_menu")} />
+      </Suspense>
+    );
   }
 
   if (screen === "pokedex") {
-    return <PokeDexScreen onBack={() => setScreen("main_menu")} />;
+    return (
+      <Suspense
+        fallback={
+          <div
+            style={{
+              height: "100dvh",
+              background: THEME.bg.base,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Loading...
+          </div>
+        }
+      >
+        <PokeDexScreen onBack={() => setScreen("main_menu")} />
+      </Suspense>
+    );
   }
 
   if (screen === "disclaimer") {
@@ -1300,13 +1371,29 @@ export default function App() {
 
   if (screen === "sandbox_config") {
     return (
-      <SandboxConfigScreen
-        onStartBattle={handleStartSandboxBattle}
-        onBack={() => setScreen("main_menu")}
-        initialPlayerTeam={sandboxPlayerTeam}
-        initialEnemyTeam={sandboxEnemyTeam}
-        onConfigChange={handleSandboxConfigChange}
-      />
+      <Suspense
+        fallback={
+          <div
+            style={{
+              height: "100dvh",
+              background: THEME.bg.base,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Loading...
+          </div>
+        }
+      >
+        <SandboxConfigScreen
+          onStartBattle={handleStartSandboxBattle}
+          onBack={() => setScreen("main_menu")}
+          initialPlayerTeam={sandboxPlayerTeam}
+          initialEnemyTeam={sandboxEnemyTeam}
+          onConfigChange={handleSandboxConfigChange}
+        />
+      </Suspense>
     );
   }
 
@@ -1359,7 +1446,25 @@ export default function App() {
   }
 
   if (screen === "event_tester") {
-    return <EventTesterScreen onBack={() => setScreen("main_menu")} />;
+    return (
+      <Suspense
+        fallback={
+          <div
+            style={{
+              height: "100dvh",
+              background: THEME.bg.base,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Loading...
+          </div>
+        }
+      >
+        <EventTesterScreen onBack={() => setScreen("main_menu")} />
+      </Suspense>
+    );
   }
 
   if (screen === "ghost_revive" && runState) {

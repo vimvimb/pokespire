@@ -64,6 +64,7 @@ function FloatingNumber({ event, position, onComplete }: FloatingNumberProps) {
     // Animate upward and fade out
     const startTime = Date.now();
     const duration = 1000; // 1 second animation
+    let frameId: number;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -73,13 +74,14 @@ function FloatingNumber({ event, position, onComplete }: FloatingNumberProps) {
       setOpacity(1 - progress * 0.8); // Fade to 20% opacity
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        frameId = requestAnimationFrame(animate);
       } else {
         onComplete();
       }
     };
 
-    requestAnimationFrame(animate);
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
   }, [onComplete]);
 
   const color = event.type === 'damage' ? '#ef4444'
@@ -132,6 +134,7 @@ function CardPlayedBanner({ sourceName, cardName, onComplete }: CardPlayedBanner
     const holdDuration = 600;
     const fadeOutDuration = 200;
     const totalDuration = fadeInDuration + holdDuration + fadeOutDuration;
+    let frameId: number;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -154,10 +157,11 @@ function CardPlayedBanner({ sourceName, cardName, onComplete }: CardPlayedBanner
         return;
       }
 
-      requestAnimationFrame(animate);
+      frameId = requestAnimationFrame(animate);
     };
 
-    requestAnimationFrame(animate);
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
   }, [onComplete]);
 
   return (
@@ -270,6 +274,7 @@ function CardFlyAnimation({ event, onComplete }: CardFlyAnimationProps) {
   useEffect(() => {
     const startTime = Date.now();
     const { FLIGHT_DURATION, IMPACT_DURATION, TRAIL_LENGTH, SPLIT_POINT } = CARD_FLY_CONFIG;
+    let frameId: number;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -299,7 +304,7 @@ function CardFlyAnimation({ event, onComplete }: CardFlyAnimationProps) {
         if (flightProgress >= 1) {
           setPhase('impact');
         } else {
-          requestAnimationFrame(animate);
+          frameId = requestAnimationFrame(animate);
         }
       } else if (phase === 'impact') {
         const impactElapsed = elapsed - FLIGHT_DURATION;
@@ -310,12 +315,13 @@ function CardFlyAnimation({ event, onComplete }: CardFlyAnimationProps) {
           setPhase('done');
           onComplete();
         } else {
-          requestAnimationFrame(animate);
+          frameId = requestAnimationFrame(animate);
         }
       }
     };
 
-    requestAnimationFrame(animate);
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
   }, [phase, onComplete, isMultiTarget]);
 
   // Calculate current position during flight
@@ -567,6 +573,7 @@ function StatusAppliedAnimation({ event, position, onComplete }: StatusAppliedAn
   useEffect(() => {
     const startTime = Date.now();
     const duration = 800;
+    let frameId: number;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -574,13 +581,14 @@ function StatusAppliedAnimation({ event, position, onComplete }: StatusAppliedAn
       setProgress(p);
 
       if (p < 1) {
-        requestAnimationFrame(animate);
+        frameId = requestAnimationFrame(animate);
       } else {
         onComplete();
       }
     };
 
-    requestAnimationFrame(animate);
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
   }, [onComplete]);
 
   // Arrow positions: 3 arrows spread horizontally, staggered timing

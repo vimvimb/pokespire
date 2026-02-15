@@ -26,7 +26,7 @@ const MUSIC_VOLUME = 0.35;
 
 let audio: HTMLAudioElement | null = null;
 let currentTrack: MusicTrack | null = null;
-let fadeIntervalId: ReturnType<typeof setInterval> | null = null;
+let fadeFrameId: number | null = null;
 
 function getAudio(): HTMLAudioElement {
   if (!audio) {
@@ -37,9 +37,9 @@ function getAudio(): HTMLAudioElement {
 }
 
 function stopFade() {
-  if (fadeIntervalId !== null) {
-    clearInterval(fadeIntervalId);
-    fadeIntervalId = null;
+  if (fadeFrameId !== null) {
+    cancelAnimationFrame(fadeFrameId);
+    fadeFrameId = null;
   }
 }
 
@@ -51,19 +51,25 @@ function fadeOut(callback: () => void) {
     return;
   }
   const startVolume = a.volume;
-  const startTime = Date.now();
-  fadeIntervalId = setInterval(() => {
-    const elapsed = Date.now() - startTime;
+  const startTime = performance.now();
+
+  const animate = (now: number) => {
+    const elapsed = now - startTime;
     const t = Math.min(elapsed / FADE_MS, 1);
     a.volume = Math.max(0, startVolume * (1 - t));
+
     if (t >= 1) {
       stopFade();
       a.pause();
       a.currentTime = 0;
       a.volume = MUSIC_VOLUME;
       callback();
+    } else {
+      fadeFrameId = requestAnimationFrame(animate);
     }
-  }, 16);
+  };
+
+  fadeFrameId = requestAnimationFrame(animate);
 }
 
 /** Play background music. Loops until a different track or null is requested.

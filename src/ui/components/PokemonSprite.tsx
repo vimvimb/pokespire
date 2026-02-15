@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import type { Combatant } from '../../engine/types';
 import type { DamagePreview } from '../../engine/preview';
 import { HealthBar } from './HealthBar';
@@ -25,7 +25,7 @@ interface Props {
   onMouseLeave?: () => void;
 }
 
-export function PokemonSprite({ combatant, isCurrentTurn, isTargetable, onSelect, onInspect, onDragEnter, onDragLeave, onDrop, damagePreview, isDragHovered, spriteScale = 1, onMouseEnter, onMouseLeave }: Props) {
+function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, onInspect, onDragEnter, onDragLeave, onDrop, damagePreview, isDragHovered, spriteScale = 1, onMouseEnter, onMouseLeave }: Props) {
   const [imgError, setImgError] = useState(false);
   const isEnemy = combatant.side === 'enemy';
 
@@ -101,7 +101,7 @@ export function PokemonSprite({ combatant, isCurrentTurn, isTargetable, onSelect
         padding: 12,
         cursor: isClickable ? 'pointer' : 'default',
         opacity,
-        transition: 'all 0.2s',
+        transition: 'opacity 0.2s, transform 0.2s, filter 0.2s',
         minWidth: 140,
         position: 'relative',
         borderRadius: 8,
@@ -305,3 +305,5 @@ export function PokemonSprite({ combatant, isCurrentTurn, isTargetable, onSelect
     </div>
   );
 }
+
+export const PokemonSprite = memo(PokemonSpriteInner);
