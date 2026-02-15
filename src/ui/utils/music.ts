@@ -126,7 +126,8 @@ type Screen =
   | 'card_removal'
   | 'event_tester'
   | 'ghost_revive'
-  | 'disclaimer';
+  | 'disclaimer'
+  | 'debugging';
 
 const DUNGEON_SCREENS: Screen[] = [
   'map',
