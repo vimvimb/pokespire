@@ -89,6 +89,8 @@ export type PassiveId =
   | 'compound_eyes'
   | 'powder_spread'
   | 'tinted_lens'
+  | 'resonance'
+  | 'pollinate'
   // Weedle/Beedrill line
   | 'poison_barb'
   | 'adaptability'
