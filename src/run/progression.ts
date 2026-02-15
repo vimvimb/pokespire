@@ -440,6 +440,19 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
     name: 'Shield Dust',
     description: 'You are immune to Poison.',
   },
+  tinted_lens: {
+    name: 'Tinted Lens',
+    description: 'Your not-very-effective attacks have no damage penalty.',
+  },
+  resonance: {
+    name: 'Resonance',
+    description: 'When you deal unblocked damage with a Psychic attack, allies in your column gain 1 Strength.',
+  },
+  pollinate: {
+    name: 'Pollinate',
+    description: 'At the start of your turn, allies in your column restore 1 energy.',
+  },
+  // Venonat/Venomoth line (shared passives with Caterpie line)
   compound_eyes: {
     name: 'Compound Eyes',
     description: 'When you apply a debuff to an enemy, gain 1 Evasion.',
@@ -447,10 +460,6 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   powder_spread: {
     name: 'Powder Spread',
     description: 'When you apply a debuff to an enemy, also apply 1 stack to both adjacent enemies.',
-  },
-  tinted_lens: {
-    name: 'Tinted Lens',
-    description: 'Your not-very-effective attacks have no damage penalty.',
   },
   // Weedle/Beedrill line
   poison_barb: {
@@ -789,26 +798,26 @@ export const PIKACHU_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Pikachu',
-      description: 'Gain Static Field.',
+      description: 'Gain Swift Guard.',
       passiveId: 'static_field',
       hpBoost: 0,
       cardsToAdd: [],
     },
     {
       level: 3,
-      name: 'Pikachu',
-      description: 'Gain Counter-Current.',
+      name: 'Raichu',
+      description: 'Evolve to Raichu (+20 HP). Gain Counter-Current.',
+      evolvesTo: 'raichu',
       passiveId: 'counter_current',
       hpBoost: 0,
       cardsToAdd: [],
     },
     {
       level: 4,
-      name: 'Raichu',
-      description: 'Evolve to Raichu (+20 HP, -2 Speed). Add Body Slam, Mega Punch, Thunder.',
-      evolvesTo: 'raichu',
-      passiveId: 'none',  // No new passive, retains all previous
-      hpBoost: 0,  // HP increase comes from Raichu's base stats
+      name: 'Raichu (Mastered)',
+      description: 'Add Body Slam, Mega Punch, Thunder.',
+      passiveId: 'none',
+      hpBoost: 0,
       cardsToAdd: ['body-slam', 'mega-punch', 'thunder'],
     },
   ],
@@ -869,8 +878,9 @@ export const RATTATA_PROGRESSION: ProgressionTree = {
     },
     {
       level: 2,
-      name: 'Rattata',
-      description: 'Add Fury Swipes. Gain Quick Feet.',
+      name: 'Raticate',
+      description: 'Evolve to Raticate. Add Fury Swipes. Gain Quick Feet.',
+      evolvesTo: 'raticate',
       passiveId: 'quick_feet',
       hpBoost: 0,
       cardsToAdd: ['fury-swipes'],
@@ -878,8 +888,7 @@ export const RATTATA_PROGRESSION: ProgressionTree = {
     {
       level: 3,
       name: 'Raticate',
-      description: 'Evolve to Raticate. Gain Proletariat.',
-      evolvesTo: 'raticate',
+      description: 'Gain Proletariat.',
       passiveId: 'proletariat',
       hpBoost: 0,
       cardsToAdd: [],
@@ -1294,7 +1303,7 @@ export const VOLTORB_PROGRESSION: ProgressionTree = {
   ],
 };
 
-// Caterpie progression tree - status-spreading support moth
+// Caterpie progression tree - psychic support moth
 export const CATERPIE_PROGRESSION: ProgressionTree = {
   baseFormId: 'caterpie',
   rungs: [
@@ -1309,15 +1318,55 @@ export const CATERPIE_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Butterfree',
-      description: 'Evolve to Butterfree (+20 HP). Gain Compound Eyes.',
+      description: 'Evolve to Butterfree (+20 HP). Add Confusion. Gain Pollinate.',
       evolvesTo: 'butterfree',
+      passiveId: 'pollinate',
+      hpBoost: 0,
+      cardsToAdd: ['confusion'],
+    },
+    {
+      level: 3,
+      name: 'Butterfree',
+      description: 'Add Psybeam. Gain Resonance.',
+      passiveId: 'resonance',
+      hpBoost: 0,
+      cardsToAdd: ['psybeam'],
+    },
+    {
+      level: 4,
+      name: 'Butterfree (Mastered)',
+      description: 'Gain Tinted Lens.',
+      passiveId: 'tinted_lens',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
+// Venonat progression tree - status-spreading support moth (mirrors Caterpie line)
+export const VENONAT_PROGRESSION: ProgressionTree = {
+  baseFormId: 'venonat',
+  rungs: [
+    {
+      level: 1,
+      name: 'Venonat',
+      description: 'Starting form with Shield Dust passive.',
+      passiveId: 'shield_dust',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Venomoth',
+      description: 'Evolve to Venomoth (+20 HP). Gain Compound Eyes.',
+      evolvesTo: 'venomoth',
       passiveId: 'compound_eyes',
       hpBoost: 0,
       cardsToAdd: [],
     },
     {
       level: 3,
-      name: 'Butterfree',
+      name: 'Venomoth',
       description: 'Add Silver Wind. Gain Powder Spread.',
       passiveId: 'powder_spread',
       hpBoost: 0,
@@ -1325,7 +1374,7 @@ export const CATERPIE_PROGRESSION: ProgressionTree = {
     },
     {
       level: 4,
-      name: 'Butterfree (Mastered)',
+      name: 'Venomoth (Mastered)',
       description: 'Add Sleep Powder. Gain Tinted Lens.',
       passiveId: 'tinted_lens',
       hpBoost: 0,
@@ -1349,9 +1398,9 @@ export const WEEDLE_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Beedrill',
-      description: 'Evolve to Beedrill (+18 HP). Add Twineedle. Gain Poison Point.',
+      description: 'Evolve to Beedrill (+18 HP). Add Twineedle. Gain Swarm Strike.',
       evolvesTo: 'beedrill',
-      passiveId: 'poison_point',
+      passiveId: 'swarm_strike',
       hpBoost: 0,
       cardsToAdd: ['twineedle'],
     },
@@ -1366,8 +1415,8 @@ export const WEEDLE_PROGRESSION: ProgressionTree = {
     {
       level: 4,
       name: 'Beedrill (Mastered)',
-      description: 'Gain Swarm Strike.',
-      passiveId: 'swarm_strike',
+      description: 'Gain Poison Point.',
+      passiveId: 'poison_point',
       hpBoost: 0,
       cardsToAdd: [],
     },
@@ -2054,6 +2103,7 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   jigglypuff: JIGGLYPUFF_PROGRESSION,
   paras: PARAS_PROGRESSION,
   zubat: ZUBAT_PROGRESSION,
+  venonat: VENONAT_PROGRESSION,
 };
 
 /**
@@ -2153,6 +2203,9 @@ export function getProgressionTree(pokemonId: string): ProgressionTree | null {
   if (pokemonId === 'electivire') {
     return ELECTABUZZ_PROGRESSION;
   }
+  if (pokemonId === 'venomoth') {
+    return VENONAT_PROGRESSION;
+  }
   return null;
 }
 
@@ -2246,6 +2299,9 @@ export function getBaseFormId(pokemonId: string): string {
   }
   if (pokemonId === 'electivire') {
     return 'electabuzz';
+  }
+  if (pokemonId === 'venomoth') {
+    return 'venonat';
   }
   return pokemonId;
 }

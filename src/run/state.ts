@@ -262,6 +262,37 @@ export function createAct2TestState(): RunState {
 }
 
 /**
+ * Helper: take a run and mark all nodes up through the given stage as completed,
+ * then position the player at the specified node.
+ */
+function advanceToBossNode(run: RunState, restNodeId: string, throughStage: number): RunState {
+  const nodes = run.nodes.map(n => ({
+    ...n,
+    completed: n.stage <= throughStage ? true : n.completed,
+  }));
+  const visitedIds = nodes.filter(n => n.completed).map(n => n.id);
+  return { ...run, nodes, currentNodeId: restNodeId, visitedNodeIds: visitedIds };
+}
+
+/** Test shortcut: drop right before Act 1 boss (Ariana). */
+export function createAct1BossTestState(): RunState {
+  const run = createTestPartyRun(300);
+  return advanceToBossNode(run, 's5-rest', 5);
+}
+
+/** Test shortcut: drop right before Act 2 boss (Giovanni). */
+export function createAct2BossTestState(): RunState {
+  const run = createTestPartyRun(300);
+  return advanceToBossNode(transitionToAct2(run), 'a2-s5-rest', 5);
+}
+
+/** Test shortcut: drop right before Act 3 boss (Mewtwo). */
+export function createAct3BossTestState(): RunState {
+  const run = createTestPartyRun(500);
+  return advanceToBossNode(transitionToAct3(run), 'a3-s5-rest', 5);
+}
+
+/**
  * Transition to Act 3 - preserves party, resets nodes to Act 3 map.
  * Note: Party is healed before showing the transition screen.
  */

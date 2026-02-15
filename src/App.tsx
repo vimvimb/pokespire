@@ -30,6 +30,9 @@ import {
   createRunState,
   createAct2TestState,
   createAct3TestState,
+  createAct1BossTestState,
+  createAct2BossTestState,
+  createAct3BossTestState,
   applyPartyPercentHeal,
   applyFullHealAll,
   addCardToDeck,
@@ -61,7 +64,7 @@ import {
   reviveFromGraveyard,
 } from './run/state';
 
-type Screen = 'main_menu' | 'select' | 'map' | 'rest' | 'event' | 'recruit' | 'card_draft' | 'battle' | 'run_victory' | 'run_defeat' | 'card_dex' | 'pokedex' | 'sandbox_config' | 'act_transition' | 'card_removal' | 'event_tester' | 'ghost_revive' | 'disclaimer';
+type Screen = 'main_menu' | 'select' | 'map' | 'rest' | 'event' | 'recruit' | 'card_draft' | 'battle' | 'run_victory' | 'run_defeat' | 'card_dex' | 'pokedex' | 'sandbox_config' | 'act_transition' | 'card_removal' | 'event_tester' | 'ghost_revive' | 'disclaimer' | 'debugging';
 
 // localStorage keys
 const SAVE_KEY = 'pokespire_save';
@@ -542,6 +545,28 @@ export default function App() {
     setScreen('map');
   }, []);
 
+  // Boss test shortcuts
+  const handleTestAct1Boss = useCallback(() => {
+    clearSave();
+    const run = createAct1BossTestState();
+    setRunState(run);
+    setScreen('map');
+  }, []);
+
+  const handleTestAct2Boss = useCallback(() => {
+    clearSave();
+    const run = createAct2BossTestState();
+    setRunState(run);
+    setScreen('map');
+  }, []);
+
+  const handleTestAct3Boss = useCallback(() => {
+    clearSave();
+    const run = createAct3BossTestState();
+    setRunState(run);
+    setScreen('map');
+  }, []);
+
   // Start a configured sandbox battle
   const handleStartSandboxBattle = useCallback((
     players: PokemonData[],
@@ -748,67 +773,25 @@ export default function App() {
           >
             Disclaimer
           </button>
-          <div className="menu-item" style={{
-            display: 'flex',
-            gap: 16,
-            marginTop: 16,
-            animationDelay: `${(menuIdx++) * 50 + 250}ms`,
-          }}>
-            <button
-              className="menu-item-dev"
-              onClick={handleTestAct2}
-              style={{
-                padding: '6px 0',
-                fontSize: 14,
-                fontWeight: 'bold',
-                border: 'none',
-                background: 'transparent',
-                color: THEME.text.tertiary,
-                cursor: 'pointer',
-                letterSpacing: '0.08em',
-                opacity: 0.6,
-                position: 'relative',
-              }}
-            >
-              Test Act 2
-            </button>
-            <button
-              className="menu-item-dev"
-              onClick={handleTestAct3}
-              style={{
-                padding: '6px 0',
-                fontSize: 14,
-                fontWeight: 'bold',
-                border: 'none',
-                background: 'transparent',
-                color: THEME.text.tertiary,
-                cursor: 'pointer',
-                letterSpacing: '0.08em',
-                opacity: 0.6,
-                position: 'relative',
-              }}
-            >
-              Test Act 3
-            </button>
-            <button
-              className="menu-item-dev"
-              onClick={() => setScreen('event_tester')}
-              style={{
-                padding: '6px 0',
-                fontSize: 14,
-                fontWeight: 'bold',
-                border: 'none',
-                background: 'transparent',
-                color: THEME.text.tertiary,
-                cursor: 'pointer',
-                letterSpacing: '0.08em',
-                opacity: 0.6,
-                position: 'relative',
-              }}
-            >
-              Event Tester
-            </button>
-          </div>
+          <button
+            className="menu-item menu-item-tertiary"
+            onClick={() => setScreen('debugging')}
+            style={{
+              padding: '8px 0',
+              fontSize: 14,
+              fontWeight: 'bold',
+              border: 'none',
+              background: 'transparent',
+              color: THEME.text.tertiary,
+              cursor: 'pointer',
+              letterSpacing: '0.08em',
+              position: 'relative',
+              opacity: 0.6,
+              animationDelay: `${(menuIdx++) * 50 + 250}ms`,
+            }}
+          >
+            Debugging
+          </button>
         </div>
 
         {/* Menu animations */}
@@ -938,6 +921,56 @@ export default function App() {
 
   if (screen === 'pokedex') {
     return <PokeDexScreen onBack={() => setScreen('main_menu')} />;
+  }
+
+  if (screen === 'debugging') {
+    const devBtnStyle = {
+      padding: '12px 20px',
+      fontSize: 14,
+      fontWeight: 'bold' as const,
+      border: `1px solid ${THEME.border.subtle}`,
+      borderRadius: 8,
+      background: THEME.bg.card,
+      color: THEME.text.secondary,
+      cursor: 'pointer',
+      letterSpacing: '0.06em',
+      width: '100%',
+    };
+    return (
+      <ScreenShell
+        ambient
+        header={
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '14px 24px',
+            borderBottom: `1px solid ${THEME.border.subtle}`,
+          }}>
+            <button
+              onClick={() => setScreen('main_menu')}
+              style={{ padding: '8px 16px', ...THEME.button.secondary, fontSize: 13 }}
+            >
+              Back
+            </button>
+            <span style={{ color: THEME.text.primary, fontWeight: 'bold', fontSize: 16, letterSpacing: '0.08em' }}>
+              Debugging
+            </span>
+            <div style={{ width: 60 }} />
+          </div>
+        }
+        bodyStyle={{ padding: '24px 16px 48px' }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 360, margin: '0 auto' }}>
+          <button onClick={handleTestAct2} style={devBtnStyle}>Test Act 2</button>
+          <button onClick={handleTestAct3} style={devBtnStyle}>Test Act 3</button>
+          <button onClick={handleTestAct1Boss} style={devBtnStyle}>Test Act 1 Boss</button>
+          <button onClick={handleTestAct2Boss} style={devBtnStyle}>Test Act 2 Boss</button>
+          <button onClick={handleTestAct3Boss} style={devBtnStyle}>Test Act 3 Boss</button>
+          <button onClick={() => setScreen('event_tester')} style={devBtnStyle}>Event Tester</button>
+        </div>
+      </ScreenShell>
+    );
   }
 
   if (screen === 'disclaimer') {

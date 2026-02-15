@@ -1409,5 +1409,43 @@
       "pound", "pound"
     ],
     "abilities": []
+  },
+
+  "venonat": {
+    "name": "Venonat",
+    "types": ["bug", "poison"],
+    "maxHp": 18,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "string-shot", "string-shot",
+      "harden", "harden",
+      "stun-spore",
+      "poison-powder",
+      "bug-bite"
+    ],
+    "abilities": [],
+    "description": "Spreads debuffs like pollen. Each one makes it harder to pin down."
+  },
+  "venomoth": {
+    "name": "Venomoth",
+    "types": ["bug", "poison"],
+    "maxHp": 38,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "string-shot", "string-shot",
+      "harden", "harden",
+      "stun-spore",
+      "poison-powder",
+      "bug-bite"
+    ],
+    "abilities": []
   }
 }

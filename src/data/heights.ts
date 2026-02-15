@@ -63,6 +63,10 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   caterpie: 1,
   butterfree: 8,  // Real: 32kg, increased for sprite scaling
 
+  // Venonat line
+  venonat: 8,     // Real: 30kg, reduced for sprite scaling
+  venomoth: 12,   // Real: 12.5kg, close to real weight
+
   // Weedle line
   weedle: 3,
   beedrill: 14,   // Real: 29.5kg, reduced for sprite scaling

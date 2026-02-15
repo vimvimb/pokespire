@@ -301,6 +301,26 @@ export function onTurnStart(
     });
   }
 
+  // Pollinate: At the start of your turn, gain +1 energy if an ally in your column has Pollinate
+  const pollinateAlly = state.combatants.find(c =>
+    c.alive &&
+    c.side === combatant.side &&
+    c.id !== combatant.id &&
+    c.position.column === combatant.position.column &&
+    c.passiveIds.includes('pollinate')
+  );
+  if (pollinateAlly) {
+    const energyGained = Math.min(1, combatant.energyCap - combatant.energy);
+    if (energyGained > 0) {
+      combatant.energy += energyGained;
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `Pollinate (${pollinateAlly.name}): ${combatant.name} restores 1 energy!`,
+      });
+    }
+  }
+
   // Reset Finisher flag at turn start
   combatant.turnFlags.finisherUsedThisTurn = false;
 
@@ -511,6 +531,24 @@ export function onDamageDealt(
       combatantId: attacker.id,
       message: `Numbing Strike: +1 Paralysis applied to ${target.name}!`,
     });
+  }
+
+  // Resonance: Unblocked Psychic attacks grant +1 Strength to allies in your column
+  if (attacker.passiveIds.includes('resonance') && card.type === 'psychic' && damageDealt > 0) {
+    const columnAllies = state.combatants.filter(c =>
+      c.alive &&
+      c.side === attacker.side &&
+      c.id !== attacker.id &&
+      c.position.column === attacker.position.column
+    );
+    for (const ally of columnAllies) {
+      applyStatus(state, ally, 'strength', 1, attacker.id);
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `Resonance: ${ally.name} gains 1 Strength!`,
+      });
+    }
   }
 
   // Mysticism: Unblocked Psychic attacks inflict 1 Enfeeble
