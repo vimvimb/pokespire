@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import type { RunState, RunPokemon, MapNode } from '../../run/types';
 import { getAvailableNextNodes } from '../../run/state';
 import { PokemonDetailsPanel } from '../components/PokemonDetailsPanel';
@@ -83,13 +83,41 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
   }, []);
 
   // Compute pixel positions from normalized node.x, node.y
-  const nodePositions = new Map<string, { x: number; y: number }>();
-  for (const node of run.nodes) {
-    nodePositions.set(node.id, {
-      x: MAP_INSET + node.x * (mapSize.width - MAP_INSET * 2),
-      y: MAP_INSET + node.y * (mapSize.height - MAP_INSET * 2),
-    });
-  }
+  const nodePositions = useMemo(() => {
+    const positions = new Map<string, { x: number; y: number }>();
+    for (const node of run.nodes) {
+      positions.set(node.id, {
+        x: MAP_INSET + node.x * (mapSize.width - MAP_INSET * 2),
+        y: MAP_INSET + node.y * (mapSize.height - MAP_INSET * 2),
+      });
+    }
+    return positions;
+  }, [run.nodes, mapSize.width, mapSize.height]);
+
+  const handlePokemonClick = useCallback(
+    (i: number) => {
+      if (run.party[i]?.currentHp > 0) setSelectedPokemonIndex(i);
+    },
+    [run.party],
+  );
+
+  const handleOpenRearrange = useCallback(() => setShowRearrange(true), []);
+  const handleOpenShop = useCallback(() => setShowShop(true), []);
+  const handleOpenMoveDeleter = useCallback(() => setShowMoveDeleter(true), []);
+
+  const handleCloseDetails = useCallback(() => setSelectedPokemonIndex(null), []);
+
+  const handleRearrangeConfirm = useCallback(
+    (newParty: RunPokemon[], newBench: RunPokemon[]) => {
+      onRearrange(newParty, newBench);
+      setShowRearrange(false);
+    },
+    [onRearrange],
+  );
+
+  const handleCloseRearrange = useCallback(() => setShowRearrange(false), []);
+  const handleCloseShop = useCallback(() => setShowShop(false), []);
+  const handleCloseMoveDeleter = useCallback(() => setShowMoveDeleter(false), []);
 
   const header = (
     <div style={{
@@ -129,14 +157,12 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
           bench={run.bench}
           graveyard={run.graveyard}
           gold={run.gold}
-          onPokemonClick={(i) => {
-            if (run.party[i].currentHp > 0) setSelectedPokemonIndex(i);
-          }}
+          onPokemonClick={handlePokemonClick}
           onSwap={onSwap}
           onPromote={onPromote}
-          onRearrange={() => setShowRearrange(true)}
-          onOpenShop={() => setShowShop(true)}
-          onOpenMoveDeleter={() => setShowMoveDeleter(true)}
+          onRearrange={handleOpenRearrange}
+          onOpenShop={handleOpenShop}
+          onOpenMoveDeleter={handleOpenMoveDeleter}
         />
 
         {/* Map area — fills remaining space */}
@@ -258,7 +284,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
           pokemon={run.party[selectedPokemonIndex]}
           pokemonIndex={selectedPokemonIndex}
           partySize={run.party.length}
-          onClose={() => setSelectedPokemonIndex(null)}
+          onClose={handleCloseDetails}
           onLevelUp={onLevelUp}
           onNavigate={setSelectedPokemonIndex}
         />
@@ -269,11 +295,8 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
         <RearrangeModal
           party={run.party}
           bench={run.bench}
-          onConfirm={(newParty, newBench) => {
-            onRearrange(newParty, newBench);
-            setShowRearrange(false);
-          }}
-          onClose={() => setShowRearrange(false)}
+          onConfirm={handleRearrangeConfirm}
+          onClose={handleCloseRearrange}
         />
       )}
 
@@ -282,7 +305,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
         <ShopScreen
           run={run}
           onPurchase={onPurchase}
-          onClose={() => setShowShop(false)}
+          onClose={handleCloseShop}
         />
       )}
 
@@ -291,7 +314,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
         <MoveDeleterScreen
           run={run}
           onForgetCard={onForgetCard}
-          onClose={() => setShowMoveDeleter(false)}
+          onClose={handleCloseMoveDeleter}
           onRestart={onRestart}
         />
       )}

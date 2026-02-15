@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, memo } from 'react';
 import type { LogEntry } from '../../engine/types';
 import { THEME } from '../theme';
 
@@ -6,7 +6,7 @@ interface Props {
   logs: LogEntry[];
 }
 
-export function BattleLog({ logs }: Props) {
+function BattleLogInner({ logs }: Props) {
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,9 +52,10 @@ export function BattleLog({ logs }: Props) {
       </div>
       {logs.map((log, i) => {
         const isTurnDivider = log.message.includes('---');
+        const stableKey = `log-${log.round}-${log.combatantId}-${i}-${log.message.slice(0, 30)}`;
         return (
           <div
-            key={i}
+            key={stableKey}
             style={{
               fontSize: isTurnDivider ? 13 : 14,
               color: isTurnDivider ? THEME.accent
@@ -73,3 +74,5 @@ export function BattleLog({ logs }: Props) {
     </div>
   );
 }
+
+export const BattleLog = memo(BattleLogInner);

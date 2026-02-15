@@ -38,8 +38,6 @@ import { getBattleSpriteScale } from "../../data/heights";
 import { Flourish } from "../components/Flourish";
 import { THEME } from "../theme";
 import battleBgAct1 from "../../../assets/backgrounds/rocket_lab_act_1_v4.png";
-import battleBgAct2 from "../../../assets/backgrounds/rocket_lab_act_2.png";
-import battleBgAct3 from "../../../assets/backgrounds/rocket_lab_act_3.png";
 import { playSound, type SoundEffect } from "../utils/sound";
 
 export type BattleResult = "victory" | "defeat";
@@ -100,8 +98,14 @@ function BattleGrid({
   switchTargetPositions?: Position[];
   onSwitchSelect?: (position: Position) => void;
 }) {
-  const frontRow = combatants.filter((c) => c.position.row === "front");
-  const backRow = combatants.filter((c) => c.position.row === "back");
+  const frontRow = useMemo(
+    () => combatants.filter((c) => c.position.row === "front"),
+    [combatants],
+  );
+  const backRow = useMemo(
+    () => combatants.filter((c) => c.position.row === "back"),
+    [combatants],
+  );
 
   // Layout: 3×2 CSS grid — 3 position rows, 2 depth columns (front/back).
   // CSS Grid ensures each row shares height across both columns, so a back-row
@@ -302,8 +306,14 @@ export function BattleScreen({
   const currentCombatant =
     state.phase === "ongoing" ? getCurrentCombatant(state) : null;
 
-  const players = state.combatants.filter((c) => c.side === "player");
-  const enemies = state.combatants.filter((c) => c.side === "enemy");
+  const players = useMemo(
+    () => state.combatants.filter((c) => c.side === "player"),
+    [state.combatants],
+  );
+  const enemies = useMemo(
+    () => state.combatants.filter((c) => c.side === "enemy"),
+    [state.combatants],
+  );
 
   // Compute global sprite scale: if any Pokemon exceeds the cap, ALL scale down proportionally
   const spriteScale = useMemo(
@@ -325,13 +335,17 @@ export function BattleScreen({
     openPileState && openPileState.combatantId === currentCombatant?.id
       ? openPileState.pile
       : null;
-  const togglePile = (pile: "draw" | "discard" | "vanished") => {
-    setOpenPileState((prev) =>
-      prev && prev.combatantId === currentCombatant?.id && prev.pile === pile
-        ? null
-        : { combatantId: currentCombatant!.id, pile },
-    );
-  };
+  const togglePile = useCallback(
+    (pile: "draw" | "discard" | "vanished") => {
+      if (!currentCombatant) return;
+      setOpenPileState((prev) =>
+        prev && prev.combatantId === currentCombatant.id && prev.pile === pile
+          ? null
+          : { combatantId: currentCombatant.id, pile },
+      );
+    },
+    [currentCombatant],
+  );
 
   // Switch position mode: store combatantId so mode auto-cancels when combatant changes (derived, no effect)
   const [switchModeCombatantId, setSwitchModeCombatantId] = useState<
@@ -386,6 +400,45 @@ export function BattleScreen({
     return getValidSwitchTargets(state, currentCombatant);
   }, [switchMode, isPlayerTurn, currentCombatant, state]);
 
+  const handleSwitchSelect = useCallback(
+    (pos: Position) => {
+      onSwitchPosition?.(pos);
+      setSwitchModeCombatantId(null);
+    },
+    [onSwitchPosition],
+  );
+
+  const handleDeselectCard = useCallback(() => onSelectCard(null), [onSelectCard]);
+
+  const handleCancelSwitchMode = useCallback(() => setSwitchModeCombatantId(null), []);
+
+  const handleToggleDraw = useCallback(() => togglePile("draw"), [togglePile]);
+  const handleToggleDiscard = useCallback(() => togglePile("discard"), [togglePile]);
+  const handleToggleVanished = useCallback(() => togglePile("vanished"), [togglePile]);
+
+  const handleSwitchButtonClick = useCallback(() => {
+    if (switchMode) {
+      setSwitchModeCombatantId(null);
+    } else {
+      setSwitchModeCombatantId(currentCombatant?.id ?? null);
+      onSelectCard(null);
+    }
+  }, [switchMode, currentCombatant?.id, onSelectCard]);
+
+  const unplayableCardIndices = useMemo(() => {
+    if (!currentCombatant) return new Set<number>();
+    const indices = new Set<number>();
+    currentCombatant.hand.forEach((cardId, idx) => {
+      const card = getMove(cardId);
+      if (
+        getCardValidTargets(state, currentCombatant, card).length === 0
+      ) {
+        indices.add(idx);
+      }
+    });
+    return indices;
+  }, [state, currentCombatant]);
+
   // Cancel switch mode on Escape
   useEffect(() => {
     if (!switchMode) return;
@@ -407,19 +460,27 @@ export function BattleScreen({
     const container = battlefieldContainerRef.current;
     if (!content || !container) return;
 
-    // Reset scale to 1 so we measure natural size
-    content.style.transform = "none";
-    const contentHeight = content.scrollHeight + PLAYER_OFFSET_Y;
-    const contentWidth = content.scrollWidth;
-    const availableHeight = container.clientHeight;
-    const availableWidth = container.clientWidth;
-    const scale = Math.min(
-      1,
-      availableHeight / contentHeight,
-      availableWidth / contentWidth,
-    );
-    setBattlefieldScale(scale);
-    content.style.transform = scale < 1 ? `scale(${scale})` : "none";
+    const measure = () => {
+      content.style.transform = "none";
+      requestAnimationFrame(() => {
+        const contentHeight = content.scrollHeight + PLAYER_OFFSET_Y;
+        const contentWidth = content.scrollWidth;
+        const availableHeight = container.clientHeight;
+        const availableWidth = container.clientWidth;
+        const scale = Math.min(
+          1,
+          availableHeight / contentHeight,
+          availableWidth / contentWidth,
+        );
+        setBattlefieldScale(scale);
+        content.style.transform = scale < 1 ? `scale(${scale})` : "none";
+      });
+    };
+
+    measure();
+    const obs = new ResizeObserver(measure);
+    obs.observe(container);
+    return () => obs.disconnect();
   }, []);
 
   // Ref to hand display for capturing card positions
@@ -1165,14 +1226,17 @@ export function BattleScreen({
     triggerCardFlyAndSelectTarget,
   ]);
 
-  const handleCardClick = (index: number) => {
-    if (!isPlayerTurn) return;
-    if (pendingCardIndex === index) {
-      onSelectCard(null); // deselect
-    } else {
-      onSelectCard(index);
-    }
-  };
+  const handleCardClick = useCallback(
+    (index: number) => {
+      if (!isPlayerTurn) return;
+      if (pendingCardIndex === index) {
+        onSelectCard(null); // deselect
+      } else {
+        onSelectCard(index);
+      }
+    },
+    [isPlayerTurn, pendingCardIndex, onSelectCard],
+  );
 
   const gameOver = phase === "victory" || phase === "defeat";
 
@@ -1225,8 +1289,23 @@ export function BattleScreen({
   }, [gameOver, phase, state.combatants, state.goldEarned, onBattleEnd]);
 
   const act = runState?.currentAct ?? 1;
-  const battleBackground =
-    act === 3 ? battleBgAct3 : act === 2 ? battleBgAct2 : battleBgAct1;
+  const [battleBackground, setBattleBackground] = useState<string>(battleBgAct1);
+
+  useEffect(() => {
+    if (act === 1) {
+      setBattleBackground(battleBgAct1);
+      return;
+    }
+    if (act === 2) {
+      import("../../../assets/backgrounds/rocket_lab_act_2.png").then((m) =>
+        setBattleBackground(m.default),
+      );
+      return;
+    }
+    import("../../../assets/backgrounds/rocket_lab_act_3.png").then((m) =>
+      setBattleBackground(m.default),
+    );
+  }, [act]);
 
   return (
     <div
@@ -1306,7 +1385,7 @@ export function BattleScreen({
         >
           {rangeLabel}
           <button
-            onClick={() => onSelectCard(null)}
+            onClick={handleDeselectCard}
             style={{
               ...THEME.button.secondary,
               marginLeft: 12,
@@ -1338,7 +1417,7 @@ export function BattleScreen({
         >
           Select adjacent position
           <button
-            onClick={() => setSwitchModeCombatantId(null)}
+            onClick={handleCancelSwitchMode}
             style={{
               ...THEME.button.secondary,
               marginLeft: 12,
@@ -1398,14 +1477,7 @@ export function BattleScreen({
               switchTargetPositions={
                 switchMode ? switchTargetPositions : undefined
               }
-              onSwitchSelect={
-                switchMode
-                  ? (pos) => {
-                      onSwitchPosition?.(pos);
-                      setSwitchModeCombatantId(null);
-                    }
-                  : undefined
-              }
+              onSwitchSelect={switchMode ? handleSwitchSelect : undefined}
             />
           </div>
 
@@ -1524,7 +1596,7 @@ export function BattleScreen({
               label="Deck"
               count={currentCombatant.drawPile.length}
               isActive={openPile === "draw"}
-              onClick={() => togglePile("draw")}
+              onClick={handleToggleDraw}
             />
 
             {/* Hand cards (center) */}
@@ -1536,19 +1608,7 @@ export function BattleScreen({
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
               draggingIndex={draggingCardIndex}
-              unplayableCardIndices={(() => {
-                const indices = new Set<number>();
-                currentCombatant.hand.forEach((cardId, idx) => {
-                  const card = getMove(cardId);
-                  if (
-                    getCardValidTargets(state, currentCombatant, card)
-                      .length === 0
-                  ) {
-                    indices.add(idx);
-                  }
-                });
-                return indices;
-              })()}
+              unplayableCardIndices={unplayableCardIndices}
             />
 
             {/* Energy vessel + Switch + End Turn (right of hand) */}
@@ -1579,16 +1639,7 @@ export function BattleScreen({
                     const accent = enabled ? teal : tealDim;
                     return (
                       <button
-                        onClick={() => {
-                          if (switchMode) {
-                            setSwitchModeCombatantId(null);
-                          } else {
-                            setSwitchModeCombatantId(
-                              currentCombatant?.id ?? null,
-                            );
-                            onSelectCard(null);
-                          }
-                        }}
+                        onClick={handleSwitchButtonClick}
                         disabled={!enabled}
                         title={
                           currentCombatant.turnFlags.hasSwitchedThisTurn
@@ -1898,7 +1949,7 @@ export function BattleScreen({
               label="Discard"
               count={currentCombatant.discardPile.length}
               isActive={openPile === "discard"}
-              onClick={() => togglePile("discard")}
+              onClick={handleToggleDiscard}
             />
 
             {/* Vanished button (conditional) */}
@@ -1907,7 +1958,7 @@ export function BattleScreen({
                 label="Vanished"
                 count={currentCombatant.vanishedPile.length}
                 isActive={openPile === "vanished"}
-                onClick={() => togglePile("vanished")}
+                onClick={handleToggleVanished}
               />
             )}
           </div>
