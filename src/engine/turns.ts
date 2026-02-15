@@ -3,7 +3,7 @@ import {
   getCurrentCombatant, checkBattleEnd, removeDeadFromTurnOrder, advanceRound,
   getCombatant,
 } from './combat';
-import { processStartOfTurnStatuses, processEndOfTurnStatuses } from './status';
+import { processStartOfTurnStatuses, processEndOfTurnStatuses, applyStatus } from './status';
 import { drawCards, discardHand } from './deck';
 import { playCard } from './cards';
 import { getStatus } from './status';
@@ -102,11 +102,21 @@ export function processAction(
   return logs;
 }
 
-const SWITCH_COST = 2;
+const BASE_SWITCH_COST = 2;
+
+/**
+ * Get the effective switch cost for a combatant.
+ * Download passive reduces it to 1.
+ */
+export function getSwitchCost(combatant: Combatant): number {
+  if (combatant.passiveIds.includes('download')) return 1;
+  return BASE_SWITCH_COST;
+}
 
 /**
  * Execute a position switch for a combatant.
- * Costs 2 energy, once per turn. Swaps with ally if target is occupied.
+ * Costs energy (2 base, 1 with Download), once per turn.
+ * Swaps with ally if target is occupied, applying swap passives.
  */
 function executeSwitchPosition(
   state: CombatState,
@@ -114,9 +124,10 @@ function executeSwitchPosition(
   targetPos: Position
 ): LogEntry[] {
   const logs: LogEntry[] = [];
+  const switchCost = getSwitchCost(combatant);
 
   // Validate: enough energy
-  if (combatant.energy < SWITCH_COST) {
+  if (combatant.energy < switchCost) {
     logs.push({
       round: state.round,
       combatantId: combatant.id,
@@ -125,12 +136,12 @@ function executeSwitchPosition(
     return logs;
   }
 
-  // Validate: hasn't switched this turn
-  if (combatant.turnFlags.hasSwitchedThisTurn) {
+  // Validate: hasn't exceeded max switches this turn
+  if (combatant.turnFlags.switchesThisTurn >= 3) {
     logs.push({
       round: state.round,
       combatantId: combatant.id,
-      message: `${combatant.name} has already switched this turn!`,
+      message: `${combatant.name} has no switches remaining!`,
     });
     return logs;
   }
@@ -150,8 +161,8 @@ function executeSwitchPosition(
   }
 
   // Deduct energy and set flag
-  combatant.energy -= SWITCH_COST;
-  combatant.turnFlags.hasSwitchedThisTurn = true;
+  combatant.energy -= switchCost;
+  combatant.turnFlags.switchesThisTurn++;
 
   // Check if target position is occupied by an alive ally
   const occupant = state.combatants.find(
@@ -172,6 +183,65 @@ function executeSwitchPosition(
       combatantId: combatant.id,
       message: `${combatant.name} and ${occupant.name} swap positions! (Energy: ${combatant.energy})`,
     });
+
+    // --- Swap passives (only trigger when swapping with an ally) ---
+
+    // Download: Grant ally 5 Block
+    if (combatant.passiveIds.includes('download')) {
+      occupant.block += 5;
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `Download: ${occupant.name} gains 5 Block!`,
+      });
+    }
+
+    // Data Transfer: Grant ally 2 Evasion and 2 Strength
+    if (combatant.passiveIds.includes('data_transfer')) {
+      applyStatus(state, occupant, 'evasion', 2, combatant.id);
+      applyStatus(state, occupant, 'strength', 2, combatant.id);
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `Data Transfer: ${occupant.name} gains 2 Evasion and 2 Strength!`,
+      });
+    }
+
+    // Overclock: Each swap reduces highest-cost card's cost by 1 more this turn
+    if (combatant.passiveIds.includes('overclock')) {
+      combatant.turnFlags.overclockReduction += 1;
+      // Find highest-cost card for the log message
+      let highestCost = -1;
+      let highestName = '';
+      for (let i = 0; i < combatant.hand.length; i++) {
+        const card = getMove(combatant.hand[i]);
+        if (card.cost > highestCost) {
+          highestCost = card.cost;
+          highestName = card.name;
+        }
+      }
+      if (highestName) {
+        const totalReduction = combatant.turnFlags.overclockReduction;
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Overclock: ${highestName} costs ${totalReduction} less this turn!`,
+        });
+      }
+    }
+
+    // Upload: Grant ally 1 energy
+    if (combatant.passiveIds.includes('upload')) {
+      const energyGained = Math.min(1, occupant.energyCap - occupant.energy);
+      if (energyGained > 0) {
+        occupant.energy += energyGained;
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Upload: ${occupant.name} gains 1 energy!`,
+        });
+      }
+    }
   } else {
     // Move to empty cell
     combatant.position = targetPos;

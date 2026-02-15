@@ -161,7 +161,12 @@ export type PassiveId =
   // inner_focus shared with Drowzee line
   // static_field shared with Pikachu line (renamed to Swift Guard)
   | 'vampiricism'
-  | 'zephyr_king';
+  | 'zephyr_king'
+  // Porygon line
+  | 'download'
+  | 'data_transfer'
+  | 'overclock'
+  | 'upload';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -659,6 +664,23 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   zephyr_king: {
     name: 'Zephyr King',
     description: 'Your Flying attacks grant you 1 Haste.',
+  },
+  // Porygon line
+  download: {
+    name: 'Download',
+    description: 'Swapping costs 1 energy instead of 2, and grants the ally 5 Block.',
+  },
+  data_transfer: {
+    name: 'Data Transfer',
+    description: 'Swapping also grants the ally 2 Evasion and 2 Strength.',
+  },
+  overclock: {
+    name: 'Overclock',
+    description: 'Each swap reduces your highest-cost card by 1 this turn. Always targets the same card.',
+  },
+  upload: {
+    name: 'Upload',
+    description: 'Swapping also grants the ally 1 energy.',
   },
 };
 
@@ -2069,6 +2091,47 @@ export const ZUBAT_PROGRESSION: ProgressionTree = {
   ],
 };
 
+// Porygon progression tree - swap-based support
+export const PORYGON_PROGRESSION: ProgressionTree = {
+  baseFormId: 'porygon',
+  rungs: [
+    {
+      level: 1,
+      name: 'Porygon',
+      description: 'Starting form with Download passive.',
+      passiveId: 'download',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Porygon2',
+      description: 'Evolve to Porygon2 (+15 HP). Add Tri Attack. Gain Data Transfer.',
+      evolvesTo: 'porygon2',
+      passiveId: 'data_transfer',
+      hpBoost: 0,
+      cardsToAdd: ['tri-attack'],
+    },
+    {
+      level: 3,
+      name: 'Porygon-Z',
+      description: 'Evolve to Porygon-Z (+5 HP). Add Hyper Beam. Gain Overclock.',
+      evolvesTo: 'porygon-z',
+      passiveId: 'overclock',
+      hpBoost: 0,
+      cardsToAdd: ['hyper-beam'],
+    },
+    {
+      level: 4,
+      name: 'Porygon-Z (Mastered)',
+      description: 'Gain Upload.',
+      passiveId: 'upload',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
 // All progression trees indexed by base form ID
 export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   charmander: CHARMANDER_PROGRESSION,
@@ -2106,6 +2169,7 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   paras: PARAS_PROGRESSION,
   zubat: ZUBAT_PROGRESSION,
   venonat: VENONAT_PROGRESSION,
+  porygon: PORYGON_PROGRESSION,
 };
 
 /**
@@ -2208,6 +2272,9 @@ export function getProgressionTree(pokemonId: string): ProgressionTree | null {
   if (pokemonId === 'venomoth') {
     return VENONAT_PROGRESSION;
   }
+  if (pokemonId === 'porygon2' || pokemonId === 'porygon-z') {
+    return PORYGON_PROGRESSION;
+  }
   return null;
 }
 
@@ -2304,6 +2371,9 @@ export function getBaseFormId(pokemonId: string): string {
   }
   if (pokemonId === 'venomoth') {
     return 'venonat';
+  }
+  if (pokemonId === 'porygon2' || pokemonId === 'porygon-z') {
+    return 'porygon';
   }
   return pokemonId;
 }

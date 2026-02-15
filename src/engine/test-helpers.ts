@@ -60,8 +60,9 @@ export function createTestCombatant(options: TestCombatantOptions = {}): Combata
       surgeMomentumReducedIndex: null,
       dragonsMajestyReducedIndex: null,
       sniperUsedThisTurn: false,
-      hasSwitchedThisTurn: false,
+      switchesThisTurn: 0,
       finisherUsedThisTurn: false,
+      overclockReduction: 0,
     },
     costModifiers: {},
   };

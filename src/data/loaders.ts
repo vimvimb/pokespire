@@ -119,6 +119,7 @@ export const STARTER_POKEMON: Record<string, PokemonData> = {
   paras: POKEMON.paras,
   zubat: POKEMON.zubat,
   venonat: POKEMON.venonat,
+  porygon: POKEMON.porygon,
 };
 
 /** Enemy Pokemon */

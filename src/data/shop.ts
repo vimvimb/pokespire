@@ -47,7 +47,7 @@ export const POKEMON_COSTS: Record<string, number> = {
   // 100g — weak stage 1, need heavy investment
   caterpie: 100, weedle: 100, rattata: 100, ekans: 100, spearow: 100, paras: 100, venonat: 100,
   // 200g — decent lines, modest final forms
-  pidgey: 200, sandshrew: 200, voltorb: 200, magikarp: 200, zubat: 200,
+  pidgey: 200, sandshrew: 200, voltorb: 200, magikarp: 200, zubat: 200, porygon: 200,
   // 250g — classic starters
   bulbasaur: 250, charmander: 250, squirtle: 250, pikachu: 250,
   // 200g — decent lines, modest final forms (continued)

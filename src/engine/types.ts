@@ -267,8 +267,9 @@ export interface CombatantTurnFlags {
   surgeMomentumReducedIndex: number | null;  // Index of card with cost reduced by Surge Momentum
   dragonsMajestyReducedIndex: number | null;  // Index of card with cost reduced by Dragon's Majesty
   sniperUsedThisTurn: boolean;  // First attack ignores evasion and block (Fearow line)
-  hasSwitchedThisTurn: boolean;  // Can only switch position once per turn
+  switchesThisTurn: number;  // Number of switches used this turn (max 3)
   finisherUsedThisTurn: boolean;  // First 3+ cost attack deals double, clears Strength (Machamp line)
+  overclockReduction: number;  // Accumulated cost reduction from Overclock swaps (Porygon-Z)
 }
 
 export interface Combatant {

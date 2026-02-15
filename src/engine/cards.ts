@@ -67,30 +67,8 @@ export function playCard(
 
   const card = getMove(cardId);
 
-  // Calculate effective cost (accounting for Inferno/Surge Momentum, Quick Feet, Rapid Strike, Hustle, Hypnotic Gaze)
-  const hasInfernoReduction = combatant.turnFlags.infernoMomentumReducedIndex === handIndex;
-  const hasSurgeReduction = combatant.turnFlags.surgeMomentumReducedIndex === handIndex;
-  const hasDragonsReduction = combatant.turnFlags.dragonsMajestyReducedIndex === handIndex;
-  const quickFeetReduction = checkQuickFeet(combatant, card);
-  const rapidStrikeReduction = checkRapidStrike(combatant, card, handIndex);
-  const hexMasteryReduction = checkHexMastery(combatant, card);
-  const lullabyReduction = checkLullaby(combatant, card);
-  const sporeMasteryReduction = checkSporeMastery(combatant, card);
-  const hustleCostIncrease = checkHustleCostIncrease(combatant, card);
-  const hypnoticGazeCostIncrease = checkHypnoticGazeCostIncrease(combatant, card);
-
-  let effectiveCost = card.cost;
-  if (hasInfernoReduction) effectiveCost -= 3;
-  if (hasSurgeReduction) effectiveCost -= 3;
-  if (hasDragonsReduction) effectiveCost -= 3;
-  effectiveCost -= quickFeetReduction;
-  effectiveCost -= rapidStrikeReduction;
-  effectiveCost -= hexMasteryReduction;
-  effectiveCost -= lullabyReduction;
-  effectiveCost -= sporeMasteryReduction;
-  effectiveCost += hustleCostIncrease;
-  effectiveCost += hypnoticGazeCostIncrease;
-  effectiveCost = Math.max(0, effectiveCost);
+  // Use the single source of truth for cost calculation
+  const effectiveCost = getEffectiveCost(combatant, handIndex);
 
   // Validate energy
   if (combatant.energy < effectiveCost) {
@@ -152,6 +130,22 @@ export function playCard(
     }
   }
 
+  // Clear Overclock reduction if the discounted card was played
+  if (combatant.turnFlags.overclockReduction > 0) {
+    let highestCost = -1;
+    let highestIdx = -1;
+    for (let i = 0; i < combatant.hand.length; i++) {
+      const c = getMove(combatant.hand[i]);
+      if (c.cost > highestCost) {
+        highestCost = c.cost;
+        highestIdx = i;
+      }
+    }
+    if (handIndex === highestIdx) {
+      combatant.turnFlags.overclockReduction = 0;
+    }
+  }
+
   // Update Rapid Strike hand size tracking when a card from the original hand is removed
   const rapidStrikeHandSize = combatant.costModifiers['rapidStrikeHandSize'] ?? 0;
   if (rapidStrikeHandSize > 0 && handIndex < rapidStrikeHandSize) {
@@ -188,6 +182,7 @@ export function playCard(
   }
 
   // Log Quick Feet reduction if applicable
+  const quickFeetReduction = checkQuickFeet(combatant, card);
   if (quickFeetReduction > 0) {
     logs.push({
       round: state.round,
@@ -1654,6 +1649,23 @@ export function getEffectiveCost(combatant: Combatant, handIndex: number): numbe
 
   // Spore Mastery: Spore costs 0
   cost -= checkSporeMastery(combatant, card);
+
+  // Overclock: reduce highest-cost card by accumulated swap count
+  if (combatant.turnFlags.overclockReduction > 0) {
+    // Find the highest base cost in hand to determine which card gets the reduction
+    let highestCost = -1;
+    let highestIdx = -1;
+    for (let i = 0; i < combatant.hand.length; i++) {
+      const c = getMove(combatant.hand[i]);
+      if (c.cost > highestCost) {
+        highestCost = c.cost;
+        highestIdx = i;
+      }
+    }
+    if (handIndex === highestIdx) {
+      cost -= combatant.turnFlags.overclockReduction;
+    }
+  }
 
   // Hustle: Attacks cost +1
   cost += checkHustleCostIncrease(combatant, card);

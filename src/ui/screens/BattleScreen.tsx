@@ -17,6 +17,7 @@ import {
   isAoERange,
   getValidSwitchTargets,
 } from "../../engine/position";
+import { getSwitchCost } from "../../engine/turns";
 import { calculateDamagePreview } from "../../engine/preview";
 import type { DamagePreview } from "../../engine/preview";
 import { PokemonSprite } from "../components/PokemonSprite";
@@ -98,13 +99,15 @@ function BattleGrid({
   switchTargetPositions?: Position[];
   onSwitchSelect?: (position: Position) => void;
 }) {
+  // Position fingerprint so useMemo recomputes after swaps (positions are mutated in place)
+  const posKey = combatants.map(c => `${c.id}:${c.position.row}:${c.position.column}`).join(',');
   const frontRow = useMemo(
     () => combatants.filter((c) => c.position.row === "front"),
-    [combatants],
+    [combatants, posKey],
   );
   const backRow = useMemo(
     () => combatants.filter((c) => c.position.row === "back"),
-    [combatants],
+    [combatants, posKey],
   );
 
   // Layout: 3×2 CSS grid — 3 position rows, 2 depth columns (front/back).
@@ -1628,9 +1631,11 @@ export function BattleScreen({
                 {/* Switch button — ornate with cost badge */}
                 {onSwitchPosition &&
                   (() => {
+                    const swCost = getSwitchCost(currentCombatant);
+                    const switchesLeft = 3 - currentCombatant.turnFlags.switchesThisTurn;
                     const canSwitch =
-                      !currentCombatant.turnFlags.hasSwitchedThisTurn &&
-                      currentCombatant.energy >= 2 &&
+                      switchesLeft > 0 &&
+                      currentCombatant.energy >= swCost &&
                       getValidSwitchTargets(state, currentCombatant).length > 0;
                     const enabled = canSwitch || switchMode;
                     const teal = "#38bdf8";
@@ -1641,11 +1646,11 @@ export function BattleScreen({
                         onClick={handleSwitchButtonClick}
                         disabled={!enabled}
                         title={
-                          currentCombatant.turnFlags.hasSwitchedThisTurn
-                            ? "Already switched this turn"
-                            : currentCombatant.energy < 2
-                              ? "Need 2 energy"
-                              : "Switch position (2 energy)"
+                          switchesLeft <= 0
+                            ? "No switches remaining"
+                            : currentCombatant.energy < swCost
+                              ? `Need ${swCost} energy`
+                              : `Switch position (${swCost} energy, ${switchesLeft} left)`
                         }
                         style={{
                           position: "relative",
@@ -1800,7 +1805,7 @@ export function BattleScreen({
                               lineHeight: 1,
                             }}
                           >
-                            2
+                            {swCost}
                           </span>
                         </div>
                       </button>

@@ -1447,5 +1447,58 @@
       "bug-bite"
     ],
     "abilities": []
+  },
+
+  "porygon": {
+    "name": "Porygon",
+    "types": ["normal"],
+    "maxHp": 30,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "psybeam",
+      "agility", "agility",
+      "charge-beam", "charge-beam"
+    ],
+    "abilities": [],
+    "description": "A digital Pokemon that buffs allies by swapping positions with them."
+  },
+  "porygon2": {
+    "name": "Porygon2",
+    "types": ["normal"],
+    "maxHp": 45,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "psybeam",
+      "agility", "agility",
+      "charge-beam", "charge-beam"
+    ],
+    "abilities": []
+  },
+  "porygon-z": {
+    "name": "Porygon-Z",
+    "types": ["normal"],
+    "maxHp": 50,
+    "baseSpeed": 8,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "psybeam",
+      "agility", "agility",
+      "charge-beam", "charge-beam"
+    ],
+    "abilities": []
   }
 }

@@ -128,6 +128,11 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   golbat: 44,      // Real: 55kg, +30% sprite size
   crobat: 104,     // Real: 75kg, +68% sprite size
 
+  // Porygon line
+  porygon: 8,       // Real: 36.5kg, reduced for sprite scaling
+  porygon2: 11,     // Real: 32.5kg, reduced for sprite scaling
+  'porygon-z': 10,  // Real: 34kg, reduced for sprite scaling
+
   // Paras line
   paras: 5.4,      // Real: 5.4kg
   parasect: 25,    // Real: 29.5kg, reduced for sprite scaling
