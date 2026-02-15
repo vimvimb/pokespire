@@ -52,10 +52,9 @@ function BattleLogInner({ logs }: Props) {
       </div>
       {logs.map((log, i) => {
         const isTurnDivider = log.message.includes('---');
-        const stableKey = `log-${log.round}-${log.combatantId}-${i}-${log.message.slice(0, 30)}`;
         return (
           <div
-            key={stableKey}
+            key={i}
             style={{
               fontSize: isTurnDivider ? 13 : 14,
               color: isTurnDivider ? THEME.accent

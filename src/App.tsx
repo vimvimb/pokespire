@@ -1,4 +1,11 @@
-import { useState, useCallback, useEffect, lazy, Suspense } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  lazy,
+  Suspense,
+} from "react";
 import type { PokemonData, Position, Combatant } from "./engine/types";
 import { useBattle } from "./ui/hooks/useBattle";
 import { PartySelectScreen } from "./ui/screens/PartySelectScreen";
@@ -178,14 +185,22 @@ export default function App() {
   );
   const battle = useBattle();
 
+  const latestSaveRef = useRef({ screen, runState });
+
   // Save game whenever screen or runState changes (debounced to avoid blocking on rapid updates)
   useEffect(() => {
-    const timer = setTimeout(() => saveGame(screen, runState), 500);
-    return () => {
-      clearTimeout(timer);
-      saveGame(screen, runState); // Flush immediately on unmount or before next debounce
-    };
+    latestSaveRef.current = { screen, runState };
+    const timer = setTimeout(() => saveGame(screen, runState), 2000);
+    return () => clearTimeout(timer);
   }, [screen, runState]);
+
+  // Flush on actual unmount only
+  useEffect(() => {
+    return () => {
+      const { screen: s, runState: r } = latestSaveRef.current;
+      saveGame(s, r);
+    };
+  }, []);
 
   // Play defeat sound when entering run_defeat screen
   useEffect(() => {
