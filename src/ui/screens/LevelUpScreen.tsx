@@ -53,7 +53,12 @@ export function LevelUpScreen({ run, onComplete }: LevelUpScreenProps) {
       if (!canPokemonLevelUp(pokemon)) return;
       const nextRung = getNextRung(pokemon);
       if (!nextRung) return;
-      result.push({ pokemonIndex: index, pokemon, nextRung, evolves: !!nextRung.evolvesTo });
+      result.push({
+        pokemonIndex: index,
+        pokemon,
+        nextRung,
+        evolves: !!nextRung.evolvesTo,
+      });
     });
     return result;
   }, [run]);
@@ -67,21 +72,24 @@ export function LevelUpScreen({ run, onComplete }: LevelUpScreenProps) {
     return updated;
   }, [run, entries]);
 
-  const evolvingEntries = useMemo(() => entries.filter((e) => e.evolves), [entries]);
+  const evolvingEntries = useMemo(
+    () => entries.filter((e) => e.evolves),
+    [entries],
+  );
 
   // If no one can level up, complete immediately
   useEffect(() => {
     if (entries.length === 0) {
       onComplete(run);
     }
-  }, []);
+  }, [entries, onComplete, run]);
 
   // Play sound on summary mount
   useEffect(() => {
     if (entries.length > 0) {
       playSound("raise_stat");
     }
-  }, []);
+  }, [entries]);
 
   const handleContinueFromSummary = () => {
     if (evolvingEntries.length > 0) {
@@ -128,12 +136,25 @@ function LevelUpSummary({
   leveledUpRun: RunState;
   onContinue: () => void;
 }) {
-  const [cardsModalEntryIndex, setCardsModalEntryIndex] = useState<number | null>(null);
+  const [cardsModalEntryIndex, setCardsModalEntryIndex] = useState<
+    number | null
+  >(null);
 
-  const modalEntry = cardsModalEntryIndex !== null ? entries.find((e) => e.pokemonIndex === cardsModalEntryIndex) : null;
+  const modalEntry =
+    cardsModalEntryIndex !== null
+      ? entries.find((e) => e.pokemonIndex === cardsModalEntryIndex)
+      : null;
 
   return (
-    <ScreenShell ambient bodyStyle={{ padding: "48px 24px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <ScreenShell
+      ambient
+      bodyStyle={{
+        padding: "48px 24px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 32 }}>
         <div
@@ -183,35 +204,69 @@ function LevelUpSummary({
                 flex: "0 0 260px",
               }}
             >
-              {/* Sprite */}
-              <img
-                src={getSpriteUrl(entry.pokemon.formId)}
-                alt={oldData.name}
-                style={{
-                  width: spriteSize,
-                  height: spriteSize,
-                  imageRendering: "pixelated",
-                  objectFit: "contain",
-                  flexShrink: 0,
-                }}
-              />
-
               {/* Info */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                  <span style={{ fontSize: 16, fontWeight: "bold" }}>
-                    {oldData.name}
-                  </span>
-                  <span
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    flex: 1,
+                    minWidth: 0,
+                    gap: 12,
+                    marginBottom: 12,
+                  }}
+                >
+                  {/* Sprite */}
+                  <img
+                    src={getSpriteUrl(entry.pokemon.formId)}
+                    alt={oldData.name}
                     style={{
-                      fontSize: 11,
-                      color: THEME.accent,
-                      ...THEME.heading,
-                      letterSpacing: "0.1em",
+                      width: spriteSize,
+                      height: spriteSize,
+                      imageRendering: "pixelated",
+                      objectFit: "contain",
+                      flexShrink: 0,
                     }}
-                  >
-                    Lv {entry.pokemon.level} → {afterPokemon.level}
-                  </span>
+                  />
+                  <div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <span style={{ fontSize: 16, fontWeight: "bold" }}>
+                        {oldData.name}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: THEME.accent,
+                          ...THEME.heading,
+                          letterSpacing: "0.1em",
+                        }}
+                      >
+                        Lv {entry.pokemon.level} → {afterPokemon.level}
+                      </span>
+                    </div>
+                    <div>
+                      {/* HP boost */}
+                      {entry.nextRung.hpBoost > 0 && (
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: THEME.status.heal,
+                            fontWeight: "bold",
+                            marginTop: 2,
+                          }}
+                        >
+                          +{entry.nextRung.hpBoost} Max HP
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* New passive */}
@@ -222,7 +277,6 @@ function LevelUpSummary({
                       background: "#22c55e12",
                       borderRadius: 4,
                       border: "1px solid #22c55e30",
-                      marginBottom: 6,
                     }}
                   >
                     <span
@@ -232,7 +286,9 @@ function LevelUpSummary({
                         color: "#22c55e",
                       }}
                     >
-                      {PASSIVE_DEFINITIONS[entry.nextRung.passiveId as PassiveId]?.name ?? entry.nextRung.passiveId}
+                      {PASSIVE_DEFINITIONS[
+                        entry.nextRung.passiveId as PassiveId
+                      ]?.name ?? entry.nextRung.passiveId}
                     </span>
                     <span
                       style={{
@@ -241,7 +297,11 @@ function LevelUpSummary({
                         marginLeft: 6,
                       }}
                     >
-                      {PASSIVE_DEFINITIONS[entry.nextRung.passiveId as PassiveId]?.description}
+                      {
+                        PASSIVE_DEFINITIONS[
+                          entry.nextRung.passiveId as PassiveId
+                        ]?.description
+                      }
                     </span>
                   </div>
                 )}
@@ -255,26 +315,13 @@ function LevelUpSummary({
                       ...THEME.button.secondary,
                       padding: "4px 10px",
                       fontSize: 12,
-                      marginBottom: 6,
+                      marginTop: 12,
                     }}
                   >
                     {entry.nextRung.cardsToAdd.length === 1
                       ? "1 new card"
                       : `${entry.nextRung.cardsToAdd.length} new cards`}
                   </button>
-                )}
-
-                {/* HP boost */}
-                {entry.nextRung.hpBoost > 0 && (
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: THEME.status.heal,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    +{entry.nextRung.hpBoost} Max HP
-                  </div>
                 )}
               </div>
             </div>
@@ -335,12 +382,22 @@ function LevelUpSummary({
                 marginBottom: 16,
               }}
             >
-              <div style={{ fontSize: 20, fontWeight: "bold", color: THEME.accent }}>
+              <div
+                style={{
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  color: THEME.accent,
+                }}
+              >
                 New cards
               </div>
               <button
                 onClick={() => setCardsModalEntryIndex(null)}
-                style={{ ...THEME.button.secondary, padding: "4px 12px", fontSize: 15 }}
+                style={{
+                  ...THEME.button.secondary,
+                  padding: "4px 12px",
+                  fontSize: 15,
+                }}
               >
                 Close
               </button>
@@ -356,7 +413,11 @@ function LevelUpSummary({
               {modalEntry.nextRung.cardsToAdd.map((cardId) => {
                 const card = getMove(cardId);
                 return card ? (
-                  <CardPreview key={cardId} card={card} showHoverEffect={false} />
+                  <CardPreview
+                    key={cardId}
+                    card={card}
+                    showHoverEffect={false}
+                  />
                 ) : null;
               })}
             </div>
@@ -389,27 +450,25 @@ function EvolutionSequence({
   entries: LevelUpEntry[];
   onComplete: () => void;
 }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState<EvolutionPhase>("intro");
   const [allDone, setAllDone] = useState(false);
   const [confettiParticles, setConfettiParticles] = useState<
-    { id: number; left: number; delay: number; duration: number; color: string }[]
+    {
+      id: number;
+      left: number;
+      delay: number;
+      duration: number;
+      color: string;
+    }[]
   >([]);
-  const [cardsModalEntryIndex, setCardsModalEntryIndex] = useState<number | null>(null);
+  const [cardsModalEntryIndex, setCardsModalEntryIndex] = useState<
+    number | null
+  >(null);
   const hasPlayedReveal = useRef(false);
 
-  const entry = !allDone ? entries[currentIndex] : null;
-  const oldFormId = entry?.pokemon.formId ?? "";
-  const newFormId = entry ? (entry.nextRung.evolvesTo ?? entry.pokemon.formId) : "";
-  const oldData = entry ? getPokemon(oldFormId) : null;
-  const newData = entry ? getPokemon(newFormId) : null;
-  const spriteSize = entry
-    ? Math.min(Math.max(getSpriteSize(oldFormId), getSpriteSize(newFormId)), 140)
-    : 0;
-
-  // Phase timing - auto-advances through all animations
+  // Phase timing - auto-advances through all animations (all Pokemon in lockstep)
   useEffect(() => {
-    if (allDone || !entry) return;
+    if (allDone) return;
     const timers: number[] = [];
 
     if (phase === "intro") {
@@ -422,43 +481,52 @@ function EvolutionSequence({
       if (!hasPlayedReveal.current) {
         hasPlayedReveal.current = true;
         playSound("win_battle");
-        setConfettiParticles(
-          Array.from({ length: 40 }, (_, i) => ({
-            id: i,
-            left: Math.random() * 100,
-            delay: Math.random() * 200,
-            duration: 1500 + Math.random() * 1000,
-            color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-          }))
-        );
+        queueMicrotask(() => {
+          setConfettiParticles(
+            Array.from({ length: 40 }, (_, i) => ({
+              id: i,
+              left: Math.random() * 100,
+              delay: Math.random() * 200,
+              duration: 1500 + Math.random() * 1000,
+              color:
+                CONFETTI_COLORS[
+                  Math.floor(Math.random() * CONFETTI_COLORS.length)
+                ],
+            })),
+          );
+        });
       }
       timers.push(window.setTimeout(() => setPhase("celebration"), 1000));
     } else if (phase === "celebration") {
       timers.push(
         window.setTimeout(() => {
-          // Auto-advance to next evolution or finish
           hasPlayedReveal.current = false;
           setConfettiParticles([]);
-          if (currentIndex + 1 >= entries.length) {
-            setAllDone(true);
-          } else {
-            setCurrentIndex(currentIndex + 1);
-            setPhase("intro");
-          }
-        }, 2000)
+          setAllDone(true);
+        }, 2000),
       );
     }
 
     return () => timers.forEach(clearTimeout);
-  }, [phase, allDone, entry, currentIndex, entries.length]);
+  }, [phase, allDone]);
 
   // ── Congratulations screen after all evolutions ──
   if (allDone) {
     const congratsModalEntry =
-      cardsModalEntryIndex !== null ? entries.find((e) => e.pokemonIndex === cardsModalEntryIndex) : null;
+      cardsModalEntryIndex !== null
+        ? entries.find((e) => e.pokemonIndex === cardsModalEntryIndex)
+        : null;
 
     return (
-      <ScreenShell ambient bodyStyle={{ padding: "48px 24px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <ScreenShell
+        ambient
+        bodyStyle={{
+          padding: "48px 24px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div
@@ -510,38 +578,73 @@ function EvolutionSequence({
                   flex: "0 0 260px",
                 }}
               >
-                <img
-                  src={getSpriteUrl(nFormId)}
-                  alt={nData.name}
-                  style={{
-                    width: size,
-                    height: size,
-                    imageRendering: "pixelated",
-                    objectFit: "contain",
-                    flexShrink: 0,
-                  }}
-                />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 15, fontWeight: "bold", marginBottom: 4 }}>
-                    {oData.name} evolved into{" "}
-                    <span style={{ color: THEME.accent }}>{nData.name}</span>!
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      flex: 1,
+                      minWidth: 0,
+                      gap: 12,
+                      marginBottom: 12,
+                    }}
+                  >
+                    <img
+                      src={getSpriteUrl(nFormId)}
+                      alt={nData.name}
+                      style={{
+                        width: size,
+                        height: size,
+                        imageRendering: "pixelated",
+                        objectFit: "contain",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontSize: 15,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {oData.name} evolved into{" "}
+                      <span style={{ color: THEME.accent }}>{nData.name}</span>!
+                    </div>
                   </div>
 
                   {e.nextRung.passiveId !== "none" && (
                     <div
                       style={{
-                        padding: "6px 8px",
+                        padding: "8px",
                         background: "#22c55e12",
                         borderRadius: 4,
                         border: "1px solid #22c55e30",
-                        marginBottom: 6,
+                        marginBottom: 12,
+                        lineHeight: 1,
                       }}
                     >
-                      <span style={{ fontSize: 12, fontWeight: "bold", color: "#22c55e" }}>
-                        {PASSIVE_DEFINITIONS[e.nextRung.passiveId as PassiveId]?.name}
-                      </span>
-                      <span style={{ fontSize: 11, color: THEME.text.secondary, marginLeft: 6 }}>
-                        {PASSIVE_DEFINITIONS[e.nextRung.passiveId as PassiveId]?.description}
+                      <p
+                        style={{
+                          fontSize: 12,
+                          fontWeight: "bold",
+                          color: "#22c55e",
+                        }}
+                      >
+                        {
+                          PASSIVE_DEFINITIONS[e.nextRung.passiveId as PassiveId]
+                            ?.name
+                        }
+                      </p>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: THEME.text.secondary,
+                        }}
+                      >
+                        {
+                          PASSIVE_DEFINITIONS[e.nextRung.passiveId as PassiveId]
+                            ?.description
+                        }
                       </span>
                     </div>
                   )}
@@ -554,7 +657,6 @@ function EvolutionSequence({
                         ...THEME.button.secondary,
                         padding: "4px 10px",
                         fontSize: 12,
-                        marginBottom: 6,
                       }}
                     >
                       {e.nextRung.cardsToAdd.length === 1
@@ -564,7 +666,13 @@ function EvolutionSequence({
                   )}
 
                   {e.nextRung.hpBoost > 0 && (
-                    <div style={{ fontSize: 12, color: THEME.status.heal, fontWeight: "bold" }}>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: THEME.status.heal,
+                        fontWeight: "bold",
+                      }}
+                    >
                       +{e.nextRung.hpBoost} Max HP
                     </div>
                   )}
@@ -626,12 +734,22 @@ function EvolutionSequence({
                   marginBottom: 16,
                 }}
               >
-                <div style={{ fontSize: 20, fontWeight: "bold", color: THEME.accent }}>
+                <div
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "bold",
+                    color: THEME.accent,
+                  }}
+                >
                   New cards
                 </div>
                 <button
                   onClick={() => setCardsModalEntryIndex(null)}
-                  style={{ ...THEME.button.secondary, padding: "4px 12px", fontSize: 15 }}
+                  style={{
+                    ...THEME.button.secondary,
+                    padding: "4px 12px",
+                    fontSize: 15,
+                  }}
                 >
                   Close
                 </button>
@@ -647,7 +765,11 @@ function EvolutionSequence({
                 {congratsModalEntry.nextRung.cardsToAdd.map((cardId) => {
                   const card = getMove(cardId);
                   return card ? (
-                    <CardPreview key={cardId} card={card} showHoverEffect={false} />
+                    <CardPreview
+                      key={cardId}
+                      card={card}
+                      showHoverEffect={false}
+                    />
                   ) : null;
                 })}
               </div>
@@ -672,8 +794,10 @@ function EvolutionSequence({
   }
 
   // ── Animation screen for current evolution ──
-  const showOld = phase === "intro" || phase === "silhouette" || phase === "morph";
-  const showNew = phase === "morph" || phase === "reveal" || phase === "celebration";
+  const showOld =
+    phase === "intro" || phase === "silhouette" || phase === "morph";
+  const showNew =
+    phase === "morph" || phase === "reveal" || phase === "celebration";
   const isSilhouette = phase === "silhouette" || phase === "morph";
   const isMorphing = phase === "morph";
 
@@ -732,66 +856,90 @@ function EvolutionSequence({
           gap: 24,
         }}
       >
-        {/* Sprite area */}
+        {/* Sprite area - row of up to 4 Pokemon evolving simultaneously */}
         <div
           style={{
-            position: "relative",
-            width: spriteSize + 40,
-            height: spriteSize + 40,
             display: "flex",
-            alignItems: "center",
+            flexDirection: "row",
             justifyContent: "center",
+            alignItems: "center",
+            gap: 32,
           }}
         >
-          {showOld && (
-            <div
-              className={isMorphing ? "evolution-morph" : ""}
-              style={{
-                position: isMorphing ? "absolute" : "relative",
-                filter: isSilhouette ? "brightness(0)" : "none",
-                opacity: isMorphing ? 0.3 : 1,
-                transition: phase === "silhouette"
-                  ? "filter 0.8s ease-out"
-                  : isMorphing
-                    ? "opacity 1s ease-out"
-                    : "none",
-              }}
-            >
-              <img
-                src={getSpriteUrl(oldFormId)}
-                alt={oldData!.name}
+          {entries.map((e) => {
+            const oldFormId = e.pokemon.formId;
+            const newFormId = e.nextRung.evolvesTo ?? e.pokemon.formId;
+            const oldData = getPokemon(oldFormId);
+            const newData = getPokemon(newFormId);
+            const spriteSize = Math.min(
+              Math.max(getSpriteSize(oldFormId), getSpriteSize(newFormId)),
+              entries.length > 2 ? 100 : 140,
+            );
+            return (
+              <div
+                key={e.pokemonIndex}
                 style={{
-                  width: spriteSize,
-                  height: spriteSize,
-                  imageRendering: "pixelated",
-                  objectFit: "contain",
+                  position: "relative",
+                  width: spriteSize + 40,
+                  height: spriteSize + 40,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
-              />
-            </div>
-          )}
+              >
+                {showOld && (
+                  <div
+                    className={isMorphing ? "evolution-morph" : ""}
+                    style={{
+                      position: isMorphing ? "absolute" : "relative",
+                      filter: isSilhouette ? "brightness(0)" : "none",
+                      opacity: isMorphing ? 0.3 : 1,
+                      transition:
+                        phase === "silhouette"
+                          ? "filter 0.8s ease-out"
+                          : isMorphing
+                            ? "opacity 1s ease-out"
+                            : "none",
+                    }}
+                  >
+                    <img
+                      src={getSpriteUrl(oldFormId)}
+                      alt={oldData.name}
+                      style={{
+                        width: spriteSize,
+                        height: spriteSize,
+                        imageRendering: "pixelated",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
+                )}
 
-          {showNew && (
-            <div
-              className={`${isMorphing ? "evolution-morph evolution-morph-new" : ""} ${phase === "reveal" ? "evolution-reveal" : ""}`}
-              style={{
-                position: isMorphing ? "absolute" : "relative",
-                filter: isMorphing ? "brightness(0)" : undefined,
-                opacity: isMorphing ? 0.7 : 1,
-                transition: isMorphing ? "opacity 0.8s ease-in" : "none",
-              }}
-            >
-              <img
-                src={getSpriteUrl(newFormId)}
-                alt={newData!.name}
-                style={{
-                  width: spriteSize,
-                  height: spriteSize,
-                  imageRendering: "pixelated",
-                  objectFit: "contain",
-                }}
-              />
-            </div>
-          )}
+                {showNew && (
+                  <div
+                    className={`${isMorphing ? "evolution-morph evolution-morph-new" : ""} ${phase === "reveal" ? "evolution-reveal" : ""}`}
+                    style={{
+                      position: isMorphing ? "absolute" : "relative",
+                      filter: isMorphing ? "brightness(0)" : undefined,
+                      opacity: isMorphing ? 0.7 : 1,
+                      transition: isMorphing ? "opacity 0.8s ease-in" : "none",
+                    }}
+                  >
+                    <img
+                      src={getSpriteUrl(newFormId)}
+                      alt={newData.name}
+                      style={{
+                        width: spriteSize,
+                        height: spriteSize,
+                        imageRendering: "pixelated",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Text */}
@@ -801,41 +949,43 @@ function EvolutionSequence({
               className="evolution-pulse"
               style={{ fontSize: 18, fontWeight: "bold", color: THEME.accent }}
             >
-              {oldData!.name} is evolving!
+              {entries.length === 1
+                ? `${getPokemon(entries[0].pokemon.formId).name} is evolving!`
+                : "Your Pokemon are evolving!"}
             </div>
           )}
           {(phase === "silhouette" || phase === "morph") && (
             <div style={{ fontSize: 14, color: THEME.text.tertiary }}>...</div>
           )}
           {phase === "celebration" && (
-            <div style={{ fontSize: 16, color: THEME.text.secondary }}>
-              {oldData!.name} evolved into{" "}
-              <strong style={{ color: THEME.accent }}>{newData!.name}</strong>!
+            <div
+              style={{
+                fontSize: entries.length === 1 ? 16 : 14,
+                color: THEME.text.secondary,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              {entries.map((e) => {
+                const oData = getPokemon(e.pokemon.formId);
+                const nData = getPokemon(
+                  e.nextRung.evolvesTo ?? e.pokemon.formId,
+                );
+                return (
+                  <div key={e.pokemonIndex}>
+                    {oData.name} evolved into{" "}
+                    <strong style={{ color: THEME.accent }}>
+                      {nData.name}
+                    </strong>
+                    !
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
-
-        {/* Progress dots */}
-        {entries.length > 1 && (
-          <div style={{ display: "flex", gap: 8 }}>
-            {entries.map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background:
-                    i === currentIndex
-                      ? THEME.accent
-                      : i < currentIndex
-                        ? "#22c55e"
-                        : THEME.border.subtle,
-                }}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
       <style>{`
