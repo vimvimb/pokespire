@@ -8,7 +8,9 @@ import {
 } from "react";
 import type { PokemonData, Position, Combatant } from "./engine/types";
 import { useBattle } from "./ui/hooks/useBattle";
+import { useTutorial } from "./ui/hooks/useTutorial";
 import { PartySelectScreen } from "./ui/screens/PartySelectScreen";
+import { TutorialStarterScreen } from "./ui/screens/TutorialStarterScreen";
 import { BattleScreen } from "./ui/screens/BattleScreen";
 import type { BattleResult } from "./ui/screens/BattleScreen";
 import { MapScreen } from "./ui/screens/MapScreen";
@@ -56,7 +58,13 @@ import type {
   EventNode,
   RecruitNode,
 } from "./run/types";
+import { getCurrentCombatant } from "./engine/combat";
 import { getPokemon } from "./data/loaders";
+import {
+  isTutorialComplete,
+  setTutorialComplete,
+  resetTutorial,
+} from "./ui/utils/tutorialPersistence";
 import { SHOP_ITEMS, CARD_FORGET_COST } from "./data/shop";
 import {
   createRunState,
@@ -174,10 +182,18 @@ export default function App() {
   const [pendingBattleNodeId, setPendingBattleNodeId] = useState<string | null>(
     null,
   );
-  const [pendingPostLevelUpScreen, setPendingPostLevelUpScreen] = useState<
-    Screen | null
-  >(null);
+  const [pendingPostLevelUpScreen, setPendingPostLevelUpScreen] =
+    useState<Screen | null>(null);
+  const [isTutorialMode, setIsTutorialMode] = useState(false);
+  const [tutorialStarterName, setTutorialStarterName] = useState("");
   const battle = useBattle();
+  const tutorialOnComplete = useCallback(() => {
+    // Overlay dismissed; battle continues
+  }, []);
+  const tutorial = useTutorial({
+    starterName: tutorialStarterName,
+    onComplete: tutorialOnComplete,
+  });
 
   const latestSaveRef = useRef({ screen, runState });
 
@@ -234,6 +250,35 @@ export default function App() {
     },
     [],
   );
+
+  // Tutorial: start practice battle (1 starter vs Magikarp with Splash-only deck)
+  const handleTutorialStart = useCallback(
+    (starter: PokemonData) => {
+      setTutorialStarterName(starter.name);
+      setIsTutorialMode(true);
+      const magikarp = getPokemon("magikarp");
+      const tutorialMagikarp: PokemonData = {
+        ...magikarp,
+        deck: Array(10).fill("splash"),
+      };
+      const playerPositions: Position[] = [{ row: "front", column: 1 }];
+      const enemyPositions: Position[] = [{ row: "front", column: 1 }];
+      battle.startTutorialBattle(
+        [starter],
+        [tutorialMagikarp],
+        playerPositions,
+        enemyPositions,
+      );
+      setScreen("battle");
+    },
+    [battle],
+  );
+
+  // Tutorial: skip and go to regular party select
+  const handleTutorialSkip = useCallback(() => {
+    setTutorialComplete();
+    setScreen("select");
+  }, []);
 
   // Handle node selection on the map
   const handleSelectNode = useCallback(
@@ -344,6 +389,20 @@ export default function App() {
     [pendingPostLevelUpScreen],
   );
 
+  // Detect enemy turn done for tutorial (phase: enemy_turn -> player_turn)
+  const prevPhaseRef = useRef<string | null>(null);
+  useEffect(() => {
+    const now = battle.phase;
+    if (
+      isTutorialMode &&
+      prevPhaseRef.current === "enemy_turn" &&
+      now === "player_turn"
+    ) {
+      tutorial.notifyEnemyTurnDone();
+    }
+    prevPhaseRef.current = now;
+  }, [battle.phase, isTutorialMode, tutorial]);
+
   // Handle battle end
   const handleBattleEnd = useCallback(
     (
@@ -351,6 +410,19 @@ export default function App() {
       combatants: Combatant[],
       combatGoldEarned?: number,
     ) => {
+      // Tutorial battle: victory -> party select, defeat -> main menu
+      if (isTutorialMode) {
+        setIsTutorialMode(false);
+        setTutorialStarterName("");
+        if (result === "victory") {
+          setTutorialComplete();
+          setScreen("select");
+        } else {
+          setScreen("main_menu");
+        }
+        return;
+      }
+
       if (!runState) return;
 
       // Recruit battles: sync HP back to fighter, return to recruit screen
@@ -451,7 +523,13 @@ export default function App() {
         setScreen("card_draft");
       }
     },
-    [runState, isRecruitBattle, recruitFighterIndex, pendingBattleNodeId],
+    [
+      runState,
+      isRecruitBattle,
+      recruitFighterIndex,
+      pendingBattleNodeId,
+      isTutorialMode,
+    ],
   );
 
   // Handle card selection during battle
@@ -470,19 +548,33 @@ export default function App() {
   const handleSelectTarget = useCallback(
     (targetId: string) => {
       if (battle.pendingCardIndex !== null) {
+        const combatant = battle.state
+          ? getCurrentCombatant(battle.state)
+          : null;
+        const moveId = combatant?.hand[battle.pendingCardIndex];
         battle.playCard(battle.pendingCardIndex, targetId || undefined);
+        if (isTutorialMode && moveId) tutorial.notifyCardPlayed(moveId);
       }
     },
-    [battle],
+    [battle, isTutorialMode, tutorial],
   );
 
   // Handle direct card play (for drag-and-drop, bypasses two-step selection)
   const handlePlayCard = useCallback(
     (cardIndex: number, targetId?: string) => {
+      const combatant = battle.state ? getCurrentCombatant(battle.state) : null;
+      const moveId = combatant?.hand[cardIndex];
       battle.playCard(cardIndex, targetId);
+      if (isTutorialMode && moveId) tutorial.notifyCardPlayed(moveId);
     },
-    [battle],
+    [battle, isTutorialMode, tutorial],
   );
+
+  // Handle end turn (with tutorial notification)
+  const handleEndTurn = useCallback(() => {
+    if (isTutorialMode) tutorial.notifyTurnEnded();
+    battle.endPlayerTurn();
+  }, [battle, isTutorialMode, tutorial]);
 
   // Handle level-up from map screen
   const handleLevelUp = useCallback(
@@ -925,7 +1017,7 @@ export default function App() {
             onClick={() => {
               clearSave();
               setHasSavedGame(false);
-              setScreen("select");
+              setScreen(isTutorialComplete() ? "select" : "tutorial_select");
             }}
             style={{
               padding: "12px 0",
@@ -1234,20 +1326,33 @@ export default function App() {
       <ScreenShell
         ambient
         header={
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "14px 24px",
-            borderBottom: `1px solid ${THEME.border.subtle}`,
-          }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "14px 24px",
+              borderBottom: `1px solid ${THEME.border.subtle}`,
+            }}
+          >
             <button
               onClick={() => setScreen("main_menu")}
-              style={{ padding: "8px 16px", ...THEME.button.secondary, fontSize: 13 }}
+              style={{
+                padding: "8px 16px",
+                ...THEME.button.secondary,
+                fontSize: 13,
+              }}
             >
               Back
             </button>
-            <span style={{ color: THEME.text.primary, fontWeight: "bold", fontSize: 16, letterSpacing: "0.08em" }}>
+            <span
+              style={{
+                color: THEME.text.primary,
+                fontWeight: "bold",
+                fontSize: 16,
+                letterSpacing: "0.08em",
+              }}
+            >
               Debugging
             </span>
             <div style={{ width: 60 }} />
@@ -1255,16 +1360,51 @@ export default function App() {
         }
         bodyStyle={{ padding: "24px 16px 48px" }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 360, margin: "0 auto" }}>
-          <button onClick={handleTestAct2} style={devBtnStyle}>Test Act 2</button>
-          <button onClick={handleTestAct3} style={devBtnStyle}>Test Act 3</button>
-          <button onClick={handleTestAct1Boss} style={devBtnStyle}>Test Act 1 Boss</button>
-          <button onClick={handleTestAct2Boss} style={devBtnStyle}>Test Act 2 Boss</button>
-          <button onClick={handleTestAct3Boss} style={devBtnStyle}>Test Act 3 Boss</button>
-          <button onClick={handleTestLevelUp} style={devBtnStyle}>Test Level Up</button>
-          <button onClick={handleTestEvolution} style={devBtnStyle}>Test Level Up + Evolution</button>
-          <button onClick={handleTestEvolutionLargeParty} style={devBtnStyle}>Test Evolution (Large Party)</button>
-          <button onClick={() => setScreen("event_tester")} style={devBtnStyle}>Event Tester</button>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+            maxWidth: 360,
+            margin: "0 auto",
+          }}
+        >
+          <button onClick={handleTestAct2} style={devBtnStyle}>
+            Test Act 2
+          </button>
+          <button onClick={handleTestAct3} style={devBtnStyle}>
+            Test Act 3
+          </button>
+          <button onClick={handleTestAct1Boss} style={devBtnStyle}>
+            Test Act 1 Boss
+          </button>
+          <button onClick={handleTestAct2Boss} style={devBtnStyle}>
+            Test Act 2 Boss
+          </button>
+          <button onClick={handleTestAct3Boss} style={devBtnStyle}>
+            Test Act 3 Boss
+          </button>
+          <button onClick={handleTestLevelUp} style={devBtnStyle}>
+            Test Level Up
+          </button>
+          <button onClick={handleTestEvolution} style={devBtnStyle}>
+            Test Level Up + Evolution
+          </button>
+          <button onClick={handleTestEvolutionLargeParty} style={devBtnStyle}>
+            Test Evolution (Large Party)
+          </button>
+          <button onClick={() => setScreen("event_tester")} style={devBtnStyle}>
+            Event Tester
+          </button>
+          <button
+            onClick={() => {
+              resetTutorial();
+              setScreen("main_menu");
+            }}
+            style={devBtnStyle}
+          >
+            Reset Tutorial (First-Time Player)
+          </button>
         </div>
       </ScreenShell>
     );
@@ -1496,6 +1636,15 @@ export default function App() {
     );
   }
 
+  if (screen === "tutorial_select") {
+    return (
+      <TutorialStarterScreen
+        onStart={handleTutorialStart}
+        onSkip={handleTutorialSkip}
+      />
+    );
+  }
+
   if (screen === "select") {
     return (
       <PartySelectScreen onStart={handleStart} onRestart={handleRestart} />
@@ -1562,9 +1711,9 @@ export default function App() {
         }
       >
         <EventTesterScreen
-              onBack={() => setScreen("main_menu")}
-              onStartBossBattle={handleStartBossBattle}
-            />
+          onBack={() => setScreen("main_menu")}
+          onStartBossBattle={handleStartBossBattle}
+        />
       </Suspense>
     );
   }
@@ -1611,12 +1760,7 @@ export default function App() {
   }
 
   if (screen === "level_up" && runState) {
-    return (
-      <LevelUpScreen
-        run={runState}
-        onComplete={handleLevelUpComplete}
-      />
-    );
+    return <LevelUpScreen run={runState} onComplete={handleLevelUpComplete} />;
   }
 
   if (screen === "battle" && battle.state) {
@@ -1629,13 +1773,27 @@ export default function App() {
         onSelectCard={handleSelectCard}
         onSelectTarget={handleSelectTarget}
         onPlayCard={handlePlayCard}
-        onEndTurn={battle.endPlayerTurn}
+        onEndTurn={handleEndTurn}
         onSwitchPosition={battle.switchPosition}
         onRestart={handleMainMenu}
         onBattleEnd={handleBattleEnd}
         runState={runState ?? undefined}
         onBackToSandboxConfig={
           isSandboxBattle ? handleBackToSandboxConfig : undefined
+        }
+        tutorial={
+          isTutorialMode && tutorial.isActive
+            ? {
+                isActive: tutorial.isActive,
+                highlightTarget: tutorial.highlightTarget,
+                stepText: tutorial.stepText,
+                advance: tutorial.advance,
+                skip: tutorial.skip,
+                canSkip: tutorial.canSkip,
+                allowInteraction: tutorial.allowInteraction,
+                zone: tutorial.currentStep?.zone ?? "bottom",
+              }
+            : undefined
         }
       />
     );

@@ -8,6 +8,26 @@ export interface HandDisplayRef {
   getCardPosition: (index: number) => { x: number; y: number } | null;
 }
 
+function isAttackCard(cardId: string): boolean {
+  try {
+    const move = getMove(cardId.replace(/__parental$/, ""));
+    return move.effects.some(
+      (e) =>
+        e.type === "damage" ||
+        e.type === "multi_hit" ||
+        e.type === "recoil" ||
+        e.type === "self_ko" ||
+        e.type === "heal_on_hit",
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isDefendCard(cardId: string): boolean {
+  return cardId === "defend" || cardId.replace(/__parental$/, "") === "defend";
+}
+
 interface Props {
   combatant: Combatant;
   selectedIndex: number | null;
@@ -16,6 +36,8 @@ interface Props {
   onDragEnd?: () => void;
   draggingIndex?: number | null;
   unplayableCardIndices?: Set<number>;
+  /** When set, add data-tutorial-id to the first matching card for the connector arrow */
+  tutorialHighlightCardType?: "attack" | "defend";
 }
 
 const HOVER_SCALE = 1.35;
@@ -23,7 +45,7 @@ const HOVER_LIFT = -30; // px upward
 const NEIGHBOR_SHIFT = 20; // px outward for immediate neighbors
 
 export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDisplay(
-  { combatant, selectedIndex, onSelectCard, onDragStart, onDragEnd, draggingIndex, unplayableCardIndices },
+  { combatant, selectedIndex, onSelectCard, onDragStart, onDragEnd, draggingIndex, unplayableCardIndices, tutorialHighlightCardType },
   ref
 ) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -46,6 +68,22 @@ export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDispla
   useImperativeHandle(ref, () => ({
     getCardPosition,
   }), [getCardPosition]);
+
+  // Find index of first card matching tutorial highlight type (for data-tutorial-id)
+  let firstMatchIdx: number | null = null;
+  if (tutorialHighlightCardType) {
+    for (let i = 0; i < combatant.hand.length; i++) {
+      const id = combatant.hand[i];
+      if (tutorialHighlightCardType === "attack" && isAttackCard(id)) {
+        firstMatchIdx = i;
+        break;
+      }
+      if (tutorialHighlightCardType === "defend" && isDefendCard(id)) {
+        firstMatchIdx = i;
+        break;
+      }
+    }
+  }
 
   return (
     <div style={{
@@ -86,9 +124,17 @@ export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDispla
           }
         }
 
+        const tutorialId =
+          firstMatchIdx === idx && tutorialHighlightCardType
+            ? tutorialHighlightCardType === "attack"
+              ? "tutorial-card-attack"
+              : "tutorial-card-defend"
+            : undefined;
+
         return (
           <div
             key={`${cardId}-${idx}`}
+            {...(tutorialId ? { "data-tutorial-id": tutorialId } : {})}
             ref={(el) => {
               if (el) {
                 cardRefs.current.set(idx, el);
