@@ -7,6 +7,7 @@ import {
 } from '../../run/progression';
 import { EXP_PER_LEVEL } from '../../run/state';
 import { getSpriteSize } from '../../data/heights';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   pokemon: RunPokemon;
@@ -105,7 +106,7 @@ export function ProgressionPanel({ pokemon, pokemonIndex, partySize, onClose, on
             gap: 16,
           }}>
             <img
-              src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemon.formId}.gif`}
+              src={getSpriteUrl(pokemon.formId)}
               alt={basePokemon.name}
               style={{
                 width: getSpriteSize(pokemon.formId),

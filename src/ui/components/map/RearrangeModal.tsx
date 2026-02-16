@@ -4,6 +4,7 @@ import type { Row, Column, Position } from '../../../engine/types';
 import { getPokemon } from '../../../data/loaders';
 import { getSpriteSize } from '../../../data/heights';
 import { THEME } from '../../theme';
+import { getSpriteUrl } from '../../utils/sprites';
 
 interface Props {
   party: RunPokemon[];
@@ -328,7 +329,7 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
                     {entry ? (
                       <>
                         <img
-                          src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${entry.pokemon.formId}.gif`}
+                          src={getSpriteUrl(entry.pokemon.formId)}
                           alt={getPokemon(entry.pokemon.formId).name}
                           style={{
                             width: Math.min(getSpriteSize(entry.pokemon.formId) * 0.55, 48),
@@ -447,7 +448,7 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
                       }}
                     >
                       <img
-                        src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${entry.pokemon.formId}.gif`}
+                        src={getSpriteUrl(entry.pokemon.formId)}
                         alt={getPokemon(entry.pokemon.formId).name}
                         style={{
                           width: Math.min(getSpriteSize(entry.pokemon.formId) * 0.5, 36),

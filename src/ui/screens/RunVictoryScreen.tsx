@@ -7,6 +7,7 @@ import { Flourish } from '../components/Flourish';
 import { THEME } from '../theme';
 import { GoldCoin } from '../components/GoldCoin';
 import { playSound } from '../utils/sound';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   run: RunState;
@@ -140,7 +141,7 @@ export function RunVictoryScreen({ run, onNewRun }: Props) {
                 justifyContent: 'center',
               }}>
                 <img
-                  src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemon.formId}.gif`}
+                  src={getSpriteUrl(pokemon.formId)}
                   alt={basePokemon.name}
                   style={{
                     width: 80,

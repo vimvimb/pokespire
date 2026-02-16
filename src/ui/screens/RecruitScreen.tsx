@@ -3,6 +3,7 @@ import { getPokemon } from '../../data/loaders';
 import { getRecruitLevel } from '../../run/state';
 import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   run: RunState;
@@ -12,10 +13,6 @@ interface Props {
   onRecruit: () => void;
   onDecline: () => void;
   onRestart: () => void;
-}
-
-function getSpriteUrl(pokemonId: string): string {
-  return `https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemonId}.gif`;
 }
 
 export function RecruitScreen({ run, node, battleResult, onStartFight, onRecruit, onDecline, onRestart }: Props) {

@@ -6,6 +6,7 @@ import { EnergyPips } from './EnergyPips';
 import { THEME } from '../theme';
 import { StatusIcons } from './StatusIcons';
 import { getSpriteSize } from '../../data/heights';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   combatant: Combatant;
@@ -29,9 +30,7 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
   const [imgError, setImgError] = useState(false);
   const isEnemy = combatant.side === 'enemy';
 
-  const spriteUrl = isEnemy
-    ? `https://img.pokemondb.net/sprites/black-white/anim/normal/${combatant.pokemonId}.gif`
-    : `https://img.pokemondb.net/sprites/black-white/anim/back-normal/${combatant.pokemonId}.gif`;
+  const spriteUrl = getSpriteUrl(combatant.pokemonId, isEnemy ? 'front' : 'back');
 
   const opacity = combatant.alive ? 1 : 0.3;
 

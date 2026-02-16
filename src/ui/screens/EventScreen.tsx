@@ -15,6 +15,7 @@ import { DexFrame } from '../components/DexFrame';
 import { EventIcon } from '../components/EventIcon';
 import { THEME } from '../theme';
 import type { MoveDefinition } from '../../engine/types';
+import { getSpriteUrl } from '../utils/sprites';
 
 // ============================================================
 // Props
@@ -41,10 +42,6 @@ type Phase =
 // ============================================================
 // Helpers
 // ============================================================
-
-function getSpriteUrl(pokemonId: string): string {
-  return `https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemonId}.gif`;
-}
 
 function getEventColor(act: number): string {
   if (act === 1) return '#14b8a6';

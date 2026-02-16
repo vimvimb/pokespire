@@ -39,6 +39,8 @@ jobs:
       - name: Install dependencies and build project
         run: |
           npm install
+          npm run download-sprites
+          npm run build:icons
           npm run build
 
       - name: Setup Pages

@@ -5,6 +5,7 @@ import { ScreenShell } from '../components/ScreenShell';
 import { DexFrame } from '../components/DexFrame';
 import { EventIcon } from '../components/EventIcon';
 import { THEME } from '../theme';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   run: RunState;
@@ -14,10 +15,6 @@ interface Props {
 
 const COLOR = '#a78bfa';
 const NAVY_BG = 'linear-gradient(180deg, rgba(14,14,24,0.85) 0%, rgba(18,18,30,0.75) 100%)';
-
-function getSpriteUrl(pokemonId: string): string {
-  return `https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemonId}.gif`;
-}
 
 function DiamondMarker({ color, size = 5 }: { color: string; size?: number }) {
   return (

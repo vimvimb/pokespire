@@ -14,6 +14,7 @@ import {
   type ProgressionRung,
 } from '../../run/progression';
 import { THEME } from '../theme';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   onBack: () => void;
@@ -73,10 +74,6 @@ const availableTypes = (Object.keys(typeCounts) as MoveType[])
 
 // Set of base form IDs for distinguishing base vs evolved in the UI
 const BASE_FORM_IDS = new Set(Object.keys(STARTER_POKEMON));
-
-function makeSpriteUrl(id: string): string {
-  return `https://img.pokemondb.net/sprites/black-white/anim/normal/${id}.gif`;
-}
 
 // ── Main Screen ─────────────────────────────────────────────────────
 
@@ -220,7 +217,7 @@ export function PokeDexScreen({ onBack }: Props) {
                   >
                     <PokemonTile
                       name={pokemon.name}
-                      spriteUrl={makeSpriteUrl(pokemon.id)}
+                      spriteUrl={getSpriteUrl(pokemon.id)}
                       primaryType={pokemon.types[0]}
                       secondaryType={pokemon.types[1]}
                       size="large"
@@ -403,7 +400,7 @@ function PokemonDetailPage({ pokemon, onBack, onMainMenu, onNavigate }: DetailPa
           gap: 8,
         }}>
           <img
-            src={makeSpriteUrl(pokemon.id)}
+            src={getSpriteUrl(pokemon.id)}
             alt={pokemon.name}
             style={{
               width: 120,
@@ -722,7 +719,7 @@ function ProgressionRungDisplay({ rung, isFirst, tree, index, onNavigate }: Prog
       {evolutionSprite && (
         <img
           className="pdex-rung-sprite"
-          src={makeSpriteUrl(evolutionSprite)}
+          src={getSpriteUrl(evolutionSprite)}
           alt={rung.name}
           onClick={() => onNavigate(evolutionSprite)}
           style={{

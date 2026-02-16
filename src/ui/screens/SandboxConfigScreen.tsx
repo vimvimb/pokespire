@@ -14,6 +14,7 @@ import { DexFrame } from '../components/DexFrame';
 import { PokemonTile, TYPE_COLORS } from '../components/PokemonTile';
 import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
+import { getSpriteUrl } from '../utils/sprites';
 
 // ── Constants ──────────────────────────────────────────────────────
 
@@ -128,11 +129,6 @@ function getDeckAtLevel(baseFormId: string, level: number): string[] {
 let nextId = 1;
 function generateId(): string {
   return `pokemon-${nextId++}`;
-}
-
-function makeSpriteUrl(formId: string, variant: 'front' | 'back' = 'front'): string {
-  const prefix = variant === 'back' ? 'back-' : '';
-  return `https://img.pokemondb.net/sprites/black-white/anim/${prefix}normal/${formId}.gif`;
 }
 
 // ── Sub-components ─────────────────────────────────────────────────
@@ -402,7 +398,7 @@ function FormationSlot({
 
   const formId = pokemon ? getFormIdAtLevel(pokemon.baseFormId, pokemon.level) : null;
   const sprite = formId
-    ? makeSpriteUrl(formId, side === 'player' ? 'back' : 'front')
+    ? getSpriteUrl(formId, side === 'player' ? 'back' : 'front')
     : null;
 
   const borderColor = isSelected
@@ -630,7 +626,7 @@ function InlineDetailEditor({
         {/* Sprite + Name */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80, gap: 4 }}>
           <img
-            src={makeSpriteUrl(formId)}
+            src={getSpriteUrl(formId)}
             alt={formId}
             style={{
               width: 56,
@@ -805,7 +801,7 @@ function PokemonRosterTile({
   return (
     <PokemonTile
       name={pokemon.name}
-      spriteUrl={makeSpriteUrl(pokemonId)}
+      spriteUrl={getSpriteUrl(pokemonId)}
       primaryType={pokemon.types[0]}
       size="small"
       draggable
