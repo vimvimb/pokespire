@@ -39,6 +39,8 @@ import type { TutorialHighlightTarget, TutorialZone } from "../../data/tutorial"
 import type { RunState } from "../../run/types";
 import { getBattleSpriteScale } from "../../data/heights";
 import { Flourish } from "../components/Flourish";
+import { simulateEnemyIntents } from "../../engine/intentPreview";
+import type { EnemyIntent } from "../../engine/intentPreview";
 import { THEME } from "../theme";
 import battleBgAct1 from "../../../assets/backgrounds/rocket_lab_act_1_v4.png";
 import { playSound, type SoundEffect } from "../utils/sound";
@@ -331,6 +333,23 @@ export function BattleScreen({
     () => state.combatants.filter((c) => c.side === "enemy"),
     [state.combatants],
   );
+
+  // Simulate enemy intents during player turn for the preview display
+  const enemyIntents = useMemo(() => {
+    if (phase !== 'player_turn' || state.phase !== 'ongoing') return null;
+    return simulateEnemyIntents(state);
+  }, [state, phase]);
+
+  // Cache last intents so the turn order bar layout stays stable during enemy turns
+  // (visibility toggles instead of DOM removal → no width jitter)
+  const cachedIntentsRef = useRef<Map<string, EnemyIntent[]> | null>(null);
+  if (enemyIntents !== null) {
+    cachedIntentsRef.current = enemyIntents;
+  } else if (state.phase !== 'ongoing') {
+    cachedIntentsRef.current = null;
+  }
+  const intentsForLayout = enemyIntents ?? cachedIntentsRef.current;
+  const intentsVisible = phase === 'player_turn';
 
   // Compute global sprite scale: if any Pokemon exceeds the cap, ALL scale down proportionally
   const spriteScale = useMemo(
@@ -1355,7 +1374,12 @@ export function BattleScreen({
           style={{ flex: 1 }}
           data-tutorial-id="turn_order"
         >
-          <TurnOrderBar state={state} />
+          <TurnOrderBar
+            state={state}
+            enemyIntents={intentsForLayout ?? undefined}
+            allCombatants={state.combatants}
+            intentsVisible={intentsVisible}
+          />
         </div>
         {onBackToSandboxConfig && (
           <button

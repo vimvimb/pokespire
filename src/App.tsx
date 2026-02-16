@@ -803,6 +803,7 @@ export default function App() {
 
   // Go to sandbox configuration screen
   const handleGoToSandbox = useCallback(() => {
+    setIsTutorialMode(false);
     setScreen("sandbox_config");
   }, []);
 
@@ -912,6 +913,7 @@ export default function App() {
         hpOverrides,
       );
       setIsSandboxBattle(true);
+      setIsTutorialMode(false);
       setScreen("battle");
     },
     [battle],
