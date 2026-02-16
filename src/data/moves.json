@@ -4337,5 +4337,242 @@
     ],
     "description": "Slash rapidly. Deal 3 damage x3 hits. (Front row)",
     "contact": true
+  },
+  "will-o-wisp": {
+    "name": "Will-O-Wisp",
+    "cost": 1,
+    "type": "fire",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "apply_status",
+        "status": "burn",
+        "stacks": 3
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "fire"
+    ],
+    "description": "Apply Burn 3.",
+    "contact": false
+  },
+  "flame-charge": {
+    "name": "Flame Charge",
+    "cost": 1,
+    "type": "fire",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 6
+      },
+      {
+        "type": "apply_status_self",
+        "status": "haste",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 6 damage. Gain 1 Haste. (Front row)",
+    "contact": true
+  },
+  "mystical-fire": {
+    "name": "Mystical Fire",
+    "cost": 1,
+    "type": "fire",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 6
+      },
+      {
+        "type": "apply_status",
+        "status": "burn",
+        "stacks": 1
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 1
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 6 damage. Apply Burn 1 and Enfeeble 1.",
+    "contact": false
+  },
+  "lava-plume": {
+    "name": "Lava Plume",
+    "cost": 2,
+    "type": "fire",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 5
+      },
+      {
+        "type": "apply_status",
+        "status": "burn",
+        "stacks": 1
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 5 damage to all enemies. Apply Burn 1.",
+    "contact": false
+  },
+  "scorch": {
+    "name": "Scorch",
+    "cost": 2,
+    "type": "fire",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 8,
+        "bonusValue": 1,
+        "bonusCondition": "target_burn_stacks"
+      },
+      {
+        "type": "apply_status",
+        "status": "burn",
+        "stacks": 2
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 8 damage (+1 per Burn stack on target). Apply Burn 2.",
+    "contact": false
+  },
+  "fire-lash": {
+    "name": "Fire Lash",
+    "cost": 1,
+    "type": "fire",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 7
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 1
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 7 damage. Apply Enfeeble 1. (Front row)",
+    "contact": true
+  },
+  "blaze-kick": {
+    "name": "Blaze Kick",
+    "cost": 1,
+    "type": "fire",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 10
+      },
+      {
+        "type": "apply_status",
+        "status": "burn",
+        "stacks": 1
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 10 damage. Apply Burn 1. (Front row)",
+    "contact": true
+  },
+  "heat-wave": {
+    "name": "Heat Wave",
+    "cost": 2,
+    "type": "fire",
+    "range": "front_row",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 8,
+        "bonusValue": 2,
+        "bonusCondition": "target_burn_stacks"
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 8 damage to front row (+2 per Burn stack on each target).",
+    "contact": false
+  },
+  "inferno": {
+    "name": "Inferno",
+    "cost": 2,
+    "type": "fire",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 10
+      },
+      {
+        "type": "apply_status",
+        "status": "burn",
+        "stacks": 3
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 10 damage. Apply Burn 3.",
+    "contact": false
+  },
+  "blast-burn": {
+    "name": "Blast Burn",
+    "cost": 3,
+    "type": "fire",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 30,
+        "bonusValue": 2,
+        "bonusCondition": "user_vanished_cards"
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 30 damage (+2 per card in your Vanished pile).",
+    "contact": false
   }
 }

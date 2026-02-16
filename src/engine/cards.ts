@@ -33,7 +33,10 @@ import {
   checkRudeAwakening,
   checkBlindAggression,
   checkDrySkin,
-  checkSporeMastery
+  checkSporeMastery,
+  checkConsumingFlame,
+  shouldConsumingFlameVanish,
+  checkImpactGuard
 } from './passives';
 import { shuffle, MAX_HAND_SIZE } from './deck';
 import { getTypeEffectiveness, getEffectivenessLabel } from './typeChart';
@@ -240,6 +243,17 @@ export function playCard(
     logs.push(...protectiveToxinsLogs);
   }
 
+  // Impact Guard: Contact front_enemy attacks grant Block
+  const impactGuardBlock = checkImpactGuard(combatant, card);
+  if (impactGuardBlock > 0) {
+    combatant.block += impactGuardBlock;
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Impact Guard: ${combatant.name} gains ${impactGuardBlock} Block!`,
+    });
+  }
+
   // Parental Bond: Add a copy of the card to hand
   if (shouldCreateCopy) {
     // Get the base card ID (strip __parental if somehow present)
@@ -296,14 +310,24 @@ export function playCard(
   }
 
   // Vanish or discard
-  if (card.vanish) {
+  // Consuming Flame forces fire cards to vanish even if they normally wouldn't
+  const forcedVanish = shouldConsumingFlameVanish(combatant, card);
+  if (card.vanish || forcedVanish) {
     // Card is removed from the game — track in vanished pile
     combatant.vanishedPile.push(cardId);
-    logs.push({
-      round: state.round,
-      combatantId: combatant.id,
-      message: `${card.name} vanishes!`,
-    });
+    if (forcedVanish && !card.vanish) {
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `Consuming Flame: ${card.name} is consumed!`,
+      });
+    } else {
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `${card.name} vanishes!`,
+      });
+    }
   } else {
     combatant.discardPile.push(cardId);
   }
@@ -651,13 +675,13 @@ function buildDamageModifiers(
     });
   }
 
-  // Searing Fury: Fire attacks deal +1 damage per Burn stack on target
-  const searingFuryBonus = checkSearingFury(source, target, card);
+  // Searing Fury: Fire attacks deal +1 damage per Burn stack across ALL enemies
+  const searingFuryBonus = checkSearingFury(source, target, card, state);
   if (searingFuryBonus > 0) {
     logs.push({
       round: state.round,
       combatantId: source.id,
-      message: `Searing Fury: +${searingFuryBonus} damage (${searingFuryBonus} Burn stacks)!`,
+      message: `Searing Fury: +${searingFuryBonus} damage (${searingFuryBonus} total Burn stacks)!`,
     });
   }
 
@@ -745,6 +769,16 @@ function buildDamageModifiers(
     });
   }
 
+  // Consuming Flame: Fire cards deal 20% more damage (but vanish after use)
+  const consumingFlameMultiplier = checkConsumingFlame(source, card);
+  if (consumingFlameMultiplier > 1) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Consuming Flame: x1.2 damage (Fire card)!`,
+    });
+  }
+
   // Rude Awakening: Double damage to sleeping targets
   const rudeAwakeningMultiplier = checkRudeAwakening(source, target);
   if (rudeAwakeningMultiplier > 1) {
@@ -814,6 +848,7 @@ function buildDamageModifiers(
     hustleMultiplier,  // 1.3x multiplier for attacks
     technicianMultiplier,  // 1.3x for 1-cost cards
     aristocratMultiplier,  // 1.3x for Epic cards
+    consumingFlameMultiplier,  // 1.2x for Fire cards (Consuming Flame)
     familyFuryBonus: scrappyBonus + relentlessBonus + blindAggressionBonus,  // Combine flat bonuses
     nightAssassinBonus,
     maliceBonus,
@@ -854,6 +889,7 @@ function buildDamageBreakdown(r: ReturnType<typeof applyCardDamage>): string {
   if (r.hustleMultiplier > 1) parts.push(`x${r.hustleMultiplier.toFixed(1)} Hustle`);
   if (r.technicianMultiplier > 1) parts.push(`x${r.technicianMultiplier.toFixed(1)} Tech`);
   if (r.aristocratMultiplier > 1) parts.push(`x${r.aristocratMultiplier.toFixed(1)} Aristocrat`);
+  if (r.consumingFlameMultiplier > 1) parts.push(`x${r.consumingFlameMultiplier.toFixed(1)} Flame`);
   if (r.typeEffectiveness !== 1.0) parts.push(`x${r.typeEffectiveness.toFixed(2)} Type`);
   if (r.bloomingCycleReduction > 0) parts.push(`-${r.bloomingCycleReduction} Blooming`);
   if (r.staticFieldReduction > 0) parts.push(`-${r.staticFieldReduction} Static`);
@@ -957,6 +993,11 @@ function resolveEffects(
             damageValue += effect.bonusValue;
           } else if (effect.bonusCondition === 'target_debuff_stacks') {
             damageValue += effect.bonusValue * getTotalDebuffStacks(target);
+          } else if (effect.bonusCondition === 'target_burn_stacks') {
+            const burnStacks = getStatusStacks(target, 'burn');
+            damageValue += effect.bonusValue * burnStacks;
+          } else if (effect.bonusCondition === 'user_vanished_cards') {
+            damageValue += effect.bonusValue * source.vanishedPile.length;
           }
         }
 

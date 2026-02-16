@@ -59,7 +59,7 @@ export interface DamageEffect {
   type: 'damage';
   value: number;
   bonusValue?: number;           // extra damage if condition met
-  bonusCondition?: 'user_below_half_hp' | 'target_debuff_stacks';  // condition type
+  bonusCondition?: 'user_below_half_hp' | 'target_debuff_stacks' | 'target_burn_stacks' | 'user_vanished_cards';  // condition type
 }
 
 export interface BlockEffect {

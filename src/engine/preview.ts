@@ -18,7 +18,8 @@ import {
   checkMalice, getTotalDebuffStacks,
   checkTechnician, checkAristocrat,
   checkRudeAwakening,
-  checkBlindAggression, checkDrySkin
+  checkBlindAggression, checkDrySkin,
+  checkConsumingFlame
 } from './passives';
 import { getBloomingCycleReduction } from './damage';
 
@@ -77,6 +78,10 @@ export function calculateDamagePreview(
           baseDamage += damageEffect.bonusValue;
         } else if (damageEffect.bonusCondition === 'target_debuff_stacks') {
           baseDamage += damageEffect.bonusValue * getTotalDebuffStacks(target);
+        } else if (damageEffect.bonusCondition === 'target_burn_stacks') {
+          baseDamage += damageEffect.bonusValue * getStatusStacks(target, 'burn');
+        } else if (damageEffect.bonusCondition === 'user_vanished_cards') {
+          baseDamage += damageEffect.bonusValue * source.vanishedPile.length;
         }
       }
       break;
@@ -111,7 +116,7 @@ export function calculateDamagePreview(
   const blindAggressionBonus = checkBlindAggression(source, target);
   const poisonBarbBonus = checkPoisonBarb(source, card);
   const adaptabilityBonus = checkAdaptability(source, card);
-  const searingFuryBonus = checkSearingFury(source, target, card);
+  const searingFuryBonus = checkSearingFury(source, target, card, state);
   const voltFuryBonus = checkVoltFury(source, target);
   const sharpBeakBonus = checkSharpBeak(source, card);
   const nightAssassinBonus = checkNightAssassin(source, card);
@@ -131,8 +136,9 @@ export function calculateDamagePreview(
   const dragonsMajestyMultiplier = checkDragonsMajesty(source);
   const technicianMultiplier = checkTechnician(source, card);
   const aristocratMultiplier = checkAristocrat(source, card);
+  const consumingFlameMultiplier = checkConsumingFlame(source, card);
   const rudeAwakeningMultiplier = checkRudeAwakening(source, target);
-  const combinedMultiplier = angerPointMultiplier * sheerForceMultiplier * recklessMultiplier * hustleMultiplier * dragonsMajestyMultiplier * technicianMultiplier * aristocratMultiplier * rudeAwakeningMultiplier;
+  const combinedMultiplier = angerPointMultiplier * sheerForceMultiplier * recklessMultiplier * hustleMultiplier * dragonsMajestyMultiplier * technicianMultiplier * aristocratMultiplier * consumingFlameMultiplier * rudeAwakeningMultiplier;
 
   // Type effectiveness (with Tinted Lens adjustment)
   let typeEffectiveness = getTypeEffectiveness(card.type, target.types);
@@ -286,11 +292,13 @@ export function calculateHandPreview(
 
   const technicianMult = checkTechnician(source, card);
   const aristocratMult = checkAristocrat(source, card);
+  const consumingFlameMult = checkConsumingFlame(source, card);
   if (technicianMult > 1) tags.push(`x${technicianMult} Tech`);
   if (aristocratMult > 1) tags.push(`x${aristocratMult} Aristocrat`);
+  if (consumingFlameMult > 1) tags.push(`x${consumingFlameMult} Flame`);
 
   const multiplier = blazeSwarmMult * angerPointMult * sheerForceMult *
-    recklessMult * hustleMult * dragonsMajestyMult * technicianMult * aristocratMult;
+    recklessMult * hustleMult * dragonsMajestyMult * technicianMult * aristocratMult * consumingFlameMult;
 
   return { additive, multiplier, tags };
 }

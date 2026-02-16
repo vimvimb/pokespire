@@ -37,6 +37,7 @@ export interface DamageResult {
   hustleMultiplier: number;       // Multiplier from Hustle (1.3x for attacks)
   technicianMultiplier: number;   // Multiplier from Technician (1.3x for 1-cost cards)
   aristocratMultiplier: number;   // Multiplier from Aristocrat (1.3x for Epic cards)
+  consumingFlameMultiplier: number; // Multiplier from Consuming Flame (1.2x for Fire cards)
   familyFuryBonus: number;        // Bonus from Family Fury (+2 per damaged ally)
   poisonBarbBonus: number;        // Bonus from Poison Barb (+2 for Poison attacks)
   adaptabilityBonus: number;      // Bonus from Adaptability (+2 extra STAB)
@@ -78,6 +79,7 @@ export interface DamageModifiers {
   hustleMultiplier?: number;
   technicianMultiplier?: number;
   aristocratMultiplier?: number;
+  consumingFlameMultiplier?: number;
   familyFuryBonus?: number;
   poisonBarbBonus?: number;
   adaptabilityBonus?: number;
@@ -144,6 +146,10 @@ export function applyCardDamage(
   // Step 1.64: Apply Aristocrat multiplier (Epic cards deal 30% more damage)
   const aristocratMultiplier = mods.aristocratMultiplier ?? 1.0;
   rawDamage = Math.floor(rawDamage * aristocratMultiplier);
+
+  // Step 1.645: Apply Consuming Flame multiplier (Fire cards deal 20% more damage)
+  const consumingFlameMultiplier = mods.consumingFlameMultiplier ?? 1.0;
+  rawDamage = Math.floor(rawDamage * consumingFlameMultiplier);
 
   // Step 1.65: Apply Type Effectiveness multiplier
   const typeEffectiveness = mods.typeEffectiveness ?? 1.0;
@@ -222,6 +228,7 @@ export function applyCardDamage(
     hustleMultiplier: hustleMultiplier,
     technicianMultiplier: technicianMultiplier,
     aristocratMultiplier: aristocratMultiplier,
+    consumingFlameMultiplier: consumingFlameMultiplier,
     familyFuryBonus: familyFuryBonus,
     nightAssassinBonus: nightAssassinBonus,
     poisonBarbBonus: poisonBarbBonus,

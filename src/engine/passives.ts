@@ -552,13 +552,13 @@ export function onDamageDealt(
     }
   }
 
-  // Mysticism: Unblocked Psychic attacks inflict 1 Enfeeble
+  // Mysticism: Unblocked Psychic attacks inflict 2 Enfeeble
   if (attacker.passiveIds.includes('mysticism') && card.type === 'psychic' && damageDealt > 0 && target.alive) {
-    applyStatus(state, target, 'enfeeble', 1, attacker.id);
+    applyStatus(state, target, 'enfeeble', 2, attacker.id);
     logs.push({
       round: state.round,
       combatantId: attacker.id,
-      message: `Mysticism: +1 Enfeeble applied to ${target.name}!`,
+      message: `Mysticism: +2 Enfeeble applied to ${target.name}!`,
     });
   }
 
@@ -1460,17 +1460,25 @@ export function checkDragonsMajesty(attacker: Combatant): number {
 
 /**
  * Check Searing Fury bonus damage.
- * Searing Fury: Fire attacks deal +1 damage per Burn stack on the target.
+ * Searing Fury: Your attacks deal +1 damage per Burn stack across ALL enemies.
  */
 export function checkSearingFury(
   attacker: Combatant,
-  target: Combatant,
-  card: MoveDefinition
+  _target: Combatant,
+  card: MoveDefinition,
+  state?: CombatState
 ): number {
   if (!attacker.passiveIds.includes('searing_fury')) return 0;
   if (card.type !== 'fire') return 0;
-  const burnStacks = target.statuses.find(s => s.type === 'burn')?.stacks ?? 0;
-  return burnStacks;
+  if (!state) return 0;
+  // Sum burn stacks across ALL enemies
+  let totalBurnStacks = 0;
+  for (const c of state.combatants) {
+    if (c.side !== attacker.side && c.alive) {
+      totalBurnStacks += getStatusStacks(c, 'burn');
+    }
+  }
+  return totalBurnStacks;
 }
 
 /**
@@ -1816,6 +1824,41 @@ export function checkSporeMastery(
   if (!combatant.passiveIds.includes('spore_mastery')) return 0;
   if (card.id !== 'spore') return 0;
   return card.cost; // Reduce by full cost to make it 0
+}
+
+/**
+ * Check Consuming Flame damage multiplier.
+ * Consuming Flame: Fire cards deal 20% more damage but Vanish after use.
+ * Returns 1.2 if active for fire cards, 1.0 otherwise.
+ */
+export function checkConsumingFlame(attacker: Combatant, card: MoveDefinition): number {
+  if (attacker.passiveIds.includes('consuming_flame') && card.type === 'fire') {
+    return 1.2;
+  }
+  return 1.0;
+}
+
+/**
+ * Check if Consuming Flame forces a card to vanish.
+ * Returns true if the card should be forced to vanish (fire card + has consuming_flame).
+ */
+export function shouldConsumingFlameVanish(combatant: Combatant, card: MoveDefinition): boolean {
+  return combatant.passiveIds.includes('consuming_flame') && card.type === 'fire';
+}
+
+/**
+ * Check Impact Guard block generation.
+ * Impact Guard: Contact front_enemy attacks grant 4 Block.
+ * Returns the block amount to grant (0 or 4).
+ */
+export function checkImpactGuard(
+  attacker: Combatant,
+  card: MoveDefinition
+): number {
+  if (!attacker.passiveIds.includes('impact_guard')) return 0;
+  if (!card.contact) return 0;
+  if (card.range !== 'front_enemy') return 0;
+  return 4;
 }
 
 /**

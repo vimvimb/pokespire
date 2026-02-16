@@ -79,6 +79,9 @@ export type PassiveId =
   // Growlithe/Arcanine line
   | 'flash_fire'
   | 'flame_body'
+  | 'impact_guard'
+  // Charmander line (new)
+  | 'consuming_flame'
   // Voltorb/Electrode line
   | 'static'
   | 'charge'
@@ -514,7 +517,7 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   },
   searing_fury: {
     name: 'Searing Fury',
-    description: 'Your Fire attacks deal +1 damage per Burn stack on the target.',
+    description: 'Your Fire attacks deal +1 damage per Burn stack across all enemies.',
   },
   volt_fury: {
     name: 'Volt Fury',
@@ -608,7 +611,7 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   },
   mysticism: {
     name: 'Mysticism',
-    description: 'Your unblocked Psychic attacks inflict 1 Enfeeble.',
+    description: 'Your unblocked Psychic attacks inflict 2 Enfeeble.',
   },
   malice: {
     name: 'Malice',
@@ -617,6 +620,14 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   hex_mastery: {
     name: 'Hex Mastery',
     description: 'Hex costs 0.',
+  },
+  consuming_flame: {
+    name: 'Consuming Flame',
+    description: 'Your Fire cards deal 20% more damage but Vanish after use.',
+  },
+  impact_guard: {
+    name: 'Impact Guard',
+    description: 'Your contact front-row attacks grant 4 Block.',
   },
   effect_spore: {
     name: 'Effect Spore',
@@ -699,9 +710,9 @@ export const CHARMANDER_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Charmeleon',
-      description: 'Evolve to Charmeleon (+10 HP). Add Flamethrower. Gain Spreading Flames.',
+      description: 'Evolve to Charmeleon (+10 HP). Add Flamethrower. Gain Consuming Flame.',
       evolvesTo: 'charmeleon',
-      passiveId: 'spreading_flames',
+      passiveId: 'consuming_flame',
       hpBoost: 0,  // HP increase comes from Charmeleon's base stats
       cardsToAdd: ['flamethrower'],
     },
@@ -1271,16 +1282,16 @@ export const GROWLITHE_PROGRESSION: ProgressionTree = {
     {
       level: 3,
       name: 'Arcanine',
-      description: 'Add Flare Blitz. Gain Flame Body.',
-      passiveId: 'flame_body',
+      description: 'Add Flare Blitz. Gain Impact Guard.',
+      passiveId: 'impact_guard',
       hpBoost: 0,
       cardsToAdd: ['flare-blitz'],
     },
     {
       level: 4,
       name: 'Arcanine (Mastered)',
-      description: 'Gain Inferno Momentum.',
-      passiveId: 'inferno_momentum',
+      description: 'Gain Rock Head.',
+      passiveId: 'rock_head',
       hpBoost: 0,
       cardsToAdd: [],
     },
@@ -1541,10 +1552,10 @@ export const MAGMAR_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Magmar',
-      description: 'Add Thunder Punch. Gain Flame Body.',
+      description: 'Add Lava Plume. Gain Flame Body.',
       passiveId: 'flame_body',
       hpBoost: 5,
-      cardsToAdd: ['thunder-punch'],
+      cardsToAdd: ['lava-plume'],
     },
     {
       level: 3,
@@ -1873,16 +1884,16 @@ export const VULPIX_PROGRESSION: ProgressionTree = {
     {
       level: 3,
       name: 'Ninetales',
-      description: 'Add Hex. Gain Malice.',
-      passiveId: 'malice',
+      description: 'Add Hex. Gain Hex Mastery.',
+      passiveId: 'hex_mastery',
       hpBoost: 0,
       cardsToAdd: ['hex'],
     },
     {
       level: 4,
       name: 'Ninetales (Mastered)',
-      description: 'Gain Hex Mastery.',
-      passiveId: 'hex_mastery',
+      description: 'Gain Malice.',
+      passiveId: 'malice',
       hpBoost: 0,
       cardsToAdd: [],
     },

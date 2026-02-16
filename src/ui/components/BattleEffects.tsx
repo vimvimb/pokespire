@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { MoveType } from '../../engine/types';
 
 // Types for battle events
@@ -60,6 +60,12 @@ function FloatingNumber({ event, position, onComplete }: FloatingNumberProps) {
   const [opacity, setOpacity] = useState(1);
   const [offsetY, setOffsetY] = useState(0);
 
+  // Use a ref so the animation effect doesn't restart when onComplete changes.
+  // Inline arrow functions (e.g. `() => removeEvent(id)`) create a new reference
+  // every render, which would cause the effect to re-run and restart the animation.
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   useEffect(() => {
     // Animate upward and fade out
     const startTime = Date.now();
@@ -76,13 +82,13 @@ function FloatingNumber({ event, position, onComplete }: FloatingNumberProps) {
       if (progress < 1) {
         frameId = requestAnimationFrame(animate);
       } else {
-        onComplete();
+        onCompleteRef.current();
       }
     };
 
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
-  }, [onComplete]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const color = event.type === 'damage' ? '#ef4444'
     : event.type === 'heal' ? '#4ade80'
@@ -127,6 +133,9 @@ function CardPlayedBanner({ sourceName, cardName, onComplete }: CardPlayedBanner
   const [opacity, setOpacity] = useState(0);
   const [scale, setScale] = useState(0.8);
 
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   useEffect(() => {
     // Fade in, hold, fade out
     const startTime = Date.now();
@@ -153,7 +162,7 @@ function CardPlayedBanner({ sourceName, cardName, onComplete }: CardPlayedBanner
         const progress = (elapsed - fadeInDuration - holdDuration) / fadeOutDuration;
         setOpacity(1 - progress);
       } else {
-        onComplete();
+        onCompleteRef.current();
         return;
       }
 
@@ -162,7 +171,7 @@ function CardPlayedBanner({ sourceName, cardName, onComplete }: CardPlayedBanner
 
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
-  }, [onComplete]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
@@ -271,6 +280,9 @@ function CardFlyAnimation({ event, onComplete }: CardFlyAnimationProps) {
   const typeColor = isBlockCard ? blockColor : (MOVE_TYPE_COLORS[event.cardType] || MOVE_TYPE_COLORS.normal);
   const isMultiTarget = event.targetPositions.length > 1;
 
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   useEffect(() => {
     const startTime = Date.now();
     const { FLIGHT_DURATION, IMPACT_DURATION, TRAIL_LENGTH, SPLIT_POINT } = CARD_FLY_CONFIG;
@@ -313,7 +325,7 @@ function CardFlyAnimation({ event, onComplete }: CardFlyAnimationProps) {
 
         if (impactProgress >= 1) {
           setPhase('done');
-          onComplete();
+          onCompleteRef.current();
         } else {
           frameId = requestAnimationFrame(animate);
         }
@@ -322,7 +334,7 @@ function CardFlyAnimation({ event, onComplete }: CardFlyAnimationProps) {
 
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
-  }, [phase, onComplete, isMultiTarget]);
+  }, [phase, isMultiTarget]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calculate current position during flight
   const getCurrentPosition = (t: number) => {
@@ -570,6 +582,9 @@ function StatusAppliedAnimation({ event, position, onComplete }: StatusAppliedAn
   const arrowColor = event.isBuff ? '#4ade80' : '#ef4444';
   const direction = event.isBuff ? -1 : 1; // -1 = up, 1 = down
 
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   useEffect(() => {
     const startTime = Date.now();
     const duration = 800;
@@ -583,13 +598,13 @@ function StatusAppliedAnimation({ event, position, onComplete }: StatusAppliedAn
       if (p < 1) {
         frameId = requestAnimationFrame(animate);
       } else {
-        onComplete();
+        onCompleteRef.current();
       }
     };
 
     frameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frameId);
-  }, [onComplete]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Arrow positions: 3 arrows spread horizontally, staggered timing
   const arrows = [

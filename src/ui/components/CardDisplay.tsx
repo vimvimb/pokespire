@@ -3,6 +3,7 @@ import type { MoveDefinition, Combatant, MoveType, CardRarity } from '../../engi
 import { isParentalBondCopy } from '../../data/loaders';
 import { calculateHandPreview } from '../../engine/preview';
 import { getEffectiveCost } from '../../engine/cards';
+import { shouldConsumingFlameVanish, hasRockHead } from '../../engine/passives';
 import { THEME } from '../theme';
 import { CardTypeMotif } from './CardTypeMotif';
 import { ItemMotif } from './ItemMotif';
@@ -183,6 +184,7 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
         const effective = Math.floor(afterAdditive * multiplier);
         const recoilPct = Math.round(effect.recoilPercent * 100);
         const changed = additiveMod !== 0 || multiplier > 1;
+        const recoilNegated = hasRockHead(combatant);
         parts.push(
           <span key={parts.length}>
             Deal{' '}
@@ -191,7 +193,10 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
             ) : (
               <>{effective}</>
             )}
-            {' '}damage. Take {recoilPct}% recoil.
+            {' '}damage.{' '}
+            <span style={recoilNegated ? { textDecoration: 'line-through', opacity: 0.5 } : undefined}>
+              Take {recoilPct}% recoil.
+            </span>
           </span>
         );
         break;
@@ -502,6 +507,18 @@ function CardDisplayInner({ cardId, handIndex, card, combatant, canAfford, isSel
           textAlign: 'center',
         }}>
           VANISH
+        </div>
+      ) : !card.vanish && shouldConsumingFlameVanish(combatant, card) && !isEchoCopy ? (
+        <div style={{
+          fontSize: 11,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          background: 'linear-gradient(90deg, #f97316, #ef4444, #f97316)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          filter: 'drop-shadow(0 0 4px rgba(239, 68, 68, 0.5))',
+        }}>
+          🔥 VANISH
         </div>
       ) : null}
 

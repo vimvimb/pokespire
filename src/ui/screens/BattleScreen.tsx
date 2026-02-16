@@ -18,6 +18,7 @@ import {
   getValidSwitchTargets,
 } from "../../engine/position";
 import { getSwitchCost } from "../../engine/turns";
+import { shouldConsumingFlameVanish } from "../../engine/passives";
 import { calculateDamagePreview } from "../../engine/preview";
 import type { DamagePreview } from "../../engine/preview";
 import { PokemonSprite } from "../components/PokemonSprite";
@@ -524,6 +525,10 @@ export function BattleScreen({
 
   // Battle effects for visual feedback (moved up to be available in handlers)
   const battleEffects = useBattleEffects();
+  // Destructure stable callbacks for use in effect dependency arrays.
+  // Using the whole `battleEffects` object as a dep causes effects to re-run every
+  // render because the object contains state arrays that change on each animation event.
+  const { addEvent, showCardPlayed, triggerCardFly, triggerStatusApplied } = battleEffects;
   const processedLogsRef = useRef<number>(0);
 
   // Status diff tracking: detect new/increased statuses by comparing snapshots
@@ -690,13 +695,22 @@ export function BattleScreen({
 
       // Trigger card fly animation if we have positions
       if (cardPos && targetPositions.length > 0) {
-        battleEffects.triggerCardFly({
+        triggerCardFly({
           cardName: card.name,
           cardType: card.type,
           startPos: cardPos,
           targetPositions,
           isBlockCard,
         });
+      }
+
+      // Trigger vanish animation — must capture ghost BEFORE state update removes the card
+      const isNativeVanish = card.vanish;
+      const isConsumingFlame = !card.vanish && shouldConsumingFlameVanish(currentCombatant, card);
+      if (isNativeVanish) {
+        handDisplayRef.current?.triggerVanish(draggingCardIndex);
+      } else if (isConsumingFlame) {
+        handDisplayRef.current?.triggerVanish(draggingCardIndex, true);
       }
 
       // Directly play the card (bypasses two-step selection to avoid flash of "Select target" message)
@@ -719,7 +733,7 @@ export function BattleScreen({
       onSelectCard,
       onSelectTarget,
       state,
-      battleEffects,
+      triggerCardFly,
       getPositionForCombatant,
     ],
   );
@@ -859,7 +873,7 @@ export function BattleScreen({
         const cardName = cardMatch[2];
         // Track current card definition for sound categorization
         currentCardDef = Object.values(MOVES).find((m) => m.name === cardName);
-        battleEffects.showCardPlayed(sourceName, cardName);
+        showCardPlayed(sourceName, cardName);
 
         // For enemy cards, trigger card fly animation
         const source = state.combatants.find((c) => c.id === log.combatantId);
@@ -886,7 +900,7 @@ export function BattleScreen({
 
             if (isBlockCard) {
               // Shield animation at enemy's own position (no beam)
-              battleEffects.triggerCardFly({
+              triggerCardFly({
                 cardName,
                 cardType,
                 startPos: sourcePos,
@@ -914,7 +928,7 @@ export function BattleScreen({
                 .filter((p): p is { x: number; y: number } => p !== null);
 
               if (targetPositions.length > 0) {
-                battleEffects.triggerCardFly({
+                triggerCardFly({
                   cardName,
                   cardType,
                   startPos: sourcePos,
@@ -943,7 +957,7 @@ export function BattleScreen({
         // Target is in the log's combatantId
         const target = state.combatants.find((c) => c.id === log.combatantId);
         if (target && damage > 0) {
-          battleEffects.addEvent({
+          addEvent({
             type: "damage",
             targetId: target.id,
             value: damage,
@@ -963,7 +977,7 @@ export function BattleScreen({
           (c) => c.name.toLowerCase() === targetName.toLowerCase(),
         );
         if (target && damage > 0) {
-          battleEffects.addEvent({
+          addEvent({
             type: "damage",
             targetId: target.id,
             value: damage,
@@ -978,7 +992,7 @@ export function BattleScreen({
         const heal = parseInt(healMatch[1]);
         const target = state.combatants.find((c) => c.id === log.combatantId);
         if (target && heal > 0) {
-          battleEffects.addEvent({
+          addEvent({
             type: "heal",
             targetId: target.id,
             value: heal,
@@ -993,7 +1007,7 @@ export function BattleScreen({
         const block = parseInt(blockMatch[1]);
         const target = state.combatants.find((c) => c.id === log.combatantId);
         if (target && block > 0) {
-          battleEffects.addEvent({
+          addEvent({
             type: "block",
             targetId: target.id,
             value: block,
@@ -1008,7 +1022,7 @@ export function BattleScreen({
         playSoundOnce("draw_card");
       }
     }
-  }, [logs, state.combatants, battleEffects, getPositionForCombatant]);
+  }, [logs, state.combatants, addEvent, showCardPlayed, triggerCardFly, getPositionForCombatant]);
 
   // Detect status changes via state diffing (handles ALL sources: moves, passives, etc.)
   useEffect(() => {
@@ -1036,7 +1050,7 @@ export function BattleScreen({
           const prevStacks = prevStatuses?.get(statusType) ?? 0;
           if (stacks > prevStacks) {
             // New status or stacks increased — fire animation
-            battleEffects.triggerStatusApplied({
+            triggerStatusApplied({
               targetId: c.id,
               statusType,
               stacks: stacks - prevStacks,
@@ -1060,7 +1074,7 @@ export function BattleScreen({
     }
 
     prevStatusRef.current = currentSnapshot;
-  }, [state.combatants, battleEffects]);
+  }, [state.combatants, triggerStatusApplied]);
 
   // Detect faints via combatant alive diffing (handles ALL defeat sources: cards, status, recoil, self-KO)
   useEffect(() => {
@@ -1213,7 +1227,7 @@ export function BattleScreen({
 
       // Trigger card fly animation if we have positions
       if (cardPos && targetPositions.length > 0) {
-        battleEffects.triggerCardFly({
+        triggerCardFly({
           cardName: card.name,
           cardType: card.type,
           startPos: cardPos,
@@ -1222,13 +1236,22 @@ export function BattleScreen({
         });
       }
 
+      // Trigger vanish animation — must capture ghost BEFORE state update removes the card
+      const isNativeVanish = card.vanish;
+      const isConsumingFlame = !card.vanish && shouldConsumingFlameVanish(currentCombatant, card);
+      if (isNativeVanish && pendingCardIndex !== null) {
+        handDisplayRef.current?.triggerVanish(pendingCardIndex);
+      } else if (isConsumingFlame && pendingCardIndex !== null) {
+        handDisplayRef.current?.triggerVanish(pendingCardIndex, true);
+      }
+
       onSelectTarget(targetId);
     },
     [
       pendingCardIndex,
       currentCombatant,
       state,
-      battleEffects,
+      triggerCardFly,
       getPositionForCombatant,
       onSelectTarget,
     ],
