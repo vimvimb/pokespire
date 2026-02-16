@@ -293,6 +293,97 @@ export function createAct3BossTestState(): RunState {
 }
 
 /**
+ * Test shortcut: level-up only (no evolution).
+ * Non-evolving Pokemon (Kangaskhan, Snorlax, Tauros) at level 1 with 3 EXP.
+ * Simulates having just won a Rattata battle: moveToNode grants +1 EXP.
+ * Returns run state ready for card draft -> level-up flow.
+ */
+export function createLevelUpTestState(): RunState {
+  const starters = ['kangaskhan', 'snorlax', 'tauros'];
+  const positions: Position[] = [
+    { row: 'front', column: 0 },
+    { row: 'front', column: 1 },
+    { row: 'front', column: 2 },
+  ];
+  const party = starters.map(id => getPokemon(id));
+  let run = createRunState(party, positions, Date.now(), 100);
+  run = {
+    ...run,
+    party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL - 1 })),
+  };
+  run = moveToNode(run, 's1-battle-rattata');
+  run = applyFullHealAll(run);
+  const rattataNode = getNodeById(run.nodes, 's1-battle-rattata');
+  const gold = rattataNode && rattataNode.type === 'battle'
+    ? applyPickupBonus(run, getBattleGoldReward(rattataNode as BattleNode, 1))
+    : 50;
+  return addGold(run, gold);
+}
+
+/**
+ * Test shortcut: level-up with evolution.
+ * Evolving Pokemon (Charmander, Bulbasaur, Squirtle) at level 1 with 3 EXP.
+ * Simulates having just won a Rattata battle: moveToNode grants +1 EXP.
+ * Returns run state ready for card draft -> level-up -> evolution flow.
+ */
+export function createEvolutionTestState(): RunState {
+  const starters = ['charmander', 'bulbasaur', 'squirtle'];
+  const positions: Position[] = [
+    { row: 'front', column: 0 },
+    { row: 'front', column: 1 },
+    { row: 'front', column: 2 },
+  ];
+  const party = starters.map(id => getPokemon(id));
+  let run = createRunState(party, positions, Date.now(), 100);
+  run = {
+    ...run,
+    party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL - 1 })),
+  };
+  run = moveToNode(run, 's1-battle-rattata');
+  run = applyFullHealAll(run);
+  const rattataNode = getNodeById(run.nodes, 's1-battle-rattata');
+  const gold = rattataNode && rattataNode.type === 'battle'
+    ? applyPickupBonus(run, getBattleGoldReward(rattataNode as BattleNode, 1))
+    : 50;
+  return addGold(run, gold);
+}
+
+/**
+ * Test shortcut: level-up with evolution, large party (4 party + 4 bench).
+ * Party: Charmander, Bulbasaur, Squirtle, Pikachu at level 1 with 3 EXP.
+ * Bench: Caterpie, Weedle, Growlithe, Vulpix at level 1 with 3 EXP.
+ * Simulates having just won a Rattata battle. Bench Pokemon auto-level during moveToNode.
+ * Returns run state ready for card draft -> level-up -> evolution flow.
+ */
+export function createEvolutionLargePartyTestState(): RunState {
+  const partyStarters = ['charmander', 'bulbasaur', 'squirtle', 'pikachu'];
+  const positions: Position[] = [
+    { row: 'front', column: 0 },
+    { row: 'front', column: 2 },
+    { row: 'back', column: 0 },
+    { row: 'back', column: 2 },
+  ];
+  const party = partyStarters.map(id => getPokemon(id));
+  let run = createRunState(party, positions, Date.now(), 100);
+  run = {
+    ...run,
+    party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL - 1 })),
+  };
+  const benchIds = ['caterpie', 'weedle', 'growlithe', 'vulpix'];
+  for (const id of benchIds) {
+    const recruit = createRecruitPokemon(id, 1, EXP_PER_LEVEL - 1);
+    run = recruitToRoster(run, recruit);
+  }
+  run = moveToNode(run, 's1-battle-rattata');
+  run = applyFullHealAll(run);
+  const rattataNode = getNodeById(run.nodes, 's1-battle-rattata');
+  const gold = rattataNode && rattataNode.type === 'battle'
+    ? applyPickupBonus(run, getBattleGoldReward(rattataNode as BattleNode, 1))
+    : 50;
+  return addGold(run, gold);
+}
+
+/**
  * Transition to Act 3 - preserves party, resets nodes to Act 3 map.
  * Note: Party is healed before showing the transition screen.
  */
