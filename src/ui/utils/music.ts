@@ -5,6 +5,7 @@ import finalDungeonRocketHideout from '../../../assets/music/final_dungeon_rocke
 import regularBattleJohto from '../../../assets/music/regular_battle_johto_trainer_battle_remix.mp3';
 import { getActMapConfig } from '../components/map/mapConfig';
 import type { RunState } from '../../run/types';
+import type { Screen } from '../../types/screens';
 
 export type MusicTrack =
   | 'early_dungeon'
@@ -108,27 +109,6 @@ export function playMusic(track: MusicTrack | null): void {
   }
 }
 
-type Screen =
-  | 'main_menu'
-  | 'select'
-  | 'map'
-  | 'rest'
-  | 'event'
-  | 'recruit'
-  | 'card_draft'
-  | 'battle'
-  | 'run_victory'
-  | 'run_defeat'
-  | 'card_dex'
-  | 'pokedex'
-  | 'sandbox_config'
-  | 'act_transition'
-  | 'card_removal'
-  | 'event_tester'
-  | 'ghost_revive'
-  | 'disclaimer'
-  | 'debugging';
-
 const DUNGEON_SCREENS: Screen[] = [
   'map',
   'rest',
@@ -137,6 +117,7 @@ const DUNGEON_SCREENS: Screen[] = [
   'card_removal',
   'ghost_revive',
   'card_draft',
+  'level_up',
   'act_transition',
 ];
 

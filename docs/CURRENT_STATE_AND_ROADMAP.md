@@ -1,6 +1,6 @@
 # Pokespire - Current State & Roadmap
 
-**Last Updated:** 2026-02-05
+**Last Updated:** 2026-02-15
 
 ---
 
@@ -160,6 +160,8 @@ Each Pokemon has 4 progression levels. Passives **stack** (not replaced) as you 
 - **EXP Required:** 2 EXP per level
 - **Level Up Grants:** Form evolution, Max HP boost (+10), new passives, new cards
 
+**Level-Up Flow:** After winning a battle, the player enters card draft. On draft completion, if any party Pokemon can level up, the **Level Up** screen appears. It shows a summary of all level-ups (passives, new cards, HP boost) in a compact row layout; new cards are viewable via a modal. If any Pokemon evolve, an evolution sequence plays (silhouette, morph, reveal, confetti), followed by a congratulations screen. Bench Pokemon that can level up are auto-leveled during node advancement with no player UI.
+
 ### Charmander Line - "Inferno" (IMPLEMENTED)
 
 **Theme:** Burn stacking and explosive damage
@@ -269,6 +271,7 @@ Rattata, Raticate, Pidgey, Pidgeotto, Pidgeot, Ekans, Arbok, Snorlax, Kangaskhan
 - **Battle Screen** - Full combat with targeting, hand display, turn order, battle log
 - **Rest Screen** - Choose between healing or max HP boost
 - **Card Draft** - Post-battle card acquisition
+- **Level Up Screen** - Appears after card draft when party members can level up. Shows level-up summary, evolution animations for evolving Pokemon, and a congratulations screen before returning to the map.
 - **Run Victory** - Campaign completion screen
 - **Card Dex** - Browse all moves/cards
 
@@ -426,6 +429,23 @@ The current single-act prototype will expand to this full structure.
 - Daily/weekly challenge runs
 - Additional generations/environments
 - Legendary Pokemon as special unlocks
+
+---
+
+## Debugging Screen - IMPLEMENTED
+
+The main menu includes a Debugging option with test shortcuts:
+
+| Shortcut                     | Purpose                                                             |
+| ---------------------------- | ------------------------------------------------------------------- |
+| Test Act 2 / 3               | Jump to mid-campaign map                                            |
+| Test Act 1 / 2 / 3 Boss      | Jump to pre-boss map                                                |
+| Test Level Up                | Card draft with non-evolving Pokemon about to level up              |
+| Test Level Up + Evolution    | Card draft with evolving starters; full level-up and evolution flow |
+| Test Evolution (Large Party) | Same as above with 4 party + 4 bench; validates large roster        |
+| Event Tester                 | Jump to event testing UI                                            |
+
+These shortcuts bypass battles to test level-up, evolution, card draft, and related flows.
 
 ---
 

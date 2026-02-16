@@ -16,6 +16,7 @@ import { RestScreen } from "./ui/screens/RestScreen";
 import { EventScreen } from "./ui/screens/EventScreen";
 import { RecruitScreen } from "./ui/screens/RecruitScreen";
 import { CardDraftScreen } from "./ui/screens/CardDraftScreen";
+import { LevelUpScreen } from "./ui/screens/LevelUpScreen";
 import { RunVictoryScreen } from "./ui/screens/RunVictoryScreen";
 import type { SandboxPokemon } from "./ui/screens/SandboxConfigScreen";
 import { ActTransitionScreen } from "./ui/screens/ActTransitionScreen";
@@ -64,6 +65,9 @@ import {
   createAct3TestState,
   createAct2BossTestState,
   createAct3BossTestState,
+  createLevelUpTestState,
+  createEvolutionTestState,
+  createEvolutionLargePartyTestState,
   applyPartyPercentHeal,
   applyFullHealAll,
   addCardToDeck,
@@ -93,29 +97,10 @@ import {
   addGold,
   spendGold,
   reviveFromGraveyard,
+  anyPokemonCanLevelUp,
 } from "./run/state";
 import { getActMapConfig } from "./ui/components/map/mapConfig";
-
-type Screen =
-  | "main_menu"
-  | "select"
-  | "map"
-  | "rest"
-  | "event"
-  | "recruit"
-  | "card_draft"
-  | "battle"
-  | "run_victory"
-  | "run_defeat"
-  | "card_dex"
-  | "pokedex"
-  | "sandbox_config"
-  | "act_transition"
-  | "card_removal"
-  | "event_tester"
-  | "ghost_revive"
-  | "disclaimer"
-  | "debugging";
+import type { Screen } from "./types/screens";
 
 // localStorage keys
 const SAVE_KEY = "pokespire_save";
@@ -134,6 +119,7 @@ function saveGame(screen: Screen, runState: RunState | null) {
     "event",
     "recruit",
     "card_draft",
+    "level_up",
     "battle",
     "act_transition",
     "card_removal",
@@ -188,6 +174,9 @@ export default function App() {
   const [pendingBattleNodeId, setPendingBattleNodeId] = useState<string | null>(
     null,
   );
+  const [pendingPostLevelUpScreen, setPendingPostLevelUpScreen] = useState<
+    Screen | null
+  >(null);
   const battle = useBattle();
 
   const latestSaveRef = useRef({ screen, runState });
@@ -329,17 +318,30 @@ export default function App() {
 
       setRunState(newRun);
 
-      // Check if run is complete
-      if (isRunComplete(newRun)) {
-        setScreen("run_victory");
-      } else if (newRun.currentNodeId === "a2-chasm-ghosts") {
-        // Special: Gengar offers to revive a fallen ally after the chasm fight
-        setScreen("ghost_revive");
+      const targetScreen: Screen = isRunComplete(newRun)
+        ? "run_victory"
+        : newRun.currentNodeId === "a2-chasm-ghosts"
+          ? "ghost_revive"
+          : "map";
+
+      if (anyPokemonCanLevelUp(newRun)) {
+        setPendingPostLevelUpScreen(targetScreen);
+        setScreen("level_up");
       } else {
-        setScreen("map");
+        setScreen(targetScreen);
       }
     },
     [runState],
+  );
+
+  const handleLevelUpComplete = useCallback(
+    (updatedRun: RunState) => {
+      setRunState(updatedRun);
+      const target = pendingPostLevelUpScreen ?? "map";
+      setPendingPostLevelUpScreen(null);
+      setScreen(target);
+    },
+    [pendingPostLevelUpScreen],
   );
 
   // Handle battle end
@@ -415,18 +417,33 @@ export default function App() {
 
       // Check if this was the final boss (Mewtwo in Act 3)
       if (isRunComplete(newRun)) {
-        setScreen("run_victory");
         setRunState(newRun);
+        if (anyPokemonCanLevelUp(newRun)) {
+          setPendingPostLevelUpScreen("run_victory");
+          setScreen("level_up");
+        } else {
+          setScreen("run_victory");
+        }
       } else if (isAct2Complete(newRun)) {
         // Giovanni defeated in Act 2 - full heal and go to act transition
         newRun = applyFullHealAll(newRun);
         setRunState(newRun);
-        setScreen("act_transition");
+        if (anyPokemonCanLevelUp(newRun)) {
+          setPendingPostLevelUpScreen("act_transition");
+          setScreen("level_up");
+        } else {
+          setScreen("act_transition");
+        }
       } else if (isAct1Complete(newRun)) {
         // Ariana defeated - full heal and go to act transition
         newRun = applyFullHealAll(newRun);
         setRunState(newRun);
-        setScreen("act_transition");
+        if (anyPokemonCanLevelUp(newRun)) {
+          setPendingPostLevelUpScreen("act_transition");
+          setScreen("level_up");
+        } else {
+          setScreen("act_transition");
+        }
       } else {
         setRunState(newRun);
         setLastGoldEarned(goldEarned > 0 ? goldEarned : undefined);
@@ -733,6 +750,30 @@ export default function App() {
     const run = createAct3BossTestState();
     setRunState(run);
     setScreen("map");
+  }, []);
+
+  const handleTestLevelUp = useCallback(() => {
+    clearSave();
+    const run = createLevelUpTestState();
+    setRunState(run);
+    setLastGoldEarned(50);
+    setScreen("card_draft");
+  }, []);
+
+  const handleTestEvolution = useCallback(() => {
+    clearSave();
+    const run = createEvolutionTestState();
+    setRunState(run);
+    setLastGoldEarned(50);
+    setScreen("card_draft");
+  }, []);
+
+  const handleTestEvolutionLargeParty = useCallback(() => {
+    clearSave();
+    const run = createEvolutionLargePartyTestState();
+    setRunState(run);
+    setLastGoldEarned(50);
+    setScreen("card_draft");
   }, []);
 
   // Jump straight to a boss fight from Event Tester
@@ -1220,6 +1261,9 @@ export default function App() {
           <button onClick={handleTestAct1Boss} style={devBtnStyle}>Test Act 1 Boss</button>
           <button onClick={handleTestAct2Boss} style={devBtnStyle}>Test Act 2 Boss</button>
           <button onClick={handleTestAct3Boss} style={devBtnStyle}>Test Act 3 Boss</button>
+          <button onClick={handleTestLevelUp} style={devBtnStyle}>Test Level Up</button>
+          <button onClick={handleTestEvolution} style={devBtnStyle}>Test Level Up + Evolution</button>
+          <button onClick={handleTestEvolutionLargeParty} style={devBtnStyle}>Test Evolution (Large Party)</button>
           <button onClick={() => setScreen("event_tester")} style={devBtnStyle}>Event Tester</button>
         </div>
       </ScreenShell>
@@ -1562,6 +1606,15 @@ export default function App() {
         onDraftComplete={handleDraftComplete}
         onRestart={handleMainMenu}
         goldEarned={lastGoldEarned}
+      />
+    );
+  }
+
+  if (screen === "level_up" && runState) {
+    return (
+      <LevelUpScreen
+        run={runState}
+        onComplete={handleLevelUpComplete}
       />
     );
   }
