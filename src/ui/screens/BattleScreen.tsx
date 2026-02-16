@@ -26,6 +26,7 @@ import { TurnOrderBar } from "../components/TurnOrderBar";
 import { BattleLog } from "../components/BattleLog";
 import { PileButton } from "../components/PileButton";
 import { PileModal } from "../components/PileModal";
+import { TutorialOverlay } from "../components/TutorialOverlay";
 import { EnergyPips } from "../components/EnergyPips";
 import { PokemonDetailsPanel } from "../components/PokemonDetailsPanel";
 import { EnemyHandPreview } from "../components/EnemyHandPreview";
@@ -34,6 +35,7 @@ import {
   BattleEffectsLayer,
 } from "../components/BattleEffects";
 import type { BattlePhase } from "../hooks/useBattle";
+import type { TutorialHighlightTarget, TutorialZone } from "../../data/tutorial";
 import type { RunState } from "../../run/types";
 import { getBattleSpriteScale } from "../../data/heights";
 import { Flourish } from "../components/Flourish";
@@ -61,6 +63,17 @@ interface Props {
   ) => void;
   runState?: RunState;
   onBackToSandboxConfig?: () => void; // Only present in sandbox mode
+  /** Tutorial overlay config when in tutorial battle */
+  tutorial?: {
+    isActive: boolean;
+    highlightTarget: TutorialHighlightTarget;
+    stepText: string;
+    advance: () => void;
+    skip: () => void;
+    canSkip: boolean;
+    allowInteraction: boolean;
+    zone: TutorialZone;
+  };
 }
 
 /** Render a 2-row grid for one side of the battle */
@@ -304,6 +317,7 @@ export function BattleScreen({
   onBattleEnd,
   runState,
   onBackToSandboxConfig,
+  tutorial: tutorialConfig,
 }: Props) {
   const isPlayerTurn = phase === "player_turn";
   const currentCombatant =
@@ -1337,7 +1351,10 @@ export function BattleScreen({
           zIndex: 10,
         }}
       >
-        <div style={{ flex: 1 }}>
+        <div
+          style={{ flex: 1 }}
+          data-tutorial-id="turn_order"
+        >
           <TurnOrderBar state={state} />
         </div>
         {onBackToSandboxConfig && (
@@ -1435,6 +1452,7 @@ export function BattleScreen({
       {/* Battlefield - Grid Layout */}
       <div
         ref={battlefieldContainerRef}
+        data-tutorial-id="battlefield"
         style={{
           position: "absolute",
           top: 20,
@@ -1602,6 +1620,7 @@ export function BattleScreen({
             />
 
             {/* Hand cards (center) */}
+            <div data-tutorial-id="hand">
             <HandDisplay
               ref={handDisplayRef}
               combatant={currentCombatant}
@@ -1611,7 +1630,15 @@ export function BattleScreen({
               onDragEnd={handleDragEnd}
               draggingIndex={draggingCardIndex}
               unplayableCardIndices={unplayableCardIndices}
+              tutorialHighlightCardType={
+                tutorialConfig?.highlightTarget === "attack_cards"
+                  ? "attack"
+                  : tutorialConfig?.highlightTarget === "defend_cards"
+                    ? "defend"
+                    : undefined
+              }
             />
+            </div>
 
             {/* Energy vessel + Switch + End Turn (right of hand) */}
             <div
@@ -1622,11 +1649,13 @@ export function BattleScreen({
                 gap: 6,
               }}
             >
+              <div data-tutorial-id="energy">
               <EnergyPips
                 energy={currentCombatant.energy}
                 energyCap={currentCombatant.energyCap}
                 variant="vessel"
               />
+              </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 {/* Switch button — ornate with cost badge */}
                 {onSwitchPosition &&
@@ -1814,6 +1843,7 @@ export function BattleScreen({
 
                 {/* End Turn button — ornate gold */}
                 <button
+                  data-tutorial-id="end_turn"
                   onClick={onEndTurn}
                   style={{
                     position: "relative",
@@ -2212,6 +2242,19 @@ export function BattleScreen({
             }
           `}</style>
         </div>
+      )}
+
+      {/* Tutorial overlay */}
+      {tutorialConfig?.isActive && (
+        <TutorialOverlay
+          highlightTarget={tutorialConfig.highlightTarget}
+          stepText={tutorialConfig.stepText}
+          onGotIt={tutorialConfig.advance}
+          onSkip={tutorialConfig.canSkip ? tutorialConfig.skip : undefined}
+          allowInteraction={tutorialConfig.allowInteraction}
+          canSkip={tutorialConfig.canSkip}
+          zone={tutorialConfig.zone}
+        />
       )}
     </div>
   );
