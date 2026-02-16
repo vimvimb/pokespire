@@ -113,6 +113,20 @@ When implementing a feature, think about:
 
 ---
 
+## Offline and PWA
+
+Pokespire is designed to be **offline-first** and **PWA-compatible**. The game should be fully playable without an internet connection after the first load, and users can add it to their home screen.
+
+**Offline-first design:** All assets (sprites, fonts, music, sounds, backgrounds) are bundled or served locally. There are no runtime fetches to external APIs or CDNs.
+
+**Guidance for agentic developers:**
+- Do not add `fetch()` calls to external APIs or CDNs at runtime; they break offline play.
+- Use the centralized `getSpriteUrl()` in `src/ui/utils/sprites.ts` for Pokemon sprites. Sprites live in `public/assets/sprites/`.
+- To add new Pokemon sprites: add the Pokemon to `pokemon.json`, then run `npm run download-sprites`. See `public/assets/sprites/README.md`.
+- PWA configuration lives in `vite.config.ts` (VitePWA plugin). To regenerate app icons: `npm run build:icons`.
+
+---
+
 ## Anti-Patterns to Avoid
 
 ### Don't: Add special cases in the wrong layer

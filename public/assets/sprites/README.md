@@ -1,6 +1,6 @@
 # Pokemon Sprites
 
-Sprites are sourced from PokemonDB (Black/White animated) and stored locally for offline play.
+Sprites are stored locally so the game works fully offline and as a PWA. They are sourced from PokemonDB (Black/White animated) and downloaded via the build script.
 
 ## Adding a new Pokemon
 
