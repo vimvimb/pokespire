@@ -325,7 +325,7 @@ export function playCard(
 /**
  * Resolve the targets for a card based on move range.
  */
-function resolveTargets(
+export function resolveTargets(
   state: CombatState,
   source: Combatant,
   range: MoveRange,
