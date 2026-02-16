@@ -2,6 +2,7 @@ import type { RunState } from '../../run/types';
 import { getPokemon } from '../../data/loaders';
 import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   run: RunState;
@@ -10,10 +11,6 @@ interface Props {
 }
 
 const HEAL_PERCENT = 0.3;
-
-function getSpriteUrl(pokemonId: string): string {
-  return `https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemonId}.gif`;
-}
 
 export function RestScreen({ run, onHeal, onRestart }: Props) {
   const header = (

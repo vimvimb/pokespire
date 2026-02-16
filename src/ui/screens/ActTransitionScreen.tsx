@@ -1,6 +1,7 @@
 import type { RunState } from '../../run/types';
 import { getPokemon } from '../../data/loaders';
 import { THEME } from '../theme';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   run: RunState;
@@ -123,7 +124,7 @@ export function ActTransitionScreen({ run, onContinue, onRestart }: Props) {
               opacity: isDead ? 0.4 : 1,
             }}>
               <img
-                src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemon.formId}.gif`}
+                src={getSpriteUrl(pokemon.formId)}
                 alt={basePokemon.name}
                 style={{
                   width: 80,

@@ -11,6 +11,7 @@ import {
 } from '../../run/progression';
 import { EXP_PER_LEVEL } from '../../run/state';
 import { getSpriteSize } from '../../data/heights';
+import { getSpriteUrl } from '../utils/sprites';
 import { CardPreview } from './CardPreview';
 import { DexFrame } from './DexFrame';
 import { THEME } from '../theme';
@@ -59,10 +60,6 @@ function inferLevelFromPassives(pokemonId: string, passiveIds: string[]): number
     }
   }
   return level;
-}
-
-function getSpriteUrl(pokemonId: string): string {
-  return `https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemonId}.gif`;
 }
 
 // ── Small SVG helpers ────────────────────────────────────────────────

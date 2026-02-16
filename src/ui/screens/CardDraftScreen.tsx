@@ -10,6 +10,7 @@ import { Flourish } from "../components/Flourish";
 import { THEME } from "../theme";
 import { GoldCoin } from "../components/GoldCoin";
 import { playSound } from "../utils/sound";
+import { getSpriteUrl } from "../utils/sprites";
 
 interface Props {
   run: RunState;
@@ -250,7 +251,7 @@ export function CardDraftScreen({
         }}
       >
         <img
-          src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${currentPokemon.formId}.gif`}
+          src={getSpriteUrl(currentPokemon.formId)}
           alt={basePokemon.name}
           style={{
             width: 72,

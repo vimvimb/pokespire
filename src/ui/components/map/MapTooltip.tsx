@@ -2,16 +2,13 @@ import type { MapNode, BattleNode, CardRemovalNode, ActTransitionNode, EventNode
 import type { ActMapConfig } from './mapConfig';
 import { ALL_EVENTS } from '../../../data/events';
 import { THEME } from '../../theme';
+import { getSpriteUrl } from '../../utils/sprites';
 
 interface Props {
   node: MapNode;
   position: { x: number; y: number };
   mapBounds: { width: number; height: number };
   actConfig: ActMapConfig;
-}
-
-function getMiniSpriteUrl(pokemonId: string): string {
-  return `https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemonId}.gif`;
 }
 
 function getDifficultyLabel(enemyCount: number): string {
@@ -90,7 +87,7 @@ function renderContent(node: MapNode, actConfig: ActMapConfig) {
               {battle.enemies.map((enemyId, idx) => (
                 <img
                   key={idx}
-                  src={getMiniSpriteUrl(enemyId)}
+                  src={getSpriteUrl(enemyId)}
                   alt={enemyId}
                   style={{
                     width: 36,
@@ -127,7 +124,7 @@ function renderContent(node: MapNode, actConfig: ActMapConfig) {
             {battle.enemies.map((enemyId, idx) => (
               <img
                 key={idx}
-                src={getMiniSpriteUrl(enemyId)}
+                src={getSpriteUrl(enemyId)}
                 alt={enemyId}
                 style={{
                   width: 36,
@@ -200,7 +197,7 @@ function renderContent(node: MapNode, actConfig: ActMapConfig) {
           {recruit.pokemonId ? (
             <>
               <img
-                src={getMiniSpriteUrl(recruit.pokemonId)}
+                src={getSpriteUrl(recruit.pokemonId)}
                 alt={recruit.pokemonId}
                 style={{
                   width: 48,

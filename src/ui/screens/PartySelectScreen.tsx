@@ -6,6 +6,7 @@ import { ScreenShell } from '../components/ScreenShell';
 import { PokemonTile } from '../components/PokemonTile';
 import { THEME } from '../theme';
 import { GoldCoin } from '../components/GoldCoin';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   onStart: (party: PokemonData[], positions: Position[], gold: number) => void;
@@ -30,10 +31,6 @@ function getPokemonByTier(cost: number): PokemonData[] {
 
 type Phase = 'select' | 'position';
 type SlotKey = `${Row}-${Column}`;
-
-function makeSpriteUrl(id: string): string {
-  return `https://img.pokemondb.net/sprites/black-white/anim/normal/${id}.gif`;
-}
 
 // ── Pokemon Card (selection phase) ─────────────────────────────────
 
@@ -63,7 +60,7 @@ function PokemonCard({
     >
       <PokemonTile
         name={pokemon.name}
-        spriteUrl={makeSpriteUrl(pokemon.id)}
+        spriteUrl={getSpriteUrl(pokemon.id)}
         primaryType={pokemon.types[0]}
         secondaryType={pokemon.types[1]}
         size="large"
@@ -178,7 +175,7 @@ function FormationSlot({
       {pokemon ? (
         <>
           <img
-            src={makeSpriteUrl(pokemon.id)}
+            src={getSpriteUrl(pokemon.id)}
             alt={pokemon.name}
             style={{ width: 60, height: 60, imageRendering: 'pixelated', objectFit: 'contain' }}
             draggable={false}
@@ -572,7 +569,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
                   <PokemonTile
                     key={id}
                     name={pokemon.name}
-                    spriteUrl={makeSpriteUrl(pokemon.id)}
+                    spriteUrl={getSpriteUrl(pokemon.id)}
                     primaryType={pokemon.types[0]}
                     size="small"
                     isSelected

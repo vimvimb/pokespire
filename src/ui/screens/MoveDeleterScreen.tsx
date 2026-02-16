@@ -7,6 +7,7 @@ import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
 import { GoldCoin } from '../components/GoldCoin';
 import { getSpriteSize } from '../../data/heights';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   run: RunState;
@@ -150,7 +151,7 @@ export function MoveDeleterScreen({ run, onForgetCard, onClose, onRestart }: Pro
         }}>
           {/* Hypno sprite */}
           <img
-            src="https://img.pokemondb.net/sprites/black-white/anim/normal/hypno.gif"
+            src={getSpriteUrl('hypno')}
             alt="Hypno"
             style={{
               width: 96,
@@ -365,7 +366,7 @@ function PokemonTile({ name, formId, deckCount, isDead, themeColor, onClick }: {
       }}
     >
       <img
-        src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${formId}.gif`}
+        src={getSpriteUrl(formId)}
         alt={name}
         style={{
           width: Math.min(getSpriteSize(formId) * 0.7, 56),

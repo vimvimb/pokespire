@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { RunState, CardRemovalNode } from '../../run/types';
 import { getPokemon, getMove } from '../../data/loaders';
 import { THEME } from '../theme';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   run: RunState;
@@ -129,7 +130,7 @@ export function CardRemovalScreen({ run, node, onComplete, onSkip, onRestart }: 
                 marginBottom: 12,
               }}>
                 <img
-                  src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemon.formId}.gif`}
+                  src={getSpriteUrl(pokemon.formId)}
                   alt={basePokemon.name}
                   style={{
                     width: 48,

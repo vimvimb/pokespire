@@ -5,6 +5,7 @@ import { canPokemonLevelUp, EXP_PER_LEVEL } from '../../../run/state';
 import { getSpriteSize } from '../../../data/heights';
 import { THEME } from '../../theme';
 import { GoldCoin } from '../GoldCoin';
+import { getSpriteUrl } from '../../utils/sprites';
 
 interface Props {
   party: RunPokemon[];
@@ -61,7 +62,7 @@ function PokemonRow({ pokemon, isDead, canLevel, onClick, isSwapTarget, onSwapCl
     >
       <div style={{ position: 'relative', flexShrink: 0 }}>
         <img
-          src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemon.formId}.gif`}
+          src={getSpriteUrl(pokemon.formId)}
           alt={basePokemon.name}
           style={{
             width: Math.min(getSpriteSize(pokemon.formId) * 0.6, 48),
@@ -350,7 +351,7 @@ function MapPartySidebarInner({ party, bench, graveyard, gold, onPokemonClick, o
                     }}
                   >
                     <img
-                      src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemon.formId}.gif`}
+                      src={getSpriteUrl(pokemon.formId)}
                       alt={basePokemon.name}
                       style={{
                         width: Math.min(getSpriteSize(pokemon.formId) * 0.5, 36),

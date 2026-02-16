@@ -7,6 +7,7 @@ import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
 import { GoldCoin } from '../components/GoldCoin';
 import { getSpriteSize } from '../../data/heights';
+import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   run: RunState;
@@ -216,7 +217,7 @@ export function ShopScreen({ run, onPurchase, onClose }: Props) {
         }}>
           {/* Kecleon sprite */}
           <img
-            src="https://img.pokemondb.net/sprites/black-white/anim/normal/kecleon.gif"
+            src={getSpriteUrl('kecleon')}
             alt="Kecleon"
             style={{
               width: 96,
@@ -293,7 +294,7 @@ export function ShopScreen({ run, onPurchase, onClose }: Props) {
                       }}
                     >
                       <img
-                        src={`https://img.pokemondb.net/sprites/black-white/anim/normal/${pokemon.formId}.gif`}
+                        src={getSpriteUrl(pokemon.formId)}
                         alt={data.name}
                         style={{
                           width: Math.min(getSpriteSize(pokemon.formId) * 0.7, 56),
