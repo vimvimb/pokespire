@@ -119,57 +119,73 @@ function FormationSlot({
   draggedPokemonId,
   dragSource,
   dragOverTarget,
+  selectedSource,
   onDragStart,
   onDragEnd,
   onDragOver,
   onDragLeave,
   onDrop,
+  onClick,
 }: {
   pokemon: PokemonData | null;
   slotKey: SlotKey;
   draggedPokemonId: string | null;
   dragSource: SlotKey | 'unplaced' | null;
   dragOverTarget: SlotKey | 'unplaced' | null;
+  selectedSource: SlotKey | 'unplaced' | null;
   onDragStart: (e: React.DragEvent) => void;
   onDragEnd: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: () => void;
   onDrop: (e: React.DragEvent) => void;
+  onClick: () => void;
 }) {
   const isDragging = draggedPokemonId !== null && dragSource === slotKey;
   const isDragOver = dragOverTarget === slotKey;
   const canDrop = draggedPokemonId !== null && dragSource !== slotKey;
+  const isClickSelected = selectedSource === slotKey;
+  const isClickTarget = selectedSource !== null && selectedSource !== slotKey;
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       draggable={!!pokemon}
       onDragStart={pokemon ? onDragStart : undefined}
       onDragEnd={onDragEnd}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
+      onClick={onClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
       style={{
         width: 100,
         height: 120,
         border: isDragOver && canDrop
           ? `2px solid ${THEME.accent}`
-          : pokemon
-            ? `2px solid ${THEME.border.medium}`
-            : `2px dashed ${THEME.border.subtle}`,
+          : isClickSelected
+            ? `2px solid ${THEME.accent}`
+            : isClickTarget
+              ? `2px solid ${THEME.border.bright}`
+              : pokemon
+                ? `2px solid ${THEME.border.medium}`
+                : `2px dashed ${THEME.border.subtle}`,
         borderRadius: 8,
         background: isDragOver && canDrop
           ? THEME.bg.elevated
-          : pokemon
-            ? THEME.bg.panel
-            : THEME.bg.base,
+          : isClickSelected
+            ? `${THEME.accent}15`
+            : pokemon
+              ? THEME.bg.panel
+              : THEME.bg.base,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        cursor: pokemon ? 'grab' : canDrop ? 'pointer' : 'default',
+        cursor: pokemon ? 'grab' : canDrop || selectedSource !== null ? 'pointer' : 'default',
         transition: 'all 0.2s',
         opacity: isDragging ? 0.5 : 1,
-        boxShadow: isDragOver && canDrop ? `0 0 8px ${THEME.accent}55` : 'none',
+        boxShadow: (isDragOver && canDrop) || isClickSelected ? `0 0 8px ${THEME.accent}55` : 'none',
       }}
     >
       {pokemon ? (
@@ -185,7 +201,7 @@ function FormationSlot({
           </div>
         </>
       ) : (
-        <div style={{ fontSize: 26, color: isDragOver && canDrop ? THEME.accent : THEME.border.medium }}>+</div>
+        <div style={{ fontSize: 26, color: (isDragOver && canDrop) || isClickTarget ? THEME.accent : THEME.border.medium }}>+</div>
       )}
     </div>
   );
@@ -202,6 +218,8 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
   const [draggedPokemonId, setDraggedPokemonId] = useState<string | null>(null);
   const [dragSource, setDragSource] = useState<SlotKey | 'unplaced' | null>(null);
   const [dragOverTarget, setDragOverTarget] = useState<SlotKey | 'unplaced' | null>(null);
+  const [selectedSource, setSelectedSource] = useState<SlotKey | 'unplaced' | null>(null);
+  const [selectedPokemonId, setSelectedPokemonId] = useState<string | null>(null);
 
   const toggle = (id: string) => {
     const cost = POKEMON_COSTS[id] ?? 200;
@@ -256,13 +274,9 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
 
   const handleDragLeave = () => setDragOverTarget(null);
 
-  const handleDrop = (e: React.DragEvent, target: SlotKey | 'unplaced') => {
-    e.preventDefault();
-    setDragOverTarget(null);
-
-    const pokemonId = e.dataTransfer.getData('pokemonId');
-    const source = e.dataTransfer.getData('source') as SlotKey | 'unplaced';
-    if (!pokemonId || !source || source === target) return;
+  // Shared move/swap/unplace logic for both drag and click
+  const applyPlace = (source: SlotKey | 'unplaced', pokemonId: string, target: SlotKey | 'unplaced') => {
+    if (source === target) return;
 
     if (target === 'unplaced') {
       setUnplacedPokemon(prev => [...prev, pokemonId]);
@@ -280,9 +294,59 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
       if (currentPokemonInSlot) setUnplacedPokemon(prev => [...prev, currentPokemonInSlot]);
       if (source === 'unplaced') setUnplacedPokemon(prev => prev.filter(id => id !== pokemonId));
     }
+  };
 
+  const handleDrop = (e: React.DragEvent, target: SlotKey | 'unplaced') => {
+    e.preventDefault();
+    setDragOverTarget(null);
+
+    const pokemonId = e.dataTransfer.getData('pokemonId');
+    const source = e.dataTransfer.getData('source') as SlotKey | 'unplaced';
+    if (!pokemonId || !source) return;
+
+    applyPlace(source, pokemonId, target);
     setDraggedPokemonId(null);
     setDragSource(null);
+  };
+
+  // Click/touch: select source then tap destination
+  const handleSlotClick = (slotKey: SlotKey) => {
+    const pokemonInSlot = formation.get(slotKey);
+
+    if (selectedSource !== null && selectedPokemonId !== null) {
+      // Something selected — place or swap
+      applyPlace(selectedSource, selectedPokemonId, slotKey);
+      setSelectedSource(null);
+      setSelectedPokemonId(null);
+      return;
+    }
+
+    // Nothing selected — select this slot if it has a Pokemon, or deselect
+    if (pokemonInSlot) {
+      setSelectedSource(slotKey);
+      setSelectedPokemonId(pokemonInSlot);
+    } else {
+      setSelectedSource(null);
+      setSelectedPokemonId(null);
+    }
+  };
+
+  const handleUnplacedTileClick = (pokemonId: string) => {
+    if (selectedSource === 'unplaced' && selectedPokemonId === pokemonId) {
+      setSelectedSource(null);
+      setSelectedPokemonId(null);
+      return;
+    }
+    setSelectedSource('unplaced');
+    setSelectedPokemonId(pokemonId);
+  };
+
+  const handleUnplacedAreaClick = () => {
+    if (selectedSource !== null && selectedSource !== 'unplaced' && selectedPokemonId !== null) {
+      applyPlace(selectedSource, selectedPokemonId, 'unplaced');
+    }
+    setSelectedSource(null);
+    setSelectedPokemonId(null);
   };
 
   const startBattle = () => {
@@ -494,11 +558,13 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
                   draggedPokemonId={draggedPokemonId}
                   dragSource={dragSource}
                   dragOverTarget={dragOverTarget}
+                  selectedSource={selectedSource}
                   onDragStart={(e) => pokemon && handleDragStart(e, pokemon.id, slotKey)}
                   onDragEnd={handleDragEnd}
                   onDragOver={(e) => handleDragOver(e, slotKey)}
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, slotKey)}
+                  onClick={() => handleSlotClick(slotKey)}
                 />
               );
             })}
@@ -512,7 +578,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
     <ScreenShell header={positionHeader} bodyStyle={{ padding: '24px 16px 48px' }} ambient ambientTint="rgba(250,204,21,0.02)">
       <div style={{ maxWidth: 600, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
         <p style={{ color: THEME.text.secondary, margin: 0, textAlign: 'center' }}>
-          Drag Pokemon into formation
+          Drag or tap a Pokemon, then tap a slot to place
         </p>
 
         {/* Positioning guide */}
@@ -538,17 +604,23 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
         {/* Unplaced Pokemon */}
         <div style={{ width: '100%' }}>
           <div style={{ fontSize: 12, color: THEME.text.secondary, marginBottom: 8, textAlign: 'center' }}>
-            {unplacedPokemon.length > 0 ? 'Drag to place:' : 'Drop here to unplace:'}
+            {unplacedPokemon.length > 0
+              ? 'Drag to place or tap to select, then tap a slot:'
+              : 'Drop or tap here to unplace:'}
           </div>
           <div
+            role="button"
+            tabIndex={0}
             onDragOver={(e) => handleDragOver(e, 'unplaced')}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, 'unplaced')}
+            onClick={handleUnplacedAreaClick}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleUnplacedAreaClick(); } }}
             style={{
               minHeight: 90,
               padding: 16,
-              background: dragOverTarget === 'unplaced' ? THEME.bg.elevated : THEME.bg.panelDark,
-              border: dragOverTarget === 'unplaced'
+              background: dragOverTarget === 'unplaced' || (selectedSource !== null && selectedSource !== 'unplaced') ? THEME.bg.elevated : THEME.bg.panelDark,
+              border: dragOverTarget === 'unplaced' || (selectedSource !== null && selectedSource !== 'unplaced')
                 ? `2px dashed ${THEME.accent}`
                 : unplacedPokemon.length > 0
                   ? `2px solid ${THEME.border.medium}`
@@ -559,24 +631,27 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
               justifyContent: 'center',
               flexWrap: 'wrap',
               transition: 'all 0.2s',
+              cursor: selectedSource !== null && selectedSource !== 'unplaced' ? 'pointer' : undefined,
             }}
           >
             {unplacedPokemon.length > 0 ? (
               unplacedPokemon.map(id => {
                 const pokemon = allPokemon.find(p => p.id === id);
                 if (!pokemon) return null;
+                const isClickSelected = selectedSource === 'unplaced' && selectedPokemonId === id;
                 return (
-                  <PokemonTile
-                    key={id}
-                    name={pokemon.name}
-                    spriteUrl={getSpriteUrl(pokemon.id)}
-                    primaryType={pokemon.types[0]}
-                    size="small"
-                    isSelected
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, id, 'unplaced')}
-                    onDragEnd={handleDragEnd}
-                  />
+                  <div key={id} onClick={(e) => { e.stopPropagation(); handleUnplacedTileClick(id); }} style={{ cursor: 'pointer' }}>
+                    <PokemonTile
+                      name={pokemon.name}
+                      spriteUrl={getSpriteUrl(pokemon.id)}
+                      primaryType={pokemon.types[0]}
+                      size="small"
+                      isSelected={isClickSelected}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, id, 'unplaced')}
+                      onDragEnd={handleDragEnd}
+                    />
+                  </div>
                 );
               })
             ) : (

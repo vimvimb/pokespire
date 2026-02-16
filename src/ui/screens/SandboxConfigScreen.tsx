@@ -835,6 +835,7 @@ export function SandboxConfigScreen({
   const [editingPokemonId, setEditingPokemonId] = useState<string | null>(null);
   const [editingSide, setEditingSide] = useState<'player' | 'enemy'>('player');
   const [showDeckEditor, setShowDeckEditor] = useState(false);
+  const [selectedRosterPokemonId, setSelectedRosterPokemonId] = useState<string | null>(null);
 
   // Persist config changes to parent
   useEffect(() => {
@@ -887,11 +888,18 @@ export function SandboxConfigScreen({
     setEditingSide(side);
   }, [playerTeam, enemyTeam]);
 
-  // ── Slot click → select for editing, or swap/move if already editing ──
+  // ── Slot click → place from roster (tap-to-place), or select for editing, or swap/move if already editing ──
 
   const handleSlotClick = useCallback((side: 'player' | 'enemy', row: Row, col: Column) => {
     const team = side === 'player' ? playerTeam : enemyTeam;
     const pokemon = team.find(p => p.position.row === row && p.position.column === col);
+
+    // Tap-to-place: roster Pokemon selected — place in this slot then clear selection
+    if (selectedRosterPokemonId !== null) {
+      handleDrop(side, row, col, selectedRosterPokemonId);
+      setSelectedRosterPokemonId(null);
+      return;
+    }
 
     // If editing a pokemon on THIS side and click a different slot → swap/move
     if (editingPokemonId !== null && editingSide === side) {
@@ -923,7 +931,7 @@ export function SandboxConfigScreen({
       setEditingPokemonId(pokemon.id);
       setEditingSide(side);
     }
-  }, [playerTeam, enemyTeam, editingPokemonId, editingSide]);
+  }, [playerTeam, enemyTeam, editingPokemonId, editingSide, selectedRosterPokemonId, handleDrop]);
 
   // ── Remove ──
 
@@ -1104,7 +1112,7 @@ export function SandboxConfigScreen({
                   textAlign: 'center',
                   marginBottom: 8,
                 }}>
-                  Drag to either team
+                  Drag or tap to select, then tap a team slot to place
                 </div>
                 <Flourish variant="heading" width={60} color={THEME.border.medium} />
                 <div style={{
@@ -1116,19 +1124,33 @@ export function SandboxConfigScreen({
                   flex: 1,
                   overflowY: 'auto',
                 }}>
-                  {AVAILABLE_POKEMON.map((pokemonId, i) => (
-                    <div
-                      key={pokemonId}
-                      className="sbx-roster-tile"
-                      style={{ animationDelay: `${i * 20}ms` }}
-                    >
-                      <PokemonRosterTile
-                        pokemonId={pokemonId}
-                        onDragStart={(e) => handleDragStart(e, pokemonId)}
-                        onDragEnd={() => {}}
-                      />
-                    </div>
-                  ))}
+                  {AVAILABLE_POKEMON.map((pokemonId, i) => {
+                    const isRosterSelected = selectedRosterPokemonId === pokemonId;
+                    return (
+                      <div
+                        key={pokemonId}
+                        className="sbx-roster-tile"
+                        style={{
+                          animationDelay: `${i * 20}ms`,
+                          borderRadius: 8,
+                          border: isRosterSelected ? `2px solid ${THEME.accent}` : '2px solid transparent',
+                          boxShadow: isRosterSelected ? `0 0 10px ${THEME.accent}55` : 'none',
+                          cursor: 'pointer',
+                          transition: 'border 0.2s, box-shadow 0.2s',
+                        }}
+                        onClick={() => {
+                          setSelectedRosterPokemonId(prev => prev === pokemonId ? null : pokemonId);
+                          if (selectedRosterPokemonId !== pokemonId) setEditingPokemonId(null);
+                        }}
+                      >
+                        <PokemonRosterTile
+                          pokemonId={pokemonId}
+                          onDragStart={(e) => handleDragStart(e, pokemonId)}
+                          onDragEnd={() => {}}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </DexFrame>

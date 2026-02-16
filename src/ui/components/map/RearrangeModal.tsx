@@ -24,11 +24,15 @@ function parseSlotKey(key: SlotKey): Position {
   return { row, column: parseInt(colStr) as Column };
 }
 
+type DragSource = { type: 'grid'; key: SlotKey } | { type: 'bench'; index: number };
+type DragOverTarget = { type: 'grid'; key: SlotKey } | { type: 'bench'; index: number } | null;
+
+const DRAG_TYPE = 'application/x-rearrange';
+
 /**
  * Rearrange Formation modal.
  * Shows the 2x3 grid with party Pokemon and a bench section.
- * Click-to-select, then click-to-swap between any two occupied slots,
- * or click an empty slot to move the selected Pokemon there.
+ * Drag or click a Pokemon, then click a slot to move it.
  * Bench Pokemon can be promoted into the grid, party Pokemon can be
  * moved to the bench.
  */
@@ -65,9 +69,56 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
   const [benchEntries, setBenchEntries] = useState<PokemonEntry[]>(initBench);
   const [selectedSlot, setSelectedSlot] = useState<SlotKey | null>(null);
   const [selectedBenchIdx, setSelectedBenchIdx] = useState<number | null>(null);
+  const [dragOverTarget, setDragOverTarget] = useState<DragOverTarget>(null);
 
   const gridCount = grid.size;
   const totalCount = gridCount + benchEntries.length;
+
+  // Apply grid-to-grid move/swap (used by both click and drag)
+  const applyGridToGrid = (fromKey: SlotKey, toKey: SlotKey) => {
+    if (fromKey === toKey) return;
+    const fromEntry = grid.get(fromKey);
+    if (!fromEntry) return;
+    const toEntry = grid.get(toKey);
+    const newGrid = new Map(grid);
+    newGrid.delete(fromKey);
+    newGrid.set(toKey, fromEntry);
+    if (toEntry) newGrid.set(fromKey, toEntry);
+    setGrid(newGrid);
+  };
+
+  // Apply bench-to-grid place/swap (used by both click and drag)
+  const applyBenchToGrid = (benchIdx: number, gridKey: SlotKey) => {
+    if (gridCount >= 4 && !grid.get(gridKey)) return;
+    const benchEntry = benchEntries[benchIdx];
+    const gridEntry = grid.get(gridKey);
+    const newGrid = new Map(grid);
+    const newBench = [...benchEntries];
+    if (gridEntry) {
+      newBench[benchIdx] = gridEntry;
+      newGrid.set(gridKey, benchEntry);
+    } else {
+      newBench.splice(benchIdx, 1);
+      newGrid.set(gridKey, benchEntry);
+    }
+    setGrid(newGrid);
+    setBenchEntries(newBench);
+  };
+
+  // Apply grid-to-bench swap (used by both click and drag)
+  const applyGridToBench = (gridKey: SlotKey, benchIdx: number) => {
+    if (gridCount <= 1) return;
+    const gridEntry = grid.get(gridKey);
+    if (!gridEntry) return;
+    const benchEntry = benchEntries[benchIdx];
+    const newGrid = new Map(grid);
+    const newBench = [...benchEntries];
+    newGrid.delete(gridKey);
+    newGrid.set(gridKey, benchEntry);
+    newBench[benchIdx] = gridEntry;
+    setGrid(newGrid);
+    setBenchEntries(newBench);
+  };
 
   // Click a grid slot
   const handleGridClick = (key: SlotKey) => {
@@ -76,26 +127,10 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
     // If a bench Pokemon is selected, place it in this slot
     if (selectedBenchIdx !== null) {
       if (gridCount >= 4 && !entry) {
-        // Can't add more than 4 to grid
         setSelectedBenchIdx(null);
         return;
       }
-      const benchEntry = benchEntries[selectedBenchIdx];
-      const newGrid = new Map(grid);
-      const newBench = [...benchEntries];
-
-      if (entry) {
-        // Swap: grid Pokemon goes to bench, bench Pokemon takes slot
-        newBench.splice(selectedBenchIdx, 1, entry);
-        newGrid.set(key, benchEntry);
-      } else {
-        // Place bench Pokemon in empty slot
-        newBench.splice(selectedBenchIdx, 1);
-        newGrid.set(key, benchEntry);
-      }
-
-      setGrid(newGrid);
-      setBenchEntries(newBench);
+      applyBenchToGrid(selectedBenchIdx, key);
       setSelectedBenchIdx(null);
       setSelectedSlot(null);
       return;
@@ -104,28 +139,15 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
     // If a grid slot is already selected
     if (selectedSlot !== null) {
       if (selectedSlot === key) {
-        // Deselect
         setSelectedSlot(null);
         return;
       }
-
       const selectedEntry = grid.get(selectedSlot);
       if (!selectedEntry) {
         setSelectedSlot(null);
         return;
       }
-
-      const newGrid = new Map(grid);
-      if (entry) {
-        // Swap two grid Pokemon
-        newGrid.set(key, selectedEntry);
-        newGrid.set(selectedSlot, entry);
-      } else {
-        // Move to empty slot
-        newGrid.delete(selectedSlot);
-        newGrid.set(key, selectedEntry);
-      }
-      setGrid(newGrid);
+      applyGridToGrid(selectedSlot, key);
       setSelectedSlot(null);
       return;
     }
@@ -138,36 +160,17 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
 
   // Click a bench Pokemon
   const handleBenchClick = (benchIdx: number) => {
-    // If a grid Pokemon is selected, swap it to bench
     if (selectedSlot !== null) {
-      const selectedEntry = grid.get(selectedSlot);
-      if (!selectedEntry) {
-        setSelectedSlot(null);
-        return;
-      }
-
-      // Don't allow demoting if it would leave grid with 0
       if (gridCount <= 1) {
         setSelectedSlot(null);
         return;
       }
-
-      const benchEntry = benchEntries[benchIdx];
-      const newGrid = new Map(grid);
-      const newBench = [...benchEntries];
-
-      // Swap: selected grid Pokemon goes to bench, bench Pokemon takes the grid slot
-      newGrid.set(selectedSlot, benchEntry);
-      newBench[benchIdx] = selectedEntry;
-
-      setGrid(newGrid);
-      setBenchEntries(newBench);
+      applyGridToBench(selectedSlot, benchIdx);
       setSelectedSlot(null);
       setSelectedBenchIdx(null);
       return;
     }
 
-    // Toggle bench selection
     if (selectedBenchIdx === benchIdx) {
       setSelectedBenchIdx(null);
     } else {
@@ -251,7 +254,7 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
           textAlign: 'center',
           margin: '0 0 8px',
         }}>
-          Click a Pokemon, then click a slot to move it
+          Drag or click a Pokemon, then click a slot to move it
         </p>
 
         {/* Positioning guide */}
@@ -296,34 +299,61 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
                 const entry = grid.get(key);
                 const isSelected = selectedSlot === key;
                 const isTarget = (selectedSlot !== null || selectedBenchIdx !== null) && !isSelected;
+                const isDragOver = dragOverTarget?.type === 'grid' && dragOverTarget.key === key;
 
                 return (
                   <div
                     key={key}
+                    draggable={!!entry}
                     onClick={() => handleGridClick(key)}
+                    onDragStart={(e) => {
+                      if (!entry) return;
+                      e.dataTransfer.setData(DRAG_TYPE, JSON.stringify({ type: 'grid', key }));
+                      e.dataTransfer.effectAllowed = 'move';
+                    }}
+                    onDragEnd={() => setDragOverTarget(null)}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = 'move';
+                      setDragOverTarget({ type: 'grid', key });
+                    }}
+                    onDragLeave={() => setDragOverTarget(prev => (prev?.type === 'grid' && prev.key === key ? null : prev))}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setDragOverTarget(null);
+                      const raw = e.dataTransfer.getData(DRAG_TYPE);
+                      if (!raw) return;
+                      const src = JSON.parse(raw) as DragSource;
+                      if (src.type === 'grid') applyGridToGrid(src.key, key);
+                      else if (src.type === 'bench') applyBenchToGrid(src.index, key);
+                    }}
                     style={{
                       width: 88,
                       height: 100,
-                      border: isSelected
+                      border: isDragOver
                         ? `2px solid ${THEME.accent}`
-                        : isTarget
-                          ? `2px solid ${THEME.border.bright}`
-                          : entry
-                            ? `2px solid ${THEME.border.medium}`
-                            : `2px dashed ${THEME.border.subtle}`,
+                        : isSelected
+                          ? `2px solid ${THEME.accent}`
+                          : isTarget
+                            ? `2px solid ${THEME.border.bright}`
+                            : entry
+                              ? `2px solid ${THEME.border.medium}`
+                              : `2px dashed ${THEME.border.subtle}`,
                       borderRadius: 10,
-                      background: isSelected
-                        ? 'rgba(250, 204, 21, 0.1)'
-                        : entry
-                          ? THEME.bg.panelDark
-                          : THEME.bg.base,
+                      background: isDragOver
+                        ? THEME.bg.elevated
+                        : isSelected
+                          ? 'rgba(250, 204, 21, 0.1)'
+                          : entry
+                            ? THEME.bg.panelDark
+                            : THEME.bg.base,
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      cursor: entry || selectedSlot !== null || selectedBenchIdx !== null ? 'pointer' : 'default',
+                      cursor: entry ? 'grab' : (selectedSlot !== null || selectedBenchIdx !== null ? 'pointer' : 'default'),
                       transition: 'all 0.15s',
-                      boxShadow: isSelected ? `0 0 12px rgba(250, 204, 21, 0.25)` : 'none',
+                      boxShadow: (isSelected || isDragOver) ? `0 0 12px rgba(250, 204, 21, 0.25)` : 'none',
                     }}
                   >
                     {entry ? (
@@ -424,25 +454,50 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
                 benchEntries.map((entry, i) => {
                   const isSelected = selectedBenchIdx === i;
                   const isTarget = selectedSlot !== null;
+                  const isDragOver = dragOverTarget?.type === 'bench' && dragOverTarget.index === i;
                   return (
                     <div
                       key={`bench-${i}`}
+                      draggable
                       onClick={() => handleBenchClick(i)}
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData(DRAG_TYPE, JSON.stringify({ type: 'bench', index: i }));
+                        e.dataTransfer.effectAllowed = 'move';
+                      }}
+                      onDragEnd={() => setDragOverTarget(null)}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        setDragOverTarget({ type: 'bench', index: i });
+                      }}
+                      onDragLeave={() => setDragOverTarget(prev => (prev?.type === 'bench' && prev.index === i ? null : prev))}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragOverTarget(null);
+                        const raw = e.dataTransfer.getData(DRAG_TYPE);
+                        if (!raw) return;
+                        const src = JSON.parse(raw) as DragSource;
+                        if (src.type === 'grid') applyGridToBench(src.key, i);
+                      }}
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         padding: '6px 10px',
                         borderRadius: 8,
-                        border: isSelected
-                          ? `2px solid #f97316`
-                          : isTarget
-                            ? `2px solid ${THEME.border.bright}`
-                            : `2px solid ${THEME.border.subtle}`,
-                        background: isSelected
-                          ? 'rgba(249, 115, 22, 0.1)'
-                          : THEME.bg.panelDark,
-                        cursor: 'pointer',
+                        border: isDragOver
+                          ? `2px solid ${THEME.accent}`
+                          : isSelected
+                            ? `2px solid #f97316`
+                            : isTarget
+                              ? `2px solid ${THEME.border.bright}`
+                              : `2px solid ${THEME.border.subtle}`,
+                        background: isDragOver
+                          ? THEME.bg.elevated
+                          : isSelected
+                            ? 'rgba(249, 115, 22, 0.1)'
+                            : THEME.bg.panelDark,
+                        cursor: 'grab',
                         transition: 'all 0.15s',
                         opacity: 0.85,
                       }}
