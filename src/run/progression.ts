@@ -204,7 +204,7 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   },
   blaze_strike: {
     name: 'Blaze Strike',
-    description: 'The first Fire attack you play each turn deals double damage.',
+    description: 'The first Fire attack you play each turn deals 30% more damage.',
   },
   inferno_momentum: {
     name: 'Inferno Momentum',
@@ -1473,19 +1473,19 @@ export const MAGIKARP_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Gyarados',
-      description: 'Evolve to Gyarados (+45 HP). Add Dragon Rage. Gain Intimidate.',
+      description: 'Evolve to Gyarados (+45 HP). Gain Intimidate.',
       evolvesTo: 'gyarados',
       passiveId: 'intimidate',
       hpBoost: 0,
-      cardsToAdd: ['dragon-rage'],
+      cardsToAdd: [],
     },
     {
       level: 3,
       name: 'Gyarados',
-      description: '+5 HP. Gain Moxie.',
+      description: '+5 HP. Add Dragon Rage. Gain Moxie.',
       passiveId: 'moxie',
       hpBoost: 5,
-      cardsToAdd: [],
+      cardsToAdd: ['dragon-rage'],
     },
     {
       level: 4,

@@ -1021,6 +1021,21 @@ export function BattleScreen({
       if (drawMatch) {
         playSoundOnce("draw_card");
       }
+
+      // Parse passive energy gain: "Moxie: X gains Y energy"
+      const energyGainMatch = log.message.match(/gains (\d+) energy/i);
+      if (energyGainMatch) {
+        const energy = parseInt(energyGainMatch[1]);
+        const source = state.combatants.find((c) => c.id === log.combatantId);
+        if (source && energy > 0) {
+          addEvent({
+            type: "energy",
+            targetId: source.id,
+            value: energy,
+          });
+          playSoundOnce("raise_stat");
+        }
+      }
     }
   }, [logs, state.combatants, addEvent, showCardPlayed, triggerCardFly, getPositionForCombatant]);
 

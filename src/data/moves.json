@@ -15,7 +15,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. (Front row)",
+    "description": "Deal 6 damage. (Front row).",
     "contact": true
   },
   "scratch": {
@@ -34,7 +34,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. (Front row)",
+    "description": "Deal 6 damage. (Front row).",
     "contact": true
   },
   "tackle": {
@@ -53,7 +53,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. (Front row)",
+    "description": "Deal 6 damage. (Front row).",
     "contact": true
   },
   "quick-attack": {
@@ -72,7 +72,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. (Front row)",
+    "description": "Deal 6 damage. (Front row).",
     "contact": true
   },
   "double-slap": {
@@ -84,7 +84,7 @@
     "effects": [
       {
         "type": "multi_hit",
-        "value": 5,
+        "value": 6,
         "hits": 2
       }
     ],
@@ -92,7 +92,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Hit 2 times for 5 damage each. (Front row)",
+    "description": "Hit 2 times for 6 damage each. (Front row).",
     "contact": true
   },
   "comet-punch": {
@@ -104,7 +104,7 @@
     "effects": [
       {
         "type": "multi_hit",
-        "value": 5,
+        "value": 6,
         "hits": 2
       }
     ],
@@ -112,7 +112,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Hit 2 times for 5 damage each. (Front row)",
+    "description": "Hit 2 times for 6 damage each. (Front row).",
     "contact": true
   },
   "fury-attack": {
@@ -124,7 +124,7 @@
     "effects": [
       {
         "type": "multi_hit",
-        "value": 3,
+        "value": 2,
         "hits": 3
       }
     ],
@@ -132,7 +132,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Hit 3 times for 3 damage each. (Front row)",
+    "description": "Hit 3 times for 2 damage each. (Front row).",
     "contact": true
   },
   "fury-swipes": {
@@ -152,7 +152,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Hit 3 times for 3 damage each. (Front row)",
+    "description": "Hit 3 times for 3 damage each. (Front row).",
     "contact": true
   },
   "spike-cannon": {
@@ -164,7 +164,7 @@
     "effects": [
       {
         "type": "multi_hit",
-        "value": 3,
+        "value": 4,
         "hits": 4
       }
     ],
@@ -172,7 +172,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Hit 4 times for 3 damage each. (Front row)",
+    "description": "Hit 4 times for 4 damage each. (Front row).",
     "contact": false
   },
   "barrage": {
@@ -184,7 +184,7 @@
     "effects": [
       {
         "type": "multi_hit",
-        "value": 3,
+        "value": 4,
         "hits": 4
       }
     ],
@@ -192,7 +192,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Hit 4 times for 3 damage each. (Front row)",
+    "description": "Hit 4 times for 4 damage each. (Front row).",
     "contact": false
   },
   "vice-grip": {
@@ -211,7 +211,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 8 damage. (Front row)",
+    "description": "Deal 8 damage. (Front row).",
     "contact": true
   },
   "cut": {
@@ -230,7 +230,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 8 damage. (Front row)",
+    "description": "Deal 8 damage. (Front row).",
     "contact": true
   },
   "rage": {
@@ -254,7 +254,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. Gain Strength 1. (Front row)",
+    "description": "Deal 6 damage. Gain Strength 1. (Front row).",
     "contact": true
   },
   "bind": {
@@ -266,7 +266,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 2
       },
       {
         "type": "apply_status",
@@ -278,7 +278,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. Apply Slow 2. (Front row)",
+    "description": "Deal 2 damage. Apply Slow 2. (Front row).",
     "contact": true
   },
   "constrict": {
@@ -290,7 +290,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 4
+        "value": 1
       },
       {
         "type": "apply_status",
@@ -302,7 +302,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 4 damage. Apply Slow 2. (Front row)",
+    "description": "Deal 1 damage. Apply Slow 2. (Front row).",
     "contact": true
   },
   "wrap": {
@@ -314,7 +314,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 8
+        "value": 3
       },
       {
         "type": "apply_status",
@@ -326,7 +326,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 8 damage. Apply Slow 2. (Front row)",
+    "description": "Deal 3 damage. Apply Slow 2. (Front row).",
     "contact": true
   },
   "stomp": {
@@ -338,14 +338,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 10
+        "value": 15
       }
     ],
     "rarity": "common",
     "pools": [
       "normal"
     ],
-    "description": "Deal 10 damage. (Front row)",
+    "description": "Deal 15 damage. (Front row).",
     "contact": true
   },
   "headbutt": {
@@ -357,14 +357,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 12
+        "value": 20
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "normal"
     ],
-    "description": "Deal 12 damage. (Front row)",
+    "description": "Deal 20 damage. (Front row).",
     "contact": true
   },
   "body-slam": {
@@ -376,7 +376,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 10
+        "value": 8
       },
       {
         "type": "apply_status",
@@ -388,7 +388,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 10 damage. Apply Paralysis 2. (Front row)",
+    "description": "Deal 8 damage. Apply Paralysis 2. (Front row).",
     "contact": true
   },
   "slam": {
@@ -400,14 +400,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 12
+        "value": 20
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "normal"
     ],
-    "description": "Deal 12 damage. (Front row)",
+    "description": "Deal 20 damage. (Front row).",
     "contact": true
   },
   "mega-punch": {
@@ -419,14 +419,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 12
+        "value": 20
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "normal"
     ],
-    "description": "Deal 12 damage. (Front row)",
+    "description": "Deal 20 damage. (Front row).",
     "contact": true
   },
   "take-down": {
@@ -438,7 +438,7 @@
     "effects": [
       {
         "type": "recoil",
-        "value": 18,
+        "value": 30,
         "recoilPercent": 0.25
       }
     ],
@@ -446,7 +446,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 18 damage. Take 25% recoil. (Front row)",
+    "description": "Deal 30 damage. Take 25% recoil. (Front row).",
     "contact": true
   },
   "double-edge": {
@@ -458,7 +458,7 @@
     "effects": [
       {
         "type": "recoil",
-        "value": 20,
+        "value": 32,
         "recoilPercent": 0.33
       }
     ],
@@ -466,7 +466,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 20 damage. Take 33% recoil. (Front row)",
+    "description": "Deal 32 damage. Take 33% recoil. (Front row).",
     "contact": true
   },
   "thrash": {
@@ -478,14 +478,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 25
+        "value": 36
       }
     ],
     "rarity": "rare",
     "pools": [
       "normal"
     ],
-    "description": "Deal 25 damage. (Front row)",
+    "description": "Deal 36 damage. (Front row).",
     "contact": true
   },
   "mega-kick": {
@@ -497,14 +497,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 33
+        "value": 43
       }
     ],
     "rarity": "epic",
     "pools": [
       "normal"
     ],
-    "description": "Deal 33 damage. (Front row)",
+    "description": "Deal 43 damage. (Front row).",
     "contact": true
   },
   "hyper-beam": {
@@ -535,14 +535,14 @@
     "effects": [
       {
         "type": "self_ko",
-        "value": 35
+        "value": 38
       }
     ],
     "rarity": "legendary",
     "pools": [
       "normal"
     ],
-    "description": "Deal 35 damage to all enemies. User faints.",
+    "description": "Deal 38 damage to all enemies. User faints.",
     "contact": false
   },
   "explosion": {
@@ -554,14 +554,14 @@
     "effects": [
       {
         "type": "self_ko",
-        "value": 50
+        "value": 56
       }
     ],
     "rarity": "legendary",
     "pools": [
       "normal"
     ],
-    "description": "Deal 50 damage to all enemies. User faints.",
+    "description": "Deal 56 damage to all enemies. User faints.",
     "contact": false
   },
   "skull-bash": {
@@ -573,7 +573,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 33
+        "value": 38
       },
       {
         "type": "block",
@@ -584,7 +584,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 33 damage. Gain 10 Block. (Front row)",
+    "description": "Deal 38 damage. Gain 10 Block. (Front row).",
     "contact": true
   },
   "swift": {
@@ -615,14 +615,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 11
+        "value": 18
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "normal"
     ],
-    "description": "Deal 11 damage.",
+    "description": "Deal 18 damage.",
     "contact": false
   },
   "hyper-fang": {
@@ -634,14 +634,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 12
+        "value": 20
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "normal"
     ],
-    "description": "Deal 12 damage. (Front row)",
+    "description": "Deal 20 damage. (Front row).",
     "contact": true
   },
   "slash": {
@@ -653,14 +653,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 12
+        "value": 20
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "normal"
     ],
-    "description": "Deal 12 damage. (Front row)",
+    "description": "Deal 20 damage. (Front row).",
     "contact": true
   },
   "strength": {
@@ -672,14 +672,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 12
+        "value": 20
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "normal"
     ],
-    "description": "Deal 12 damage. (Front row)",
+    "description": "Deal 20 damage. (Front row).",
     "contact": true
   },
   "dizzy-punch": {
@@ -691,7 +691,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 10
+        "value": 16
       },
       {
         "type": "apply_status",
@@ -703,7 +703,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 10 damage. Apply Weak 2. (Front row)",
+    "description": "Deal 16 damage. Apply Enfeeble 2. (Front row).",
     "contact": true
   },
   "razor-wind": {
@@ -715,7 +715,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 11
+        "value": 13
       }
     ],
     "rarity": "rare",
@@ -723,7 +723,7 @@
       "normal",
       "flying"
     ],
-    "description": "Deal 11 damage to a row.",
+    "description": "Deal 13 damage to a row.",
     "contact": false
   },
   "horn-attack": {
@@ -735,14 +735,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 10
+        "value": 15
       }
     ],
     "rarity": "common",
     "pools": [
       "normal"
     ],
-    "description": "Deal 10 damage. (Front row)",
+    "description": "Deal 15 damage. (Front row).",
     "contact": true
   },
   "pay-day": {
@@ -754,12 +754,12 @@
     "effects": [
       {
         "type": "damage",
-        "value": 8
+        "value": 14
       }
     ],
     "rarity": "epic",
     "goldOnHit": true,
-    "description": "Deal 8 damage. Gain gold equal to damage dealt. Vanish.",
+    "description": "Deal 14 damage. (Front row). Vanish.",
     "contact": false
   },
   "egg-bomb": {
@@ -771,14 +771,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 20
+        "value": 36
       }
     ],
     "rarity": "rare",
     "pools": [
       "normal"
     ],
-    "description": "Deal 20 damage. (Front row)",
+    "description": "Deal 36 damage. (Front row).",
     "contact": false
   },
   "struggle": {
@@ -797,7 +797,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. (Front row)",
+    "description": "Deal 6 damage. (Front row).",
     "contact": true
   },
   "swords-dance": {
@@ -837,7 +837,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Apply Weak 2. Vanish.",
+    "description": "Apply Enfeeble 2. Vanish.",
     "contact": false
   },
   "tail-whip": {
@@ -857,7 +857,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Apply Weak 1. Vanish.",
+    "description": "Apply Enfeeble 1. Vanish.",
     "contact": false
   },
   "leer": {
@@ -877,7 +877,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Apply Weak 2.",
+    "description": "Apply Enfeeble 2.",
     "contact": false
   },
   "screech": {
@@ -897,7 +897,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Apply Weak 3.",
+    "description": "Apply Enfeeble 3.",
     "contact": false
   },
   "roar": {
@@ -922,7 +922,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Apply Weak 2 and Slow 2. Vanish.",
+    "description": "Apply Enfeeble 2. Apply Slow 2. Vanish.",
     "contact": false
   },
   "sing": {
@@ -1006,7 +1006,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Apply Weak 2 and Slow 2.",
+    "description": "Apply Enfeeble 2. Apply Slow 2.",
     "contact": false
   },
   "smokescreen": {
@@ -1031,7 +1031,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Apply Weak 2 and Slow 2. Vanish.",
+    "description": "Apply Enfeeble 2. Apply Slow 2. Vanish.",
     "contact": false
   },
   "double-team": {
@@ -1121,14 +1121,14 @@
     "effects": [
       {
         "type": "heal",
-        "value": 20
+        "value": 22
       }
     ],
     "rarity": "rare",
     "pools": [
       "normal"
     ],
-    "description": "Heal 20 HP.",
+    "description": "Heal 22 HP. Vanish.",
     "contact": false
   },
   "soft-boiled": {
@@ -1140,14 +1140,14 @@
     "effects": [
       {
         "type": "heal",
-        "value": 20
+        "value": 22
       }
     ],
     "rarity": "rare",
     "pools": [
       "normal"
     ],
-    "description": "Heal 20 HP.",
+    "description": "Heal 22 HP. Vanish.",
     "contact": false
   },
   "focus-energy": {
@@ -1179,14 +1179,14 @@
     "effects": [
       {
         "type": "block",
-        "value": 8
+        "value": 7
       }
     ],
     "rarity": "common",
     "pools": [
       "normal"
     ],
-    "description": "Gain 8 Block.",
+    "description": "Gain 7 Block.",
     "contact": false
   },
   "metronome": {
@@ -1253,7 +1253,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Gain Strength 2 and Evasion 2. Vanish.",
+    "description": "Gain Strength 2. Gain Evasion 2. Vanish.",
     "contact": false
   },
   "substitute": {
@@ -1265,14 +1265,14 @@
     "effects": [
       {
         "type": "block",
-        "value": 15
+        "value": 18
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "normal"
     ],
-    "description": "Gain 15 Block.",
+    "description": "Gain 18 Block.",
     "contact": false
   },
   "glare": {
@@ -1332,7 +1332,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Apply Weak 2.",
+    "description": "Apply Enfeeble 2.",
     "contact": false
   },
   "splash": {
@@ -1528,7 +1528,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 7 damage. Apply Weak 1. (Front row)",
+    "description": "Deal 7 damage. Apply Enfeeble 1. (Front row).",
     "contact": true
   },
   "hiss": {
@@ -1548,7 +1548,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Apply Weak 1. Vanish.",
+    "description": "Apply Enfeeble 1. Vanish.",
     "contact": false
   },
   "twineedle": {
@@ -1573,7 +1573,7 @@
     "pools": [
       "bug"
     ],
-    "description": "Hit 2 times for 4 damage each. Apply Poison 1. (Front row)",
+    "description": "Hit 2 times for 4 damage each. Apply Poison 1. (Front row).",
     "contact": true
   },
   "pin-missile": {
@@ -1585,7 +1585,7 @@
     "effects": [
       {
         "type": "multi_hit",
-        "value": 3,
+        "value": 4,
         "hits": 4
       }
     ],
@@ -1593,7 +1593,7 @@
     "pools": [
       "bug"
     ],
-    "description": "Hit 4 times for 3 damage each. (Front row)",
+    "description": "Hit 4 times for 4 damage each. (Front row).",
     "contact": false
   },
   "string-shot": {
@@ -1652,7 +1652,7 @@
     "pools": [
       "dark"
     ],
-    "description": "Deal 8 damage. (Front row)",
+    "description": "Deal 8 damage. (Front row).",
     "contact": true
   },
   "dragon-rage": {
@@ -1683,7 +1683,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 1
       },
       {
         "type": "apply_status",
@@ -1695,7 +1695,7 @@
     "pools": [
       "electric"
     ],
-    "description": "Deal 6 damage. Apply Paralysis 2.",
+    "description": "Deal 1 damage. Apply Paralysis 2.",
     "contact": false
   },
   "thunder-wave": {
@@ -1734,7 +1734,7 @@
     "pools": [
       "electric"
     ],
-    "description": "Deal 10 damage. (Front row)",
+    "description": "Deal 10 damage. (Front row).",
     "contact": true
   },
   "thunderbolt": {
@@ -1746,14 +1746,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 11
+        "value": 13
       }
     ],
     "rarity": "rare",
     "pools": [
       "electric"
     ],
-    "description": "Deal 11 damage to an entire row.",
+    "description": "Deal 13 damage to a row.",
     "contact": false
   },
   "thunder": {
@@ -1765,14 +1765,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 33
+        "value": 39
       }
     ],
     "rarity": "epic",
     "pools": [
       "electric"
     ],
-    "description": "Deal 33 damage.",
+    "description": "Deal 39 damage.",
     "contact": false
   },
   "karate-chop": {
@@ -1791,7 +1791,7 @@
     "pools": [
       "fighting"
     ],
-    "description": "Deal 6 damage. (Front row)",
+    "description": "Deal 6 damage. (Front row).",
     "contact": true
   },
   "low-kick": {
@@ -1810,7 +1810,7 @@
     "pools": [
       "fighting"
     ],
-    "description": "Deal 8 damage. (Front row)",
+    "description": "Deal 8 damage. (Front row).",
     "contact": true
   },
   "double-kick": {
@@ -1822,7 +1822,7 @@
     "effects": [
       {
         "type": "multi_hit",
-        "value": 4,
+        "value": 6,
         "hits": 2
       }
     ],
@@ -1830,7 +1830,7 @@
     "pools": [
       "fighting"
     ],
-    "description": "Hit 2 times for 4 damage each. (Front row)",
+    "description": "Hit 2 times for 6 damage each. (Front row).",
     "contact": true
   },
   "rolling-kick": {
@@ -1861,14 +1861,14 @@
     "effects": [
       {
         "type": "block",
-        "value": 8
+        "value": 7
       }
     ],
     "rarity": "common",
     "pools": [
       "fighting"
     ],
-    "description": "Gain 8 Block.",
+    "description": "Gain 7 Block.",
     "contact": false
   },
   "submission": {
@@ -1880,7 +1880,7 @@
     "effects": [
       {
         "type": "recoil",
-        "value": 15,
+        "value": 18,
         "recoilPercent": 0.5
       }
     ],
@@ -1888,7 +1888,7 @@
     "pools": [
       "fighting"
     ],
-    "description": "Deal 15 damage. Take 50% recoil. (Front row)",
+    "description": "Deal 18 damage. Take 50% recoil. (Front row).",
     "contact": true
   },
   "seismic-toss": {
@@ -1907,7 +1907,7 @@
     "pools": [
       "fighting"
     ],
-    "description": "Deal 20 fixed damage to all enemies in a column. Vanish.",
+    "description": "Deal 20 fixed damage (ignores modifiers). Vanish.",
     "contact": true
   },
   "jump-kick": {
@@ -1919,14 +1919,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 15
+        "value": 22
       }
     ],
     "rarity": "rare",
     "pools": [
       "fighting"
     ],
-    "description": "Deal 15 damage.",
+    "description": "Deal 22 damage.",
     "contact": true
   },
   "high-jump-kick": {
@@ -1938,14 +1938,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 33
+        "value": 43
       }
     ],
     "rarity": "epic",
     "pools": [
       "fighting"
     ],
-    "description": "Deal 33 damage. (Front row)",
+    "description": "Deal 43 damage. (Front row).",
     "contact": true
   },
   "bulk-up": {
@@ -1969,7 +1969,7 @@
     "pools": [
       "fighting"
     ],
-    "description": "Gain 2 Strength and 4 Block.",
+    "description": "Gain Strength 2. Gain 4 Block.",
     "contact": false
   },
   "cross-chop": {
@@ -1981,14 +1981,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 25
+        "value": 36
       }
     ],
     "rarity": "rare",
     "pools": [
       "fighting"
     ],
-    "description": "Deal 25 damage. (Front row)",
+    "description": "Deal 36 damage. (Front row).",
     "contact": true
   },
   "fire-spin": {
@@ -2019,7 +2019,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 5
       },
       {
         "type": "apply_status",
@@ -2031,7 +2031,7 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 6 damage. Apply Burn 2.",
+    "description": "Deal 5 damage. Apply Burn 2.",
     "contact": false
   },
   "fire-punch": {
@@ -2050,7 +2050,7 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 10 damage. (Front row)",
+    "description": "Deal 10 damage. (Front row).",
     "contact": true
   },
   "flamethrower": {
@@ -2062,14 +2062,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 11
+        "value": 14
       }
     ],
     "rarity": "rare",
     "pools": [
       "fire"
     ],
-    "description": "Deal 11 damage to all enemies in a column.",
+    "description": "Deal 14 damage to all enemies in a column.",
     "contact": false
   },
   "fire-blast": {
@@ -2081,37 +2081,37 @@
     "effects": [
       {
         "type": "damage",
-        "value": 33
+        "value": 39
       }
     ],
     "rarity": "epic",
     "pools": [
       "fire"
     ],
-    "description": "Deal 33 damage.",
+    "description": "Deal 39 damage.",
     "contact": false
   },
   "flame-wheel": {
     "name": "Flame Wheel",
-    "cost": 1,
+    "cost": 2,
     "type": "fire",
     "range": "front_enemy",
     "vanish": false,
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 12
       },
       {
         "type": "block",
-        "value": 5
+        "value": 7
       }
     ],
     "rarity": "common",
     "pools": [
       "fire"
     ],
-    "description": "Deal 6 damage. Gain 5 Block. (Front row)",
+    "description": "Deal 12 damage. Gain 7 Block. (Front row).",
     "contact": true
   },
   "fire-fang": {
@@ -2123,7 +2123,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 8
+        "value": 7
       },
       {
         "type": "apply_status",
@@ -2135,7 +2135,7 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 8 damage. Apply Burn 1. (Front row)",
+    "description": "Deal 7 damage. Apply Burn 1. (Front row).",
     "contact": true
   },
   "morning-sun": {
@@ -2147,26 +2147,26 @@
     "effects": [
       {
         "type": "heal",
-        "value": 20
+        "value": 22
       }
     ],
     "rarity": "rare",
     "pools": [
       "fire"
     ],
-    "description": "Heal 20 HP.",
+    "description": "Heal 22 HP. Vanish.",
     "contact": false
   },
   "flare-blitz": {
     "name": "Flare Blitz",
     "cost": 3,
     "type": "fire",
-    "range": "any_enemy",
+    "range": "front_enemy",
     "vanish": false,
     "effects": [
       {
         "type": "recoil",
-        "value": 30,
+        "value": 45,
         "recoilPercent": 0.25
       }
     ],
@@ -2174,7 +2174,7 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 30 damage. Take 25% recoil.",
+    "description": "Deal 45 damage. Take 25% recoil. (Front row).",
     "contact": true
   },
   "gust": {
@@ -2212,7 +2212,7 @@
     "pools": [
       "flying"
     ],
-    "description": "Deal 6 damage. (Front row)",
+    "description": "Deal 6 damage. (Front row).",
     "contact": true
   },
   "wing-attack": {
@@ -2224,14 +2224,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 10
+        "value": 15
       }
     ],
     "rarity": "common",
     "pools": [
       "flying"
     ],
-    "description": "Deal 10 damage. (Front row)",
+    "description": "Deal 15 damage. (Front row).",
     "contact": true
   },
   "drill-peck": {
@@ -2243,14 +2243,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 12
+        "value": 20
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "flying"
     ],
-    "description": "Deal 12 damage. (Front row)",
+    "description": "Deal 20 damage. (Front row).",
     "contact": true
   },
   "fly": {
@@ -2262,14 +2262,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 15
+        "value": 22
       }
     ],
     "rarity": "rare",
     "pools": [
       "flying"
     ],
-    "description": "Deal 15 damage.",
+    "description": "Deal 22 damage.",
     "contact": true
   },
   "sky-attack": {
@@ -2281,14 +2281,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 33
+        "value": 43
       }
     ],
     "rarity": "epic",
     "pools": [
       "flying"
     ],
-    "description": "Deal 33 damage. (Front row)",
+    "description": "Deal 43 damage. (Front row).",
     "contact": true
   },
   "mirror-move": {
@@ -2319,7 +2319,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 5
+        "value": 3
       },
       {
         "type": "apply_status",
@@ -2331,7 +2331,7 @@
     "pools": [
       "ghost"
     ],
-    "description": "Deal 5 damage. Apply Paralysis 1. (Front row)",
+    "description": "Deal 3 damage. Apply Paralysis 1. (Front row).",
     "contact": true
   },
   "night-shade": {
@@ -2375,7 +2375,7 @@
     "pools": [
       "ghost"
     ],
-    "description": "Apply Weak 2 and Slow 2.",
+    "description": "Apply Enfeeble 2. Apply Slow 2.",
     "contact": false
   },
   "hex": {
@@ -2387,8 +2387,8 @@
     "effects": [
       {
         "type": "damage",
-        "value": 8,
-        "bonusValue": 1,
+        "value": 12,
+        "bonusValue": 2,
         "bonusCondition": "target_debuff_stacks"
       }
     ],
@@ -2396,7 +2396,7 @@
     "pools": [
       "ghost"
     ],
-    "description": "Deal 8 damage plus 1 per debuff stack on the target.",
+    "description": "Deal 12 damage plus 2 per debuff stack on the target.",
     "contact": false
   },
   "vine-whip": {
@@ -2415,7 +2415,7 @@
     "pools": [
       "grass"
     ],
-    "description": "Deal 6 damage. (Front row)",
+    "description": "Deal 6 damage. (Front row).",
     "contact": true
   },
   "absorb": {
@@ -2427,7 +2427,7 @@
     "effects": [
       {
         "type": "heal_on_hit",
-        "value": 5,
+        "value": 3,
         "healPercent": 0.5
       }
     ],
@@ -2435,7 +2435,7 @@
     "pools": [
       "grass"
     ],
-    "description": "Deal 5 damage. Heal 50% of damage dealt.",
+    "description": "Deal 3 damage. Heal 50% of damage dealt.",
     "contact": false
   },
   "mega-drain": {
@@ -2467,7 +2467,7 @@
     "effects": [
       {
         "type": "heal_on_hit",
-        "value": 22,
+        "value": 33,
         "healPercent": 0.5
       }
     ],
@@ -2475,7 +2475,7 @@
     "pools": [
       "grass"
     ],
-    "description": "Deal 22 damage. Heal 50% of damage dealt.",
+    "description": "Deal 33 damage. Heal 50% of damage dealt.",
     "contact": false
   },
   "leech-seed": {
@@ -2514,7 +2514,7 @@
     "pools": [
       "grass"
     ],
-    "description": "Deal 8 damage. (Front row)",
+    "description": "Deal 8 damage. (Front row).",
     "contact": false
   },
   "stun-spore": {
@@ -2586,14 +2586,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 33
+        "value": 39
       }
     ],
     "rarity": "epic",
     "pools": [
       "grass"
     ],
-    "description": "Deal 33 damage.",
+    "description": "Deal 39 damage.",
     "contact": false
   },
   "petal-dance": {
@@ -2605,14 +2605,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 20
+        "value": 17
       }
     ],
     "rarity": "rare",
     "pools": [
       "grass"
     ],
-    "description": "Deal 20 damage to all enemies.",
+    "description": "Deal 17 damage to all enemies.",
     "contact": true
   },
   "sand-attack": {
@@ -2632,7 +2632,7 @@
     "pools": [
       "ground"
     ],
-    "description": "Apply Weak 2.",
+    "description": "Apply Enfeeble 2.",
     "contact": false
   },
   "bone-club": {
@@ -2651,7 +2651,7 @@
     "pools": [
       "ground"
     ],
-    "description": "Deal 8 damage. (Front row)",
+    "description": "Deal 8 damage. (Front row).",
     "contact": false
   },
   "bonemerang": {
@@ -2663,7 +2663,7 @@
     "effects": [
       {
         "type": "multi_hit",
-        "value": 5,
+        "value": 6,
         "hits": 2
       }
     ],
@@ -2671,7 +2671,7 @@
     "pools": [
       "ground"
     ],
-    "description": "Hit 2 times for 5 damage each. (Front row)",
+    "description": "Hit 2 times for 6 damage each. (Front row).",
     "contact": false
   },
   "dig": {
@@ -2683,14 +2683,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 12
+        "value": 20
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "ground"
     ],
-    "description": "Deal 12 damage. (Front row)",
+    "description": "Deal 20 damage. (Front row).",
     "contact": true
   },
   "earthquake": {
@@ -2702,14 +2702,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 20
+        "value": 17
       }
     ],
     "rarity": "rare",
     "pools": [
       "ground"
     ],
-    "description": "Deal 20 damage to all enemies.",
+    "description": "Deal 17 damage to all enemies.",
     "contact": false
   },
   "fissure": {
@@ -2748,7 +2748,7 @@
     "pools": [
       "ice"
     ],
-    "description": "Cleanse 1 debuff from an ally.",
+    "description": "Cleanse 1 debuff.",
     "contact": false
   },
   "haze": {
@@ -2767,7 +2767,7 @@
     "pools": [
       "ice"
     ],
-    "description": "Remove 2 debuffs (highest stacks). Vanish.",
+    "description": "Cleanse 2 debuffs. Vanish.",
     "contact": false
   },
   "aurora-beam": {
@@ -2779,7 +2779,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 9
+        "value": 10
       },
       {
         "type": "apply_status",
@@ -2791,7 +2791,7 @@
     "pools": [
       "ice"
     ],
-    "description": "Deal 9 damage. Apply Weak 2.",
+    "description": "Deal 10 damage. Apply Enfeeble 2.",
     "contact": false
   },
   "ice-punch": {
@@ -2810,7 +2810,7 @@
     "pools": [
       "ice"
     ],
-    "description": "Deal 10 damage. (Front row)",
+    "description": "Deal 10 damage. (Front row).",
     "contact": true
   },
   "ice-beam": {
@@ -2822,14 +2822,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 15
+        "value": 22
       }
     ],
     "rarity": "rare",
     "pools": [
       "ice"
     ],
-    "description": "Deal 15 damage.",
+    "description": "Deal 22 damage.",
     "contact": false
   },
   "blizzard": {
@@ -2860,54 +2860,6 @@
     "effects": [
       {
         "type": "damage",
-        "value": 5
-      },
-      {
-        "type": "apply_status",
-        "status": "poison",
-        "stacks": 1
-      }
-    ],
-    "rarity": "basic",
-    "pools": [
-      "poison"
-    ],
-    "description": "Deal 5 damage. Apply Poison 1. (Front row)",
-    "contact": false
-  },
-  "acid": {
-    "name": "Acid",
-    "cost": 1,
-    "type": "poison",
-    "range": "any_enemy",
-    "vanish": false,
-    "effects": [
-      {
-        "type": "damage",
-        "value": 6
-      },
-      {
-        "type": "apply_status",
-        "status": "enfeeble",
-        "stacks": 2
-      }
-    ],
-    "rarity": "common",
-    "pools": [
-      "poison"
-    ],
-    "description": "Deal 6 damage. Apply Weak 2.",
-    "contact": false
-  },
-  "smog": {
-    "name": "Smog",
-    "cost": 1,
-    "type": "poison",
-    "range": "any_enemy",
-    "vanish": false,
-    "effects": [
-      {
-        "type": "damage",
         "value": 4
       },
       {
@@ -2920,7 +2872,55 @@
     "pools": [
       "poison"
     ],
-    "description": "Deal 4 damage. Apply Poison 1.",
+    "description": "Deal 4 damage. Apply Poison 1. (Front row).",
+    "contact": false
+  },
+  "acid": {
+    "name": "Acid",
+    "cost": 1,
+    "type": "poison",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 5
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 2
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "poison"
+    ],
+    "description": "Deal 5 damage. Apply Enfeeble 2.",
+    "contact": false
+  },
+  "smog": {
+    "name": "Smog",
+    "cost": 1,
+    "type": "poison",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 3
+      },
+      {
+        "type": "apply_status",
+        "status": "poison",
+        "stacks": 1
+      }
+    ],
+    "rarity": "basic",
+    "pools": [
+      "poison"
+    ],
+    "description": "Deal 3 damage. Apply Poison 1.",
     "contact": false
   },
   "poison-powder": {
@@ -2960,7 +2960,7 @@
     "pools": [
       "poison"
     ],
-    "description": "Apply Poison 1 to entire front row.",
+    "description": "Apply Poison 1.",
     "contact": false
   },
   "sludge": {
@@ -2972,7 +2972,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 10
+        "value": 15
       },
       {
         "type": "apply_status",
@@ -2984,7 +2984,7 @@
     "pools": [
       "poison"
     ],
-    "description": "Deal 10 damage. Apply Poison 1.",
+    "description": "Deal 15 damage. Apply Poison 1.",
     "contact": false
   },
   "toxic": {
@@ -3016,7 +3016,7 @@
     "effects": [
       {
         "type": "block",
-        "value": 10
+        "value": 8
       },
       {
         "type": "apply_status_self",
@@ -3028,7 +3028,7 @@
     "pools": [
       "poison"
     ],
-    "description": "Gain 10 Block and Evasion 2. Vanish.",
+    "description": "Gain 8 Block. Gain Evasion 2. Vanish.",
     "contact": false
   },
   "confusion": {
@@ -3059,14 +3059,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 10
+        "value": 9
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "psychic"
     ],
-    "description": "Deal 10 damage.",
+    "description": "Deal 9 damage.",
     "contact": false
   },
   "psybeam": {
@@ -3078,14 +3078,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 9
+        "value": 14
       }
     ],
     "rarity": "common",
     "pools": [
       "psychic"
     ],
-    "description": "Deal 9 damage.",
+    "description": "Deal 14 damage.",
     "contact": false
   },
   "psychic": {
@@ -3097,14 +3097,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 15
+        "value": 22
       }
     ],
     "rarity": "rare",
     "pools": [
       "psychic"
     ],
-    "description": "Deal 15 damage.",
+    "description": "Deal 22 damage.",
     "contact": false
   },
   "dream-eater": {
@@ -3116,7 +3116,7 @@
     "effects": [
       {
         "type": "heal_on_hit",
-        "value": 12,
+        "value": 18,
         "healPercent": 0.5
       }
     ],
@@ -3124,7 +3124,7 @@
     "pools": [
       "psychic"
     ],
-    "description": "Deal 12 damage. Heal 50% of damage dealt.",
+    "description": "Deal 18 damage. Heal 50% of damage dealt.",
     "contact": false
   },
   "psywave": {
@@ -3203,7 +3203,7 @@
     "pools": [
       "psychic"
     ],
-    "description": "Gain 3 Haste. Vanish.",
+    "description": "Gain Haste 3. Vanish.",
     "contact": false
   },
   "teleport": {
@@ -3235,14 +3235,14 @@
     "effects": [
       {
         "type": "block",
-        "value": 8
+        "value": 7
       }
     ],
     "rarity": "common",
     "pools": [
       "psychic"
     ],
-    "description": "Gain 8 Block.",
+    "description": "Gain 7 Block.",
     "contact": false
   },
   "light-screen": {
@@ -3266,7 +3266,7 @@
     "pools": [
       "psychic"
     ],
-    "description": "Gain 12 Block and Evasion 2. Vanish.",
+    "description": "Gain 12 Block. Gain Evasion 2. Vanish.",
     "contact": false
   },
   "reflect": {
@@ -3278,14 +3278,14 @@
     "effects": [
       {
         "type": "block",
-        "value": 15
+        "value": 18
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "psychic"
     ],
-    "description": "Gain 15 Block.",
+    "description": "Gain 18 Block.",
     "contact": false
   },
   "amnesia": {
@@ -3297,14 +3297,14 @@
     "effects": [
       {
         "type": "block",
-        "value": 8
+        "value": 7
       }
     ],
     "rarity": "common",
     "pools": [
       "psychic"
     ],
-    "description": "Gain 8 Block.",
+    "description": "Gain 7 Block.",
     "contact": false
   },
   "kinesis": {
@@ -3324,7 +3324,7 @@
     "pools": [
       "psychic"
     ],
-    "description": "Apply Weak 2.",
+    "description": "Apply Enfeeble 2.",
     "contact": false
   },
   "rest": {
@@ -3348,7 +3348,7 @@
     "pools": [
       "psychic"
     ],
-    "description": "Heal 50% of max HP. Apply Sleep 2 to self. Vanish.",
+    "description": "Heal 50% of max HP. Gain Sleep 2. Vanish.",
     "contact": false
   },
   "rock-throw": {
@@ -3367,7 +3367,7 @@
     "pools": [
       "rock"
     ],
-    "description": "Deal 8 damage. (Back row only)",
+    "description": "Deal 8 damage. (Back row only).",
     "contact": false
   },
   "rock-slide": {
@@ -3379,14 +3379,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 9
+        "value": 12
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "rock"
     ],
-    "description": "Deal 9 damage to entire front row.",
+    "description": "Deal 12 damage to entire front row.",
     "contact": false
   },
   "water-gun": {
@@ -3417,7 +3417,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 1
       },
       {
         "type": "apply_status",
@@ -3429,7 +3429,7 @@
     "pools": [
       "water"
     ],
-    "description": "Deal 6 damage. Apply Slow 2.",
+    "description": "Deal 1 damage. Apply Slow 2.",
     "contact": false
   },
   "clamp": {
@@ -3441,7 +3441,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 2
       },
       {
         "type": "apply_status",
@@ -3453,7 +3453,7 @@
     "pools": [
       "water"
     ],
-    "description": "Deal 6 damage. Apply Slow 2. (Front row)",
+    "description": "Deal 2 damage. Apply Slow 2. (Front row).",
     "contact": true
   },
   "withdraw": {
@@ -3465,14 +3465,14 @@
     "effects": [
       {
         "type": "block",
-        "value": 8
+        "value": 7
       }
     ],
     "rarity": "common",
     "pools": [
       "water"
     ],
-    "description": "Gain 8 Block.",
+    "description": "Gain 7 Block.",
     "contact": false
   },
   "bubble-beam": {
@@ -3484,14 +3484,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 9
+        "value": 14
       }
     ],
     "rarity": "common",
     "pools": [
       "water"
     ],
-    "description": "Deal 9 damage.",
+    "description": "Deal 14 damage.",
     "contact": false
   },
   "waterfall": {
@@ -3503,14 +3503,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 12
+        "value": 20
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "water"
     ],
-    "description": "Deal 12 damage. (Front row)",
+    "description": "Deal 20 damage. (Front row).",
     "contact": true
   },
   "surf": {
@@ -3522,14 +3522,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 10
+        "value": 11
       }
     ],
     "rarity": "rare",
     "pools": [
       "water"
     ],
-    "description": "Deal 10 damage to all enemies.",
+    "description": "Deal 11 damage to all enemies.",
     "contact": false
   },
   "crabhammer": {
@@ -3541,14 +3541,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 15
+        "value": 24
       }
     ],
     "rarity": "rare",
     "pools": [
       "water"
     ],
-    "description": "Deal 15 damage. (Front row)",
+    "description": "Deal 24 damage. (Front row).",
     "contact": true
   },
   "hydro-pump": {
@@ -3560,14 +3560,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 33
+        "value": 39
       }
     ],
     "rarity": "epic",
     "pools": [
       "water"
     ],
-    "description": "Deal 33 damage.",
+    "description": "Deal 39 damage.",
     "contact": false
   },
   "fake-out": {
@@ -3579,7 +3579,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 2
       },
       {
         "type": "apply_status",
@@ -3591,7 +3591,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. Apply Slow 3. Vanish. (Front row)",
+    "description": "Deal 2 damage. Apply Slow 3. (Front row). Vanish.",
     "contact": true
   },
   "sludge-bomb": {
@@ -3603,7 +3603,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 15
+        "value": 16
       },
       {
         "type": "apply_status",
@@ -3615,7 +3615,7 @@
     "pools": [
       "poison"
     ],
-    "description": "Deal 15 damage. Apply Poison 2.",
+    "description": "Deal 16 damage. Apply Poison 2.",
     "contact": false
   },
   "megahorn": {
@@ -3627,14 +3627,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 30
+        "value": 43
       }
     ],
     "rarity": "epic",
     "pools": [
       "bug"
     ],
-    "description": "Deal 30 damage. (Front row)",
+    "description": "Deal 43 damage. (Front row).",
     "contact": true
   },
   "spark": {
@@ -3653,7 +3653,7 @@
     "pools": [
       "electric"
     ],
-    "description": "Deal 8 damage. (Front row)",
+    "description": "Deal 8 damage. (Front row).",
     "contact": true
   },
   "charge-beam": {
@@ -3689,7 +3689,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 8
+        "value": 5
       },
       {
         "type": "apply_status",
@@ -3701,7 +3701,7 @@
     "pools": [
       "electric"
     ],
-    "description": "Deal 8 damage to all enemies. Apply Paralysis 1.",
+    "description": "Deal 5 damage to all enemies. Apply Paralysis 1.",
     "contact": false
   },
   "bug-bite": {
@@ -3720,7 +3720,7 @@
     "pools": [
       "bug"
     ],
-    "description": "Deal 8 damage. (Front row)",
+    "description": "Deal 8 damage. (Front row).",
     "contact": true
   },
   "silver-wind": {
@@ -3732,7 +3732,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 8
       },
       {
         "type": "apply_status_self",
@@ -3744,7 +3744,7 @@
     "pools": [
       "bug"
     ],
-    "description": "Deal 6 damage to all enemies. Gain Strength 1.",
+    "description": "Deal 8 damage to all enemies. Gain Strength 1.",
     "contact": false
   },
   "flail": {
@@ -3756,8 +3756,8 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6,
-        "bonusValue": 6,
+        "value": 8,
+        "bonusValue": 8,
         "bonusCondition": "user_below_half_hp"
       }
     ],
@@ -3765,7 +3765,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. Deal 12 instead if below 50% HP. (Front row)",
+    "description": "Deal 8 damage. Deal 16 instead if below 50% HP. (Front row).",
     "contact": true
   },
   "bounce": {
@@ -3777,7 +3777,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 12
+        "value": 16
       },
       {
         "type": "apply_status",
@@ -3789,7 +3789,7 @@
     "pools": [
       "flying"
     ],
-    "description": "Deal 12 damage. Apply Paralysis 1.",
+    "description": "Deal 16 damage. Apply Paralysis 1.",
     "contact": true
   },
   "dragon-dance": {
@@ -3814,7 +3814,7 @@
     "pools": [
       "dragon"
     ],
-    "description": "Gain 2 Strength and 2 Haste. Vanish.",
+    "description": "Gain Strength 2. Gain Haste 2. Vanish.",
     "contact": false
   },
   "twister": {
@@ -3826,14 +3826,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 5
       }
     ],
     "rarity": "basic",
     "pools": [
       "dragon"
     ],
-    "description": "Deal 6 damage.",
+    "description": "Deal 5 damage.",
     "contact": false
   },
   "potion": {
@@ -4024,7 +4024,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 15
+        "value": 20
       },
       {
         "type": "apply_status",
@@ -4036,7 +4036,7 @@
     "pools": [
       "ghost"
     ],
-    "description": "Deal 15 damage. Apply Weak 1.",
+    "description": "Deal 20 damage. Apply Enfeeble 1.",
     "contact": false
   },
   "ominous-wind": {
@@ -4048,7 +4048,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 15
+        "value": 8
       },
       {
         "type": "apply_status_self",
@@ -4065,7 +4065,7 @@
     "pools": [
       "ghost"
     ],
-    "description": "Deal 15 damage to ALL enemies. Gain Strength 2 and Haste 2.",
+    "description": "Deal 8 damage to all enemies. Gain Strength 2. Gain Haste 2.",
     "contact": false
   },
   "dazed": {
@@ -4110,10 +4110,10 @@
     "effects": [
       {
         "type": "damage",
-        "value": 8
+        "value": 7
       }
     ],
-    "description": "A charming cry deals 8 damage.",
+    "description": "Deal 7 damage.",
     "contact": false
   },
   "fairy-wind": {
@@ -4137,7 +4137,7 @@
         "stacks": 1
       }
     ],
-    "description": "A fairy breeze deals 6 damage and applies Enfeeble 1.",
+    "description": "Deal 6 damage. Apply Enfeeble 1.",
     "contact": false
   },
   "charm": {
@@ -4157,7 +4157,7 @@
         "stacks": 2
       }
     ],
-    "description": "A cute display applies Enfeeble 2.",
+    "description": "Apply Enfeeble 2. (Front row).",
     "contact": false
   },
   "moonlight": {
@@ -4180,7 +4180,7 @@
         "count": 1
       }
     ],
-    "description": "Heal 12 HP and cleanse 1 debuff.",
+    "description": "Heal 12 HP. Cleanse 1 debuff. Vanish.",
     "contact": false
   },
   "follow-me": {
@@ -4220,10 +4220,10 @@
     "effects": [
       {
         "type": "damage",
-        "value": 15
+        "value": 22
       }
     ],
-    "description": "A brilliant moonbeam deals 15 damage.",
+    "description": "Deal 22 damage.",
     "contact": false
   },
   "sweet-kiss": {
@@ -4264,10 +4264,10 @@
     "effects": [
       {
         "type": "damage",
-        "value": 11
+        "value": 17
       }
     ],
-    "description": "A brilliant flash deals 11 damage to all enemies.",
+    "description": "Deal 17 damage to all enemies.",
     "contact": false
   },
   "cosmic-power": {
@@ -4283,7 +4283,7 @@
     "effects": [
       {
         "type": "block",
-        "value": 8
+        "value": 20
       },
       {
         "type": "apply_status_self",
@@ -4291,7 +4291,7 @@
         "stacks": 1
       }
     ],
-    "description": "Channel cosmic energy. Gain 8 Block and 1 Evasion.",
+    "description": "Gain 20 Block. Gain Evasion 1.",
     "contact": false
   },
   "play-rough": {
@@ -4307,7 +4307,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 28
+        "value": 37
       },
       {
         "type": "apply_status",
@@ -4315,7 +4315,7 @@
         "stacks": 2
       }
     ],
-    "description": "A rough and tumble assault deals 20 damage and applies Enfeeble 2.",
+    "description": "Deal 37 damage. Apply Enfeeble 2. (Front row).",
     "contact": true
   },
   "fury-cutter": {
@@ -4327,7 +4327,7 @@
     "effects": [
       {
         "type": "multi_hit",
-        "value": 3,
+        "value": 2,
         "hits": 3
       }
     ],
@@ -4335,7 +4335,7 @@
     "pools": [
       "bug"
     ],
-    "description": "Slash rapidly. Deal 3 damage x3 hits. (Front row)",
+    "description": "Hit 3 times for 2 damage each. (Front row).",
     "contact": true
   },
   "will-o-wisp": {
@@ -4367,19 +4367,19 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 5
       },
       {
         "type": "apply_status_self",
         "status": "haste",
-        "stacks": 1
+        "stacks": 2
       }
     ],
     "rarity": "common",
     "pools": [
       "fire"
     ],
-    "description": "Deal 6 damage. Gain 1 Haste. (Front row)",
+    "description": "Deal 5 damage. Gain Haste 2. (Front row).",
     "contact": true
   },
   "mystical-fire": {
@@ -4391,7 +4391,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 7
       },
       {
         "type": "apply_status",
@@ -4408,31 +4408,31 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 6 damage. Apply Burn 1 and Enfeeble 1.",
+    "description": "Deal 7 damage. Apply Burn 1. Apply Enfeeble 1.",
     "contact": false
   },
   "lava-plume": {
     "name": "Lava Plume",
     "cost": 2,
     "type": "fire",
-    "range": "all_enemies",
+    "range": "front_row",
     "vanish": false,
     "effects": [
       {
         "type": "damage",
-        "value": 5
+        "value": 8
       },
       {
         "type": "apply_status",
         "status": "burn",
-        "stacks": 1
+        "stacks": 2
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "fire"
     ],
-    "description": "Deal 5 damage to all enemies. Apply Burn 1.",
+    "description": "Deal 8 damage to the front row. Apply Burn 2.",
     "contact": false
   },
   "scorch": {
@@ -4444,7 +4444,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 8,
+        "value": 14,
         "bonusValue": 1,
         "bonusCondition": "target_burn_stacks"
       },
@@ -4458,7 +4458,7 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 8 damage (+1 per Burn stack on target). Apply Burn 2.",
+    "description": "Deal 14 damage (+1 per Burn stack on target). Apply Burn 2.",
     "contact": false
   },
   "fire-lash": {
@@ -4470,7 +4470,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 7
+        "value": 9
       },
       {
         "type": "apply_status",
@@ -4482,7 +4482,7 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 7 damage. Apply Enfeeble 1. (Front row)",
+    "description": "Deal 9 damage. Apply Enfeeble 1. (Front row).",
     "contact": true
   },
   "blaze-kick": {
@@ -4494,19 +4494,14 @@
     "effects": [
       {
         "type": "damage",
-        "value": 10
-      },
-      {
-        "type": "apply_status",
-        "status": "burn",
-        "stacks": 1
+        "value": 12
       }
     ],
     "rarity": "rare",
     "pools": [
       "fire"
     ],
-    "description": "Deal 10 damage. Apply Burn 1. (Front row)",
+    "description": "Deal 12 damage. (Front row).",
     "contact": true
   },
   "heat-wave": {
@@ -4518,7 +4513,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 8,
+        "value": 14,
         "bonusValue": 2,
         "bonusCondition": "target_burn_stacks"
       }
@@ -4527,7 +4522,7 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 8 damage to front row (+2 per Burn stack on each target).",
+    "description": "Deal 14 damage to entire front row (+2 per Burn stack on target).",
     "contact": false
   },
   "inferno": {
@@ -4539,7 +4534,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 10
+        "value": 16
       },
       {
         "type": "apply_status",
@@ -4551,7 +4546,7 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 10 damage. Apply Burn 3.",
+    "description": "Deal 16 damage. Apply Burn 3.",
     "contact": false
   },
   "blast-burn": {
@@ -4563,7 +4558,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 30,
+        "value": 45,
         "bonusValue": 2,
         "bonusCondition": "user_vanished_cards"
       }
@@ -4572,7 +4567,163 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 30 damage (+2 per card in your Vanished pile).",
+    "description": "Deal 45 damage (+2 per card in your Vanished pile).",
+    "contact": false
+  },
+  "burn-up": {
+    "name": "Burn Up",
+    "cost": 1,
+    "type": "fire",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 12
+      },
+      {
+        "type": "remove_type",
+        "moveType": "fire"
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 12 damage. Remove your Fire type for the rest of battle. (Front row).",
+    "contact": false
+  },
+  "eruption": {
+    "name": "Eruption",
+    "cost": 3,
+    "type": "fire",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 35,
+        "hpScaling": true
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal up to 35 damage to all enemies. Scales with user's current HP.",
+    "contact": false
+  },
+  "burning-jealousy": {
+    "name": "Burning Jealousy",
+    "cost": 2,
+    "type": "fire",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 22,
+        "bonusValue": 2,
+        "bonusCondition": "target_buff_stacks"
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 22 damage (+2 per buff stack on the target).",
+    "contact": false
+  },
+  "heat-crash": {
+    "name": "Heat Crash",
+    "cost": 2,
+    "type": "fire",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 26,
+        "weightScaling": true
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal up to 26 damage, scaled by user/target weight ratio (max 2x). (Front row).",
+    "contact": true
+  },
+  "fiery-dance": {
+    "name": "Fiery Dance",
+    "cost": 1,
+    "type": "fire",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 9
+      },
+      {
+        "type": "apply_status_self",
+        "status": "strength",
+        "stacks": 3
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 9 damage. Gain Strength 3.",
+    "contact": false
+  },
+  "incinerate": {
+    "name": "Incinerate",
+    "cost": 2,
+    "type": "fire",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 14
+      },
+      {
+        "type": "apply_status",
+        "status": "burn",
+        "stacks": 6
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 14 damage. Apply Burn 6.",
+    "contact": false
+  },
+  "overheat": {
+    "name": "Overheat",
+    "cost": 3,
+    "type": "fire",
+    "range": "column",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 33
+      },
+      {
+        "type": "apply_status_self",
+        "status": "enfeeble",
+        "stacks": 6
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "fire"
+    ],
+    "description": "Deal 33 damage to a column. Apply Enfeeble 6 to self.",
     "contact": false
   }
 }

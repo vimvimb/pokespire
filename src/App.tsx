@@ -50,6 +50,11 @@ const EventTesterScreen = lazy(() =>
     default: m.EventTesterScreen,
   })),
 );
+const ClassesPlanScreen = lazy(() =>
+  import("./ui/screens/ClassesPlanScreen").then((m) => ({
+    default: m.ClassesPlanScreen,
+  })),
+);
 import { GhostReviveScreen } from "./ui/screens/GhostReviveScreen";
 import type {
   RunState,
@@ -1398,6 +1403,9 @@ export default function App() {
           <button onClick={() => setScreen("event_tester")} style={devBtnStyle}>
             Event Tester
           </button>
+          <button onClick={() => setScreen("classes_plan")} style={devBtnStyle}>
+            Classes Plan
+          </button>
           <button
             onClick={() => {
               resetTutorial();
@@ -1716,6 +1724,28 @@ export default function App() {
           onBack={() => setScreen("main_menu")}
           onStartBossBattle={handleStartBossBattle}
         />
+      </Suspense>
+    );
+  }
+
+  if (screen === "classes_plan") {
+    return (
+      <Suspense
+        fallback={
+          <div
+            style={{
+              height: "100dvh",
+              background: THEME.bg.base,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Loading...
+          </div>
+        }
+      >
+        <ClassesPlanScreen onBack={() => setScreen("debugging")} />
       </Suspense>
     );
   }

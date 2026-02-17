@@ -26,6 +26,7 @@ const EFFECT_COLORS: Record<string, string> = {
   gain_energy: '#fbbf24',
   apply_status_self: '#4ade80',
   cleanse: '#67e8f9',
+  remove_type: '#f87171',
 };
 
 const MOVE_TYPE_COLORS: Record<MoveType, string> = {
@@ -83,8 +84,24 @@ function buildDescription(card: MoveDefinition): React.ReactNode {
           ? ` (+${effect.bonusValue} per debuff on target)`
           : effect.bonusCondition === 'user_below_half_hp'
             ? ` (+${effect.bonusValue} below half HP)`
+            : effect.bonusCondition === 'target_burn_stacks'
+              ? ` (+${effect.bonusValue} per Burn on target)`
+              : effect.bonusCondition === 'target_buff_stacks'
+                ? ` (+${effect.bonusValue} per buff on target)`
+                : effect.bonusCondition === 'user_vanished_cards'
+                  ? ` (+${effect.bonusValue} per vanished card)`
+                  : '';
+        const scalingText = effect.hpScaling
+          ? ' Scales with user HP.'
+          : effect.weightScaling
+            ? ' Scales with weight ratio.'
             : '';
-        parts.push(<span key={parts.length}>Deal {effect.value} damage{bonusText}.</span>);
+        parts.push(
+          <span key={parts.length}>
+            Deal {effect.hpScaling || effect.weightScaling ? 'up to ' : ''}{effect.value} damage{bonusText}.
+            {scalingText && <span style={{ color: '#fb923c', opacity: 0.8 }}>{scalingText}</span>}
+          </span>
+        );
         break;
       }
       case 'block':
@@ -172,6 +189,13 @@ function buildDescription(card: MoveDefinition): React.ReactNode {
         parts.push(
           <span key={parts.length} style={{ color: '#67e8f9' }}>
             Cleanse {effect.count} debuff{effect.count > 1 ? 's' : ''}.
+          </span>
+        );
+        break;
+      case 'remove_type':
+        parts.push(
+          <span key={parts.length} style={{ color: '#f87171' }}>
+            Lose {effect.moveType} type.
           </span>
         );
         break;

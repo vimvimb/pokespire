@@ -120,8 +120,23 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
             {effect.bonusCondition === 'target_debuff_stacks' && (
               <span style={{ color: '#c084fc' }}>{' '}+{effect.bonusValue} per debuff on target.</span>
             )}
+            {effect.bonusCondition === 'target_burn_stacks' && (
+              <span style={{ color: '#fb923c' }}>{' '}+{effect.bonusValue} per Burn on target.</span>
+            )}
+            {effect.bonusCondition === 'target_buff_stacks' && (
+              <span style={{ color: '#fbbf24' }}>{' '}+{effect.bonusValue} per buff on target.</span>
+            )}
+            {effect.bonusCondition === 'user_vanished_cards' && (
+              <span style={{ color: '#a78bfa' }}>{' '}+{effect.bonusValue} per vanished card.</span>
+            )}
             {effect.bonusCondition === 'user_below_half_hp' && !conditionActive && (
               <span style={{ opacity: 0.6 }}>{' '}+{effect.bonusValue} below half HP.</span>
+            )}
+            {effect.hpScaling && (
+              <span style={{ color: '#fb923c', opacity: 0.8 }}>{' '}Scales with HP.</span>
+            )}
+            {effect.weightScaling && (
+              <span style={{ color: '#d4d4d8', opacity: 0.8 }}>{' '}Scales with weight.</span>
             )}
           </span>
         );
@@ -260,6 +275,13 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
         parts.push(
           <span key={parts.length} style={{ color: '#67e8f9' }}>
             Cleanse {effect.count} debuff{effect.count > 1 ? 's' : ''}.
+          </span>
+        );
+        break;
+      case 'remove_type':
+        parts.push(
+          <span key={parts.length} style={{ color: '#f87171' }}>
+            Lose {effect.moveType} type.
           </span>
         );
         break;

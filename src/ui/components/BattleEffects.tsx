@@ -4,7 +4,7 @@ import type { MoveType } from '../../engine/types';
 // Types for battle events
 export interface BattleEvent {
   id: string;
-  type: 'damage' | 'heal' | 'block' | 'status' | 'card_played';
+  type: 'damage' | 'heal' | 'block' | 'status' | 'card_played' | 'energy';
   targetId?: string;
   sourceId?: string;
   value?: number;
@@ -93,11 +93,13 @@ function FloatingNumber({ event, position, onComplete }: FloatingNumberProps) {
   const color = event.type === 'damage' ? '#ef4444'
     : event.type === 'heal' ? '#4ade80'
     : event.type === 'block' ? '#60a5fa'
+    : event.type === 'energy' ? '#facc15'
     : '#facc15';
 
   const prefix = event.type === 'damage' ? '-'
     : event.type === 'heal' ? '+'
     : event.type === 'block' ? '🛡️+'
+    : event.type === 'energy' ? '⚡+'
     : '';
 
   return (

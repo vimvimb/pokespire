@@ -14,7 +14,7 @@ export interface DamageResult {
   strength: number;
   enfeeble: number;
   stab: number;
-  blazeStrikeMultiplier: number;  // 2 if Blaze Strike triggered, 1 otherwise
+  blazeStrikeMultiplier: number;  // 1.3 if Blaze Strike triggered, 1 otherwise
   swarmStrikeMultiplier: number;  // 2 if Swarm Strike triggered, 1 otherwise
   finisherMultiplier: number;     // 2 if Finisher triggered, 1 otherwise
   fortifiedCannonsBonus: number;  // Bonus from Fortified Cannons (Water + Block)
@@ -126,7 +126,7 @@ export function applyCardDamage(
   rawDamage = Math.max(rawDamage, 1); // floor at 1
 
   // Step 1.5: Apply strike multipliers (Blaze Strike / Swarm Strike / Finisher — mutually exclusive)
-  const blazeStrikeMultiplier = mods.isBlazeStrike ? 2 : 1;
+  const blazeStrikeMultiplier = mods.isBlazeStrike ? 1.3 : 1;
   const swarmStrikeMultiplier = mods.isSwarmStrike ? 2 : 1;
   const finisherMultiplier = mods.isFinisher ? 2 : 1;
   rawDamage = rawDamage * Math.max(blazeStrikeMultiplier, swarmStrikeMultiplier, finisherMultiplier);

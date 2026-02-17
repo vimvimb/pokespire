@@ -53,13 +53,16 @@ export type CardEffectType =
   | 'draw_cards'
   | 'gain_energy'
   | 'apply_status_self'
-  | 'cleanse';
+  | 'cleanse'
+  | 'remove_type';
 
 export interface DamageEffect {
   type: 'damage';
   value: number;
   bonusValue?: number;           // extra damage if condition met
-  bonusCondition?: 'user_below_half_hp' | 'target_debuff_stacks' | 'target_burn_stacks' | 'user_vanished_cards';  // condition type
+  bonusCondition?: 'user_below_half_hp' | 'target_debuff_stacks' | 'target_burn_stacks' | 'target_buff_stacks' | 'user_vanished_cards';  // condition type
+  hpScaling?: boolean;           // if true, multiply base damage by user's currentHP / maxHP (e.g. Eruption)
+  weightScaling?: boolean;       // if true, multiply base damage by user's weight / target's weight (e.g. Heat Crash)
 }
 
 export interface BlockEffect {
@@ -149,6 +152,12 @@ export interface CleanseEffect {
   count: number;  // number of debuffs to remove (highest stacks first)
 }
 
+/** Remove a type from the user for the rest of battle (e.g. Burn Up removes fire type) */
+export interface RemoveTypeEffect {
+  type: 'remove_type';
+  moveType: MoveType;  // the type to remove from the user
+}
+
 export type CardEffect =
   | DamageEffect
   | BlockEffect
@@ -164,7 +173,8 @@ export type CardEffect =
   | DrawCardsEffect
   | GainEnergyEffect
   | ApplyStatusSelfEffect
-  | CleanseEffect;
+  | CleanseEffect
+  | RemoveTypeEffect;
 
 // --- Move Types (elemental) ---
 

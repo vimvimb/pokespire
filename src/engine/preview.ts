@@ -15,13 +15,14 @@ import {
   checkNightAssassin,
   checkFriendGuard,
   checkFinisher, isAttackCard,
-  checkMalice, getTotalDebuffStacks,
+  checkMalice, getTotalDebuffStacks, getTotalBuffStacks,
   checkTechnician, checkAristocrat,
   checkRudeAwakening,
   checkBlindAggression, checkDrySkin,
   checkConsumingFlame
 } from './passives';
 import { getBloomingCycleReduction } from './damage';
+import { POKEMON_WEIGHTS } from '../data/heights';
 
 // ============================================================
 // Damage Preview Calculation - For drag-and-drop targeting
@@ -80,6 +81,8 @@ export function calculateDamagePreview(
           baseDamage += damageEffect.bonusValue * getTotalDebuffStacks(target);
         } else if (damageEffect.bonusCondition === 'target_burn_stacks') {
           baseDamage += damageEffect.bonusValue * getStatusStacks(target, 'burn');
+        } else if (damageEffect.bonusCondition === 'target_buff_stacks') {
+          baseDamage += damageEffect.bonusValue * getTotalBuffStacks(target);
         } else if (damageEffect.bonusCondition === 'user_vanished_cards') {
           baseDamage += damageEffect.bonusValue * source.vanishedPile.length;
         }
@@ -97,6 +100,19 @@ export function calculateDamagePreview(
       break;
     default:
       return null;
+  }
+
+  // HP-proportional scaling (e.g. Eruption)
+  if (damageEffect.type === 'damage' && damageEffect.hpScaling) {
+    baseDamage = Math.floor(baseDamage * (source.hp / source.maxHp));
+  }
+
+  // Weight-ratio scaling (e.g. Heat Crash)
+  if (damageEffect.type === 'damage' && damageEffect.weightScaling) {
+    const userWeight = POKEMON_WEIGHTS[source.pokemonId] ?? 50;
+    const targetWeight = POKEMON_WEIGHTS[target.pokemonId] ?? 50;
+    const ratio = Math.min(userWeight / targetWeight, 2.0);
+    baseDamage = Math.floor(baseDamage * ratio);
   }
 
   // Calculate all modifiers (mirroring buildDamageModifiers logic)
@@ -129,7 +145,7 @@ export function calculateDamagePreview(
   const { shouldApply: isSwarmStrike } = checkSwarmStrike(state, source, card, true);
   // Finisher: approximate using base cost >= 3 for preview
   const { shouldApply: isFinisherActive } = checkFinisher(state, source, card, card.cost, true);
-  const blazeStrikeMultiplier = isBlazeStrike ? 2 : isSwarmStrike ? 2 : isFinisherActive ? 2 : 1;
+  const blazeStrikeMultiplier = isBlazeStrike ? 1.3 : isSwarmStrike ? 2 : isFinisherActive ? 2 : 1;
   const angerPointMultiplier = checkAngerPoint(source);
   const sheerForceMultiplier = checkSheerForce(source);
   const recklessMultiplier = checkReckless(source, card);
@@ -273,7 +289,7 @@ export function calculateHandPreview(
   const finisherActive = source.passiveIds.includes('finisher') &&
     !source.turnFlags.finisherUsedThisTurn &&
     isAttackCard(card) && card.cost >= 3;
-  const blazeSwarmMult = blazeStrikeActive ? 2 : swarmStrikeActive ? 2 : finisherActive ? 2 : 1;
+  const blazeSwarmMult = blazeStrikeActive ? 1.3 : swarmStrikeActive ? 2 : finisherActive ? 2 : 1;
 
   const angerPointMult = checkAngerPoint(source);
   const sheerForceMult = checkSheerForce(source);
@@ -281,7 +297,7 @@ export function calculateHandPreview(
   const hustleMult = checkHustleMultiplier(source);
   const dragonsMajestyMult = checkDragonsMajesty(source);
 
-  if (blazeStrikeActive) tags.push('x2 Blaze');
+  if (blazeStrikeActive) tags.push('x1.3 Blaze');
   if (swarmStrikeActive) tags.push('x2 Swarm');
   if (finisherActive) tags.push('x2 Finisher');
   if (angerPointMult > 1) tags.push(`x${angerPointMult} Anger Pt`);

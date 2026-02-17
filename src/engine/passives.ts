@@ -338,7 +338,7 @@ export function onTurnStart(
 
 /**
  * Check if Blaze Strike should trigger for this attack.
- * Used for: Blaze Strike (first Fire attack deals double damage)
+ * Used for: Blaze Strike (first Fire attack deals 30% more damage)
  * Returns whether the multiplier should apply, and marks it as used.
  */
 export function checkBlazeStrike(
@@ -353,7 +353,7 @@ export function checkBlazeStrike(
   const isFire = card.type === 'fire';
   const notUsed = !attacker.turnFlags.blazeStrikeUsedThisTurn;
 
-  // Blaze Strike: First Fire attack each turn deals double damage
+  // Blaze Strike: First Fire attack each turn deals 30% more damage
   if (hasBlaze && isFire && notUsed) {
     // Only set the flag if this is NOT a dry run (actual card play)
     if (!dryRun) {
@@ -361,7 +361,7 @@ export function checkBlazeStrike(
       logs.push({
         round: state.round,
         combatantId: attacker.id,
-        message: `Blaze Strike: ${card.name} deals double damage!`,
+        message: `Blaze Strike: ${card.name} deals 30% more damage!`,
       });
     }
     return { shouldApply: true, logs };
@@ -1869,5 +1869,16 @@ export function getTotalDebuffStacks(combatant: Combatant): number {
   const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt'];
   return combatant.statuses
     .filter(s => debuffTypes.includes(s.type))
+    .reduce((total, s) => total + s.stacks, 0);
+}
+
+/**
+ * Get total buff stacks on a combatant.
+ * Used by Burning Jealousy for scaling damage against buffed targets.
+ */
+export function getTotalBuffStacks(combatant: Combatant): number {
+  const buffTypes = ['strength', 'evasion', 'haste'];
+  return combatant.statuses
+    .filter(s => buffTypes.includes(s.type))
     .reduce((total, s) => total + s.stacks, 0);
 }

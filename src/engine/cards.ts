@@ -27,6 +27,7 @@ import {
   checkMalice,
   checkHexMastery,
   getTotalDebuffStacks,
+  getTotalBuffStacks,
   checkTechnician,
   checkAristocrat,
   checkLullaby,
@@ -39,6 +40,7 @@ import {
   checkImpactGuard
 } from './passives';
 import { shuffle, MAX_HAND_SIZE } from './deck';
+import { POKEMON_WEIGHTS } from '../data/heights';
 import { getTypeEffectiveness, getEffectivenessLabel } from './typeChart';
 import { applySlipstream } from './turns';
 
@@ -996,9 +998,24 @@ function resolveEffects(
           } else if (effect.bonusCondition === 'target_burn_stacks') {
             const burnStacks = getStatusStacks(target, 'burn');
             damageValue += effect.bonusValue * burnStacks;
+          } else if (effect.bonusCondition === 'target_buff_stacks') {
+            damageValue += effect.bonusValue * getTotalBuffStacks(target);
           } else if (effect.bonusCondition === 'user_vanished_cards') {
             damageValue += effect.bonusValue * source.vanishedPile.length;
           }
+        }
+
+        // HP-proportional scaling (e.g. Eruption: damage × currentHP/maxHP)
+        if (effect.hpScaling) {
+          damageValue = Math.floor(damageValue * (source.hp / source.maxHp));
+        }
+
+        // Weight-ratio scaling (e.g. Heat Crash: damage × userWeight/targetWeight, capped at 2.0)
+        if (effect.weightScaling) {
+          const userWeight = POKEMON_WEIGHTS[source.pokemonId] ?? 50;
+          const targetWeight = POKEMON_WEIGHTS[target.pokemonId] ?? 50;
+          const ratio = Math.min(userWeight / targetWeight, 2.0);
+          damageValue = Math.floor(damageValue * ratio);
         }
 
         const r = applyCardDamage(source, target, damageValue, card.type, mods);
@@ -1560,6 +1577,19 @@ function resolveEffects(
             round: state.round,
             combatantId: cleanseRecipient.id,
             message: `${cleanseRecipient.name} has no debuffs to cleanse.`,
+          });
+        }
+        break;
+      }
+
+      case 'remove_type': {
+        const typeIdx = source.types.indexOf(effect.moveType);
+        if (typeIdx !== -1) {
+          source.types = source.types.filter(t => t !== effect.moveType);
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${source.name} lost its ${effect.moveType} type!`,
           });
         }
         break;

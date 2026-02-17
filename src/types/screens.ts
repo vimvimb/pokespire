@@ -19,4 +19,5 @@ export type Screen =
   | "event_tester"
   | "ghost_revive"
   | "disclaimer"
-  | "debugging";
+  | "debugging"
+  | "classes_plan";
