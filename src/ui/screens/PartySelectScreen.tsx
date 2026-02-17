@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import type { PokemonData, Position, Row, Column } from '../../engine/types';
 import { STARTER_POKEMON } from '../../data/loaders';
 import { POKEMON_COSTS, STARTING_GOLD } from '../../data/shop';
@@ -11,6 +11,7 @@ import { getSpriteUrl } from '../utils/sprites';
 interface Props {
   onStart: (party: PokemonData[], positions: Position[], gold: number) => void;
   onRestart: () => void;
+  preSelected?: { pokemon: PokemonData[]; gold: number };
 }
 
 const allPokemon = Object.values(STARTER_POKEMON);
@@ -209,12 +210,16 @@ function FormationSlot({
 
 // ── Root Component ─────────────────────────────────────────────────
 
-export function PartySelectScreen({ onStart, onRestart }: Props) {
-  const [phase, setPhase] = useState<Phase>('select');
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [gold, setGold] = useState(STARTING_GOLD);
+export function PartySelectScreen({ onStart, onRestart, preSelected }: Props) {
+  const [phase, setPhase] = useState<Phase>(preSelected ? 'position' : 'select');
+  const [selected, setSelected] = useState<Set<string>>(() =>
+    preSelected ? new Set(preSelected.pokemon.map((p) => p.id)) : new Set(),
+  );
+  const [gold, setGold] = useState(preSelected?.gold ?? STARTING_GOLD);
   const [formation, setFormation] = useState<Map<SlotKey, string>>(new Map());
-  const [unplacedPokemon, setUnplacedPokemon] = useState<string[]>([]);
+  const [unplacedPokemon, setUnplacedPokemon] = useState<string[]>(() =>
+    preSelected ? preSelected.pokemon.map((p) => p.id) : [],
+  );
   const [draggedPokemonId, setDraggedPokemonId] = useState<string | null>(null);
   const [dragSource, setDragSource] = useState<SlotKey | 'unplaced' | null>(null);
   const [dragOverTarget, setDragOverTarget] = useState<SlotKey | 'unplaced' | null>(null);
@@ -234,7 +239,15 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
     }
   };
 
-  const party = allPokemon.filter(s => selected.has(s.id));
+  // Combined Pokemon lookup: preSelected Pokemon + all selectable Pokemon
+  const pokemonLookup = useMemo(() => {
+    const map = new Map<string, PokemonData>();
+    allPokemon.forEach((p) => map.set(p.id, p));
+    preSelected?.pokemon.forEach((p) => map.set(p.id, p));
+    return map;
+  }, [preSelected]);
+
+  const party = [...selected].map((id) => pokemonLookup.get(id)).filter(Boolean) as PokemonData[];
 
   const goToPositioning = () => {
     setUnplacedPokemon([...selected]);
@@ -355,7 +368,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
     formation.forEach((pokemonId, slotKey) => {
       const [row, colStr] = slotKey.split('-') as [Row, string];
       const col = parseInt(colStr) as Column;
-      const pokemon = allPokemon.find(p => p.id === pokemonId);
+      const pokemon = pokemonLookup.get(pokemonId);
       if (pokemon) {
         partyList.push(pokemon);
         positions.push({ row, column: col });
@@ -368,7 +381,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
 
   const getPokemonInSlot = (row: Row, col: Column): PokemonData | null => {
     const id = formation.get(`${row}-${col}`);
-    return id ? allPokemon.find(p => p.id === id) || null : null;
+    return id ? pokemonLookup.get(id) ?? null : null;
   };
 
   // ════════════════════════════════════════════════════════════════
@@ -511,12 +524,21 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
       padding: '14px 24px',
       borderBottom: `1px solid ${THEME.border.subtle}`,
     }}>
-      <button
-        onClick={goBackToSelect}
-        style={{ padding: '8px 16px', ...THEME.button.secondary, fontSize: 13 }}
-      >
-        &larr; Back
-      </button>
+      {preSelected ? (
+        <button
+          onClick={onRestart}
+          style={{ padding: '8px 16px', ...THEME.button.secondary, fontSize: 13 }}
+        >
+          &larr; Main Menu
+        </button>
+      ) : (
+        <button
+          onClick={goBackToSelect}
+          style={{ padding: '8px 16px', ...THEME.button.secondary, fontSize: 13 }}
+        >
+          &larr; Back
+        </button>
+      )}
       <h1 style={{ margin: 0, color: THEME.accent, fontSize: 22, ...THEME.heading }}>
         Set Formation
       </h1>
@@ -636,7 +658,7 @@ export function PartySelectScreen({ onStart, onRestart }: Props) {
           >
             {unplacedPokemon.length > 0 ? (
               unplacedPokemon.map(id => {
-                const pokemon = allPokemon.find(p => p.id === id);
+                const pokemon = pokemonLookup.get(id);
                 if (!pokemon) return null;
                 const isClickSelected = selectedSource === 'unplaced' && selectedPokemonId === id;
                 return (

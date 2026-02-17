@@ -10,6 +10,7 @@ import type { PokemonData, Position, Combatant } from "./engine/types";
 import { useBattle } from "./ui/hooks/useBattle";
 import { useTutorial } from "./ui/hooks/useTutorial";
 import { PartySelectScreen } from "./ui/screens/PartySelectScreen";
+import { CampaignDraftScreen } from "./ui/screens/CampaignDraftScreen";
 import { TutorialStarterScreen } from "./ui/screens/TutorialStarterScreen";
 import { BattleScreen } from "./ui/screens/BattleScreen";
 import type { BattleResult } from "./ui/screens/BattleScreen";
@@ -70,6 +71,10 @@ import {
   setTutorialComplete,
   resetTutorial,
 } from "./ui/utils/tutorialPersistence";
+import {
+  unlockPokemon,
+  resetProfile,
+} from "./run/playerProfile";
 import { SHOP_ITEMS, CARD_FORGET_COST } from "./data/shop";
 import {
   createRunState,
@@ -190,6 +195,10 @@ export default function App() {
   const [pendingPostLevelUpScreen, setPendingPostLevelUpScreen] =
     useState<Screen | null>(null);
   const [isTutorialMode, setIsTutorialMode] = useState(false);
+  const [draftResults, setDraftResults] = useState<{
+    pokemon: PokemonData[];
+    gold: number;
+  } | null>(null);
   const [tutorialStarterName, setTutorialStarterName] = useState("");
   const battle = useBattle();
   const tutorialOnComplete = useCallback(() => {
@@ -251,6 +260,7 @@ export default function App() {
     (party: PokemonData[], positions: Position[], gold: number) => {
       const run = createRunState(party, positions, Date.now(), gold);
       setRunState(run);
+      setDraftResults(null);
       setScreen("map");
     },
     [],
@@ -279,10 +289,10 @@ export default function App() {
     [battle],
   );
 
-  // Tutorial: skip and go to regular party select
+  // Tutorial: skip and go to campaign draft
   const handleTutorialSkip = useCallback(() => {
     setTutorialComplete();
-    setScreen("select");
+    setScreen("campaign_draft");
   }, []);
 
   // Handle node selection on the map
@@ -421,7 +431,7 @@ export default function App() {
         setTutorialStarterName("");
         if (result === "victory") {
           setTutorialComplete();
-          setScreen("select");
+          setScreen("campaign_draft");
         } else {
           setScreen("main_menu");
         }
@@ -754,6 +764,9 @@ export default function App() {
     );
     let newRun = recruitToRoster(runState, newPokemon);
 
+    // Permanently unlock this Pokemon for future drafts
+    unlockPokemon(recruitNode.pokemonId);
+
     // Mark the node as recruited
     newRun = {
       ...newRun,
@@ -779,6 +792,7 @@ export default function App() {
 
   // Return to main menu (preserves save)
   const handleMainMenu = useCallback(() => {
+    setDraftResults(null);
     setScreen("main_menu");
     setHasSavedGame(!!runState);
   }, [runState]);
@@ -803,6 +817,7 @@ export default function App() {
     clearSave();
     setHasSavedGame(false);
     setRunState(null);
+    setDraftResults(null);
     setScreen("main_menu");
   }, []);
 
@@ -1024,7 +1039,10 @@ export default function App() {
             onClick={() => {
               clearSave();
               setHasSavedGame(false);
-              setScreen(isTutorialComplete() ? "select" : "tutorial_select");
+              setDraftResults(null);
+              setScreen(
+                isTutorialComplete() ? "campaign_draft" : "tutorial_select",
+              );
             }}
             style={{
               padding: "12px 0",
@@ -1408,12 +1426,30 @@ export default function App() {
           </button>
           <button
             onClick={() => {
+              clearSave();
+              setDraftResults(null);
+              setScreen("select");
+            }}
+            style={devBtnStyle}
+          >
+            Free Draft (Old Campaign)
+          </button>
+          <button
+            onClick={() => {
               resetTutorial();
               setScreen("main_menu");
             }}
             style={devBtnStyle}
           >
             Reset Tutorial (First-Time Player)
+          </button>
+          <button
+            onClick={() => {
+              resetProfile();
+            }}
+            style={devBtnStyle}
+          >
+            Reset Pokemon Unlocks
           </button>
         </div>
       </ScreenShell>
@@ -1655,9 +1691,25 @@ export default function App() {
     );
   }
 
+  if (screen === "campaign_draft") {
+    return (
+      <CampaignDraftScreen
+        onComplete={(pokemon, gold) => {
+          setDraftResults({ pokemon, gold });
+          setScreen("select");
+        }}
+        onBack={() => setScreen("main_menu")}
+      />
+    );
+  }
+
   if (screen === "select") {
     return (
-      <PartySelectScreen onStart={handleStart} onRestart={handleRestart} />
+      <PartySelectScreen
+        onStart={handleStart}
+        onRestart={handleRestart}
+        preSelected={draftResults ?? undefined}
+      />
     );
   }
 

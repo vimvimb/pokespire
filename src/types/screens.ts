@@ -20,4 +20,5 @@ export type Screen =
   | "ghost_revive"
   | "disclaimer"
   | "debugging"
+  | "campaign_draft"
   | "classes_plan";
