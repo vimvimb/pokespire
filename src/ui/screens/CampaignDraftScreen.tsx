@@ -153,8 +153,8 @@ export function CampaignDraftScreen({ onComplete, onBack }: Props) {
             color: THEME.text.primary,
             fontWeight: "bold",
             fontSize: 16,
-            letterSpacing: "0.08em",
             ...THEME.heading,
+            letterSpacing: "0.08em",
           }}
         >
           {roundLabel}
