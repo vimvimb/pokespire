@@ -52,9 +52,12 @@ export function CampaignDraftScreen({ onComplete, onBack, campaignId = "rocket_t
       // Fixed pool: shuffle and use as-is
       return seededShuffle(campaign.draftPool, seed);
     }
-    // Unlock-based pool: filter out starters
+    // Unlock-based pool: filter to this campaign's recruit pool so Pokemon
+    // unlocked in other campaigns (e.g. Johto legendaries) can't bleed in.
     const unlocked = getUnlockedPokemonIds();
-    const eligible = unlocked.filter((id) => !starterIds.includes(id));
+    const eligible = unlocked.filter(
+      (id) => !starterIds.includes(id) && campaign.recruitPool.includes(id),
+    );
     return seededShuffle(eligible, seed);
   }, []);
 
