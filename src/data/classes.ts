@@ -5,6 +5,7 @@ export type ClassCategory = 'defensive' | 'offensive' | 'support' | 'specialist'
 export interface ClassDef {
   id: string;
   name: string;
+  pinName: string;
   category: ClassCategory;
   switchesPerTurn: number;
   condition: string;
@@ -16,114 +17,62 @@ export const CLASS_DEFS: ClassDef[] = [
   {
     id: 'rogue',
     name: 'Rogue',
+    pinName: 'Rogue Pin',
     category: 'defensive',
     switchesPerTurn: 1,
     condition: 'When switching columns',
     effect:
-      'Provoke all enemies in the column you moved to, forcing them to target you.',
+      'Provoke (2 stacks) all enemies in the column you moved to, forcing them to target you.',
   },
   {
     id: 'vanguard',
     name: 'Vanguard',
+    pinName: 'Vanguard Pin',
     category: 'defensive',
     switchesPerTurn: 1,
-    condition: "Didn't move last turn (activates turn 1)",
-    effect: 'Gain 5 Block at the start of the round.',
-  },
-  {
-    id: 'defender',
-    name: 'Defender',
-    category: 'defensive',
-    switchesPerTurn: 1,
-    condition: 'When swapping with an ally',
-    effect: 'Share half your current Block with them.',
+    condition: 'At the start of each round',
+    effect: 'Gain Block equal to 3 per ally in your row (including self). Range: 3-9.',
   },
   {
     id: 'interceptor',
     name: 'Interceptor',
+    pinName: 'Interceptor Pin',
     category: 'defensive',
     switchesPerTurn: 1,
-    condition: 'Ally in your row targeted by a single-target attack',
-    effect: 'Once per round, you take the damage instead.',
+    condition: 'Ally in your column takes single-target damage',
+    effect: 'Reduce that damage by 4.',
   },
 
   // ── Offensive ────────────────────────────────────────────────
   {
     id: 'deadshot',
     name: 'Deadshot',
+    pinName: 'Deadshot Pin',
     category: 'offensive',
     switchesPerTurn: 1,
-    condition: 'While in the back row',
-    effect: '+5 damage to enemies in your column.',
+    condition: 'When targeting an enemy in your column',
+    effect: '+5 damage.',
   },
   {
     id: 'guerilla',
     name: 'Guerilla',
+    pinName: 'Guerilla Pin',
     category: 'offensive',
     switchesPerTurn: 2,
     condition: 'When switching rows',
     effect:
-      'Switching to the back row costs 0 energy. Switching to the front row grants your front-row attacks +3 damage for the rest of the turn.',
-  },
-  {
-    id: 'necromancer',
-    name: 'Necromancer',
-    category: 'offensive',
-    switchesPerTurn: 1,
-    condition: 'When an enemy in your column dies',
-    effect: 'Recover 1 energy.',
-  },
-  {
-    id: 'pugilist',
-    name: 'Pugilist',
-    category: 'offensive',
-    switchesPerTurn: 1,
-    condition: 'While in the front row',
-    effect: 'Your front-targeting attacks deal +2 damage.',
+      'Back→front: +4 damage to all attacks this turn. Front→back: gain 3 Block.',
   },
 
   // ── Support ──────────────────────────────────────────────────
   {
-    id: 'bard',
-    name: 'Bard',
-    category: 'support',
-    switchesPerTurn: 1,
-    condition: 'When swapping with an ally',
-    effect: 'Give them 1 energy.',
-  },
-  {
-    id: 'herald',
-    name: 'Herald',
-    category: 'support',
-    switchesPerTurn: 1,
-    condition: 'When swapping with an ally',
-    effect: 'Grant them 2 Haste.',
-  },
-  {
     id: 'priest',
     name: 'Priest',
+    pinName: 'Priest Pin',
     category: 'support',
     switchesPerTurn: 1,
     condition: 'While in back row with an ally in front (same column)',
     effect: 'That ally recovers 5 HP at the start of your turn.',
-  },
-  {
-    id: 'captain',
-    name: 'Captain',
-    category: 'support',
-    switchesPerTurn: 1,
-    condition: 'Allies to your sides (same row, adjacent columns)',
-    effect: 'They deal +3 damage.',
-  },
-
-  // ── Specialist ───────────────────────────────────────────────
-  {
-    id: 'renegade',
-    name: 'Renegade',
-    category: 'specialist',
-    switchesPerTurn: 1,
-    condition: 'No adjacent allies',
-    effect: '+4 damage dealt, −4 damage taken.',
   },
 ];
 

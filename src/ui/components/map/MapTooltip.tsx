@@ -1,5 +1,6 @@
 import type { MapNode, BattleNode, CardRemovalNode, ActTransitionNode, EventNode, RecruitNode } from '../../../run/types';
 import type { ActMapConfig } from './mapConfig';
+import type { Position } from '../../../engine/types';
 import { ALL_EVENTS } from '../../../data/events';
 import { THEME } from '../../theme';
 import { getSpriteUrl } from '../../utils/sprites';
@@ -19,7 +20,7 @@ function getDifficultyLabel(enemyCount: number): string {
 
 export function MapTooltip({ node, position, mapBounds, actConfig }: Props) {
   // Position to the right of node, fall back to left if overflowing
-  const tooltipWidth = 180;
+  const tooltipWidth = 240;
   const gap = 40;
   const rightOverflow = position.x + gap + tooltipWidth > mapBounds.width;
   const left = rightOverflow
@@ -59,6 +60,76 @@ export function MapTooltip({ node, position, mapBounds, actConfig }: Props) {
   );
 }
 
+/** Render enemies in a 2-col × 3-row grid matching battle formation. */
+function renderEnemyGrid(enemies: string[], positions: Position[]) {
+  // Build a grid: rows 0-2, columns front/back
+  const grid: (string | null)[][] = [
+    [null, null], // row 0: [front, back]
+    [null, null], // row 1
+    [null, null], // row 2
+  ];
+  for (let i = 0; i < enemies.length; i++) {
+    const pos = positions[i];
+    if (!pos) continue;
+    const col = pos.row === 'front' ? 0 : 1;
+    grid[pos.column][col] = enemies[i];
+  }
+
+  return (
+    <div>
+      {/* Column labels */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: 4,
+        marginBottom: 2,
+      }}>
+        <div style={{ fontSize: 8, color: THEME.text.tertiary, textAlign: 'center', letterSpacing: '0.1em' }}>FRONT</div>
+        <div style={{ fontSize: 8, color: THEME.text.tertiary, textAlign: 'center', letterSpacing: '0.1em' }}>BACK</div>
+      </div>
+      {/* Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gridTemplateRows: 'repeat(3, 36px)',
+        gap: 4,
+      }}>
+        {grid.flatMap((row, rowIdx) =>
+          row.map((enemyId, colIdx) => (
+            <div
+              key={`${rowIdx}-${colIdx}`}
+              style={{
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto',
+                border: enemyId ? 'none' : `1px dashed ${THEME.border.subtle}`,
+                borderRadius: 4,
+                opacity: enemyId ? 1 : 0.3,
+              }}
+            >
+              {enemyId && (
+                <img
+                  src={getSpriteUrl(enemyId)}
+                  alt={enemyId}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    imageRendering: 'pixelated',
+                    objectFit: 'contain',
+                  }}
+                />
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 function renderContent(node: MapNode, actConfig: ActMapConfig) {
   switch (node.type) {
     case 'battle': {
@@ -81,25 +152,8 @@ function renderContent(node: MapNode, actConfig: ActMapConfig) {
               {bossName}
             </div>
             <div style={{ fontSize: 11, color: THEME.text.tertiary }}>Boss Battle</div>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 2,
-              marginTop: 8,
-            }}>
-              {battle.enemies.map((enemyId, idx) => (
-                <img
-                  key={idx}
-                  src={getSpriteUrl(enemyId)}
-                  alt={enemyId}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    imageRendering: 'pixelated',
-                    objectFit: 'contain',
-                  }}
-                />
-              ))}
+            <div style={{ marginTop: 8 }}>
+              {renderEnemyGrid(battle.enemies, battle.enemyPositions)}
             </div>
           </div>
         );
@@ -123,21 +177,7 @@ function renderContent(node: MapNode, actConfig: ActMapConfig) {
               {difficulty}
             </span>
           </div>
-          <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            {battle.enemies.map((enemyId, idx) => (
-              <img
-                key={idx}
-                src={getSpriteUrl(enemyId)}
-                alt={enemyId}
-                style={{
-                  width: 36,
-                  height: 36,
-                  imageRendering: 'pixelated',
-                  objectFit: 'contain',
-                }}
-              />
-            ))}
-          </div>
+          {renderEnemyGrid(battle.enemies, battle.enemyPositions)}
         </div>
       );
     }

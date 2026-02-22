@@ -4,16 +4,16 @@ import type {
   PokemonData, Position, Combatant,
 } from '../../engine/types';
 import {
-  createCombatState, getCurrentCombatant, buildTurnOrder,
+  createCombatState, getCurrentCombatant, buildTurnOrder, insertBonusTurns,
 } from '../../engine/combat';
 import { startTurn, processAction, endTurn, skipTurnAndAdvance } from '../../engine/turns';
-import { getEffectiveCost } from '../../engine/cards';
+import { getEffectiveCost, getPlayableCards } from '../../engine/cards';
 import { drawCards } from '../../engine/deck';
 import { chooseEnemyAction } from '../../engine/ai';
 import type { RunState, BattleNode as MapBattleNode } from '../../run/types';
 import { getRunPokemonData } from '../../run/state';
-import { getPokemon } from '../../data/loaders';
-import { onBattleStart } from '../../engine/passives';
+import { getPokemon, getEnemyDeck } from '../../data/loaders';
+import { onBattleStart, processRoundStartPassives } from '../../engine/passives';
 
 export type BattlePhase = 'selecting' | 'player_turn' | 'enemy_turn' | 'animating' | 'victory' | 'defeat';
 
@@ -31,7 +31,8 @@ export interface BattleHook {
     enemyPositions: Position[],
     playerPassives: Map<number, string[]>,
     enemyPassives: Map<number, string[]>,
-    hpOverrides?: Map<string, { maxHp?: number; startPercent?: number }>
+    hpOverrides?: Map<string, { maxHp?: number; startPercent?: number }>,
+    playerItems?: Map<number, string>
   ) => void;
   startTutorialBattle: (
     players: PokemonData[],
@@ -66,12 +67,18 @@ export function useBattle(): BattleHook {
   // Use refs to break circular dependency between callbacks
   const processNextTurnRef = useRef<(s: CombatState) => void>(() => {});
   const scheduleEnemyTurnRef = useRef<(s: CombatState) => void>(() => {});
+  // Guard: prevents double endTurn when auto-end (from playCard) and endPlayerTurn
+  // fire in the same React batch due to rapid card-play + End-Turn clicks.
+  const endingTurnRef = useRef(false);
 
   const addLogs = useCallback((newLogs: LogEntry[]) => {
     setLogs(prev => [...prev, ...newLogs]);
   }, []);
 
   const processNextTurn = useCallback((s: CombatState) => {
+    // Clear the double-end guard — a new turn is starting
+    endingTurnRef.current = false;
+
     // If tutorial is paused, poll until unpaused
     if (tutorialPausedRef.current) {
       setTimeout(() => processNextTurnRef.current(s), 100);
@@ -220,7 +227,12 @@ export function useBattle(): BattleHook {
 
     // Rebuild turn order after battle start passives (Haste from Scurry affects speed)
     s.turnOrder = buildTurnOrder(s);
+    insertBonusTurns(s);
     s.currentTurnIndex = 0;
+
+    // Round-start passives for round 1 (Vanguard block, etc.)
+    const roundStartLogs = processRoundStartPassives(s);
+    initialLogs.push(...roundStartLogs);
 
     // Pre-draw hands for all combatants so enemy hands are visible during player turn
     for (const c of s.combatants) {
@@ -277,17 +289,23 @@ export function useBattle(): BattleHook {
     const playerPositions = aliveParty.map(({ pokemon }) => pokemon.position);
     const playerSlotIndices = aliveParty.map(({ originalIndex }) => originalIndex);
 
-    // Get enemy Pokemon data, applying HP multiplier if present (for boss fights)
+    // Get enemy Pokemon data, applying HP multiplier and deck tier overrides
     const hpMultiplier = node.enemyHpMultiplier ?? 1;
-    const enemies = node.enemies.map(id => {
+    const enemies = node.enemies.map((id, i) => {
       const basePokemon = getPokemon(id);
-      if (hpMultiplier !== 1) {
-        return {
-          ...basePokemon,
-          maxHp: Math.floor(basePokemon.maxHp * hpMultiplier),
-        };
+      let enemy = { ...basePokemon };
+
+      // Override deck with tiered enemy deck from enemy-decks.json
+      if (node.enemyDeckTiers?.[i]) {
+        enemy = { ...enemy, deck: getEnemyDeck(id, node.enemyDeckTiers[i]) };
       }
-      return basePokemon;
+
+      // Apply HP multiplier
+      if (hpMultiplier !== 1) {
+        enemy = { ...enemy, maxHp: Math.floor(enemy.maxHp * hpMultiplier) };
+      }
+
+      return enemy;
     });
     const enemyPositions = node.enemyPositions;
 
@@ -304,6 +322,27 @@ export function useBattle(): BattleHook {
     const passiveOverrides = new Map<number, string[]>();
     aliveParty.forEach(({ pokemon, originalIndex }) => {
       passiveOverrides.set(originalIndex, pokemon.passiveIds);
+    });
+
+    // Override enemy passives from encounter generator (replaces default L1 auto-assign)
+    if (node.enemyPassiveIds) {
+      const enemyCombatants = s.combatants.filter(c => c.side === 'enemy');
+      node.enemyPassiveIds.forEach((pids, i) => {
+        if (enemyCombatants[i]) {
+          enemyCombatants[i].passiveIds = [...pids];
+        }
+      });
+    }
+
+    // Apply held item assignments from run state
+    const playerCombatants = s.combatants.filter(c => c.side === 'player');
+    aliveParty.forEach(({ pokemon, originalIndex }) => {
+      if (pokemon.heldItemIds.length > 0) {
+        const combatant = playerCombatants.find(c => c.slotIndex === originalIndex);
+        if (combatant) {
+          combatant.heldItemIds = [...pokemon.heldItemIds];
+        }
+      }
     });
 
     initializeBattle(s, hpOverrides, passiveOverrides);
@@ -384,7 +423,8 @@ export function useBattle(): BattleHook {
     enemyPositions: Position[],
     playerPassives: Map<number, string[]>,
     enemyPassives: Map<number, string[]>,
-    hpOverrides?: Map<string, { maxHp?: number; startPercent?: number }>
+    hpOverrides?: Map<string, { maxHp?: number; startPercent?: number }>,
+    playerItems?: Map<number, string>
   ) => {
     // Create combat state
     const s = createCombatState(players, enemies, playerPositions, enemyPositions);
@@ -423,6 +463,16 @@ export function useBattle(): BattleHook {
           if (override.startPercent !== undefined) {
             combatant.hp = Math.floor(combatant.maxHp * override.startPercent);
           }
+        }
+      });
+    }
+
+    // Apply held item assignments
+    if (playerItems) {
+      playerItems.forEach((itemId, slotIndex) => {
+        const combatant = playerCombatants.find(c => c.slotIndex === slotIndex);
+        if (combatant) {
+          combatant.heldItemIds = [itemId];
         }
       });
     }
@@ -473,8 +523,43 @@ export function useBattle(): BattleHook {
 
       if (state.phase !== 'ongoing') {
         setPhase(state.phase === 'victory' ? 'victory' : 'defeat');
+        setState({ ...state });
+        return;
       }
+
+      // If the player just primed a self-KO, auto-end their turn
+      const current = getCurrentCombatant(state);
+      if (current.primedSelfKo) {
+        endingTurnRef.current = true;
+        const endLogs = endTurn(state);
+        addLogs(endLogs);
+        setState({ ...state });
+        if (state.phase !== 'ongoing') {
+          setPhase(state.phase === 'victory' ? 'victory' : 'defeat');
+          return;
+        }
+        setTimeout(() => processNextTurnRef.current(state), 500);
+        return;
+      }
+
       setState({ ...state });
+
+      // Auto-end turn if no playable cards remain
+      if (current.alive && !current.primedSelfKo && getPlayableCards(current).length === 0) {
+        endingTurnRef.current = true;
+        setPhase('animating');
+        setTimeout(() => {
+          const endLogs = endTurn(state);
+          addLogs(endLogs);
+          setState({ ...state });
+          if (state.phase !== 'ongoing') {
+            setPhase(state.phase === 'victory' ? 'victory' : 'defeat');
+            return;
+          }
+          setTimeout(() => processNextTurnRef.current(state), 500);
+        }, 600);
+        return;
+      }
     } catch (error) {
       console.error('Error playing card:', error);
       setPendingCardIndex(null);
@@ -501,7 +586,10 @@ export function useBattle(): BattleHook {
   }, [state, phase, addLogs]);
 
   const endPlayerTurn = useCallback(() => {
-    if (!state || phase !== 'player_turn') return;
+    if (!state || phase !== 'player_turn' || endingTurnRef.current) return;
+
+    // Immediately block further interaction during turn transition
+    setPhase('animating');
 
     const endLogs = endTurn(state);
     addLogs(endLogs);

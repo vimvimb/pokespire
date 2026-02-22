@@ -17,7 +17,8 @@ import {
   isAoERange,
   getValidSwitchTargets,
 } from "../../engine/position";
-import { getSwitchCost } from "../../engine/turns";
+import { getSwitchCost, getMaxSwitches } from "../../engine/turns";
+import { getPlayableCards } from "../../engine/cards";
 import { shouldConsumingFlameVanish } from "../../engine/passives";
 import { calculateDamagePreview } from "../../engine/preview";
 import type { DamagePreview } from "../../engine/preview";
@@ -43,6 +44,8 @@ import { Flourish } from "../components/Flourish";
 import { simulateEnemyIntents } from "../../engine/intentPreview";
 import type { EnemyIntent } from "../../engine/intentPreview";
 import { THEME } from "../theme";
+import { HeldItemsSidebar } from "../components/HeldItemsSidebar";
+import { checkItemPlayRestriction } from "../../engine/itemEffects";
 import battleBgAct1 from "../../../assets/backgrounds/rocket_lab_act_1_v4.png";
 import { getRunActMapConfig } from "../../data/campaigns";
 import { playSound, type SoundEffect } from "../utils/sound";
@@ -81,8 +84,31 @@ interface Props {
 }
 
 /** Render a 2-row grid for one side of the battle */
+
+// Fixed cell dimensions — ensures grid never collapses when cells are empty
+const CELL_W = 200; // px, wide enough for largest sprite at MAX_BATTLE_SPRITE_SIZE
+const CELL_H = 260; // px, tall enough for sprite + name + health bar + energy pips
+const TILT_PX = 36; // isometric horizontal offset per column slot
+const SLOT_GAP = 4; // vertical gap between rows
+const ROW_GAP = 50; // horizontal gap between front and back columns
+
+// Ground grid line geometry — forms a parallelogram following the isometric tilt
+const GRID_W = 2 * CELL_W + ROW_GAP; // full grid width before tilt (450)
+const GRID_H = 3 * CELL_H + 2 * SLOT_GAP; // full grid height (788)
+const MAX_TILT = 2 * TILT_PX; // tilt at the bottom row (72)
+// Row boundary y-positions: top edge, midpoints of gaps, bottom edge
+const GRID_ROW_YS = [
+  0,
+  CELL_H + SLOT_GAP / 2,
+  2 * CELL_H + 1.5 * SLOT_GAP,
+  GRID_H,
+];
+// Column boundary x-positions: left edge, center of column gap, right edge
+const GRID_COL_XS = [0, CELL_W + ROW_GAP / 2, GRID_W];
+
 function BattleGrid({
   combatants,
+  allCombatants,
   currentCombatant,
   targetableIds,
   onSelectTarget,
@@ -100,6 +126,7 @@ function BattleGrid({
   onSwitchSelect,
 }: {
   combatants: Combatant[];
+  allCombatants: Combatant[];
   currentCombatant: Combatant | null;
   targetableIds: Set<string>;
   onSelectTarget: (id: string) => void;
@@ -138,13 +165,6 @@ function BattleGrid({
   // Front row renders on top (z-index) for depth layering
   const leftZIndex = side === "player" ? 1 : 2;
   const rightZIndex = side === "player" ? 2 : 1;
-
-  // Tilt: horizontal offset per column slot for isometric depth
-  // Both sides tilt the same direction (down-right) so the diagonals match
-  const TILT_PX = 36; // pixels per slot
-
-  const SLOT_GAP = 4; // vertical gap between Pokemon in same position
-  const ROW_GAP = 50; // horizontal gap between front and back columns
 
   // Compute arrow character pointing from source toward target cell
   // Player grid: back row on LEFT, front row on RIGHT
@@ -185,6 +205,9 @@ function BattleGrid({
           zIndex,
           display: "flex",
           justifyContent: "center",
+          alignItems: "center",
+          width: CELL_W,
+          height: CELL_H,
         }}
       >
         {combatant ? (
@@ -204,6 +227,7 @@ function BattleGrid({
           >
             <PokemonSprite
               combatant={combatant}
+              combatants={allCombatants}
               isCurrentTurn={currentCombatant?.id === combatant.id}
               isTargetable={!isSwitchTarget && targetableIds.has(combatant.id)}
               onSelect={
@@ -272,37 +296,77 @@ function BattleGrid({
   };
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "auto auto",
-        gridTemplateRows: "repeat(3, auto)",
-        columnGap: ROW_GAP,
-        rowGap: SLOT_GAP,
-      }}
-    >
-      {([0, 1, 2] as Column[]).flatMap((col) => {
-        const leftCombatant = leftCol.find((c) => c.position.column === col);
-        const rightCombatant = rightCol.find((c) => c.position.column === col);
-        const tiltX = col * TILT_PX;
-        // Left column row depends on side: player left=back, enemy left=front
-        const leftRow = side === "player" ? "back" : "front";
-        const rightRow = side === "player" ? "front" : "back";
-        return [
-          <div key={`${col}-l`}>
-            {renderCell(leftCombatant, leftZIndex, tiltX, {
-              row: leftRow,
-              column: col,
-            })}
-          </div>,
-          <div key={`${col}-r`}>
-            {renderCell(rightCombatant, rightZIndex, tiltX, {
-              row: rightRow,
-              column: col,
-            })}
-          </div>,
-        ];
-      })}
+    <div style={{ position: "relative" }}>
+      {/* Ground grid lines — SVG parallelogram following the isometric tilt */}
+      <svg
+        style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
+        width={GRID_W + MAX_TILT}
+        height={GRID_H}
+      >
+        {/* Horizontal lines at row boundaries — tilted proportionally */}
+        {GRID_ROW_YS.map((y, i) => {
+          const tx = GRID_H > 0 ? (y / GRID_H) * MAX_TILT : 0;
+          return (
+            <line
+              key={`h${i}`}
+              x1={tx}
+              y1={y}
+              x2={tx + GRID_W}
+              y2={y}
+              stroke="rgba(240, 230, 211, 0.10)"
+              strokeWidth={1}
+            />
+          );
+        })}
+        {/* Diagonal lines at column boundaries — follow the tilt slope */}
+        {GRID_COL_XS.map((x, i) => (
+          <line
+            key={`d${i}`}
+            x1={x}
+            y1={0}
+            x2={x + MAX_TILT}
+            y2={GRID_H}
+            stroke="rgba(240, 230, 211, 0.10)"
+            strokeWidth={1}
+          />
+        ))}
+      </svg>
+
+      {/* Grid content */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `${CELL_W}px ${CELL_W}px`,
+          gridTemplateRows: `repeat(3, ${CELL_H}px)`,
+          columnGap: ROW_GAP,
+          rowGap: SLOT_GAP,
+        }}
+      >
+        {([0, 1, 2] as Column[]).flatMap((col) => {
+          const leftCombatant = leftCol.find((c) => c.position.column === col);
+          const rightCombatant = rightCol.find(
+            (c) => c.position.column === col,
+          );
+          const tiltX = col * TILT_PX;
+          // Left column row depends on side: player left=back, enemy left=front
+          const leftRow = side === "player" ? "back" : "front";
+          const rightRow = side === "player" ? "front" : "back";
+          return [
+            <div key={`${col}-l`}>
+              {renderCell(leftCombatant, leftZIndex, tiltX, {
+                row: leftRow,
+                column: col,
+              })}
+            </div>,
+            <div key={`${col}-r`}>
+              {renderCell(rightCombatant, rightZIndex, tiltX, {
+                row: rightRow,
+                column: col,
+              })}
+            </div>,
+          ];
+        })}
+      </div>
     </div>
   );
 }
@@ -469,13 +533,17 @@ export function BattleScreen({
     currentCombatant.hand.forEach((cardId, idx) => {
       const card = getMove(cardId);
       if (
-        getCardValidTargets(state, currentCombatant, card).length === 0
+        getCardValidTargets(state, currentCombatant, card).length === 0 ||
+        !checkItemPlayRestriction(currentCombatant, card)
       ) {
         indices.add(idx);
       }
     });
     return indices;
   }, [state, currentCombatant]);
+
+  const shouldFlashEndTurn = isPlayerTurn && !!currentCombatant &&
+    getPlayableCards(currentCombatant).length === 0;
 
   // Cancel switch mode on Escape
   useEffect(() => {
@@ -940,6 +1008,22 @@ export function BattleScreen({
             }
           }
         }
+      }
+
+      // Parse self-KO charging: "X is charging Card Name!"
+      const chargingMatch = log.message.match(/^(.+?) is charging (.+?)!$/i);
+      if (chargingMatch) {
+        const sourceName = chargingMatch[1];
+        const cardName = chargingMatch[2];
+        showCardPlayed(sourceName, cardName, 'CHARGING...');
+      }
+
+      // Parse self-KO detonation: "X's Card Name detonates!"
+      const detonateMatch = log.message.match(/^(.+?)'s (.+?) detonates!$/i);
+      if (detonateMatch) {
+        const sourceName = detonateMatch[1];
+        const cardName = detonateMatch[2];
+        showCardPlayed(sourceName, cardName, 'DETONATING!');
       }
 
       // Parse damage: "X takes Y damage" (most common pattern)
@@ -1556,6 +1640,7 @@ export function BattleScreen({
           <div style={{ transform: `translateY(${PLAYER_OFFSET_Y}px)` }}>
             <BattleGrid
               combatants={players}
+              allCombatants={state.combatants}
               currentCombatant={currentCombatant}
               targetableIds={
                 dragTargetableIds.size > 0 ? dragTargetableIds : targetableIds
@@ -1579,6 +1664,7 @@ export function BattleScreen({
           <div>
             <BattleGrid
               combatants={enemies}
+              allCombatants={state.combatants}
               currentCombatant={currentCombatant}
               targetableIds={
                 dragTargetableIds.size > 0 ? dragTargetableIds : targetableIds
@@ -1642,6 +1728,9 @@ export function BattleScreen({
           flexDirection: "column",
         }}
       >
+        {currentCombatant && currentCombatant.heldItemIds.length > 0 && (
+          <HeldItemsSidebar itemIds={currentCombatant.heldItemIds} ownerName={currentCombatant.name} />
+        )}
         <BattleLog logs={logs} />
       </div>
 
@@ -1735,7 +1824,8 @@ export function BattleScreen({
                 {onSwitchPosition &&
                   (() => {
                     const swCost = getSwitchCost(currentCombatant);
-                    const switchesLeft = 3 - currentCombatant.turnFlags.switchesThisTurn;
+                    const maxSw = getMaxSwitches(currentCombatant);
+                    const switchesLeft = maxSw - currentCombatant.turnFlags.switchesThisTurn;
                     const canSwitch =
                       switchesLeft > 0 &&
                       currentCombatant.energy >= swCost &&
@@ -1916,8 +2006,16 @@ export function BattleScreen({
                   })()}
 
                 {/* End Turn button — ornate gold */}
+                <style>{`
+                  @keyframes pksFlash {
+                    0%, 100% { filter: brightness(1) drop-shadow(0 0 0px transparent); }
+                    50% { filter: brightness(1.3) drop-shadow(0 0 6px ${THEME.accent}88); }
+                  }
+                  .pks-flash { animation: pksFlash 1.2s ease-in-out infinite; }
+                `}</style>
                 <button
                   data-tutorial-id="end_turn"
+                  className={shouldFlashEndTurn ? "pks-flash" : undefined}
                   onClick={onEndTurn}
                   style={{
                     position: "relative",

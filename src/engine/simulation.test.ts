@@ -68,7 +68,7 @@ function runLargeExperiment(team: TeamConfig, numSeeds: number, runsPerSeed: num
 }
 
 describe('Debug - Battle Log Analysis', () => {
-  it('shows battle log for a2-s1-battle-1 defeat', () => {
+  it('shows battle log for 2b defeat', () => {
     const team: TeamConfig = {
       name: 'DEBUG',
       starters: ['nidoran-m', 'nidoran-f', 'pidgey', 'tauros'],
@@ -80,7 +80,7 @@ describe('Debug - Battle Log Analysis', () => {
       ],
     };
 
-    // Find a seed that loses at a2-s1-battle-1
+    // Find a seed that loses at 2b
     for (let seed = 100; seed <= 5000; seed += 100) {
       const summary = runSimulation({
         starters: team.starters,
@@ -90,8 +90,8 @@ describe('Debug - Battle Log Analysis', () => {
       });
 
       const result = summary.results[0];
-      if (result.defeatedAtNode === 'a2-s1-battle-1' && result.battleLog) {
-        console.log(`\n=== BATTLE LOG (seed ${seed}) - a2-s1-battle-1 ===`);
+      if (result.defeatedAtNode === '2b' && result.battleLog) {
+        console.log(`\n=== BATTLE LOG (seed ${seed}) - 2b ===`);
         console.log(`Party levels: [${result.partyLevels.join(', ')}]`);
         console.log(`Party alive count: ${result.partyAliveCount}`);
         console.log('');

@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import type { Combatant } from '../../engine/types';
 import type { DamagePreview } from '../../engine/preview';
 import { HealthBar } from './HealthBar';
@@ -24,15 +24,45 @@ interface Props {
   spriteScale?: number;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  /** All combatants in combat — threaded to StatusIcons for source name resolution */
+  combatants?: Combatant[];
 }
 
-function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, onInspect, onDragEnter, onDragLeave, onDrop, damagePreview, isDragHovered, spriteScale = 1, onMouseEnter, onMouseLeave }: Props) {
+/** Death animation duration in ms */
+const FAINT_DURATION = 800;
+
+function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, onInspect, onDragEnter, onDragLeave, onDrop, damagePreview, isDragHovered, spriteScale = 1, onMouseEnter, onMouseLeave, combatants }: Props) {
   const [imgError, setImgError] = useState(false);
+  const [blockHovered, setBlockHovered] = useState(false);
   const isEnemy = combatant.side === 'enemy';
 
   const spriteUrl = getSpriteUrl(combatant.pokemonId, isEnemy ? 'front' : 'back');
 
-  const opacity = combatant.alive ? 1 : 0.3;
+  // --- Faint animation state ---
+  // 'alive' = normal, 'fainting' = playing death animation, 'fainted' = hidden
+  const [faintPhase, setFaintPhase] = useState<'alive' | 'fainting' | 'fainted'>(
+    combatant.alive ? 'alive' : 'fainted',
+  );
+  const prevAliveRef = useRef(combatant.alive);
+
+  useEffect(() => {
+    if (prevAliveRef.current && !combatant.alive) {
+      // Just died — trigger animation
+      setFaintPhase('fainting');
+      const timer = setTimeout(() => setFaintPhase('fainted'), FAINT_DURATION);
+      return () => clearTimeout(timer);
+    }
+    if (!prevAliveRef.current && combatant.alive) {
+      // Revived
+      setFaintPhase('alive');
+    }
+    prevAliveRef.current = combatant.alive;
+  }, [combatant.alive]);
+
+  // Fully hidden after faint animation
+  if (faintPhase === 'fainted') {
+    return null;
+  }
 
   // Scale sprite based on Pokemon weight, with global battle scale applied
   const spriteSize = Math.round(getSpriteSize(combatant.pokemonId) * spriteScale);
@@ -56,20 +86,20 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
     }
   };
 
-  const handleDragEnter = (e: React.DragEvent) => {
+  const handleDragEnterEvt = (e: React.DragEvent) => {
     e.preventDefault();
     if (isTargetable && combatant.alive) {
       onDragEnter?.();
     }
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragLeaveEvt = (e: React.DragEvent) => {
     // Only trigger if leaving the actual element (not entering a child)
     if (e.currentTarget.contains(e.relatedTarget as Node)) return;
     onDragLeave?.();
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDropEvt = (e: React.DragEvent) => {
     e.preventDefault();
     if (isTargetable && combatant.alive) {
       onDrop?.();
@@ -85,13 +115,16 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
     return '#e2e8f0'; // Neutral
   };
 
+  const isFainting = faintPhase === 'fainting';
+
   return (
     <div
       onClick={isClickable ? handleClick : undefined}
       onDragOver={handleDragOver}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      onDragEnter={handleDragEnterEvt}
+      onDragLeave={handleDragLeaveEvt}
+      onDrop={handleDropEvt}
+      className={isFainting ? 'pks-faint' : undefined}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -99,7 +132,6 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
         gap: 6,
         padding: 12,
         cursor: isClickable ? 'pointer' : 'default',
-        opacity,
         transition: 'opacity 0.2s, transform 0.2s, filter 0.2s',
         minWidth: 140,
         position: 'relative',
@@ -124,7 +156,7 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
         <div
           onMouseEnter={onMouseEnter}
           onMouseLeave={onMouseLeave}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}
         >
           <div style={{ fontSize: 17, fontWeight: 'bold', color: THEME.text.primary, marginBottom: 4 }}>
             {combatant.name}
@@ -158,6 +190,25 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
               {isEnemy ? '👾' : '🔮'}
             </div>
           )}
+
+          {/* Death X overlay — only during fainting animation */}
+          {isFainting && (
+            <svg
+              viewBox="0 0 100 100"
+              width={spriteSize}
+              height={spriteSize}
+              style={{ position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)', pointerEvents: 'none' }}
+            >
+              <line x1="15" y1="15" x2="85" y2="85" stroke="#ef4444" strokeWidth="6" strokeLinecap="round" opacity="0.85">
+                <animate attributeName="x2" from="15" to="85" dur="0.2s" fill="freeze" />
+                <animate attributeName="y2" from="15" to="85" dur="0.2s" fill="freeze" />
+              </line>
+              <line x1="85" y1="15" x2="15" y2="85" stroke="#ef4444" strokeWidth="6" strokeLinecap="round" opacity="0.85">
+                <animate attributeName="x2" from="85" to="15" dur="0.2s" begin="0.15s" fill="freeze" />
+                <animate attributeName="y2" from="15" to="85" dur="0.2s" begin="0.15s" fill="freeze" />
+              </line>
+            </svg>
+          )}
         </div>
 
         {/* Status icons - positioned behind the sprite, skewed to match formation tilt */}
@@ -172,7 +223,7 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
           minWidth: 100,
         }}>
           {combatant.statuses.length > 0 && (
-            <StatusIcons statuses={combatant.statuses} maxPerColumn={3} skewAngle={isEnemy ? 11 : -11} />
+            <StatusIcons statuses={combatant.statuses} maxPerColumn={3} skewAngle={isEnemy ? 11 : -11} combatants={combatants} />
           )}
         </div>
       </div>
@@ -181,15 +232,19 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
       <div style={{ width: '100%', maxWidth: 120, position: 'relative' }}>
         <HealthBar current={combatant.hp} max={combatant.maxHp} skewAngle={isEnemy ? 11 : -11} />
         {combatant.block > 0 && (
-          <div style={{
-            position: 'absolute',
-            right: -16,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            width: 30,
-            height: 34,
-            zIndex: 5,
-          }}>
+          <div
+            onMouseEnter={() => setBlockHovered(true)}
+            onMouseLeave={() => setBlockHovered(false)}
+            style={{
+              position: 'absolute',
+              right: -16,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: 30,
+              height: 34,
+              zIndex: 5,
+            }}
+          >
             <svg viewBox="0 0 24 28" width="30" height="34" style={{ position: 'absolute', top: 0, left: 0, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.5))' }}>
               <defs>
                 <linearGradient id="shieldBase" x1="0" y1="0" x2="0.3" y2="1">
@@ -221,16 +276,31 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
             }}>
               {combatant.block}
             </span>
+            {blockHovered && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                marginTop: 4,
+                padding: '5px 10px',
+                background: 'rgba(0, 0, 0, 0.9)',
+                borderRadius: 6,
+                fontSize: 12,
+                color: '#e2e8f0',
+                whiteSpace: 'nowrap',
+                zIndex: 10,
+                pointerEvents: 'none',
+              }}>
+                Blocks {combatant.block} damage from the next attack. Halves at end of round.
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {combatant.side === 'player' && (
         <EnergyPips energy={combatant.energy} energyCap={combatant.energyCap} />
-      )}
-
-      {!combatant.alive && (
-        <div style={{ fontSize: 15, color: '#ef4444', fontWeight: 'bold' }}>FAINTED</div>
       )}
 
       {/* Damage Preview - shown on all valid targets when a card is selected or being dragged */}
@@ -301,6 +371,26 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
           )}
         </div>
       )}
+
+      <style>{`
+        @keyframes pksFaintShake {
+          0%, 100% { transform: translateX(0); }
+          15% { transform: translateX(-6px) rotate(-2deg); }
+          30% { transform: translateX(6px) rotate(2deg); }
+          45% { transform: translateX(-4px) rotate(-1deg); }
+          60% { transform: translateX(4px) rotate(1deg); }
+          75% { transform: translateX(-2px); }
+          90% { transform: translateX(2px); }
+        }
+        @keyframes pksFaintFade {
+          0% { opacity: 1; }
+          60% { opacity: 0.7; }
+          100% { opacity: 0; }
+        }
+        .pks-faint {
+          animation: pksFaintShake 0.5s ease-out, pksFaintFade 0.8s ease-in forwards;
+        }
+      `}</style>
     </div>
   );
 }

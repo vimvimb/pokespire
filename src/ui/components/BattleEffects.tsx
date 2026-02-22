@@ -36,6 +36,7 @@ const STATUS_DISPLAY: Record<string, { icon: string; color: string }> = {
   strength: { icon: '💪', color: '#ef4444' },
   haste: { icon: '💨', color: '#22d3ee' },
   taunt: { icon: '☝️', color: '#dc2626' },
+  fatigue: { icon: '😵', color: '#94a3b8' },
 };
 
 // Card fly animation event
@@ -127,22 +128,27 @@ function FloatingNumber({ event, position, onComplete }: FloatingNumberProps) {
 interface CardPlayedBannerProps {
   sourceName: string;
   cardName: string;
+  subtitle?: string;
   onComplete: () => void;
 }
 
-// Banner that shows what card was played
-function CardPlayedBanner({ sourceName, cardName, onComplete }: CardPlayedBannerProps) {
+// Banner that shows what card was played (or charging status)
+function CardPlayedBanner({ sourceName, cardName, subtitle, onComplete }: CardPlayedBannerProps) {
   const [opacity, setOpacity] = useState(0);
   const [scale, setScale] = useState(0.8);
 
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
 
+  const isCharging = !!subtitle;
+  const holdDuration = isCharging ? 1000 : 600;
+  const borderColor = isCharging ? '#f97316' : '#facc15';
+  const titleColor = isCharging ? '#f97316' : '#facc15';
+
   useEffect(() => {
     // Fade in, hold, fade out
     const startTime = Date.now();
     const fadeInDuration = 150;
-    const holdDuration = 600;
     const fadeOutDuration = 200;
     const totalDuration = fadeInDuration + holdDuration + fadeOutDuration;
     let frameId: number;
@@ -184,17 +190,24 @@ function CardPlayedBanner({ sourceName, cardName, onComplete }: CardPlayedBanner
         transform: `translate(-50%, -50%) scale(${scale})`,
         padding: '12px 24px',
         background: 'rgba(30, 30, 46, 0.95)',
-        border: '2px solid #facc15',
+        border: `2px solid ${borderColor}`,
         borderRadius: 12,
         opacity,
         pointerEvents: 'none',
         zIndex: 200,
         textAlign: 'center',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+        boxShadow: isCharging
+          ? `0 4px 20px rgba(0,0,0,0.5), 0 0 20px rgba(249,115,22,0.4)`
+          : '0 4px 20px rgba(0,0,0,0.5)',
       }}
     >
       <div style={{ fontSize: 14, color: '#94a3b8' }}>{sourceName}</div>
-      <div style={{ fontSize: 20, fontWeight: 'bold', color: '#facc15' }}>{cardName}</div>
+      <div style={{ fontSize: 20, fontWeight: 'bold', color: titleColor }}>{cardName}</div>
+      {subtitle && (
+        <div style={{ fontSize: 12, color: '#ef4444', fontWeight: 'bold', marginTop: 4, letterSpacing: 2 }}>
+          {subtitle}
+        </div>
+      )}
     </div>
   );
 }
@@ -717,7 +730,7 @@ function StatusAppliedAnimation({ event, position, onComplete }: StatusAppliedAn
 // Hook to manage battle effects
 export function useBattleEffects() {
   const [events, setEvents] = useState<BattleEvent[]>([]);
-  const [cardBanner, setCardBanner] = useState<{ sourceName: string; cardName: string; id: string } | null>(null);
+  const [cardBanner, setCardBanner] = useState<{ sourceName: string; cardName: string; subtitle?: string; id: string } | null>(null);
   const [cardFlyEvents, setCardFlyEvents] = useState<CardFlyEvent[]>([]);
 
   const addEvent = useCallback((event: Omit<BattleEvent, 'id' | 'timestamp'>) => {
@@ -729,8 +742,8 @@ export function useBattleEffects() {
     setEvents(prev => [...prev, newEvent]);
   }, []);
 
-  const showCardPlayed = useCallback((sourceName: string, cardName: string) => {
-    setCardBanner({ sourceName, cardName, id: `${Date.now()}` });
+  const showCardPlayed = useCallback((sourceName: string, cardName: string, subtitle?: string) => {
+    setCardBanner({ sourceName, cardName, subtitle, id: `${Date.now()}` });
   }, []);
 
   const removeEvent = useCallback((id: string) => {
@@ -788,7 +801,7 @@ export function useBattleEffects() {
 
 interface BattleEffectsLayerProps {
   events: BattleEvent[];
-  cardBanner: { sourceName: string; cardName: string; id: string } | null;
+  cardBanner: { sourceName: string; cardName: string; subtitle?: string; id: string } | null;
   cardFlyEvents: CardFlyEvent[];
   statusAppliedEvents: StatusAppliedEvent[];
   getPositionForCombatant: (combatantId: string) => { x: number; y: number } | null;
@@ -857,6 +870,7 @@ export function BattleEffectsLayer({
           key={cardBanner.id}
           sourceName={cardBanner.sourceName}
           cardName={cardBanner.cardName}
+          subtitle={cardBanner.subtitle}
           onComplete={onBannerComplete}
         />
       )}

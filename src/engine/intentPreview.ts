@@ -56,18 +56,29 @@ export function simulateEnemyIntents(
 
   let sequenceNumber = 1;
 
-  // Walk all remaining un-acted entries in turn order
-  // We start from the entry AFTER the current one (current is the player whose turn it is)
+  // Snapshot the combatant IDs to simulate BEFORE we start modifying the clone.
+  // We can't iterate by index because processAction → removeDeadFromTurnOrder
+  // may remove entries and shift indices, causing us to skip combatants.
   const startIndex = clone.currentTurnIndex + 1;
+  const idsToSimulate = clone.turnOrder
+    .slice(startIndex)
+    .filter(e => !e.hasActed)
+    .map(e => e.combatantId);
 
-  for (let i = startIndex; i < clone.turnOrder.length; i++) {
-    const entry = clone.turnOrder[i];
+  for (const id of idsToSimulate) {
+    // Find current index in the (possibly modified) turn order.
+    // Prefer unacted entries to handle deferred turns (primed self-KO)
+    // where the same combatant ID appears twice.
+    const entryIndex = clone.turnOrder.findIndex(e => e.combatantId === id && !e.hasActed);
+    if (entryIndex < 0) continue; // removed (died before their turn)
+
+    const entry = clone.turnOrder[entryIndex];
     if (entry.hasActed) continue;
     if (clone.phase !== 'ongoing') break;
 
     let combatant: Combatant;
     try {
-      combatant = getCombatant(clone, entry.combatantId);
+      combatant = getCombatant(clone, id);
     } catch {
       continue;
     }
@@ -75,13 +86,64 @@ export function simulateEnemyIntents(
     if (!combatant.alive) continue;
 
     // Set up clone so this combatant is the "current" one
-    clone.currentTurnIndex = i;
+    clone.currentTurnIndex = entryIndex;
+
+    // Primed Self-KO: generate detonation intent BEFORE startTurn resolves it
+    if (combatant.primedSelfKo && combatant.side === 'enemy') {
+      const primedCard = getMove(combatant.primedSelfKo.cardId);
+      const aliveEnemies = clone.combatants.filter(c => c.alive && c.side !== combatant.side);
+      const targetIds = aliveEnemies.map(t => t.id);
+
+      // Compute damage previews against each target
+      const damageByTarget: Record<string, IntentDamagePreview> = {};
+      for (const target of aliveEnemies) {
+        try {
+          const preview = calculateDamagePreview(clone, combatant, target, primedCard);
+          if (preview) {
+            damageByTarget[target.id] = {
+              totalDamage: preview.totalDamage,
+              typeEffectiveness: preview.typeEffectiveness,
+              effectivenessLabel: preview.effectivenessLabel,
+              blockedAmount: preview.blockedAmount,
+              isMultiHit: preview.isMultiHit,
+              hits: preview.hits,
+              finalDamage: preview.finalDamage,
+            };
+          }
+        } catch {
+          // skip
+        }
+      }
+
+      // Check which targets would be KO'd
+      const wouldKO: Record<string, boolean> = {};
+      for (const target of aliveEnemies) {
+        const dmg = damageByTarget[target.id];
+        wouldKO[target.id] = dmg ? dmg.totalDamage >= target.hp : false;
+      }
+
+      const intents: EnemyIntent[] = [{
+        sequenceNumber: sequenceNumber++,
+        sourceId: combatant.id,
+        cardId: primedCard.id,
+        cardName: primedCard.name,
+        moveType: primedCard.type,
+        range: primedCard.range,
+        isSelfTarget: false,
+        isAoE: true,
+        targetIds,
+        wouldKO,
+        damageByTarget,
+        cardCost: 0,
+      }];
+      result.set(combatant.id, intents);
+    }
 
     // Start the turn (energy gain, status ticks, passives)
     try {
       const { skipped } = startTurn(clone);
       if (skipped) {
-        // Turn was skipped (e.g., fainted from status damage)
+        // Turn was skipped (e.g., fainted from status damage, or primed detonation)
         continue;
       }
     } catch {

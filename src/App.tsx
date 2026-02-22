@@ -52,12 +52,10 @@ const EventTesterScreen = lazy(() =>
     default: m.EventTesterScreen,
   })),
 );
-const ClassesPlanScreen = lazy(() =>
-  import("./ui/screens/ClassesPlanScreen").then((m) => ({
-    default: m.ClassesPlanScreen,
-  })),
-);
 import { GhostReviveScreen } from "./ui/screens/GhostReviveScreen";
+import { ItemDexScreen } from "./ui/screens/ItemDexScreen";
+import { StarterItemScreen } from "./ui/screens/StarterItemScreen";
+import { ItemRewardScreen } from "./ui/screens/ItemRewardScreen";
 import type {
   RunState,
   RunPokemon,
@@ -130,10 +128,13 @@ import {
   spendGold,
   reviveFromGraveyard,
   anyPokemonCanLevelUp,
+  rollItemReward,
+  rollBossItemReward,
 } from "./run/state";
 import { getActMapConfig } from "./ui/components/map/mapConfig";
 import { isCurrentActComplete, hasNextAct, getCampaignStatus, CAMPAIGNS } from "./data/campaigns";
 import type { Screen } from "./types/screens";
+import type { ItemDefinition } from "./data/items";
 
 // localStorage keys
 const SAVE_KEY = "pokespire_save";
@@ -156,6 +157,7 @@ function saveGame(screen: Screen, runState: RunState | null) {
     "battle",
     "act_transition",
     "card_removal",
+    "item_reward",
   ];
   if (runState && savableScreens.includes(screen)) {
     const saveData: SaveData = { screen, runState, savedAt: Date.now() };
@@ -209,6 +211,8 @@ export default function App() {
   );
   const [pendingPostLevelUpScreen, setPendingPostLevelUpScreen] =
     useState<Screen | null>(null);
+  const [pendingItemReward, setPendingItemReward] = useState<ItemDefinition | null>(null);
+  const [pendingPostItemScreen, setPendingPostItemScreen] = useState<Screen | null>(null);
   const [isTutorialMode, setIsTutorialMode] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>("rocket_tower");
   const [draftResults, setDraftResults] = useState<{
@@ -276,8 +280,7 @@ export default function App() {
     (party: PokemonData[], positions: Position[], gold: number) => {
       const run = createRunState(party, positions, Date.now(), gold, selectedCampaignId);
       setRunState(run);
-      setDraftResults(null);
-      setScreen("map");
+      setScreen("starter_items");
     },
     [selectedCampaignId],
   );
@@ -420,7 +423,7 @@ export default function App() {
 
       const targetScreen: Screen = isRunComplete(newRun)
         ? "run_victory"
-        : newRun.currentNodeId === "a2-chasm-ghosts"
+        : newRun.currentNodeId === "2j"
           ? "ghost_revive"
           : "map";
 
@@ -499,27 +502,14 @@ export default function App() {
         return;
       }
 
-      // Normal 1v1 recruit battles: sync HP back to fighter, return to recruit screen
+      // Normal 1v1 recruit battles: sync HP + singleUse cards back to fighter, return to recruit screen
       if (isRecruitBattle && recruitFighterIndex !== null) {
-        const playerCombatant = combatants.find((c) => c.side === "player");
-        let newParty = runState.party;
-        if (playerCombatant) {
-          const newHp = Math.max(0, playerCombatant.hp);
-          const isKO = newHp <= 0 || !playerCombatant.alive;
-          newParty = runState.party.map((p, i) => {
-            if (i !== recruitFighterIndex) return p;
-            return { ...p, currentHp: newHp, knockedOut: p.knockedOut || isKO };
-          });
-          const updatedRun = moveKnockedOutToGraveyard({
-            ...runState,
-            party: newParty,
-          });
-          setRunState(updatedRun);
-          newParty = updatedRun.party;
-        }
+        let updatedRun = syncBattleResults(runState, combatants);
+        updatedRun = moveKnockedOutToGraveyard(updatedRun);
+        setRunState(updatedRun);
 
         // Check for full party wipe
-        const allDead = newParty.every((p) => p.currentHp <= 0 || p.knockedOut);
+        const allDead = updatedRun.party.every((p) => p.currentHp <= 0 || p.knockedOut);
         if (allDead) {
           setIsRecruitBattle(false);
           setPendingBattleNodeId(null);
@@ -585,20 +575,52 @@ export default function App() {
           setScreen("run_victory");
         }
       } else if (isCurrentActComplete(newRun) && hasNextAct(newRun)) {
-        // Act boss defeated and there is a next act — full heal and show act transition
+        // Act boss defeated and there is a next act — full heal, roll boss item, then act transition
         newRun = applyFullHealAll(newRun);
+
+        const excludeIds = newRun.party.flatMap(p => p.heldItemIds);
+        const { item: bossItem, nextSeed } = rollBossItemReward(
+          newRun.seed, excludeIds,
+        );
+        newRun = { ...newRun, seed: nextSeed };
         setRunState(newRun);
-        if (anyPokemonCanLevelUp(newRun)) {
-          setPendingPostLevelUpScreen("act_transition");
-          setScreen("level_up");
+
+        // Determine the screen after item reward (or directly if no item)
+        const afterItem: Screen = "act_transition";
+        if (bossItem) {
+          setPendingItemReward(bossItem);
+          setPendingPostItemScreen(afterItem);
+          if (anyPokemonCanLevelUp(newRun)) {
+            setPendingPostLevelUpScreen("item_reward");
+            setScreen("level_up");
+          } else {
+            setScreen("item_reward");
+          }
         } else {
-          setScreen("act_transition");
+          if (anyPokemonCanLevelUp(newRun)) {
+            setPendingPostLevelUpScreen(afterItem);
+            setScreen("level_up");
+          } else {
+            setScreen(afterItem);
+          }
         }
       } else {
-        setRunState(newRun);
         setLastGoldEarned(goldEarned > 0 ? goldEarned : undefined);
-        // Go to card draft after battle
-        setScreen("card_draft");
+
+        // Roll for item reward (50% chance)
+        const excludeIds = newRun.party.flatMap(p => p.heldItemIds);
+        const { item: rewardItem, nextSeed } = rollItemReward(
+          newRun.currentAct, newRun.seed, excludeIds,
+        );
+        newRun = { ...newRun, seed: nextSeed };
+        setRunState(newRun);
+
+        if (rewardItem) {
+          setPendingItemReward(rewardItem);
+          setScreen("item_reward");
+        } else {
+          setScreen("card_draft");
+        }
       }
     },
     [
@@ -824,8 +846,8 @@ export default function App() {
     [runState, battle],
   );
 
-  // Handle recruit confirm (add to bench)
-  const handleRecruitConfirm = useCallback(() => {
+  // Handle recruit confirm (add to bench, optionally with a starter item)
+  const handleRecruitConfirm = useCallback((itemId?: string) => {
     if (!runState) return;
 
     const currentNode = getCurrentNode(runState);
@@ -839,6 +861,9 @@ export default function App() {
       level,
       matchingExp,
     );
+    if (itemId) {
+      newPokemon.heldItemIds = [itemId];
+    }
     let newRun = recruitToRoster(runState, newPokemon);
 
     // Permanently unlock this Pokemon for future drafts
@@ -1037,6 +1062,7 @@ export default function App() {
       playerPassives: Map<number, string[]>,
       enemyPassives: Map<number, string[]>,
       hpOverrides: Map<string, { maxHp?: number; startPercent?: number }>,
+      playerItems?: Map<number, string>,
     ) => {
       battle.startConfiguredBattle(
         players,
@@ -1046,6 +1072,7 @@ export default function App() {
         playerPassives,
         enemyPassives,
         hpOverrides,
+        playerItems,
       );
       setIsSandboxBattle(true);
       setIsTutorialMode(false);
@@ -1243,6 +1270,24 @@ export default function App() {
             Card Dex
           </button>
           <button
+            className="menu-item menu-item-secondary"
+            onClick={() => setScreen("item_dex")}
+            style={{
+              padding: "10px 0",
+              fontSize: 18,
+              fontWeight: "bold",
+              border: "none",
+              background: "transparent",
+              color: THEME.text.secondary,
+              cursor: "pointer",
+              letterSpacing: "0.08em",
+              position: "relative",
+              animationDelay: `${menuIdx++ * 50 + 250}ms`,
+            }}
+          >
+            Item Dex
+          </button>
+          <button
             className="menu-item menu-item-tertiary"
             onClick={() => setScreen("disclaimer")}
             style={{
@@ -1401,6 +1446,10 @@ export default function App() {
         `}</style>
       </div>
     );
+  }
+
+  if (screen === "item_dex") {
+    return <ItemDexScreen onBack={() => setScreen("main_menu")} />;
   }
 
   if (screen === "card_dex") {
@@ -1622,8 +1671,8 @@ export default function App() {
           <button onClick={() => setScreen("event_tester")} style={devBtnStyle}>
             Event Tester
           </button>
-          <button onClick={() => setScreen("classes_plan")} style={devBtnStyle}>
-            Classes Plan
+          <button onClick={() => setScreen("sandbox_config")} style={devBtnStyle}>
+            Sandbox
           </button>
           <button
             onClick={() => {
@@ -1902,6 +1951,47 @@ export default function App() {
     );
   }
 
+  if (screen === "starter_items" && runState) {
+    return (
+      <StarterItemScreen
+        run={runState}
+        onComplete={(updatedRun) => {
+          setRunState(updatedRun);
+          setDraftResults(null);
+          setScreen("map");
+        }}
+        onBack={() => setScreen("select")}
+      />
+    );
+  }
+
+  if (screen === "item_reward" && runState && pendingItemReward) {
+    return (
+      <ItemRewardScreen
+        run={runState}
+        rewardItem={pendingItemReward}
+        onAssign={(pokemonIndex) => {
+          const updatedParty = runState.party.map((p, i) =>
+            i === pokemonIndex
+              ? { ...p, heldItemIds: [...p.heldItemIds, pendingItemReward.id] }
+              : p,
+          );
+          setRunState({ ...runState, party: updatedParty });
+          const next = pendingPostItemScreen ?? "card_draft";
+          setPendingItemReward(null);
+          setPendingPostItemScreen(null);
+          setScreen(next);
+        }}
+        onSkip={() => {
+          const next = pendingPostItemScreen ?? "card_draft";
+          setPendingItemReward(null);
+          setPendingPostItemScreen(null);
+          setScreen(next);
+        }}
+      />
+    );
+  }
+
   if (screen === "campaign_draft") {
     return (
       <CampaignDraftScreen
@@ -1992,27 +2082,6 @@ export default function App() {
     );
   }
 
-  if (screen === "classes_plan") {
-    return (
-      <Suspense
-        fallback={
-          <div
-            style={{
-              height: "100dvh",
-              background: THEME.bg.base,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            Loading...
-          </div>
-        }
-      >
-        <ClassesPlanScreen onBack={() => setScreen("debugging")} />
-      </Suspense>
-    );
-  }
 
   if (screen === "ghost_revive" && runState) {
     return (

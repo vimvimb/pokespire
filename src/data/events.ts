@@ -870,7 +870,7 @@ const FIXED_EVENTS: EventDefinition[] = [
         flavorText: 'Leap across the narrow I-beam.',
         outcome: {
           type: 'fixed',
-          effects: [{ type: 'setPath', connections: ['a2-chasm-ghosts'] }],
+          effects: [{ type: 'setPath', connections: ['2j'] }],
           description: 'As you\'re about to jump, a ghostly presence materializes from the darkness below...',
         },
       },

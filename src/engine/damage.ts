@@ -1,5 +1,6 @@
 import type { Combatant, CombatState, MoveType } from './types';
 import { getStatusStacks } from './status';
+import { checkItemSurvival, getItemHealModifier, hasItem } from './itemEffects';
 
 // ============================================================
 // Damage Calculation — Section 8 of spec
@@ -38,10 +39,13 @@ export interface DamageResult {
   technicianMultiplier: number;   // Multiplier from Technician (1.3x for 1-cost cards)
   aristocratMultiplier: number;   // Multiplier from Aristocrat (1.3x for Epic cards)
   consumingFlameMultiplier: number; // Multiplier from Consuming Flame (1.2x for Fire cards)
+  lifeOrbMultiplier: number;       // Multiplier from Life Orb (1.3x for attacks)
   familyFuryBonus: number;        // Bonus from Family Fury (+2 per damaged ally)
   poisonBarbBonus: number;        // Bonus from Poison Barb (+2 for Poison attacks)
   adaptabilityBonus: number;      // Bonus from Adaptability (+2 extra STAB)
   maliceBonus: number;            // Bonus from Malice (target's Burn + Enfeeble stacks)
+  itemDamageBonus: number;        // Bonus from held item effects
+  itemDamageReduction: number;    // Reduction from held item defense effects
   typeEffectiveness: number;      // Type matchup multiplier (1.25x super effective, 0.75x not effective)
   evasion: number;
   afterEvasion: number;
@@ -80,11 +84,14 @@ export interface DamageModifiers {
   technicianMultiplier?: number;
   aristocratMultiplier?: number;
   consumingFlameMultiplier?: number;
+  lifeOrbMultiplier?: number;      // Life Orb 1.3x multiplier
   familyFuryBonus?: number;
   poisonBarbBonus?: number;
   adaptabilityBonus?: number;
   nightAssassinBonus?: number;
   maliceBonus?: number;
+  itemDamageBonus?: number;        // Flat bonus from held item effects
+  itemDamageReduction?: number;    // Flat reduction from held item defense effects
   typeEffectiveness?: number;  // Type matchup multiplier
   ignoreEvasion?: boolean;  // For Scrappy / Sniper
   ignoreBlock?: boolean;    // For Sniper
@@ -121,8 +128,9 @@ export function applyCardDamage(
   const adaptabilityBonus = mods.adaptabilityBonus ?? 0;
   const nightAssassinBonus = mods.nightAssassinBonus ?? 0;
   const maliceBonus = mods.maliceBonus ?? 0;
+  const itemDamageBonus = mods.itemDamageBonus ?? 0;
 
-  let rawDamage = baseDamage + strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + counterBonus + keenEyeBonus + predatorsPatienceBonus + searingFuryBonus + voltFuryBonus + sharpBeakBonus + proletariatBonus + familyFuryBonus + poisonBarbBonus + adaptabilityBonus + nightAssassinBonus + maliceBonus - enfeeble;
+  let rawDamage = baseDamage + strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + counterBonus + keenEyeBonus + predatorsPatienceBonus + searingFuryBonus + voltFuryBonus + sharpBeakBonus + proletariatBonus + familyFuryBonus + poisonBarbBonus + adaptabilityBonus + nightAssassinBonus + maliceBonus + itemDamageBonus - enfeeble;
   rawDamage = Math.max(rawDamage, 1); // floor at 1
 
   // Step 1.5: Apply strike multipliers (Blaze Strike / Swarm Strike / Finisher — mutually exclusive)
@@ -151,6 +159,10 @@ export function applyCardDamage(
   const consumingFlameMultiplier = mods.consumingFlameMultiplier ?? 1.0;
   rawDamage = Math.floor(rawDamage * consumingFlameMultiplier);
 
+  // Step 1.646: Apply Life Orb multiplier (1.3x damage)
+  const lifeOrbMultiplier = mods.lifeOrbMultiplier ?? 1.0;
+  rawDamage = Math.floor(rawDamage * lifeOrbMultiplier);
+
   // Step 1.65: Apply Type Effectiveness multiplier
   const typeEffectiveness = mods.typeEffectiveness ?? 1.0;
   rawDamage = Math.floor(rawDamage * typeEffectiveness);
@@ -160,8 +172,9 @@ export function applyCardDamage(
   const staticReduction = mods.staticFieldReduction ?? 0;
   const thickHideReduction = mods.thickHideReduction ?? 0;
   const friendGuardReduction = mods.friendGuardReduction ?? 0;
+  const itemDamageReduction = mods.itemDamageReduction ?? 0;
 
-  rawDamage = Math.max(rawDamage - bloomingReduction - staticReduction - thickHideReduction - friendGuardReduction, 0);
+  rawDamage = Math.max(rawDamage - bloomingReduction - staticReduction - thickHideReduction - friendGuardReduction - itemDamageReduction, 0);
 
   // Step 1.8: Apply Thick Fat multiplier (25% reduction for Fire/Ice)
   const thickFatMultiplier = mods.thickFatMultiplier ?? 1.0;
@@ -187,7 +200,13 @@ export function applyCardDamage(
   const damageToBlock = ignoreBlock ? 0 : Math.min(afterEvasion, target.block);
   if (!ignoreBlock) target.block -= damageToBlock;
 
-  const damageToHp = afterEvasion - damageToBlock;
+  let damageToHp = afterEvasion - damageToBlock;
+
+  // Sturdy Charm: Attacks dealing 5 or less HP damage deal 1 instead
+  if (hasItem(target, 'sturdy_charm') && damageToHp > 1 && damageToHp <= 5) {
+    damageToHp = 1;
+  }
+
   const hpBefore = target.hp;
   target.hp -= damageToHp;
 
@@ -195,6 +214,11 @@ export function applyCardDamage(
   if (target.hp <= 0) {
     target.hp = 0;
     target.alive = false;
+  }
+
+  // Step 4.5: Item survival check (Focus Sash: survive one lethal hit at 1 HP)
+  if (!target.alive) {
+    checkItemSurvival(target);
   }
 
   // Actual HP lost (capped at target's remaining HP, no overkill)
@@ -219,22 +243,25 @@ export function applyCardDamage(
     searingFuryBonus,
     voltFuryBonus,
     sharpBeakBonus,
-    thickHideReduction: thickHideReduction,
-    friendGuardReduction: friendGuardReduction,
-    thickFatMultiplier: thickFatMultiplier,
-    multiscaleMultiplier: multiscaleMultiplier,
-    proletariatBonus: proletariatBonus,
-    ragingBullMultiplier: ragingBullMultiplier,
-    hustleMultiplier: hustleMultiplier,
-    technicianMultiplier: technicianMultiplier,
-    aristocratMultiplier: aristocratMultiplier,
-    consumingFlameMultiplier: consumingFlameMultiplier,
-    familyFuryBonus: familyFuryBonus,
-    nightAssassinBonus: nightAssassinBonus,
-    poisonBarbBonus: poisonBarbBonus,
-    adaptabilityBonus: adaptabilityBonus,
-    maliceBonus: maliceBonus,
-    typeEffectiveness: typeEffectiveness,
+    thickHideReduction,
+    friendGuardReduction,
+    thickFatMultiplier,
+    multiscaleMultiplier,
+    proletariatBonus,
+    ragingBullMultiplier,
+    hustleMultiplier,
+    technicianMultiplier,
+    aristocratMultiplier,
+    consumingFlameMultiplier,
+    lifeOrbMultiplier,
+    familyFuryBonus,
+    nightAssassinBonus,
+    poisonBarbBonus,
+    adaptabilityBonus,
+    maliceBonus,
+    itemDamageBonus,
+    itemDamageReduction,
+    typeEffectiveness,
     evasion,
     afterEvasion,
     blockedAmount: damageToBlock,
@@ -276,9 +303,13 @@ export function applyBypassDamage(target: Combatant, damage: number): number {
 
 /**
  * Heal a combatant. Cannot exceed maxHp.
+ * Applies item-based heal modifiers automatically (via getItemHealModifier from itemEffects).
  */
 export function applyHeal(target: Combatant, amount: number): number {
+  const modifier = getItemHealModifier(target);
+  const adjustedAmount = modifier !== 1.0 ? Math.floor(amount * modifier) : amount;
+
   const before = target.hp;
-  target.hp = Math.min(target.hp + amount, target.maxHp);
+  target.hp = Math.min(target.hp + adjustedAmount, target.maxHp);
   return target.hp - before;
 }

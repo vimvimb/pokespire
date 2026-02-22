@@ -548,15 +548,15 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   // Sandshrew/Sandslash line
   spiked_hide: {
     name: 'Spiked Hide',
-    description: 'When hit by a front-row attack, deal 2 damage back to the attacker.',
+    description: 'When you deal damage, gain Thorns equal to damage/4 (min 1).',
   },
   bristling_rampart: {
     name: 'Bristling Rampart',
-    description: 'When you take unblocked damage, gain 2 Block.',
+    description: 'When you take unblocked damage, gain 3 Block.',
   },
   fortified_spines: {
     name: 'Fortified Spines',
-    description: 'Your Ground attacks deal bonus damage equal to 25% of your current Block.',
+    description: 'Your attacks deal bonus damage equal to your Thorns stacks.',
   },
   // Gastly/Gengar line
   intangible: {
@@ -1722,7 +1722,7 @@ export const SANDSHREW_PROGRESSION: ProgressionTree = {
     {
       level: 3,
       name: 'Sandslash',
-      description: 'Gain Bristling Rampart. When you take unblocked damage, gain 2 Block.',
+      description: 'Gain Bristling Rampart. When you take unblocked damage, gain 3 Block.',
       passiveId: 'bristling_rampart',
       hpBoost: 0,
       cardsToAdd: [],
@@ -1730,7 +1730,7 @@ export const SANDSHREW_PROGRESSION: ProgressionTree = {
     {
       level: 4,
       name: 'Sandslash',
-      description: 'Gain Fortified Spines. Ground attacks deal bonus damage from Block. Add Earthquake.',
+      description: 'Gain Fortified Spines. Attacks deal bonus damage from Thorns. Add Earthquake.',
       passiveId: 'fortified_spines',
       hpBoost: 0,
       cardsToAdd: ['earthquake'],

@@ -125,6 +125,8 @@ export function applyStatus(
     case 'evasion':
     case 'haste':
     case 'taunt':
+    case 'fatigue':
+    case 'thorns':
       // Additive stacking for all standard statuses
       if (existing) {
         existing.stacks += stacks;
@@ -139,6 +141,21 @@ export function applyStatus(
 
     case 'leech':
       // Additive stacking, tracks source for healing
+      if (existing) {
+        existing.stacks += stacks;
+        existing.sourceId = sourceId; // Update source to latest applier
+      } else {
+        target.statuses.push({
+          type,
+          stacks,
+          sourceId,
+          appliedOrder: state.statusApplyCounter++,
+        });
+      }
+      break;
+
+    case 'provoke':
+      // Additive stacking, tracks source for forced targeting
       if (existing) {
         existing.stacks += stacks;
         existing.sourceId = sourceId; // Update source to latest applier
@@ -310,7 +327,8 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
       if (status.type === 'paralysis' || status.type === 'slow' ||
           status.type === 'enfeeble' || status.type === 'strength' ||
           status.type === 'evasion' || status.type === 'sleep' ||
-          status.type === 'haste' || status.type === 'taunt') {
+          status.type === 'haste' || status.type === 'taunt' ||
+          status.type === 'provoke') {
         const statusName = status.type.charAt(0).toUpperCase() + status.type.slice(1);
         logs.push({
           round: state.round,
@@ -362,25 +380,15 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
       }
     }
 
-    // Reset Block (but Pressure Hull retains 50% of current block)
+    // Block half-decay: all combatants retain floor(block * 0.5)
     if (c.block > 0) {
-      const hasPressureHull = c.passiveIds.includes('pressure_hull');
-      if (hasPressureHull) {
-        const retained = Math.floor(c.block * 0.5);
-        logs.push({
-          round: state.round,
-          combatantId: c.id,
-          message: `${c.name}'s Block (${c.block}) resets to ${retained} (Pressure Hull).`,
-        });
-        c.block = retained;
-      } else {
-        logs.push({
-          round: state.round,
-          combatantId: c.id,
-          message: `${c.name}'s Block (${c.block}) resets to 0.`,
-        });
-        c.block = 0;
-      }
+      const retained = Math.floor(c.block * 0.5);
+      logs.push({
+        round: state.round,
+        combatantId: c.id,
+        message: `${c.name}'s Block (${c.block}) decays to ${retained}.`,
+      });
+      c.block = retained;
     }
   }
 

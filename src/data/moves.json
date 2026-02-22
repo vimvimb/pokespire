@@ -471,21 +471,30 @@
   },
   "thrash": {
     "name": "Thrash",
-    "cost": 3,
+    "cost": 2,
     "type": "normal",
     "range": "front_enemy",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       {
         "type": "damage",
-        "value": 36
+        "value": 18
+      },
+      {
+        "type": "add_echo_to_hand",
+        "count": 1
+      },
+      {
+        "type": "apply_status_self",
+        "status": "fatigue",
+        "stacks": 2
       }
     ],
-    "rarity": "rare",
+    "rarity": "uncommon",
     "pools": [
       "normal"
     ],
-    "description": "Deal 36 damage. (Front row).",
+    "description": "Deal 18 damage. Add 1 Echo (half damage) to hand. Gain Fatigue 2. Vanish. (Front row).",
     "contact": true
   },
   "mega-kick": {
@@ -1489,7 +1498,7 @@
     "contact": false
   },
   "defend": {
-    "name": "Defend",
+    "name": "Protect",
     "cost": 1,
     "type": "normal",
     "range": "self",
@@ -1497,14 +1506,14 @@
     "effects": [
       {
         "type": "block",
-        "value": 5
+        "value": 6
       }
     ],
     "rarity": "basic",
     "pools": [
       "normal"
     ],
-    "description": "Gain 5 Block.",
+    "description": "Gain 6 Block.",
     "contact": false
   },
   "metal-claw": {
@@ -2615,6 +2624,402 @@
     "description": "Deal 17 damage to all enemies.",
     "contact": true
   },
+  "leafage": {
+    "name": "Leafage",
+    "cost": 1,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 5
+      }
+    ],
+    "rarity": "basic",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 5 damage.",
+    "contact": false
+  },
+  "trailblaze": {
+    "name": "Trailblaze",
+    "cost": 1,
+    "type": "grass",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 5
+      },
+      {
+        "type": "apply_status_self",
+        "status": "haste",
+        "stacks": 2
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 5 damage. Gain Haste 2. (Front row).",
+    "contact": true
+  },
+  "cotton-spore": {
+    "name": "Cotton Spore",
+    "cost": 1,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 2
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "grass"
+    ],
+    "description": "Apply Slow 2.",
+    "contact": false
+  },
+  "cotton-guard": {
+    "name": "Cotton Guard",
+    "cost": 1,
+    "type": "grass",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "block",
+        "value": 9
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "grass"
+    ],
+    "description": "Gain 9 Block.",
+    "contact": false
+  },
+  "seed-bomb": {
+    "name": "Seed Bomb",
+    "cost": 2,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 18
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 18 damage.",
+    "contact": false
+  },
+  "horn-leech": {
+    "name": "Horn Leech",
+    "cost": 2,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "heal_on_hit",
+        "value": 14,
+        "healPercent": 0.5
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 14 damage. Heal 50% of damage dealt.",
+    "contact": true
+  },
+  "bullet-seed": {
+    "name": "Bullet Seed",
+    "cost": 2,
+    "type": "grass",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "multi_hit",
+        "value": 5,
+        "hits": 3
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "grass"
+    ],
+    "description": "Hit 3 times for 5 damage each. (Front row).",
+    "contact": false
+  },
+  "petal-blizzard": {
+    "name": "Petal Blizzard",
+    "cost": 2,
+    "type": "grass",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 9
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 9 damage to all enemies.",
+    "contact": true
+  },
+  "energy-ball": {
+    "name": "Energy Ball",
+    "cost": 2,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 20
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 1
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 20 damage. Apply Enfeeble 1.",
+    "contact": false
+  },
+  "power-whip": {
+    "name": "Power Whip",
+    "cost": 2,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 22
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 22 damage.",
+    "contact": true
+  },
+  "leaf-blade": {
+    "name": "Leaf Blade",
+    "cost": 2,
+    "type": "grass",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 24
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 24 damage. (Front row).",
+    "contact": true
+  },
+  "grass-knot": {
+    "name": "Grass Knot",
+    "cost": 2,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 22,
+        "inverseWeightScaling": true
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 22 damage. Deals more to heavier targets (up to x2).",
+    "contact": false
+  },
+  "wood-hammer": {
+    "name": "Wood Hammer",
+    "cost": 3,
+    "type": "grass",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "recoil",
+        "value": 48,
+        "recoilPercent": 0.33
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 48 damage. Take 33% recoil. (Front row).",
+    "contact": true
+  },
+  "synthesis": {
+    "name": "Synthesis",
+    "cost": 2,
+    "type": "grass",
+    "range": "self",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "heal",
+        "value": 22
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "grass"
+    ],
+    "description": "Heal 22 HP. Vanishes.",
+    "contact": false
+  },
+  "aromatherapy": {
+    "name": "Aromatherapy",
+    "cost": 1,
+    "type": "grass",
+    "range": "self",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "cleanse",
+        "count": 2
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "grass"
+    ],
+    "description": "Remove 2 debuffs. Vanishes.",
+    "contact": false
+  },
+  "leaf-storm": {
+    "name": "Leaf Storm",
+    "cost": 3,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 39
+      },
+      {
+        "type": "apply_status_self",
+        "status": "enfeeble",
+        "stacks": 6
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 39 damage. Apply Enfeeble 6 to self. Vanishes.",
+    "contact": false
+  },
+  "strength-sap": {
+    "name": "Strength Sap",
+    "cost": 2,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "heal_on_hit",
+        "value": 16,
+        "healPercent": 0.5
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 3
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 16 damage. Heal 50% of damage dealt. Apply Enfeeble 3. Vanishes.",
+    "contact": false
+  },
+  "frenzy-plant": {
+    "name": "Frenzy Plant",
+    "cost": 3,
+    "type": "grass",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 45
+      },
+      {
+        "type": "apply_status_self",
+        "status": "fatigue",
+        "stacks": 3
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 45 damage. Apply Fatigue 3 to self.",
+    "contact": false
+  },
+  "flower-trick": {
+    "name": "Flower Trick",
+    "cost": 1,
+    "type": "grass",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 12
+      },
+      {
+        "type": "copy_enemy_card",
+        "count": 1
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "grass"
+    ],
+    "description": "Deal 12 damage. Copy an Echo of the target's top card. (Front row).",
+    "contact": true
+  },
   "sand-attack": {
     "name": "Sand Attack",
     "cost": 1,
@@ -3570,6 +3975,407 @@
     "description": "Deal 39 damage.",
     "contact": false
   },
+  "aqua-jet": {
+    "name": "Aqua Jet",
+    "cost": 1,
+    "type": "water",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 6
+      }
+    ],
+    "rarity": "basic",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 6 damage. (Front only, contact).",
+    "contact": true
+  },
+  "razor-shell": {
+    "name": "Razor Shell",
+    "cost": 1,
+    "type": "water",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 7
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 7 damage. Apply Enfeeble 1. (Front only, contact).",
+    "contact": true
+  },
+  "chilling-water": {
+    "name": "Chilling Water",
+    "cost": 1,
+    "type": "water",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 6
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 6 damage. Apply Enfeeble 1.",
+    "contact": false
+  },
+  "whirlpool": {
+    "name": "Whirlpool",
+    "cost": 2,
+    "type": "water",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 8
+      },
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 8 damage. Apply Slow 1.",
+    "contact": false
+  },
+  "water-pulse": {
+    "name": "Water Pulse",
+    "cost": 1,
+    "type": "water",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 9
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 9 damage.",
+    "contact": false
+  },
+  "scald": {
+    "name": "Scald",
+    "cost": 2,
+    "type": "water",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 14
+      },
+      {
+        "type": "apply_status",
+        "status": "burn",
+        "stacks": 2
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 14 damage. Apply Burn 2.",
+    "contact": false
+  },
+  "liquidation": {
+    "name": "Liquidation",
+    "cost": 2,
+    "type": "water",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 16
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 1
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 16 damage. Apply Enfeeble 1. (Contact).",
+    "contact": true
+  },
+  "muddy-water": {
+    "name": "Muddy Water",
+    "cost": 2,
+    "type": "water",
+    "range": "front_row",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 12
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 12 damage to the front row.",
+    "contact": false
+  },
+  "aqua-ring": {
+    "name": "Aqua Ring",
+    "cost": 1,
+    "type": "water",
+    "range": "self",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "heal",
+        "value": 9
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "water"
+    ],
+    "description": "Heal 9 HP. Vanish.",
+    "contact": false
+  },
+  "water-shuriken": {
+    "name": "Water Shuriken",
+    "cost": 2,
+    "type": "water",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "multi_hit",
+        "value": 4,
+        "hits": 3
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "water"
+    ],
+    "description": "Hit 3x for 4 each (12 total). (Front only).",
+    "contact": false
+  },
+  "aqua-tail": {
+    "name": "Aqua Tail",
+    "cost": 2,
+    "type": "water",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 22
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 22 damage. (Contact).",
+    "contact": true
+  },
+  "wave-crash": {
+    "name": "Wave Crash",
+    "cost": 3,
+    "type": "water",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "recoil",
+        "value": 48,
+        "recoilPercent": 0.33
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 48 damage. Take 33% recoil. (Front only, contact).",
+    "contact": true
+  },
+  "flip-turn": {
+    "name": "Flip Turn",
+    "cost": 1,
+    "type": "water",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 9
+      },
+      {
+        "type": "draw_cards",
+        "count": 1
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 9 damage. Draw 1 card. (Front only, contact).",
+    "contact": true
+  },
+  "rain-dance": {
+    "name": "Rain Dance",
+    "cost": 1,
+    "type": "water",
+    "range": "self",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "apply_status_self",
+        "status": "haste",
+        "stacks": 3
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "water"
+    ],
+    "description": "Gain Haste 3. Vanish.",
+    "contact": false
+  },
+  "brine": {
+    "name": "Brine",
+    "cost": 2,
+    "type": "water",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 14,
+        "bonusValue": 8,
+        "bonusCondition": "target_below_half_hp"
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 14 damage. +8 if target is below half HP.",
+    "contact": false
+  },
+  "life-dew": {
+    "name": "Life Dew",
+    "cost": 2,
+    "type": "water",
+    "range": "self",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "heal",
+        "value": 26
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "water"
+    ],
+    "description": "Heal 26 HP. Vanish.",
+    "contact": false
+  },
+  "sparkling-aria": {
+    "name": "Sparkling Aria",
+    "cost": 2,
+    "type": "water",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 13
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 13 damage to all enemies.",
+    "contact": false
+  },
+  "water-spout": {
+    "name": "Water Spout",
+    "cost": 3,
+    "type": "water",
+    "range": "all_enemies",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 35,
+        "hpScaling": true
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal up to 35 damage to all enemies. Scales with user HP. Vanish.",
+    "contact": false
+  },
+  "hydro-cannon": {
+    "name": "Hydro Cannon",
+    "cost": 3,
+    "type": "water",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 45
+      },
+      {
+        "type": "apply_status_self",
+        "status": "fatigue",
+        "stacks": 3
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "water"
+    ],
+    "description": "Deal 45 damage. Gain Fatigue 3.",
+    "contact": false
+  },
   "fake-out": {
     "name": "Fake Out",
     "cost": 1,
@@ -3802,7 +4608,7 @@
       {
         "type": "apply_status_self",
         "status": "strength",
-        "stacks": 2
+        "stacks": 4
       },
       {
         "type": "apply_status_self",
@@ -3814,7 +4620,7 @@
     "pools": [
       "dragon"
     ],
-    "description": "Gain Strength 2. Gain Haste 2. Vanish.",
+    "description": "Gain Strength 4. Gain Haste 2. Vanish.",
     "contact": false
   },
   "twister": {
@@ -3834,6 +4640,300 @@
       "dragon"
     ],
     "description": "Deal 5 damage.",
+    "contact": false
+  },
+  "dragon-breath": {
+    "name": "Dragon Breath",
+    "cost": 1,
+    "type": "dragon",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 4
+      },
+      {
+        "type": "apply_status",
+        "status": "paralysis",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 4 damage. Apply Paralysis 1.",
+    "contact": false
+  },
+  "dragon-tail": {
+    "name": "Dragon Tail",
+    "cost": 1,
+    "type": "dragon",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 1
+      },
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 2
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 1 damage. Apply Slow 2.",
+    "contact": true
+  },
+  "dragon-claw": {
+    "name": "Dragon Claw",
+    "cost": 1,
+    "type": "dragon",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 10
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 10 damage. (Front row).",
+    "contact": true
+  },
+  "dual-chop": {
+    "name": "Dual Chop",
+    "cost": 1,
+    "type": "dragon",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "multi_hit",
+        "value": 3,
+        "hits": 2
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Hit 2 times for 3 damage each. (Front row).",
+    "contact": true
+  },
+  "dragon-hammer": {
+    "name": "Dragon Hammer",
+    "cost": 2,
+    "type": "dragon",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 20
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 20 damage. (Front row).",
+    "contact": true
+  },
+  "breaking-swipe": {
+    "name": "Breaking Swipe",
+    "cost": 2,
+    "type": "dragon",
+    "range": "front_row",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 10
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 1
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 10 damage to front row. Apply Enfeeble 1.",
+    "contact": true
+  },
+  "dragon-pulse": {
+    "name": "Dragon Pulse",
+    "cost": 2,
+    "type": "dragon",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 22
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 22 damage.",
+    "contact": false
+  },
+  "dragon-rush": {
+    "name": "Dragon Rush",
+    "cost": 2,
+    "type": "dragon",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 24
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 24 damage. (Front row).",
+    "contact": true
+  },
+  "scale-shot": {
+    "name": "Scale Shot",
+    "cost": 2,
+    "type": "dragon",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "multi_hit",
+        "value": 5,
+        "hits": 4
+      },
+      {
+        "type": "apply_status_self",
+        "status": "haste",
+        "stacks": 2
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Hit 4 times for 5 damage each. Gain Haste 2.",
+    "contact": false
+  },
+  "clanging-scales": {
+    "name": "Clanging Scales",
+    "cost": 2,
+    "type": "dragon",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 17
+      },
+      {
+        "type": "apply_status_self",
+        "status": "slow",
+        "stacks": 2
+      },
+      {
+        "type": "apply_status_self",
+        "status": "enfeeble",
+        "stacks": 3
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 17 damage to all enemies. Gain Slow 2 and Enfeeble 3.",
+    "contact": false
+  },
+  "outrage": {
+    "name": "Outrage",
+    "cost": 2,
+    "type": "dragon",
+    "range": "any_enemy",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 33
+      },
+      {
+        "type": "add_echo_to_hand",
+        "count": 2
+      },
+      {
+        "type": "apply_status_self",
+        "status": "fatigue",
+        "stacks": 3
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 33 damage. Add 2 Echoes (half damage) to hand. Gain Fatigue 3. Vanish.",
+    "contact": true
+  },
+  "draco-meteor": {
+    "name": "Draco Meteor",
+    "cost": 3,
+    "type": "dragon",
+    "range": "any_enemy",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 39
+      },
+      {
+        "type": "apply_status_self",
+        "status": "enfeeble",
+        "stacks": 6
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 39 damage. Gain Enfeeble 6. Vanish.",
+    "contact": false
+  },
+  "dragon-energy": {
+    "name": "Dragon Energy",
+    "cost": 3,
+    "type": "dragon",
+    "range": "all_enemies",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 35,
+        "hpScaling": true
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 35 damage to all enemies, scaled by current HP %. Vanish.",
     "contact": false
   },
   "potion": {
@@ -4239,7 +5339,7 @@
     "effects": [
       {
         "type": "apply_status",
-        "status": "taunt",
+        "status": "provoke",
         "stacks": 2
       },
       {
@@ -4248,7 +5348,7 @@
         "stacks": 1
       }
     ],
-    "description": "A sweet kiss applies Taunt 2 and Enfeeble 1 to an enemy.",
+    "description": "A sweet kiss applies Provoke 2 and Enfeeble 1 to an enemy.",
     "contact": false
   },
   "dazzling-gleam": {
@@ -4707,7 +5807,7 @@
     "cost": 3,
     "type": "fire",
     "range": "column",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       {
         "type": "damage",
@@ -4723,7 +5823,7 @@
     "pools": [
       "fire"
     ],
-    "description": "Deal 33 damage to a column. Apply Enfeeble 6 to self.",
+    "description": "Deal 33 damage to a column. Apply Enfeeble 6 to self. Vanish.",
     "contact": false
   },
   "ancient-power": {

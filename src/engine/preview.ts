@@ -19,8 +19,12 @@ import {
   checkTechnician, checkAristocrat,
   checkRudeAwakening,
   checkBlindAggression, checkDrySkin,
-  checkConsumingFlame
+  checkConsumingFlame,
 } from './passives';
+import {
+  getItemDamageBonus, getItemDamageReduction, getItemDamageBonusSourceOnly,
+  getItemDamageMultiplier, getItemStatusStacksMultiplier,
+} from './itemEffects';
 import { getBloomingCycleReduction } from './damage';
 import { POKEMON_WEIGHTS } from '../data/heights';
 
@@ -77,6 +81,8 @@ export function calculateDamagePreview(
       if (damageEffect.bonusValue && damageEffect.bonusCondition) {
         if (damageEffect.bonusCondition === 'user_below_half_hp' && source.hp < source.maxHp * 0.5) {
           baseDamage += damageEffect.bonusValue;
+        } else if (damageEffect.bonusCondition === 'target_below_half_hp' && target.hp < target.maxHp * 0.5) {
+          baseDamage += damageEffect.bonusValue;
         } else if (damageEffect.bonusCondition === 'target_debuff_stacks') {
           baseDamage += damageEffect.bonusValue * getTotalDebuffStacks(target);
         } else if (damageEffect.bonusCondition === 'target_burn_stacks') {
@@ -112,6 +118,14 @@ export function calculateDamagePreview(
     const userWeight = POKEMON_WEIGHTS[source.pokemonId] ?? 50;
     const targetWeight = POKEMON_WEIGHTS[target.pokemonId] ?? 50;
     const ratio = Math.min(userWeight / targetWeight, 2.0);
+    baseDamage = Math.floor(baseDamage * ratio);
+  }
+
+  // Inverse weight-ratio scaling (e.g. Grass Knot)
+  if (damageEffect.type === 'damage' && damageEffect.inverseWeightScaling) {
+    const userWeight = POKEMON_WEIGHTS[source.pokemonId] ?? 50;
+    const targetWeight = POKEMON_WEIGHTS[target.pokemonId] ?? 50;
+    const ratio = Math.min(targetWeight / userWeight, 2.0);
     baseDamage = Math.floor(baseDamage * ratio);
   }
 
@@ -169,21 +183,29 @@ export function calculateDamagePreview(
   const thickFatMultiplier = checkThickFat(target, card.type);
   const drySkinMultiplier = checkDrySkin(target, card.type);
 
+  // Item damage bonuses (pass typeEffectiveness for Expert Belt)
+  const itemDamageBonus = getItemDamageBonus(state, source, target, card, typeEffectiveness);
+  const itemDamageReduction = getItemDamageReduction(state, target, card);
+
+  // Item damage multiplier (Life Orb: 1.3x, Fuchsia Shuriken: 0.5x)
+  const lifeOrbMultiplier = getItemDamageMultiplier(source, card);
+
   // Calculate raw damage (before evasion/block)
   let rawDamage = baseDamage + strength + stab + fortifiedBonus + counterBonus +
     keenEyeBonus + predatorsPatienceBonus + proletariatBonus +
     scrappyBonus + blindAggressionBonus + poisonBarbBonus + adaptabilityBonus + relentlessBonus +
     searingFuryBonus + voltFuryBonus + sharpBeakBonus + nightAssassinBonus +
-    maliceBonus - enfeeble;
+    maliceBonus + itemDamageBonus - enfeeble;
   rawDamage = Math.max(rawDamage, 1);
 
   // Apply multipliers
   rawDamage = rawDamage * blazeStrikeMultiplier;
   rawDamage = Math.floor(rawDamage * combinedMultiplier);  // Anger Point + Sheer Force
+  rawDamage = Math.floor(rawDamage * lifeOrbMultiplier);
   rawDamage = Math.floor(rawDamage * typeEffectiveness);
 
   // Apply defensive reductions
-  rawDamage = Math.max(rawDamage - bloomingReduction - staticReduction - thickHideReduction - friendGuardReduction, 0);
+  rawDamage = Math.max(rawDamage - bloomingReduction - staticReduction - thickHideReduction - friendGuardReduction - itemDamageReduction, 0);
   rawDamage = Math.floor(rawDamage * thickFatMultiplier * drySkinMultiplier);
 
   // Multiscale: Take half damage if above 75% HP
@@ -229,6 +251,7 @@ export function calculateDamagePreview(
 export interface HandPreview {
   additive: number;      // Net additive modifier (strength + STAB + passives - enfeeble)
   multiplier: number;    // Combined damage multiplier (blaze, anger point, sheer force, etc.)
+  statusStacksMult: number; // Status stacks multiplier (Fuchsia Shuriken: 2x on damage+status cards)
   tags: string[];        // Breakdown labels for hover display
 }
 
@@ -255,8 +278,8 @@ export function calculateHandPreview(
   // Passive additive bonuses (source-only, inlined to avoid CombatState dependency)
   const fortifiedCannonsBonus = (source.passiveIds.includes('fortified_cannons') && card.type === 'water' && source.block > 0)
     ? Math.floor(source.block * 0.25) : 0;
-  const fortifiedSpinesBonus = (source.passiveIds.includes('fortified_spines') && card.type === 'ground' && source.block > 0)
-    ? Math.floor(source.block * 0.25) : 0;
+  const fortifiedSpinesBonus = source.passiveIds.includes('fortified_spines')
+    ? getStatusStacks(source, 'thorns') : 0;
 
   if (fortifiedCannonsBonus > 0) tags.push(`+${fortifiedCannonsBonus} Fort. Cannons`);
   if (fortifiedSpinesBonus > 0) tags.push(`+${fortifiedSpinesBonus} Fort. Spines`);
@@ -277,9 +300,13 @@ export function calculateHandPreview(
   if (nightAssassinBonus > 0) tags.push(`+${nightAssassinBonus} Night Assassin`);
   if (relentlessBonus > 0) tags.push(`+${relentlessBonus} Relentless`);
 
+  // Item damage bonus (source-only, no target info)
+  const itemBonus = getItemDamageBonusSourceOnly(source, card);
+  if (itemBonus > 0) tags.push(`+${itemBonus} Item`);
+
   const additive = strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus +
     proletariatBonus + scrappyBonus + poisonBarbBonus + adaptabilityBonus +
-    sharpBeakBonus + nightAssassinBonus + relentlessBonus - enfeeble;
+    sharpBeakBonus + nightAssassinBonus + relentlessBonus + itemBonus - enfeeble;
 
   // Multipliers (source-only, inlined where CombatState was only used for logs)
   const blazeStrikeActive = source.passiveIds.includes('blaze_strike') &&
@@ -309,14 +336,20 @@ export function calculateHandPreview(
   const technicianMult = checkTechnician(source, card);
   const aristocratMult = checkAristocrat(source, card);
   const consumingFlameMult = checkConsumingFlame(source, card);
+  const itemDmgMult = getItemDamageMultiplier(source, card);
   if (technicianMult > 1) tags.push(`x${technicianMult} Tech`);
   if (aristocratMult > 1) tags.push(`x${aristocratMult} Aristocrat`);
   if (consumingFlameMult > 1) tags.push(`x${consumingFlameMult} Flame`);
+  if (itemDmgMult > 1) tags.push(`x${itemDmgMult} Item`);
+  if (itemDmgMult < 1) tags.push(`x${itemDmgMult} Shuriken`);
+
+  // Status stacks multiplier (Fuchsia Shuriken doubles status on damage+status cards)
+  const statusStacksMult = getItemStatusStacksMultiplier(source, card);
 
   const multiplier = blazeSwarmMult * angerPointMult * sheerForceMult *
-    recklessMult * hustleMult * dragonsMajestyMult * technicianMult * aristocratMult * consumingFlameMult;
+    recklessMult * hustleMult * dragonsMajestyMult * technicianMult * aristocratMult * consumingFlameMult * itemDmgMult;
 
-  return { additive, multiplier, tags };
+  return { additive, multiplier, statusStacksMult, tags };
 }
 
 /**

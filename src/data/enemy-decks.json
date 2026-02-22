@@ -1,0 +1,482 @@
+{
+  "bulbasaur": {
+    "L1": ["tackle", "tackle", "tackle", "defend", "defend", "vine-whip", "vine-whip", "leech-seed", "growth", "poison-powder"],
+    "L2": ["tackle", "tackle", "vine-whip", "vine-whip", "mega-drain", "leech-seed", "growth", "poison-powder", "defend", "defend"],
+    "L3": ["tackle", "vine-whip", "mega-drain", "razor-leaf", "leech-seed", "sleep-powder", "growth", "toxic", "defend", "defend"],
+    "L4": ["vine-whip", "mega-drain", "razor-leaf", "petal-dance", "leech-seed", "sleep-powder", "solar-beam", "growth", "defend", "defend"]
+  },
+  "ivysaur": {
+    "L1": ["tackle", "tackle", "tackle", "defend", "defend", "vine-whip", "vine-whip", "leech-seed", "growth", "poison-powder"],
+    "L2": ["tackle", "vine-whip", "vine-whip", "mega-drain", "razor-leaf", "leech-seed", "growth", "poison-powder", "defend", "defend"],
+    "L3": ["vine-whip", "mega-drain", "razor-leaf", "sludge", "leech-seed", "sleep-powder", "growth", "toxic", "defend", "defend"],
+    "L4": ["mega-drain", "razor-leaf", "sludge-bomb", "giga-drain", "leech-seed", "sleep-powder", "growth", "toxic", "defend", "substitute"]
+  },
+  "venusaur": {
+    "L1": ["tackle", "tackle", "tackle", "defend", "defend", "vine-whip", "vine-whip", "leech-seed", "growth", "poison-powder"],
+    "L2": ["tackle", "vine-whip", "vine-whip", "mega-drain", "razor-leaf", "leech-seed", "growth", "acid", "defend", "defend"],
+    "L3": ["vine-whip", "mega-drain", "razor-leaf", "sludge-bomb", "leech-seed", "sleep-powder", "growth", "toxic", "defend", "defend"],
+    "L4": ["razor-leaf", "solar-beam", "sludge-bomb", "giga-drain", "leech-seed", "sleep-powder", "toxic", "growth", "defend", "substitute"]
+  },
+  "charmander": {
+    "L1": ["scratch", "scratch", "scratch", "defend", "defend", "ember", "ember", "metal-claw", "smokescreen", "growl"],
+    "L2": ["scratch", "scratch", "ember", "ember", "fire-fang", "flame-charge", "metal-claw", "smokescreen", "defend", "defend"],
+    "L3": ["scratch", "ember", "fire-fang", "flame-charge", "fire-punch", "flamethrower", "metal-claw", "smokescreen", "defend", "defend"],
+    "L4": ["ember", "fire-fang", "fire-punch", "flamethrower", "inferno", "flame-charge", "blaze-kick", "smokescreen", "defend", "defend"]
+  },
+  "charmeleon": {
+    "L1": ["scratch", "scratch", "scratch", "defend", "defend", "ember", "ember", "metal-claw", "smokescreen", "growl"],
+    "L2": ["scratch", "ember", "ember", "fire-fang", "flame-wheel", "flame-charge", "metal-claw", "smokescreen", "defend", "defend"],
+    "L3": ["ember", "fire-fang", "flame-wheel", "fire-punch", "flamethrower", "inferno", "metal-claw", "smokescreen", "defend", "defend"],
+    "L4": ["fire-fang", "fire-punch", "flamethrower", "inferno", "fire-blast", "blaze-kick", "flame-charge", "smokescreen", "defend", "substitute"]
+  },
+  "charizard": {
+    "L1": ["scratch", "scratch", "scratch", "defend", "defend", "ember", "ember", "metal-claw", "smokescreen", "growl"],
+    "L2": ["scratch", "ember", "ember", "fire-fang", "flame-wheel", "wing-attack", "metal-claw", "smokescreen", "defend", "defend"],
+    "L3": ["ember", "fire-fang", "flame-wheel", "fire-punch", "flamethrower", "fly", "wing-attack", "smokescreen", "defend", "defend"],
+    "L4": ["fire-punch", "flamethrower", "fire-blast", "fly", "blaze-kick", "fiery-dance", "flare-blitz", "smokescreen", "defend", "substitute"]
+  },
+  "squirtle": {
+    "L1": ["tackle", "tackle", "tackle", "defend", "defend", "water-gun", "water-gun", "withdraw", "bubble", "tail-whip"],
+    "L2": ["tackle", "tackle", "water-gun", "water-gun", "bubble-beam", "withdraw", "bubble", "tail-whip", "defend", "defend"],
+    "L3": ["tackle", "water-gun", "bubble-beam", "waterfall", "withdraw", "ice-beam", "bubble", "bite", "defend", "defend"],
+    "L4": ["water-gun", "bubble-beam", "waterfall", "surf", "withdraw", "ice-beam", "bite", "skull-bash", "defend", "substitute"]
+  },
+  "wartortle": {
+    "L1": ["tackle", "tackle", "tackle", "defend", "defend", "water-gun", "water-gun", "withdraw", "bubble", "tail-whip"],
+    "L2": ["tackle", "water-gun", "water-gun", "bubble-beam", "waterfall", "withdraw", "bubble", "tail-whip", "defend", "defend"],
+    "L3": ["water-gun", "bubble-beam", "waterfall", "surf", "withdraw", "ice-punch", "bite", "bubble", "defend", "defend"],
+    "L4": ["bubble-beam", "waterfall", "surf", "ice-beam", "withdraw", "bite", "skull-bash", "bubble", "defend", "substitute"]
+  },
+  "blastoise": {
+    "L1": ["tackle", "tackle", "tackle", "defend", "defend", "water-gun", "water-gun", "withdraw", "bubble", "tail-whip"],
+    "L2": ["tackle", "water-gun", "water-gun", "bubble-beam", "waterfall", "withdraw", "bite", "tail-whip", "defend", "defend"],
+    "L3": ["water-gun", "bubble-beam", "waterfall", "surf", "withdraw", "ice-beam", "bite", "skull-bash", "defend", "defend"],
+    "L4": ["bubble-beam", "waterfall", "hydro-pump", "surf", "withdraw", "ice-beam", "skull-bash", "bite", "defend", "substitute"]
+  },
+  "pikachu": {
+    "L1": ["quick-attack", "quick-attack", "quick-attack", "defend", "defend", "thunder-shock", "thunder-shock", "thunder-wave", "double-team", "tail-whip"],
+    "L2": ["quick-attack", "quick-attack", "thunder-shock", "thunder-shock", "spark", "thunder-wave", "charge-beam", "double-team", "defend", "defend"],
+    "L3": ["quick-attack", "thunder-shock", "spark", "charge-beam", "thunder-punch", "thunderbolt", "thunder-wave", "double-team", "defend", "defend"],
+    "L4": ["quick-attack", "spark", "charge-beam", "thunder-punch", "thunderbolt", "discharge", "thunder-wave", "double-team", "defend", "substitute"]
+  },
+  "raichu": {
+    "L1": ["quick-attack", "quick-attack", "quick-attack", "defend", "defend", "thunder-shock", "thunder-shock", "thunder-wave", "double-team", "tail-whip"],
+    "L2": ["quick-attack", "quick-attack", "thunder-shock", "spark", "spark", "thunder-wave", "charge-beam", "double-team", "defend", "defend"],
+    "L3": ["quick-attack", "spark", "charge-beam", "thunder-punch", "thunderbolt", "discharge", "thunder-wave", "double-team", "defend", "defend"],
+    "L4": ["quick-attack", "spark", "charge-beam", "thunder-punch", "thunderbolt", "discharge", "thunder", "double-team", "defend", "substitute"]
+  },
+  "nidoran-f": {
+    "L1": ["scratch", "counter", "defend", "defend", "poison-sting", "poison-sting", "smog", "bite", "tail-whip", "acid"],
+    "L2": ["scratch", "poison-sting", "poison-sting", "acid", "acid", "bite", "counter", "leer", "defend", "defend"],
+    "L3": ["scratch", "poison-sting", "acid", "sludge", "body-slam", "bite", "toxic", "counter", "defend", "defend"],
+    "L4": ["sludge-bomb", "body-slam", "bite", "toxic", "counter", "ice-beam", "swords-dance", "acid", "defend", "substitute"]
+  },
+  "nidorina": {
+    "L1": ["scratch", "counter", "defend", "defend", "poison-sting", "poison-sting", "smog", "bite", "tail-whip", "acid"],
+    "L2": ["scratch", "poison-sting", "acid", "acid", "sludge", "bite", "counter", "leer", "defend", "defend"],
+    "L3": ["scratch", "acid", "sludge", "sludge-bomb", "body-slam", "bite", "counter", "toxic", "defend", "defend"],
+    "L4": ["sludge-bomb", "body-slam", "bite", "toxic", "counter", "ice-beam", "swords-dance", "acid", "defend", "substitute"]
+  },
+  "nidoqueen": {
+    "L1": ["scratch", "counter", "defend", "defend", "poison-sting", "poison-sting", "smog", "bite", "tail-whip", "acid"],
+    "L2": ["scratch", "counter", "acid", "acid", "sludge", "poison-sting", "bite", "leer", "defend", "defend"],
+    "L3": ["counter", "acid", "sludge-bomb", "body-slam", "earthquake", "bite", "toxic", "leer", "defend", "defend"],
+    "L4": ["sludge-bomb", "earthquake", "body-slam", "toxic", "ice-beam", "fire-blast", "counter", "swords-dance", "defend", "substitute"]
+  },
+  "nidoran-m": {
+    "L1": ["peck", "peck", "defend", "defend", "poison-sting", "poison-sting", "smog", "horn-attack", "leer", "acid"],
+    "L2": ["peck", "poison-sting", "poison-sting", "acid", "acid", "horn-attack", "focus-energy", "leer", "defend", "defend"],
+    "L3": ["peck", "poison-sting", "acid", "sludge", "horn-attack", "double-kick", "focus-energy", "swords-dance", "defend", "defend"],
+    "L4": ["sludge-bomb", "horn-attack", "double-kick", "thunderbolt", "focus-energy", "swords-dance", "ice-beam", "acid", "defend", "substitute"]
+  },
+  "nidorino": {
+    "L1": ["peck", "peck", "defend", "defend", "poison-sting", "poison-sting", "smog", "horn-attack", "leer", "acid"],
+    "L2": ["peck", "poison-sting", "horn-attack", "acid", "acid", "sludge", "focus-energy", "leer", "defend", "defend"],
+    "L3": ["peck", "poison-sting", "horn-attack", "sludge", "sludge-bomb", "double-kick", "focus-energy", "swords-dance", "defend", "defend"],
+    "L4": ["sludge-bomb", "horn-attack", "double-kick", "thunderbolt", "focus-energy", "swords-dance", "toxic", "acid", "defend", "substitute"]
+  },
+  "nidoking": {
+    "L1": ["peck", "peck", "defend", "defend", "poison-sting", "poison-sting", "smog", "horn-attack", "leer", "acid"],
+    "L2": ["peck", "poison-sting", "horn-attack", "acid", "sludge", "double-kick", "focus-energy", "leer", "defend", "defend"],
+    "L3": ["horn-attack", "sludge-bomb", "double-kick", "earthquake", "thunderbolt", "focus-energy", "swords-dance", "leer", "defend", "defend"],
+    "L4": ["sludge-bomb", "earthquake", "thunderbolt", "ice-beam", "fire-blast", "megahorn", "swords-dance", "focus-energy", "defend", "substitute"]
+  },
+  "caterpie": {
+    "L1": ["tackle", "tackle", "tackle", "string-shot", "string-shot", "harden", "harden", "stun-spore", "poison-powder", "bug-bite"],
+    "L2": ["tackle", "tackle", "bug-bite", "bug-bite", "string-shot", "stun-spore", "poison-powder", "harden", "defend", "defend"],
+    "L3": ["tackle", "bug-bite", "bug-bite", "leech-life", "string-shot", "stun-spore", "poison-powder", "silver-wind", "defend", "defend"],
+    "L4": ["bug-bite", "leech-life", "silver-wind", "sleep-powder", "stun-spore", "poison-powder", "string-shot", "psybeam", "defend", "defend"]
+  },
+  "butterfree": {
+    "L1": ["tackle", "tackle", "tackle", "string-shot", "string-shot", "harden", "harden", "stun-spore", "poison-powder", "bug-bite"],
+    "L2": ["tackle", "bug-bite", "bug-bite", "gust", "string-shot", "stun-spore", "poison-powder", "leech-life", "defend", "defend"],
+    "L3": ["bug-bite", "gust", "leech-life", "silver-wind", "stun-spore", "sleep-powder", "psybeam", "confusion", "defend", "defend"],
+    "L4": ["silver-wind", "gust", "sleep-powder", "stun-spore", "psychic", "dream-eater", "psybeam", "double-team", "defend", "substitute"]
+  },
+  "weedle": {
+    "L1": ["poison-sting", "poison-sting", "bug-bite", "bug-bite", "tackle", "tackle", "harden", "harden", "string-shot", "fury-attack"],
+    "L2": ["poison-sting", "poison-sting", "bug-bite", "bug-bite", "tackle", "twineedle", "string-shot", "fury-attack", "defend", "defend"],
+    "L3": ["poison-sting", "bug-bite", "bug-bite", "twineedle", "fury-cutter", "sludge", "string-shot", "toxic", "defend", "defend"],
+    "L4": ["poison-sting", "bug-bite", "twineedle", "pin-missile", "sludge-bomb", "fury-cutter", "toxic", "silver-wind", "defend", "defend"]
+  },
+  "beedrill": {
+    "L1": ["poison-sting", "poison-sting", "bug-bite", "bug-bite", "tackle", "tackle", "harden", "harden", "string-shot", "fury-attack"],
+    "L2": ["poison-sting", "bug-bite", "bug-bite", "twineedle", "pin-missile", "sludge", "string-shot", "fury-attack", "defend", "defend"],
+    "L3": ["poison-sting", "bug-bite", "twineedle", "pin-missile", "sludge", "fury-cutter", "toxic", "silver-wind", "defend", "defend"],
+    "L4": ["bug-bite", "twineedle", "pin-missile", "sludge-bomb", "megahorn", "fury-cutter", "toxic", "silver-wind", "defend", "substitute"]
+  },
+  "venonat": {
+    "L1": ["tackle", "tackle", "tackle", "string-shot", "string-shot", "harden", "harden", "stun-spore", "poison-powder", "bug-bite"],
+    "L2": ["tackle", "tackle", "bug-bite", "bug-bite", "stun-spore", "poison-powder", "leech-life", "string-shot", "defend", "defend"],
+    "L3": ["tackle", "bug-bite", "leech-life", "psybeam", "stun-spore", "poison-powder", "sludge", "string-shot", "defend", "defend"],
+    "L4": ["bug-bite", "leech-life", "psybeam", "psychic", "stun-spore", "sleep-powder", "sludge", "toxic", "defend", "defend"]
+  },
+  "venomoth": {
+    "L1": ["tackle", "tackle", "tackle", "string-shot", "string-shot", "harden", "harden", "stun-spore", "poison-powder", "bug-bite"],
+    "L2": ["tackle", "bug-bite", "bug-bite", "gust", "stun-spore", "poison-powder", "leech-life", "psybeam", "defend", "defend"],
+    "L3": ["bug-bite", "gust", "leech-life", "psybeam", "stun-spore", "sleep-powder", "sludge", "silver-wind", "defend", "defend"],
+    "L4": ["silver-wind", "gust", "leech-life", "psychic", "sleep-powder", "stun-spore", "sludge-bomb", "toxic", "defend", "substitute"]
+  },
+  "vulpix": {
+    "L1": ["fire-spin", "will-o-wisp", "extrasensory", "extrasensory", "defend", "defend", "ember", "confuse-ray", "ember", "hex"],
+    "L2": ["fire-spin", "will-o-wisp", "extrasensory", "ember", "ember", "confuse-ray", "hex", "fire-fang", "defend", "defend"],
+    "L3": ["will-o-wisp", "extrasensory", "ember", "confuse-ray", "hex", "fire-punch", "flamethrower", "mystical-fire", "defend", "defend"],
+    "L4": ["will-o-wisp", "extrasensory", "confuse-ray", "hex", "fire-punch", "flamethrower", "inferno", "fire-blast", "defend", "substitute"]
+  },
+  "ninetales": {
+    "L1": ["fire-spin", "fire-spin", "extrasensory", "extrasensory", "defend", "defend", "ember", "confuse-ray", "ember", "hex"],
+    "L2": ["fire-spin", "extrasensory", "extrasensory", "ember", "confuse-ray", "hex", "will-o-wisp", "mystical-fire", "defend", "defend"],
+    "L3": ["extrasensory", "ember", "confuse-ray", "hex", "will-o-wisp", "mystical-fire", "flamethrower", "inferno", "defend", "defend"],
+    "L4": ["extrasensory", "confuse-ray", "hex", "will-o-wisp", "mystical-fire", "flamethrower", "inferno", "fire-blast", "defend", "substitute"]
+  },
+  "oddish": {
+    "L1": ["vine-whip", "vine-whip", "absorb", "absorb", "defend", "defend", "poison-powder", "stun-spore", "mega-drain", "acid"],
+    "L2": ["vine-whip", "vine-whip", "absorb", "mega-drain", "acid", "poison-powder", "stun-spore", "leech-seed", "defend", "defend"],
+    "L3": ["vine-whip", "mega-drain", "razor-leaf", "acid", "sludge", "poison-powder", "sleep-powder", "leech-seed", "defend", "defend"],
+    "L4": ["mega-drain", "razor-leaf", "sludge", "toxic", "sleep-powder", "petal-dance", "leech-seed", "stun-spore", "defend", "defend"]
+  },
+  "gloom": {
+    "L1": ["vine-whip", "vine-whip", "absorb", "absorb", "defend", "defend", "poison-powder", "stun-spore", "mega-drain", "acid"],
+    "L2": ["vine-whip", "absorb", "mega-drain", "acid", "acid", "poison-powder", "stun-spore", "leech-seed", "defend", "defend"],
+    "L3": ["vine-whip", "mega-drain", "razor-leaf", "acid", "sludge", "sleep-powder", "stun-spore", "toxic", "defend", "defend"],
+    "L4": ["mega-drain", "razor-leaf", "sludge-bomb", "toxic", "sleep-powder", "stun-spore", "petal-dance", "leech-seed", "defend", "substitute"]
+  },
+  "vileplume": {
+    "L1": ["vine-whip", "vine-whip", "absorb", "absorb", "defend", "defend", "poison-powder", "stun-spore", "mega-drain", "acid"],
+    "L2": ["vine-whip", "mega-drain", "acid", "acid", "poison-powder", "stun-spore", "leech-seed", "absorb", "defend", "defend"],
+    "L3": ["mega-drain", "razor-leaf", "sludge-bomb", "acid", "sleep-powder", "stun-spore", "toxic", "leech-seed", "defend", "defend"],
+    "L4": ["razor-leaf", "giga-drain", "sludge-bomb", "toxic", "sleep-powder", "petal-dance", "stun-spore", "leech-seed", "defend", "substitute"]
+  },
+  "paras": {
+    "L1": ["scratch", "scratch", "scratch", "defend", "defend", "absorb", "absorb", "stun-spore", "leech-life", "bug-bite"],
+    "L2": ["scratch", "scratch", "absorb", "bug-bite", "bug-bite", "stun-spore", "leech-life", "mega-drain", "defend", "defend"],
+    "L3": ["scratch", "bug-bite", "leech-life", "mega-drain", "razor-leaf", "stun-spore", "sleep-powder", "leech-seed", "defend", "defend"],
+    "L4": ["bug-bite", "leech-life", "mega-drain", "razor-leaf", "silver-wind", "sleep-powder", "spore", "leech-seed", "defend", "defend"]
+  },
+  "parasect": {
+    "L1": ["scratch", "scratch", "scratch", "defend", "defend", "absorb", "absorb", "stun-spore", "leech-life", "bug-bite"],
+    "L2": ["scratch", "absorb", "bug-bite", "bug-bite", "stun-spore", "leech-life", "mega-drain", "leech-seed", "defend", "defend"],
+    "L3": ["bug-bite", "leech-life", "mega-drain", "razor-leaf", "stun-spore", "sleep-powder", "leech-seed", "silver-wind", "defend", "defend"],
+    "L4": ["bug-bite", "leech-life", "mega-drain", "razor-leaf", "silver-wind", "sleep-powder", "spore", "leech-seed", "defend", "substitute"]
+  },
+  "zubat": {
+    "L1": ["bite", "bite", "bite", "defend", "defend", "leech-life", "poison-sting", "gust", "wing-attack", "wing-attack"],
+    "L2": ["bite", "bite", "wing-attack", "wing-attack", "gust", "leech-life", "poison-sting", "confuse-ray", "defend", "defend"],
+    "L3": ["bite", "wing-attack", "gust", "leech-life", "sludge", "confuse-ray", "toxic", "drill-peck", "defend", "defend"],
+    "L4": ["bite", "gust", "leech-life", "sludge-bomb", "toxic", "confuse-ray", "drill-peck", "fly", "defend", "defend"]
+  },
+  "golbat": {
+    "L1": ["bite", "bite", "bite", "defend", "defend", "leech-life", "poison-sting", "gust", "wing-attack", "wing-attack"],
+    "L2": ["bite", "bite", "wing-attack", "gust", "leech-life", "poison-sting", "sludge", "confuse-ray", "defend", "defend"],
+    "L3": ["bite", "wing-attack", "gust", "leech-life", "sludge", "confuse-ray", "toxic", "drill-peck", "defend", "defend"],
+    "L4": ["bite", "gust", "leech-life", "sludge-bomb", "toxic", "confuse-ray", "drill-peck", "fly", "defend", "substitute"]
+  },
+  "crobat": {
+    "L1": ["bite", "bite", "bite", "defend", "defend", "leech-life", "poison-sting", "gust", "wing-attack", "wing-attack"],
+    "L2": ["bite", "bite", "wing-attack", "gust", "leech-life", "sludge", "confuse-ray", "drill-peck", "defend", "defend"],
+    "L3": ["bite", "gust", "leech-life", "sludge-bomb", "confuse-ray", "toxic", "drill-peck", "fly", "defend", "defend"],
+    "L4": ["bite", "gust", "leech-life", "sludge-bomb", "toxic", "confuse-ray", "fly", "sky-attack", "defend", "substitute"]
+  },
+  "machop": {
+    "L1": ["karate-chop", "karate-chop", "karate-chop", "defend", "defend", "low-kick", "low-kick", "double-kick", "counter", "rolling-kick"],
+    "L2": ["karate-chop", "karate-chop", "low-kick", "low-kick", "double-kick", "counter", "rolling-kick", "bulk-up", "defend", "defend"],
+    "L3": ["karate-chop", "low-kick", "double-kick", "counter", "rolling-kick", "bulk-up", "cross-chop", "seismic-toss", "defend", "defend"],
+    "L4": ["double-kick", "counter", "bulk-up", "cross-chop", "seismic-toss", "jump-kick", "submission", "focus-energy", "defend", "defend"]
+  },
+  "machoke": {
+    "L1": ["karate-chop", "karate-chop", "karate-chop", "defend", "defend", "low-kick", "low-kick", "double-kick", "counter", "rolling-kick"],
+    "L2": ["karate-chop", "karate-chop", "low-kick", "double-kick", "counter", "rolling-kick", "bulk-up", "focus-energy", "defend", "defend"],
+    "L3": ["karate-chop", "low-kick", "double-kick", "counter", "bulk-up", "cross-chop", "seismic-toss", "focus-energy", "defend", "defend"],
+    "L4": ["double-kick", "counter", "bulk-up", "cross-chop", "seismic-toss", "jump-kick", "submission", "focus-energy", "defend", "substitute"]
+  },
+  "machamp": {
+    "L1": ["karate-chop", "karate-chop", "karate-chop", "defend", "defend", "low-kick", "low-kick", "double-kick", "counter", "rolling-kick"],
+    "L2": ["karate-chop", "low-kick", "low-kick", "double-kick", "counter", "rolling-kick", "bulk-up", "focus-energy", "defend", "defend"],
+    "L3": ["karate-chop", "double-kick", "counter", "bulk-up", "cross-chop", "seismic-toss", "jump-kick", "focus-energy", "defend", "defend"],
+    "L4": ["double-kick", "counter", "bulk-up", "cross-chop", "high-jump-kick", "seismic-toss", "jump-kick", "swords-dance", "defend", "substitute"]
+  },
+  "clefairy": {
+    "L1": ["pound", "pound", "pound", "defend", "defend", "disarming-voice", "disarming-voice", "fairy-wind", "charm", "moonlight"],
+    "L2": ["pound", "pound", "disarming-voice", "disarming-voice", "fairy-wind", "charm", "moonlight", "follow-me", "defend", "defend"],
+    "L3": ["pound", "disarming-voice", "fairy-wind", "charm", "moonlight", "follow-me", "moonblast", "cosmic-power", "defend", "defend"],
+    "L4": ["disarming-voice", "fairy-wind", "charm", "moonlight", "moonblast", "cosmic-power", "dazzling-gleam", "play-rough", "defend", "substitute"]
+  },
+  "clefable": {
+    "L1": ["pound", "pound", "pound", "defend", "defend", "disarming-voice", "disarming-voice", "fairy-wind", "charm", "moonlight"],
+    "L2": ["pound", "pound", "disarming-voice", "disarming-voice", "fairy-wind", "charm", "moonlight", "follow-me", "defend", "defend"],
+    "L3": ["disarming-voice", "fairy-wind", "charm", "moonlight", "follow-me", "moonblast", "dazzling-gleam", "cosmic-power", "defend", "defend"],
+    "L4": ["fairy-wind", "charm", "moonlight", "moonblast", "dazzling-gleam", "play-rough", "cosmic-power", "follow-me", "defend", "substitute"]
+  },
+  "jigglypuff": {
+    "L1": ["defend", "defend", "defense-curl", "defense-curl", "sing", "sing", "disarming-voice", "disarming-voice", "pound", "pound"],
+    "L2": ["defend", "defend", "defense-curl", "sing", "sing", "disarming-voice", "disarming-voice", "pound", "charm", "fairy-wind"],
+    "L3": ["defend", "defend", "sing", "sing", "disarming-voice", "fairy-wind", "charm", "body-slam", "moonblast", "double-team"],
+    "L4": ["defend", "substitute", "sing", "disarming-voice", "fairy-wind", "charm", "body-slam", "moonblast", "dazzling-gleam", "double-team"]
+  },
+  "wigglytuff": {
+    "L1": ["defend", "defend", "defense-curl", "defense-curl", "sing", "sing", "disarming-voice", "disarming-voice", "pound", "pound"],
+    "L2": ["defend", "defend", "defense-curl", "sing", "sing", "disarming-voice", "fairy-wind", "charm", "pound", "double-team"],
+    "L3": ["defend", "defend", "sing", "disarming-voice", "fairy-wind", "charm", "body-slam", "moonblast", "double-team", "moonlight"],
+    "L4": ["defend", "substitute", "sing", "fairy-wind", "charm", "body-slam", "moonblast", "dazzling-gleam", "play-rough", "double-team"]
+  },
+  "magmar": {
+    "L1": ["defend", "defend", "defend", "karate-chop", "karate-chop", "ember", "ember", "ember", "fire-punch", "fire-punch"],
+    "L2": ["defend", "defend", "karate-chop", "ember", "ember", "fire-punch", "fire-punch", "flame-wheel", "will-o-wisp", "screech"],
+    "L3": ["defend", "defend", "karate-chop", "ember", "fire-punch", "flame-wheel", "flamethrower", "lava-plume", "will-o-wisp", "screech"],
+    "L4": ["defend", "substitute", "fire-punch", "flamethrower", "fire-blast", "lava-plume", "cross-chop", "will-o-wisp", "screech", "overheat"]
+  },
+  "magmortar": {
+    "L1": ["defend", "defend", "defend", "karate-chop", "karate-chop", "ember", "ember", "ember", "fire-punch", "fire-punch"],
+    "L2": ["defend", "defend", "karate-chop", "ember", "ember", "fire-punch", "fire-punch", "flame-wheel", "flame-charge", "will-o-wisp"],
+    "L3": ["defend", "defend", "karate-chop", "fire-punch", "flame-wheel", "flamethrower", "lava-plume", "fire-blast", "will-o-wisp", "screech"],
+    "L4": ["defend", "substitute", "fire-punch", "flamethrower", "fire-blast", "lava-plume", "cross-chop", "overheat", "will-o-wisp", "screech"]
+  },
+  "electabuzz": {
+    "L1": ["defend", "defend", "defend", "karate-chop", "karate-chop", "thunder-shock", "thunder-shock", "thunder-shock", "thunder-punch", "thunder-punch"],
+    "L2": ["defend", "defend", "karate-chop", "thunder-shock", "thunder-shock", "thunder-punch", "thunder-punch", "spark", "charge-beam", "thunder-wave"],
+    "L3": ["defend", "defend", "karate-chop", "thunder-shock", "thunder-punch", "spark", "charge-beam", "thunderbolt", "thunder-wave", "cross-chop"],
+    "L4": ["defend", "substitute", "thunder-punch", "spark", "charge-beam", "thunderbolt", "discharge", "thunder-wave", "cross-chop", "ice-punch"]
+  },
+  "electivire": {
+    "L1": ["defend", "defend", "defend", "karate-chop", "karate-chop", "thunder-shock", "thunder-shock", "thunder-shock", "thunder-punch", "thunder-punch"],
+    "L2": ["defend", "defend", "karate-chop", "thunder-shock", "thunder-punch", "thunder-punch", "spark", "charge-beam", "thunder-wave", "ice-punch"],
+    "L3": ["defend", "defend", "thunder-punch", "spark", "charge-beam", "thunderbolt", "discharge", "thunder-wave", "cross-chop", "ice-punch"],
+    "L4": ["defend", "substitute", "thunder-punch", "thunderbolt", "discharge", "thunder", "cross-chop", "ice-punch", "charge-beam", "thunder-wave"]
+  },
+  "porygon": {
+    "L1": ["tackle", "tackle", "tackle", "defend", "defend", "psybeam", "agility", "agility", "charge-beam", "charge-beam"],
+    "L2": ["tackle", "tackle", "psybeam", "charge-beam", "charge-beam", "agility", "swift", "tri-attack", "defend", "defend"],
+    "L3": ["tackle", "psybeam", "charge-beam", "agility", "swift", "tri-attack", "thunderbolt", "ice-beam", "defend", "defend"],
+    "L4": ["psybeam", "charge-beam", "agility", "tri-attack", "thunderbolt", "ice-beam", "discharge", "swift", "defend", "substitute"]
+  },
+  "porygon2": {
+    "L1": ["tackle", "tackle", "tackle", "defend", "defend", "psybeam", "agility", "agility", "charge-beam", "charge-beam"],
+    "L2": ["tackle", "psybeam", "psybeam", "charge-beam", "charge-beam", "agility", "swift", "tri-attack", "defend", "defend"],
+    "L3": ["psybeam", "charge-beam", "agility", "swift", "tri-attack", "thunderbolt", "ice-beam", "discharge", "defend", "defend"],
+    "L4": ["charge-beam", "agility", "tri-attack", "thunderbolt", "ice-beam", "discharge", "hyper-beam", "psychic", "defend", "substitute"]
+  },
+  "porygon-z": {
+    "L1": ["tackle", "tackle", "tackle", "defend", "defend", "psybeam", "agility", "agility", "charge-beam", "charge-beam"],
+    "L2": ["tackle", "psybeam", "charge-beam", "charge-beam", "agility", "swift", "tri-attack", "thunderbolt", "defend", "defend"],
+    "L3": ["psybeam", "charge-beam", "agility", "tri-attack", "thunderbolt", "ice-beam", "discharge", "swift", "defend", "defend"],
+    "L4": ["charge-beam", "agility", "tri-attack", "thunderbolt", "ice-beam", "discharge", "thunder", "hyper-beam", "defend", "substitute"]
+  },
+  "rattata": {
+    "L1": ["tackle", "tackle", "tackle", "scratch", "scratch", "bite", "bite", "tail-whip", "defend", "focus-energy"],
+    "L2": ["tackle", "tackle", "quick-attack", "bite", "bite", "hyper-fang", "focus-energy", "tail-whip", "defend", "defend"],
+    "L3": ["tackle", "quick-attack", "bite", "hyper-fang", "take-down", "flail", "focus-energy", "swords-dance", "defend", "defend"],
+    "L4": ["quick-attack", "bite", "hyper-fang", "double-edge", "super-fang", "thrash", "focus-energy", "swords-dance", "defend", "defend"]
+  },
+  "raticate": {
+    "L1": ["tackle", "tackle", "tackle", "scratch", "scratch", "bite", "bite", "tail-whip", "defend", "focus-energy"],
+    "L2": ["tackle", "tackle", "quick-attack", "bite", "bite", "hyper-fang", "stomp", "focus-energy", "defend", "defend"],
+    "L3": ["tackle", "quick-attack", "bite", "hyper-fang", "stomp", "double-edge", "focus-energy", "swords-dance", "defend", "defend"],
+    "L4": ["quick-attack", "bite", "hyper-fang", "double-edge", "super-fang", "skull-bash", "swords-dance", "thrash", "defend", "defend"]
+  },
+  "pidgey": {
+    "L1": ["peck", "peck", "wing-attack", "wing-attack", "gust", "gust", "sand-attack", "quick-attack", "defend", "defend"],
+    "L2": ["peck", "wing-attack", "wing-attack", "gust", "gust", "swift", "sand-attack", "quick-attack", "defend", "defend"],
+    "L3": ["wing-attack", "gust", "gust", "swift", "quick-attack", "drill-peck", "sand-attack", "agility", "defend", "defend"],
+    "L4": ["gust", "gust", "swift", "drill-peck", "fly", "razor-wind", "agility", "double-team", "defend", "defend"]
+  },
+  "pidgeotto": {
+    "L1": ["peck", "peck", "wing-attack", "wing-attack", "gust", "gust", "sand-attack", "quick-attack", "defend", "defend"],
+    "L2": ["peck", "wing-attack", "wing-attack", "gust", "gust", "swift", "drill-peck", "sand-attack", "defend", "defend"],
+    "L3": ["wing-attack", "gust", "gust", "swift", "drill-peck", "razor-wind", "agility", "screech", "defend", "defend"],
+    "L4": ["gust", "gust", "swift", "drill-peck", "fly", "razor-wind", "agility", "double-team", "defend", "substitute"]
+  },
+  "pidgeot": {
+    "L1": ["peck", "peck", "wing-attack", "wing-attack", "gust", "gust", "sand-attack", "quick-attack", "defend", "defend"],
+    "L2": ["peck", "wing-attack", "gust", "gust", "swift", "drill-peck", "sand-attack", "quick-attack", "defend", "defend"],
+    "L3": ["wing-attack", "gust", "gust", "swift", "drill-peck", "fly", "razor-wind", "agility", "defend", "substitute"],
+    "L4": ["gust", "gust", "swift", "drill-peck", "fly", "sky-attack", "razor-wind", "agility", "defend", "substitute"]
+  },
+  "spearow": {
+    "L1": ["defend", "defend", "defend", "peck", "peck", "peck", "gust", "gust", "fury-attack", "fury-attack"],
+    "L2": ["defend", "defend", "peck", "peck", "gust", "gust", "fury-attack", "wing-attack", "swift", "quick-attack"],
+    "L3": ["defend", "defend", "peck", "gust", "gust", "wing-attack", "drill-peck", "razor-wind", "swift", "agility"],
+    "L4": ["defend", "substitute", "gust", "gust", "drill-peck", "fly", "razor-wind", "agility", "swift", "double-team"]
+  },
+  "fearow": {
+    "L1": ["defend", "defend", "defend", "peck", "peck", "peck", "gust", "gust", "fury-attack", "fury-attack"],
+    "L2": ["defend", "defend", "peck", "peck", "gust", "gust", "fury-attack", "wing-attack", "swift", "quick-attack"],
+    "L3": ["defend", "defend", "peck", "gust", "gust", "fury-attack", "drill-peck", "razor-wind", "agility", "swift"],
+    "L4": ["defend", "substitute", "gust", "gust", "drill-peck", "fly", "razor-wind", "sky-attack", "agility", "double-team"]
+  },
+  "ekans": {
+    "L1": ["bite", "bite", "poison-sting", "poison-sting", "wrap", "hiss", "defend", "defend", "acid", "smog"],
+    "L2": ["bite", "poison-sting", "poison-sting", "acid", "acid", "smog", "glare", "hiss", "defend", "defend"],
+    "L3": ["bite", "poison-sting", "acid", "sludge", "toxic", "glare", "screech", "hiss", "defend", "defend"],
+    "L4": ["bite", "acid", "sludge", "sludge-bomb", "toxic", "glare", "screech", "acid-armor", "defend", "defend"]
+  },
+  "arbok": {
+    "L1": ["bite", "bite", "poison-sting", "poison-sting", "wrap", "hiss", "defend", "defend", "acid", "smog"],
+    "L2": ["bite", "poison-sting", "poison-sting", "acid", "acid", "smog", "glare", "screech", "defend", "defend"],
+    "L3": ["bite", "poison-sting", "acid", "sludge", "sludge-bomb", "glare", "toxic", "screech", "defend", "defend"],
+    "L4": ["bite", "acid", "sludge-bomb", "sludge-bomb", "toxic", "glare", "screech", "acid-armor", "defend", "defend"]
+  },
+  "sandshrew": {
+    "L1": ["defend", "defend", "defend", "scratch", "scratch", "scratch", "sand-attack", "sand-attack", "bone-club", "bone-club"],
+    "L2": ["defend", "defend", "scratch", "scratch", "sand-attack", "sand-attack", "bone-club", "bone-club", "dig", "slash"],
+    "L3": ["defend", "defend", "scratch", "sand-attack", "bone-club", "bonemerang", "dig", "slash", "swords-dance", "rock-slide"],
+    "L4": ["defend", "substitute", "sand-attack", "bonemerang", "dig", "earthquake", "slash", "swords-dance", "rock-slide", "bone-club"]
+  },
+  "sandslash": {
+    "L1": ["defend", "defend", "defend", "scratch", "scratch", "scratch", "sand-attack", "sand-attack", "bone-club", "bone-club"],
+    "L2": ["defend", "defend", "scratch", "scratch", "sand-attack", "sand-attack", "bone-club", "bone-club", "dig", "slash"],
+    "L3": ["defend", "defend", "scratch", "sand-attack", "bone-club", "bonemerang", "dig", "earthquake", "swords-dance", "slash"],
+    "L4": ["defend", "substitute", "sand-attack", "bonemerang", "dig", "earthquake", "swords-dance", "slash", "rock-slide", "skull-bash"]
+  },
+  "meowth": {
+    "L1": ["scratch", "scratch", "bite", "bite", "defend", "defend", "pay-day", "fake-out", "pay-day", "swift"],
+    "L2": ["scratch", "bite", "bite", "swift", "pay-day", "fake-out", "focus-energy", "screech", "defend", "defend"],
+    "L3": ["bite", "swift", "swift", "pay-day", "fake-out", "slash", "screech", "focus-energy", "defend", "defend"],
+    "L4": ["bite", "swift", "pay-day", "fake-out", "slash", "double-edge", "screech", "swords-dance", "defend", "defend"]
+  },
+  "persian": {
+    "L1": ["scratch", "scratch", "bite", "bite", "defend", "defend", "pay-day", "fake-out", "pay-day", "swift"],
+    "L2": ["scratch", "bite", "bite", "swift", "swift", "pay-day", "fake-out", "slash", "defend", "defend"],
+    "L3": ["bite", "swift", "swift", "pay-day", "fake-out", "slash", "screech", "swords-dance", "defend", "defend"],
+    "L4": ["bite", "swift", "pay-day", "fake-out", "slash", "double-edge", "screech", "swords-dance", "defend", "substitute"]
+  },
+  "growlithe": {
+    "L1": ["fire-spin", "fire-spin", "flame-wheel", "flame-wheel", "fire-fang", "fire-fang", "defend", "defend", "bite", "roar"],
+    "L2": ["fire-spin", "flame-wheel", "flame-wheel", "fire-fang", "fire-fang", "ember", "bite", "roar", "defend", "defend"],
+    "L3": ["flame-wheel", "fire-fang", "fire-fang", "ember", "fire-punch", "flamethrower", "bite", "roar", "defend", "defend"],
+    "L4": ["flame-wheel", "fire-fang", "fire-punch", "flamethrower", "inferno", "blaze-kick", "bite", "roar", "defend", "substitute"]
+  },
+  "arcanine": {
+    "L1": ["fire-spin", "fire-spin", "flame-wheel", "flame-wheel", "fire-fang", "fire-fang", "defend", "defend", "bite", "roar"],
+    "L2": ["fire-spin", "flame-wheel", "flame-wheel", "fire-fang", "fire-fang", "ember", "fire-punch", "roar", "defend", "defend"],
+    "L3": ["flame-wheel", "fire-fang", "fire-punch", "flamethrower", "inferno", "blaze-kick", "bite", "roar", "defend", "substitute"],
+    "L4": ["fire-punch", "flamethrower", "inferno", "fire-blast", "blaze-kick", "fiery-dance", "morning-sun", "roar", "defend", "substitute"]
+  },
+  "tauros": {
+    "L1": ["tackle", "tackle", "stomp", "stomp", "take-down", "thrash", "rage", "horn-attack", "defend", "defend"],
+    "L2": ["tackle", "stomp", "stomp", "take-down", "thrash", "rage", "horn-attack", "focus-energy", "defend", "defend"],
+    "L3": ["stomp", "take-down", "thrash", "double-edge", "horn-attack", "rage", "focus-energy", "swords-dance", "defend", "defend"],
+    "L4": ["take-down", "thrash", "double-edge", "mega-kick", "horn-attack", "body-slam", "focus-energy", "swords-dance", "defend", "defend"]
+  },
+  "kangaskhan": {
+    "L1": ["comet-punch", "comet-punch", "mega-punch", "dizzy-punch", "bite", "bite", "counter", "rage", "defend", "defend"],
+    "L2": ["comet-punch", "mega-punch", "dizzy-punch", "bite", "bite", "stomp", "rage", "focus-energy", "defend", "defend"],
+    "L3": ["comet-punch", "mega-punch", "dizzy-punch", "bite", "stomp", "thrash", "focus-energy", "swords-dance", "defend", "defend"],
+    "L4": ["comet-punch", "mega-punch", "dizzy-punch", "bite", "thrash", "mega-kick", "focus-energy", "swords-dance", "defend", "substitute"]
+  },
+  "drowzee": {
+    "L1": ["confusion", "confusion", "pound", "pound", "defend", "defend", "hypnosis", "barrier", "teleport", "psybeam"],
+    "L2": ["confusion", "confusion", "psybeam", "psybeam", "hypnosis", "barrier", "meditate", "teleport", "defend", "defend"],
+    "L3": ["confusion", "psybeam", "psychic", "hypnosis", "barrier", "meditate", "light-screen", "teleport", "defend", "defend"],
+    "L4": ["psybeam", "psychic", "dream-eater", "hypnosis", "barrier", "meditate", "light-screen", "teleport", "defend", "substitute"]
+  },
+  "hypno": {
+    "L1": ["confusion", "confusion", "pound", "pound", "defend", "defend", "hypnosis", "barrier", "teleport", "psybeam"],
+    "L2": ["confusion", "confusion", "psybeam", "psybeam", "hypnosis", "barrier", "meditate", "teleport", "defend", "defend"],
+    "L3": ["confusion", "psybeam", "psychic", "dream-eater", "hypnosis", "barrier", "meditate", "light-screen", "defend", "defend"],
+    "L4": ["psybeam", "psychic", "dream-eater", "hypnosis", "rest", "barrier", "meditate", "light-screen", "defend", "substitute"]
+  },
+  "voltorb": {
+    "L1": ["thunder-shock", "thunder-shock", "sonic-boom", "sonic-boom", "spark", "spark", "charge-beam", "defend", "defend", "screech"],
+    "L2": ["thunder-shock", "sonic-boom", "spark", "spark", "charge-beam", "charge-beam", "screech", "thunder-wave", "defend", "defend"],
+    "L3": ["spark", "charge-beam", "charge-beam", "thunderbolt", "screech", "thunder-wave", "light-screen", "sonic-boom", "defend", "defend"],
+    "L4": ["spark", "charge-beam", "thunderbolt", "discharge", "thunder", "screech", "thunder-wave", "light-screen", "defend", "defend"]
+  },
+  "electrode": {
+    "L1": ["thunder-shock", "thunder-shock", "sonic-boom", "sonic-boom", "spark", "spark", "charge-beam", "defend", "defend", "screech"],
+    "L2": ["thunder-shock", "sonic-boom", "spark", "spark", "charge-beam", "charge-beam", "screech", "thunder-wave", "defend", "defend"],
+    "L3": ["spark", "charge-beam", "charge-beam", "thunderbolt", "discharge", "screech", "thunder-wave", "light-screen", "defend", "defend"],
+    "L4": ["spark", "charge-beam", "thunderbolt", "discharge", "thunder", "self-destruct", "screech", "light-screen", "defend", "defend"]
+  },
+  "magikarp": {
+    "L1": ["splash", "splash", "splash", "tackle", "tackle", "tackle", "defend", "defend", "flail", "bounce"],
+    "L2": ["splash", "splash", "tackle", "tackle", "tackle", "flail", "flail", "bounce", "defend", "defend"],
+    "L3": ["splash", "tackle", "tackle", "flail", "flail", "bounce", "bounce", "quick-attack", "defend", "defend"],
+    "L4": ["tackle", "tackle", "flail", "flail", "bounce", "bounce", "quick-attack", "swift", "defend", "defend"]
+  },
+  "gyarados": {
+    "L1": ["splash", "splash", "splash", "tackle", "tackle", "tackle", "defend", "defend", "flail", "bounce"],
+    "L2": ["tackle", "tackle", "bite", "bite", "bounce", "flail", "water-gun", "water-gun", "defend", "defend"],
+    "L3": ["bite", "bounce", "waterfall", "waterfall", "bubble-beam", "ice-beam", "thrash", "rage", "defend", "defend"],
+    "L4": ["bite", "waterfall", "hydro-pump", "ice-beam", "thrash", "dragon-dance", "bounce", "rage", "defend", "substitute"]
+  },
+  "gastly": {
+    "L1": ["lick", "lick", "confuse-ray", "confuse-ray", "double-team", "double-team", "poison-gas", "poison-gas", "shadow-punch", "shadow-punch"],
+    "L2": ["lick", "confuse-ray", "double-team", "poison-gas", "shadow-punch", "shadow-punch", "night-shade", "acid", "barrier", "acid-armor"],
+    "L3": ["lick", "confuse-ray", "double-team", "shadow-punch", "night-shade", "shadow-ball", "toxic", "hypnosis", "barrier", "acid-armor"],
+    "L4": ["confuse-ray", "double-team", "shadow-ball", "night-shade", "hex", "toxic", "hypnosis", "dream-eater", "barrier", "acid-armor"]
+  },
+  "haunter": {
+    "L1": ["lick", "lick", "confuse-ray", "confuse-ray", "double-team", "double-team", "poison-gas", "poison-gas", "shadow-punch", "shadow-punch"],
+    "L2": ["lick", "confuse-ray", "double-team", "poison-gas", "shadow-punch", "shadow-punch", "night-shade", "sludge", "barrier", "acid-armor"],
+    "L3": ["lick", "confuse-ray", "double-team", "shadow-punch", "night-shade", "shadow-ball", "sludge", "hypnosis", "barrier", "acid-armor"],
+    "L4": ["confuse-ray", "double-team", "shadow-ball", "night-shade", "hex", "sludge-bomb", "hypnosis", "dream-eater", "barrier", "acid-armor"]
+  },
+  "gengar": {
+    "L1": ["lick", "lick", "confuse-ray", "confuse-ray", "double-team", "double-team", "poison-gas", "poison-gas", "shadow-punch", "shadow-punch"],
+    "L2": ["lick", "confuse-ray", "double-team", "poison-gas", "shadow-punch", "shadow-punch", "night-shade", "sludge", "barrier", "acid-armor"],
+    "L3": ["confuse-ray", "double-team", "shadow-punch", "night-shade", "shadow-ball", "sludge-bomb", "toxic", "hypnosis", "barrier", "acid-armor"],
+    "L4": ["confuse-ray", "shadow-ball", "hex", "sludge-bomb", "toxic", "hypnosis", "ominous-wind", "dream-eater", "barrier", "substitute"]
+  },
+  "rhyhorn": {
+    "L1": ["horn-attack", "horn-attack", "stomp", "stomp", "rock-slide", "defend", "defend", "tackle", "tackle", "sand-attack"],
+    "L2": ["horn-attack", "horn-attack", "stomp", "stomp", "rock-slide", "rock-slide", "sand-attack", "rage", "defend", "defend"],
+    "L3": ["horn-attack", "stomp", "rock-slide", "rock-slide", "take-down", "sand-attack", "swords-dance", "rage", "defend", "defend"],
+    "L4": ["horn-attack", "rock-slide", "rock-slide", "earthquake", "take-down", "thrash", "sand-attack", "swords-dance", "defend", "substitute"]
+  },
+  "rhydon": {
+    "L1": ["horn-attack", "horn-attack", "stomp", "stomp", "rock-slide", "defend", "defend", "tackle", "tackle", "sand-attack"],
+    "L2": ["horn-attack", "horn-attack", "stomp", "stomp", "rock-slide", "rock-slide", "sand-attack", "rage", "defend", "defend"],
+    "L3": ["horn-attack", "stomp", "rock-slide", "rock-slide", "earthquake", "take-down", "sand-attack", "swords-dance", "defend", "defend"],
+    "L4": ["horn-attack", "rock-slide", "earthquake", "take-down", "megahorn", "thrash", "sand-attack", "swords-dance", "defend", "substitute"]
+  },
+  "snorlax": {
+    "L1": ["tackle", "tackle", "headbutt", "headbutt", "body-slam", "body-slam", "rest", "defend", "defend", "sing"],
+    "L2": ["tackle", "headbutt", "body-slam", "body-slam", "rest", "amnesia", "sing", "focus-energy", "defend", "defend"],
+    "L3": ["headbutt", "body-slam", "body-slam", "rest", "thrash", "double-edge", "sing", "swords-dance", "defend", "substitute"],
+    "L4": ["body-slam", "body-slam", "rest", "thrash", "skull-bash", "hyper-beam", "sing", "swords-dance", "defend", "substitute"]
+  },
+  "lapras": {
+    "L1": ["tackle", "tackle", "defend", "defend", "defend", "water-gun", "water-gun", "mist", "mist", "sing"],
+    "L2": ["tackle", "water-gun", "water-gun", "bubble-beam", "aurora-beam", "mist", "sing", "withdraw", "defend", "defend"],
+    "L3": ["water-gun", "bubble-beam", "ice-beam", "surf", "body-slam", "sing", "mist", "withdraw", "defend", "defend"],
+    "L4": ["bubble-beam", "ice-beam", "hydro-pump", "surf", "blizzard", "body-slam", "sing", "mist", "defend", "substitute"]
+  },
+  "dratini": {
+    "L1": ["defend", "defend", "defend", "tackle", "tackle", "tackle", "wrap", "wrap", "thunder-wave", "twister"],
+    "L2": ["defend", "defend", "tackle", "tackle", "wrap", "thunder-wave", "twister", "swift", "slam", "agility"],
+    "L3": ["defend", "defend", "tackle", "wrap", "thunder-wave", "twister", "slam", "ice-beam", "thunderbolt", "agility"],
+    "L4": ["defend", "substitute", "twister", "thunder-wave", "slam", "ice-beam", "thunderbolt", "agility", "dragon-rage", "dragon-dance"]
+  },
+  "dragonair": {
+    "L1": ["defend", "defend", "defend", "tackle", "tackle", "tackle", "wrap", "wrap", "thunder-wave", "twister"],
+    "L2": ["defend", "defend", "tackle", "wrap", "thunder-wave", "twister", "slam", "aurora-beam", "swift", "agility"],
+    "L3": ["defend", "defend", "wrap", "thunder-wave", "twister", "slam", "ice-beam", "thunderbolt", "agility", "swift"],
+    "L4": ["defend", "substitute", "twister", "thunder-wave", "ice-beam", "thunderbolt", "agility", "dragon-rage", "slam", "dragon-dance"]
+  },
+  "dragonite": {
+    "L1": ["defend", "defend", "defend", "tackle", "tackle", "tackle", "wrap", "wrap", "thunder-wave", "twister"],
+    "L2": ["defend", "defend", "tackle", "wrap", "thunder-wave", "twister", "slam", "wing-attack", "swift", "agility"],
+    "L3": ["defend", "defend", "twister", "thunder-wave", "fly", "ice-beam", "thunderbolt", "slam", "agility", "take-down"],
+    "L4": ["defend", "substitute", "twister", "dragon-dance", "fly", "ice-beam", "thunderbolt", "fire-blast", "hyper-beam", "agility"]
+  }
+}

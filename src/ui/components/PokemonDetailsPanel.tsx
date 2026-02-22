@@ -11,6 +11,8 @@ import {
 } from '../../run/progression';
 import { EXP_PER_LEVEL } from '../../run/state';
 import { getSpriteSize } from '../../data/heights';
+import { ITEM_DEFS, RARITY_COLORS } from '../../data/items';
+import { HeldItemBadge } from './HeldItemBadge';
 import { getSpriteUrl } from '../utils/sprites';
 import { CardPreview } from './CardPreview';
 import { DexFrame } from './DexFrame';
@@ -389,6 +391,7 @@ export function PokemonDetailsPanel({
                   deckSize={deck.length}
                   types={basePokemon.types}
                   passiveInfos={passiveInfos}
+                  heldItemIds={pokemon?.heldItemIds ?? []}
                 />
               )}
 
@@ -480,7 +483,7 @@ export function PokemonDetailsPanel({
 // ── Stats tab ────────────────────────────────────────────────────────
 
 function StatsContent({
-  currentHp, maxHp, speed, energyPerTurn, energyCap, handSize, deckSize, types, passiveInfos,
+  currentHp, maxHp, speed, energyPerTurn, energyCap, handSize, deckSize, types, passiveInfos, heldItemIds,
 }: {
   currentHp: number;
   maxHp: number;
@@ -491,6 +494,7 @@ function StatsContent({
   deckSize: number;
   types: string[];
   passiveInfos: PassiveInfo[];
+  heldItemIds: string[];
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -537,6 +541,41 @@ function StatsContent({
           })}
         </div>
       </div>
+
+      {/* Held Items */}
+      {heldItemIds.length > 0 && (
+        <div>
+          <SectionLabel>Held Items</SectionLabel>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {heldItemIds.map(itemId => {
+              const def = ITEM_DEFS[itemId];
+              if (!def) return null;
+              return (
+                <div key={itemId} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '10px 12px',
+                  background: THEME.chrome.backdrop,
+                  borderRadius: 4,
+                  borderLeft: `3px solid ${RARITY_COLORS[def.rarity]}`,
+                }}>
+                  <HeldItemBadge itemId={def.id} size={40} />
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 'bold', color: RARITY_COLORS[def.rarity] }}>
+                      {def.name}
+                    </div>
+                    <div style={{ fontSize: 11, color: THEME.text.tertiary, marginTop: 2 }}>
+                      {def.rarity}
+                    </div>
+                    <div style={{ fontSize: 12, color: THEME.text.secondary, marginTop: 3 }}>
+                      {def.description}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Passive Abilities */}
       <div>

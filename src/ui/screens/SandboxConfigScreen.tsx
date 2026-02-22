@@ -15,6 +15,7 @@ import { PokemonTile, TYPE_COLORS } from '../components/PokemonTile';
 import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
 import { getSpriteUrl } from '../utils/sprites';
+import { ITEM_DEFS, RARITY_COLORS } from '../../data/items';
 
 // ── Constants ──────────────────────────────────────────────────────
 
@@ -31,7 +32,7 @@ const ALL_RARITIES: CardRarity[] = [
 ];
 
 const ALL_STATUSES: StatusType[] = [
-  'burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt',
+  'burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt', 'provoke', 'fatigue',
   'strength', 'evasion', 'haste',
 ];
 
@@ -47,6 +48,7 @@ const STATUS_COLORS: Record<StatusType, string> = {
   evasion: '#67e8f9',
   haste: '#fbbf24',
   taunt: '#dc2626',
+  provoke: '#e040a0',
 };
 
 
@@ -60,6 +62,7 @@ export interface SandboxPokemon {
   startAt50Percent: boolean;
   position: Position;
   customDeck: string[] | null;
+  heldItemIds: string[];
 }
 
 interface Props {
@@ -70,7 +73,8 @@ interface Props {
     enemyPositions: Position[],
     playerPassives: Map<number, string[]>,
     enemyPassives: Map<number, string[]>,
-    hpOverrides: Map<string, { maxHp?: number; startPercent?: number }>
+    hpOverrides: Map<string, { maxHp?: number; startPercent?: number }>,
+    playerItems?: Map<number, string>
   ) => void;
   onBack: () => void;
   initialPlayerTeam?: SandboxPokemon[];
@@ -461,6 +465,7 @@ function FormationSlot({
             <img
               src={sprite}
               alt={formId || ''}
+              draggable={false}
               style={{
                 width: 60,
                 height: 60,
@@ -600,11 +605,13 @@ function InlineDetailEditor({
   onUpdate,
   onRemove,
   onOpenDeckEditor,
+  takenItemIds,
 }: {
   pokemon: SandboxPokemon;
   onUpdate: (pokemon: SandboxPokemon) => void;
   onRemove: () => void;
   onOpenDeckEditor: () => void;
+  takenItemIds: string[];
 }) {
   const formId = getFormIdAtLevel(pokemon.baseFormId, pokemon.level);
   const passives = getPassivesAtLevel(pokemon.baseFormId, pokemon.level);
@@ -723,6 +730,46 @@ function InlineDetailEditor({
             />
             <span style={{ fontSize: 12, color: '#fcd34d' }}>Start 50%</span>
           </label>
+        </div>
+
+        {/* Held Item */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 100 }}>
+          <div style={{ fontSize: 10, color: THEME.text.tertiary, ...THEME.heading, letterSpacing: '0.1em' }}>Held Item</div>
+          <select
+            value={pokemon.heldItemIds[0] ?? ''}
+            onChange={(e) => onUpdate({ ...pokemon, heldItemIds: e.target.value ? [e.target.value] : [] })}
+            style={{
+              padding: '4px 8px',
+              fontSize: 12,
+              background: 'rgba(0,0,0,0.3)',
+              color: pokemon.heldItemIds[0] && ITEM_DEFS[pokemon.heldItemIds[0]]
+                ? RARITY_COLORS[ITEM_DEFS[pokemon.heldItemIds[0]].rarity]
+                : THEME.text.tertiary,
+              border: `1px solid ${THEME.border.subtle}`,
+              borderRadius: 4,
+              cursor: 'pointer',
+            }}
+          >
+            <option value="">None</option>
+            {Object.values(ITEM_DEFS).map(item => {
+              const taken = takenItemIds.includes(item.id) && item.id !== pokemon.heldItemIds[0];
+              return (
+                <option key={item.id} value={item.id} disabled={taken}>
+                  {item.icon} {item.name}{taken ? ' (taken)' : ''}
+                </option>
+              );
+            })}
+          </select>
+          {pokemon.heldItemIds[0] && (() => {
+            const item = ITEM_DEFS[pokemon.heldItemIds[0]];
+            if (!item) return null;
+            return (
+              <div style={{ fontSize: 10, color: THEME.text.secondary, lineHeight: 1.3, maxWidth: 160 }}>
+                <span style={{ color: RARITY_COLORS[item.rarity], fontWeight: 'bold' }}>{item.name}:</span>{' '}
+                {item.description}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Deck preview + Edit */}
@@ -874,6 +921,7 @@ export function SandboxConfigScreen({
       startAt50Percent: false,
       position: { row, column: col },
       customDeck: null,
+      heldItemIds: [],
     };
 
     if (existingIndex >= 0) {
@@ -1015,7 +1063,13 @@ export function SandboxConfigScreen({
       }
     });
 
-    onStartBattle(players, enemies, playerPositions, enemyPositions, playerPassives, enemyPassives, hpOverrides);
+    const playerItems = new Map<number, string>();
+    playerTeam.forEach((p, i) => {
+      if (p.heldItemIds[0]) playerItems.set(i, p.heldItemIds[0]);
+    });
+
+    onStartBattle(players, enemies, playerPositions, enemyPositions, playerPassives, enemyPassives, hpOverrides,
+      playerItems.size > 0 ? playerItems : undefined);
   }, [playerTeam, enemyTeam, onStartBattle]);
 
   const canStart = playerTeam.length > 0 && enemyTeam.length > 0;
@@ -1187,6 +1241,7 @@ export function SandboxConfigScreen({
                 onUpdate={(p) => handleUpdatePokemon('player', p)}
                 onRemove={() => handleRemoveEditing('player')}
                 onOpenDeckEditor={() => setShowDeckEditor(true)}
+                takenItemIds={playerTeam.filter(p => p.id !== playerEditingPokemon.id && p.heldItemIds.length > 0).flatMap(p => p.heldItemIds)}
               />
             )}
             {enemyEditingPokemon && (
@@ -1196,6 +1251,7 @@ export function SandboxConfigScreen({
                 onUpdate={(p) => handleUpdatePokemon('enemy', p)}
                 onRemove={() => handleRemoveEditing('enemy')}
                 onOpenDeckEditor={() => setShowDeckEditor(true)}
+                takenItemIds={enemyTeam.filter(p => p.id !== enemyEditingPokemon.id && p.heldItemIds.length > 0).flatMap(p => p.heldItemIds)}
               />
             )}
           </div>

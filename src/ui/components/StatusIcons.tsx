@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { StatusInstance } from '../../engine/types';
+import type { StatusInstance, Combatant } from '../../engine/types';
 import { THEME } from '../theme';
 
 // ── SVG line-art icons (12×12 viewBox, rendered at 16×16) ──────────
@@ -139,13 +139,47 @@ function TauntIcon({ color }: { color: string }) {
   );
 }
 
+function FatigueIcon({ color }: { color: string }) {
+  return (
+    <svg width={16} height={16} viewBox="0 0 12 12" fill="none">
+      {/* Spiral/daze — represents exhaustion */}
+      <path d="M6 2 C8.5 2 10 3.5 10 6 C10 8 8.5 9 7 8.5 C5.5 8 5 7 5.5 6 C6 5 7.5 5 7.5 6.5" stroke={color} strokeWidth="1.2" strokeLinecap="round" fill="none" />
+      {/* Sweat drop */}
+      <path d="M3 3.5 C3 2.5 2.5 1.5 2.5 1.5 C2.5 1.5 2 2.5 2 3.5 C2 4 2.2 4.3 2.5 4.3 C2.8 4.3 3 4 3 3.5Z" fill={color + '55'} stroke={color} strokeWidth="0.5" />
+    </svg>
+  );
+}
+
+function ThornsIcon({ color }: { color: string }) {
+  return (
+    <svg width={16} height={16} viewBox="0 0 12 12" fill="none">
+      {/* Spiky circle — thorns/barbs */}
+      <path d="M6 1 L7 3.5 L9.5 2 L8.5 4.5 L11 6 L8.5 7.5 L9.5 10 L7 8.5 L6 11 L5 8.5 L2.5 10 L3.5 7.5 L1 6 L3.5 4.5 L2.5 2 L5 3.5 Z" stroke={color} strokeWidth="0.9" strokeLinejoin="round" fill={color + '20'} />
+      <circle cx="6" cy="6" r="2" fill={color + '35'} />
+    </svg>
+  );
+}
+
+function ProvokeIcon({ color }: { color: string }) {
+  return (
+    <svg width={16} height={16} viewBox="0 0 12 12" fill="none">
+      <circle cx="6" cy="6" r="4" stroke={color} strokeWidth="1" />
+      <circle cx="6" cy="6" r="1.5" fill={color} />
+      <line x1="6" y1="0.5" x2="6" y2="3" stroke={color} strokeWidth="1" strokeLinecap="round" />
+      <line x1="6" y1="9" x2="6" y2="11.5" stroke={color} strokeWidth="1" strokeLinecap="round" />
+      <line x1="0.5" y1="6" x2="3" y2="6" stroke={color} strokeWidth="1" strokeLinecap="round" />
+      <line x1="9" y1="6" x2="11.5" y2="6" stroke={color} strokeWidth="1" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 // ── Status definitions ─────────────────────────────────────────────
 
 const STATUS_INFO: Record<string, {
   Icon: React.FC<{ color: string }>;
   color: string;
   label: string;
-  describe: (stacks: number, duration?: number) => string;
+  describe: (stacks: number, duration?: number, status?: StatusInstance, combatants?: Combatant[]) => string;
 }> = {
   burn: {
     Icon: BurnIcon, color: '#ef4444', label: 'Burn',
@@ -189,7 +223,25 @@ const STATUS_INFO: Record<string, {
   },
   taunt: {
     Icon: TauntIcon, color: '#dc2626', label: 'Taunt',
-    describe: (s) => `Forces enemies to target this unit when possible. Can only play attack cards. ${s} round${s !== 1 ? 's' : ''} remaining.`,
+    describe: (s) => `Forces enemies to target this unit when possible. ${s} round${s !== 1 ? 's' : ''} remaining.`,
+  },
+  fatigue: {
+    Icon: FatigueIcon, color: '#94a3b8', label: 'Fatigue',
+    describe: (s) => `Loses ${s} energy at the start of next turn. All stacks clear at once.`,
+  },
+  thorns: {
+    Icon: ThornsIcon, color: '#94a3b8', label: 'Thorns',
+    describe: (s) => `When hit by an attack, deals ${s} bypass damage back to the attacker. Permanent.`,
+  },
+  provoke: {
+    Icon: ProvokeIcon, color: '#e040a0', label: 'Provoke',
+    describe: (s, _d, status, combatants) => {
+      const source = status?.sourceId && combatants
+        ? combatants.find(c => c.id === status.sourceId)
+        : undefined;
+      const name = source?.name ?? 'the source';
+      return `Forced to target ${name}. ${s} round${s !== 1 ? 's' : ''} remaining.`;
+    },
   },
 };
 
@@ -212,14 +264,17 @@ interface Props {
   maxPerColumn?: number;
   /** Skew angle applied to the container — text is counter-skewed by the negative (default 11) */
   skewAngle?: number;
+  /** All combatants in combat — used to resolve source names in tooltips (e.g. Provoke) */
+  combatants?: Combatant[];
 }
 
-function StatusBadge({ status, index, hoveredIdx, setHoveredIdx, counterSkew }: {
+function StatusBadge({ status, index, hoveredIdx, setHoveredIdx, counterSkew, combatants }: {
   status: StatusInstance;
   index: number;
   hoveredIdx: number | null;
   setHoveredIdx: (idx: number | null) => void;
   counterSkew: number;
+  combatants?: Combatant[];
 }) {
   const info = STATUS_INFO[status.type] || FALLBACK;
   const { Icon, color, label } = info;
@@ -288,7 +343,7 @@ function StatusBadge({ status, index, hoveredIdx, setHoveredIdx, counterSkew }: 
             {label} {status.stacks}
           </div>
           <div style={{ color: THEME.text.secondary, fontSize: 12, lineHeight: '1.45' }}>
-            {info.describe(status.stacks, status.duration)}
+            {info.describe(status.stacks, status.duration, status, combatants)}
           </div>
         </div>
       )}
@@ -296,7 +351,7 @@ function StatusBadge({ status, index, hoveredIdx, setHoveredIdx, counterSkew }: 
   );
 }
 
-export function StatusIcons({ statuses, maxPerColumn = 3, skewAngle = 11 }: Props) {
+export function StatusIcons({ statuses, maxPerColumn = 3, skewAngle = 11, combatants }: Props) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const counterSkew = -skewAngle;
 
@@ -322,6 +377,7 @@ export function StatusIcons({ statuses, maxPerColumn = 3, skewAngle = 11 }: Prop
                 hoveredIdx={hoveredIdx}
                 setHoveredIdx={setHoveredIdx}
                 counterSkew={counterSkew}
+                combatants={combatants}
               />
             );
           })}

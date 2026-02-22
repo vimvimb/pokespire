@@ -118,6 +118,11 @@ export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDispla
     triggerVanish,
   }), [getCardPosition, triggerVanish]);
 
+  // Check if ALL cards in hand are unplayable (for dismiss visual)
+  const allUnplayable = unplayableCardIndices
+    ? combatant.hand.length > 0 && combatant.hand.every((_, idx) => unplayableCardIndices.has(idx))
+    : false;
+
   // Find index of first card matching tutorial highlight type (for data-tutorial-id)
   let firstMatchIdx: number | null = null;
   if (tutorialHighlightCardType) {
@@ -195,9 +200,10 @@ export const HandDisplay = forwardRef<HandDisplayRef, Props>(function HandDispla
               onMouseEnter={() => setHoveredIndex(idx)}
               onMouseLeave={() => setHoveredIndex(null)}
               style={{
-                transform: `translateX(${translateX}px) translateY(${translateY}px) scale(${scale})`,
+                transform: `translateX(${translateX}px) translateY(${allUnplayable ? translateY + 8 : translateY}px) scale(${scale})`,
                 transformOrigin: 'center bottom',
-                transition: 'transform 0.15s ease-out',
+                transition: allUnplayable ? 'transform 0.4s ease-out, opacity 0.4s ease-out' : 'transform 0.15s ease-out',
+                opacity: allUnplayable ? 0.3 : 1,
                 zIndex,
                 position: 'relative',
               }}

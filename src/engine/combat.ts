@@ -5,7 +5,8 @@ import type {
 import { shuffle } from './deck';
 import { getEffectiveSpeed, processRoundBoundary } from './status';
 import { assignPartyPositions } from './position';
-import { onRoundEnd } from './passives';
+import { onRoundEnd, processRoundStartPassives } from './passives';
+import { processItemBattleEnd } from './itemEffects';
 import { getProgressionTree, getRungForLevel } from '../run/progression';
 
 // ============================================================
@@ -13,6 +14,14 @@ import { getProgressionTree, getRungForLevel } from '../run/progression';
 // ============================================================
 
 let combatantCounter = 0;
+
+/** Monotonic counter for unique TurnQueueEntry IDs. */
+let turnEntryCounter = 0;
+
+/** Create a unique entry ID for a TurnQueueEntry. */
+export function nextEntryId(): number {
+  return turnEntryCounter++;
+}
 
 function createCombatant(
   data: PokemonData,
@@ -61,8 +70,12 @@ function createCombatant(
       switchesThisTurn: 0,
       finisherUsedThisTurn: false,
       overclockReduction: 0,
+      quickClawBonusTurn: false,
     },
     costModifiers: {},
+    itemState: {},
+    heldItemIds: [],
+    focusSashUsed: false,
   };
 }
 
@@ -83,6 +96,7 @@ export function createCombatState(
   skipShuffle?: boolean,
 ): CombatState {
   combatantCounter = 0;
+  turnEntryCounter = 0;
 
   const pPositions = playerPositions ?? assignPartyPositions(playerParty.length);
   const ePositions = enemyPositions ?? assignPartyPositions(enemyParty.length);
@@ -154,7 +168,22 @@ export function buildTurnOrder(state: CombatState): TurnQueueEntry[] {
     }
   });
 
-  return living.map(c => ({ combatantId: c.id, hasActed: false }));
+  return living.map(c => ({ entryId: nextEntryId(), combatantId: c.id, hasActed: false }));
+}
+
+/**
+ * Insert bonus turns (Quick Claw) at position 0 of the turn order.
+ * Called after buildTurnOrder + battle start effects.
+ */
+export function insertBonusTurns(state: CombatState): void {
+  const bonusCombatants = state.combatants.filter(
+    c => c.alive && c.turnFlags.quickClawBonusTurn
+  );
+  // Insert in reverse so the first one found ends up at index 0
+  for (const c of bonusCombatants.reverse()) {
+    state.turnOrder.unshift({ entryId: nextEntryId(), combatantId: c.id, hasActed: false, bonusTurn: true });
+    c.turnFlags.quickClawBonusTurn = false;
+  }
 }
 
 /**
@@ -207,7 +236,10 @@ export function checkSpeedChangesAndRebuild(
  */
 export function rebuildTurnOrderMidRound(state: CombatState): LogEntry[] {
   const logs: LogEntry[] = [];
-  const currentId = state.turnOrder[state.currentTurnIndex]?.combatantId;
+  // Track the exact entry object (not just ID) to handle Quick Claw duplicates.
+  // findIndex by combatantId is ambiguous when a combatant has bonus + normal entries.
+  const currentEntry = state.turnOrder[state.currentTurnIndex];
+  const currentId = currentEntry?.combatantId;
 
   // Split into acted and remaining
   const acted = state.turnOrder.filter(e => e.hasActed);
@@ -218,29 +250,29 @@ export function rebuildTurnOrderMidRound(state: CombatState): LogEntry[] {
   const protectedEntries = remaining.filter(e => protectedIds.has(e.combatantId));
   const unprotectedEntries = remaining.filter(e => !protectedIds.has(e.combatantId));
 
-  // Sort only unprotected by speed
-  const unprotectedCombatants = unprotectedEntries
-    .map(e => getCombatant(state, e.combatantId))
-    .filter(c => c.alive);
-
-  unprotectedCombatants.sort((a, b) => {
-    const speedA = getEffectiveSpeed(a);
-    const speedB = getEffectiveSpeed(b);
-    if (speedA !== speedB) return speedB - speedA;
-    if (a.side !== b.side) return a.side === 'player' ? -1 : 1;
-    if (a.side === 'player') return b.slotIndex - a.slotIndex;
-    return a.slotIndex - b.slotIndex;
-  });
-
-  const sortedUnprotected: TurnQueueEntry[] = unprotectedCombatants.map(c => ({
-    combatantId: c.id,
-    hasActed: false,
-  }));
+  // Sort unprotected entries directly by their combatant's speed.
+  // We sort the entries themselves (not combatants) to preserve duplicates
+  // correctly — e.g. Quick Claw creates two entries for one combatant.
+  const sortedUnprotected = unprotectedEntries
+    .filter(e => getCombatant(state, e.combatantId).alive)
+    .sort((a, b) => {
+      const ca = getCombatant(state, a.combatantId);
+      const cb = getCombatant(state, b.combatantId);
+      const speedA = getEffectiveSpeed(ca);
+      const speedB = getEffectiveSpeed(cb);
+      if (speedA !== speedB) return speedB - speedA;
+      if (ca.side !== cb.side) return ca.side === 'player' ? -1 : 1;
+      if (ca.side === 'player') return cb.slotIndex - ca.slotIndex;
+      return ca.slotIndex - cb.slotIndex;
+    });
 
   // Protected allies should stay AFTER the current combatant, not before.
   // Find where current combatant lands in sorted unprotected, insert protected right after.
+  // Use exact entry reference (indexOf) to avoid ambiguity with duplicate combatant entries.
   let newRemaining: TurnQueueEntry[];
-  const currentInSorted = sortedUnprotected.findIndex(e => e.combatantId === currentId);
+  const currentInSorted = currentEntry
+    ? sortedUnprotected.indexOf(currentEntry)
+    : -1;
   if (currentInSorted >= 0) {
     // Current is unprotected: insert protected allies right after current
     newRemaining = [
@@ -261,9 +293,9 @@ export function rebuildTurnOrderMidRound(state: CombatState): LogEntry[] {
 
   if (changed) {
     state.turnOrder = [...acted, ...newRemaining];
-    // Fix currentTurnIndex to point at the current actor
-    if (currentId) {
-      const newIdx = state.turnOrder.findIndex(e => e.combatantId === currentId);
+    // Fix currentTurnIndex to point at the exact current entry (not just first ID match)
+    if (currentEntry) {
+      const newIdx = state.turnOrder.indexOf(currentEntry);
       if (newIdx >= 0) {
         state.currentTurnIndex = newIdx;
       }
@@ -316,6 +348,7 @@ export function checkBattleEnd(state: CombatState): void {
 
   if (!enemiesAlive) {
     state.phase = 'victory';
+    processItemBattleEnd(state);
   } else if (!playersAlive) {
     state.phase = 'defeat';
   }
@@ -325,7 +358,9 @@ export function checkBattleEnd(state: CombatState): void {
  * Remove dead combatants from turn order — Section 3.3.
  */
 export function removeDeadFromTurnOrder(state: CombatState): void {
-  const currentId = state.turnOrder[state.currentTurnIndex]?.combatantId;
+  // Track the exact entry object (not just ID) to handle Quick Claw duplicates.
+  // findIndex by combatantId is ambiguous when a combatant has multiple entries.
+  const currentEntry = state.turnOrder[state.currentTurnIndex];
   const oldIndex = state.currentTurnIndex;
 
   state.turnOrder = state.turnOrder.filter(entry => {
@@ -339,11 +374,11 @@ export function removeDeadFromTurnOrder(state: CombatState): void {
     return;
   }
 
-  // Try to find the current combatant in the new order
-  if (currentId) {
-    const newIndex = state.turnOrder.findIndex(e => e.combatantId === currentId);
+  // Try to find the exact current entry by reference in the new order
+  if (currentEntry) {
+    const newIndex = state.turnOrder.indexOf(currentEntry);
     if (newIndex >= 0) {
-      // Current combatant still alive, point to their new position
+      // Current entry still present, point to its new position
       state.currentTurnIndex = newIndex;
       return;
     }
@@ -385,6 +420,10 @@ export function advanceRound(state: CombatState): LogEntry[] {
     combatantId: '',
     message: `--- Round ${state.round} begins ---`,
   });
+
+  // Round-start passives (Vanguard block, etc.)
+  const roundStartLogs = processRoundStartPassives(state);
+  logs.push(...roundStartLogs);
 
   // Log position changes caused by speed modifiers
   const newOrder = state.turnOrder.map(e => e.combatantId);

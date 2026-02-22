@@ -27,7 +27,7 @@ import {
 import { createCombatState, getCurrentCombatant } from './combat';
 import { startTurn, processAction, endTurn } from './turns';
 import { getEffectiveCost, getPlayableCards } from './cards';
-import { getPokemon, getMove } from '../data/loaders';
+import { getPokemon, getMove, getEnemyDeck } from '../data/loaders';
 import { sampleDraftCards } from '../run/draft';
 import { createRng } from '../run/rng';
 import { getTypeEffectiveness } from './typeChart';
@@ -291,6 +291,9 @@ function runBattle(
 
       const actionLogs = processAction(state, action);
       state.log.push(...actionLogs);
+
+      // Primed self-KO: stop playing cards, let the deferred turn handle detonation
+      if (combatant.primedSelfKo) break;
     }
 
     if (state.phase !== 'ongoing') break;
@@ -519,16 +522,20 @@ function simulateSingleRun(
           .filter(({ p }) => !p.knockedOut)
           .map(({ i }) => i);
 
-        const enemyData = battleNode.enemies.map(id => {
+        const enemyData = battleNode.enemies.map((id, i) => {
           const pokemon = getPokemon(id);
+          let enemy = { ...pokemon };
+
+          // Override deck with tiered enemy deck
+          if (battleNode.enemyDeckTiers?.[i]) {
+            enemy = { ...enemy, deck: getEnemyDeck(id, battleNode.enemyDeckTiers[i]) };
+          }
+
           // Apply HP multiplier if present (boss fights)
           if (battleNode.enemyHpMultiplier) {
-            return {
-              ...pokemon,
-              maxHp: Math.floor(pokemon.maxHp * battleNode.enemyHpMultiplier),
-            };
+            enemy = { ...enemy, maxHp: Math.floor(enemy.maxHp * battleNode.enemyHpMultiplier) };
           }
-          return pokemon;
+          return enemy;
         });
 
         const combatState = createCombatState(
@@ -548,6 +555,16 @@ function simulateSingleRun(
             playerCombatants[i].passiveIds = [...runPokemon.passiveIds];
             playerCombatants[i].hp = runPokemon.currentHp;
           }
+        }
+
+        // Override enemy passives from encounter generator
+        if (battleNode.enemyPassiveIds) {
+          const enemyCombatants = combatState.combatants.filter(c => c.side === 'enemy');
+          battleNode.enemyPassiveIds.forEach((pids, i) => {
+            if (enemyCombatants[i]) {
+              enemyCombatants[i].passiveIds = [...pids];
+            }
+          });
         }
 
         // Run battle

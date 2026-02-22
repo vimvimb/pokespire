@@ -1,6 +1,7 @@
 import type { MoveDefinition, PokemonData, MoveType, MoveRange, CardEffect } from '../engine/types';
 import movesData from './moves.json';
 import pokemonData from './pokemon.json';
+import enemyDecksData from './enemy-decks.json';
 
 // ============================================================
 // Data Loaders — Load JSON data and export typed objects
@@ -142,13 +143,10 @@ export function getMove(id: string): MoveDefinition {
     if (!baseMove) throw new Error(`Move not found: ${baseId}`);
 
     // Create a modified copy with 0 cost, vanish, and halved damage
-    return {
-      ...baseMove,
-      id: id,  // Keep the __parental suffix in the ID
-      name: `${baseMove.name} (Echo)`,
-      cost: 0,
-      vanish: true,
-      effects: baseMove.effects.map(effect => {
+    // Strip self-targeting effects (echoes are pure bonus hits, not full re-plays)
+    const echoEffects = baseMove.effects
+      .filter(effect => effect.type !== 'add_echo_to_hand' && effect.type !== 'apply_status_self' && effect.type !== 'copy_enemy_card')
+      .map(effect => {
         // Halve all damage-dealing effects
         switch (effect.type) {
           case 'damage':
@@ -164,7 +162,14 @@ export function getMove(id: string): MoveDefinition {
           default:
             return effect;
         }
-      }),
+      });
+    return {
+      ...baseMove,
+      id: id,  // Keep the __parental suffix in the ID
+      name: `${baseMove.name} (Echo)`,
+      cost: 0,
+      vanish: true,
+      effects: echoEffects,
     };
   }
 
@@ -192,3 +197,20 @@ export function getPokemon(id: string): PokemonData {
 
 // Legacy alias for backward compatibility during migration
 export const getCard = getMove;
+
+// ============================================================
+// Enemy Deck Loader
+// ============================================================
+
+const ENEMY_DECKS = enemyDecksData as Record<string, Record<string, string[]>>;
+
+/**
+ * Get an enemy deck for a given Pokemon at a specific tier (1-4).
+ * Falls back to the Pokemon's base deck from pokemon.json if not found.
+ */
+export function getEnemyDeck(pokemonId: string, tier: number): string[] {
+  const entry = ENEMY_DECKS[pokemonId];
+  if (!entry) return getPokemon(pokemonId).deck;
+  const key = `L${tier}`;
+  return [...(entry[key] ?? entry['L1'] ?? getPokemon(pokemonId).deck)];
+}

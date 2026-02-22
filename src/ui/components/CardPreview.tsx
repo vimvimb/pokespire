@@ -27,6 +27,8 @@ const EFFECT_COLORS: Record<string, string> = {
   apply_status_self: '#4ade80',
   cleanse: '#67e8f9',
   remove_type: '#f87171',
+  add_echo_to_hand: '#c084fc',
+  copy_enemy_card: '#c084fc',
 };
 
 const MOVE_TYPE_COLORS: Record<MoveType, string> = {
@@ -90,15 +92,19 @@ function buildDescription(card: MoveDefinition): React.ReactNode {
                 ? ` (+${effect.bonusValue} per buff on target)`
                 : effect.bonusCondition === 'user_vanished_cards'
                   ? ` (+${effect.bonusValue} per vanished card)`
-                  : '';
+                  : effect.bonusCondition === 'target_below_half_hp'
+                    ? ` (+${effect.bonusValue} if target below half HP)`
+                    : '';
         const scalingText = effect.hpScaling
           ? ' Scales with user HP.'
           : effect.weightScaling
             ? ' Scales with weight ratio.'
-            : '';
+            : effect.inverseWeightScaling
+              ? ' Deals more to heavier targets.'
+              : '';
         parts.push(
           <span key={parts.length}>
-            Deal {effect.hpScaling || effect.weightScaling ? 'up to ' : ''}{effect.value} damage{bonusText}.
+            Deal {effect.hpScaling || effect.weightScaling || effect.inverseWeightScaling ? 'up to ' : ''}{effect.value} damage{bonusText}.
             {scalingText && <span style={{ color: '#fb923c', opacity: 0.8 }}>{scalingText}</span>}
           </span>
         );
@@ -196,6 +202,20 @@ function buildDescription(card: MoveDefinition): React.ReactNode {
         parts.push(
           <span key={parts.length} style={{ color: '#f87171' }}>
             Lose {effect.moveType} type.
+          </span>
+        );
+        break;
+      case 'add_echo_to_hand':
+        parts.push(
+          <span key={parts.length} style={{ color: '#c084fc' }}>
+            Add {effect.count} Echo{effect.count > 1 ? 'es' : ''} to hand.
+          </span>
+        );
+        break;
+      case 'copy_enemy_card':
+        parts.push(
+          <span key={parts.length} style={{ color: '#c084fc' }}>
+            Copy Echo of target's top card.
           </span>
         );
         break;

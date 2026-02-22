@@ -121,7 +121,7 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   vileplume: 19,  // Real: 18.6kg
 
   // Meowth line
-  meowth: 4,      // Real: 4.2kg
+  meowth: 7,      // Real: 4.2kg, increased for visual balance
 
   // Zubat line
   zubat: 7.5,      // Real: 7.5kg
@@ -256,12 +256,12 @@ export function getSpriteSize(pokemonId: string): number {
 
 /**
  * Compute a global sprite scale factor for a battle.
- * If the largest Pokemon's natural sprite size exceeds MAX_BATTLE_SPRITE_SIZE,
- * returns a factor < 1 that all sprites should be multiplied by.
+ * Scales all sprites so the largest Pokemon fills MAX_BATTLE_SPRITE_SIZE.
+ * Can scale both UP (all small pokemon) and DOWN (one giant pokemon).
  * This preserves relative size ratios (Snorlax stays ~2.6x Pikachu).
  */
 export function getBattleSpriteScale(pokemonIds: string[]): number {
   if (pokemonIds.length === 0) return 1;
   const maxNatural = Math.max(...pokemonIds.map(id => getSpriteSize(id)));
-  return Math.min(1, MAX_BATTLE_SPRITE_SIZE / maxNatural);
+  return MAX_BATTLE_SPRITE_SIZE / maxNatural;
 }

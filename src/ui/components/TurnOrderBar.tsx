@@ -50,7 +50,7 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
   const outerFrameRef = useRef<number | null>(null);
 
   useLayoutEffect(() => {
-    const currentOrder = state.turnOrder.map(e => e.combatantId);
+    const currentOrder = state.turnOrder.map(e => String(e.entryId));
     const prevOrder = prevOrderRef.current;
 
     // Only animate when the actual ID sequence changed (real reorder),
@@ -229,8 +229,8 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
 
         return (
           <div
-            key={entry.combatantId}
-            ref={setRef(entry.combatantId)}
+            key={entry.entryId}
+            ref={setRef(String(entry.entryId))}
             style={{
               display: 'flex',
               flexDirection: 'column',

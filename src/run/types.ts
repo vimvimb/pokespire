@@ -22,6 +22,7 @@ export interface RunPokemon {
   knockedOut: boolean;        // True if Pokemon was KO'd (kept for future resurrection features)
   energyModifier: number;     // Permanent energy per turn modifier from events (default 0)
   drawModifier: number;       // Permanent hand size modifier from events (default 0)
+  heldItemIds: string[];      // Held item IDs (e.g. ['life_orb', 'focus_sash'])
 }
 
 /**
@@ -41,6 +42,7 @@ export interface RunState {
   recruitSeed: number;        // Separate seed for recruit encounter RNG
   gold: number;               // PokeGold currency
   seenEventIds: string[];     // Event IDs already encountered this run (no repeats)
+  itemInventory: string[];    // Unassigned items found during run
 }
 
 // --- Node Types ---
@@ -73,6 +75,8 @@ export interface BattleNode extends BaseNode {
   enemies: string[];          // Pokemon IDs
   enemyPositions: Position[];
   enemyHpMultiplier?: number; // Optional HP multiplier for boss fights
+  enemyDeckTiers?: number[];  // 1-4 per enemy (indexes match enemies[]), from encounter generator
+  enemyPassiveIds?: string[][]; // Passive IDs per enemy (indexes match enemies[]), overrides auto-assign
 }
 
 export interface CardRemovalNode extends BaseNode {

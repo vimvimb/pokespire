@@ -22,4 +22,6 @@ export type Screen =
   | "debugging"
   | "campaign_draft"
   | "campaign_select"
-  | "classes_plan";
+  | "starter_items"
+  | "item_dex"
+  | "item_reward";

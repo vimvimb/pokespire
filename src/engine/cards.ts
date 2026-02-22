@@ -7,7 +7,7 @@ import { applyStatus, getStatusImmunitySource, decayEvasionOnHit, getStatusStack
 import { getEffectiveFrontRow, isInEffectiveFrontRow } from './position';
 import {
   checkBlazeStrike, checkFortifiedCannons, checkCounterCurrent, checkStaticField,
-  onDamageDealt, onDamageTaken, onStatusApplied,
+  onDamageDealt, onDamageTaken, onKill, onStatusApplied,
   checkGustForce, checkKeenEye, hasWhippingWinds, checkPredatorsPatience, checkThickHide, checkThickFat,
   checkProletariat, checkAngerPoint, checkScrappy, checkSheerForce,
   checkQuickFeet, checkHustleMultiplier, checkHustleCostIncrease, checkHypnoticGazeCostIncrease,
@@ -37,9 +37,12 @@ import {
   checkSporeMastery,
   checkConsumingFlame,
   shouldConsumingFlameVanish,
-  checkImpactGuard
+  checkImpactGuard,
+  checkItemDamageBonus,
+  checkItemDamageReduction
 } from './passives';
 import { shuffle, MAX_HAND_SIZE } from './deck';
+import { processItemPostCard, getItemDamageMultiplier, checkItemPlayRestriction, getItemStatusStacksMultiplier, hasItem } from './itemEffects';
 import { POKEMON_WEIGHTS } from '../data/heights';
 import { getTypeEffectiveness, getEffectivenessLabel } from './typeChart';
 import { applySlipstream } from './turns';
@@ -78,6 +81,13 @@ export function playCard(
   // Validate energy
   if (combatant.energy < effectiveCost) {
     throw new Error(`Not enough energy. Have ${combatant.energy}, need ${effectiveCost}`);
+  }
+
+  // Item play restrictions (Choice Scarf 2-card limit, Choice Band attacks-only, etc.)
+  if (combatant.heldItemIds.length > 0) {
+    if (!checkItemPlayRestriction(combatant, card)) {
+      throw new Error(`Item restriction: ${combatant.name} cannot play ${card.name}`);
+    }
   }
 
   // Check if Parental Bond / Family Fury should create a copy
@@ -160,6 +170,9 @@ export function playCard(
   // Remove from hand
   combatant.hand.splice(handIndex, 1);
 
+  // Reset Shell Bell flag before resolving each card
+  combatant.itemState['shellBellUsed'] = 0;
+
   // Resolve targets
   let targets = resolveTargets(state, combatant, card.range, action.targetId);
 
@@ -212,7 +225,9 @@ export function playCard(
 
   // Resolve effects on each target, tracking damage to poisoned enemies
   let totalDamageToPoisoned = 0;
-  for (const target of targets) {
+  for (let ti = 0; ti < targets.length; ti++) {
+    const target = targets[ti];
+
     const result = resolveEffects(state, combatant, target, card);
     logs.push(...result.logs);
     totalDamageToPoisoned += result.damageToPoisoned;
@@ -255,6 +270,13 @@ export function playCard(
       message: `Impact Guard: ${combatant.name} gains ${impactGuardBlock} Block!`,
     });
   }
+
+  // Pre-compute vanish (needed by item post-card effects and vanish/discard below)
+  const forcedVanish = shouldConsumingFlameVanish(combatant, card);
+  const didVanish = card.vanish || forcedVanish;
+
+  // --- Item post-card effects ---
+  logs.push(...processItemPostCard(state, combatant, card, didVanish));
 
   // Parental Bond: Add a copy of the card to hand
   if (shouldCreateCopy) {
@@ -312,9 +334,7 @@ export function playCard(
   }
 
   // Vanish or discard
-  // Consuming Flame forces fire cards to vanish even if they normally wouldn't
-  const forcedVanish = shouldConsumingFlameVanish(combatant, card);
-  if (card.vanish || forcedVanish) {
+  if (didVanish) {
     // Card is removed from the game — track in vanished pile
     combatant.vanishedPile.push(cardId);
     if (forcedVanish && !card.vanish) {
@@ -827,6 +847,36 @@ function buildDamageModifiers(
   // Combine Anger Point, Sheer Force, Reckless, Dragon's Majesty, and Rude Awakening multipliers
   const combinedMultiplier = angerPointMultiplier * sheerForceMultiplier * recklessMultiplier * dragonsMajestyMultiplier * rudeAwakeningMultiplier;
 
+  // Item damage bonuses (pass typeEffectiveness for Expert Belt)
+  const itemDamageBonus = checkItemDamageBonus(state, source, target, card, typeEffectiveness);
+  if (itemDamageBonus > 0) {
+    const itemName = source.heldItemIds.length > 0 ? source.heldItemIds.join(', ') : 'Item';
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `${itemName}: +${itemDamageBonus} damage!`,
+    });
+  }
+
+  const itemDamageReduction = checkItemDamageReduction(state, target, card);
+  if (itemDamageReduction > 0) {
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `buddy_guard: -${itemDamageReduction} damage!`,
+    });
+  }
+
+  // Item damage multiplier (Life Orb: 1.3x, Fuchsia Shuriken: 0.5x on damage+status)
+  const lifeOrbMultiplier = getItemDamageMultiplier(source, card);
+  if (lifeOrbMultiplier < 1 && hasItem(source, 'fuchsia_shuriken')) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `fuchsia_shuriken: x0.5 damage, x2 status stacks!`,
+    });
+  }
+
   return {
     isBlazeStrike,
     isSwarmStrike,
@@ -851,11 +901,14 @@ function buildDamageModifiers(
     technicianMultiplier,  // 1.3x for 1-cost cards
     aristocratMultiplier,  // 1.3x for Epic cards
     consumingFlameMultiplier,  // 1.2x for Fire cards (Consuming Flame)
+    lifeOrbMultiplier,  // 1.3x for Life Orb
     familyFuryBonus: scrappyBonus + relentlessBonus + blindAggressionBonus,  // Combine flat bonuses
     nightAssassinBonus,
     maliceBonus,
     poisonBarbBonus,
     adaptabilityBonus,
+    itemDamageBonus,
+    itemDamageReduction,
     typeEffectiveness,
     ignoreEvasion: sniperIgnoreEvasion,
     ignoreBlock: sniperIgnoreBlock,
@@ -881,6 +934,7 @@ function buildDamageBreakdown(r: ReturnType<typeof applyCardDamage>): string {
   if (r.maliceBonus > 0) parts.push(`+${r.maliceBonus} Malice`);
   if (r.proletariatBonus > 0) parts.push(`+${r.proletariatBonus} Proletariat`);
   if (r.familyFuryBonus > 0) parts.push(`+${r.familyFuryBonus} Fury`);
+  if (r.itemDamageBonus > 0) parts.push(`+${r.itemDamageBonus} Item`);
   if (r.enfeeble > 0) parts.push(`-${r.enfeeble} Enfeeble`);
   if (r.blazeStrikeMultiplier > 1) parts.push(`x${r.blazeStrikeMultiplier} Blaze`);
   if (r.swarmStrikeMultiplier > 1) parts.push(`x${r.swarmStrikeMultiplier} Swarm`);
@@ -892,16 +946,102 @@ function buildDamageBreakdown(r: ReturnType<typeof applyCardDamage>): string {
   if (r.technicianMultiplier > 1) parts.push(`x${r.technicianMultiplier.toFixed(1)} Tech`);
   if (r.aristocratMultiplier > 1) parts.push(`x${r.aristocratMultiplier.toFixed(1)} Aristocrat`);
   if (r.consumingFlameMultiplier > 1) parts.push(`x${r.consumingFlameMultiplier.toFixed(1)} Flame`);
+  if (r.lifeOrbMultiplier > 1) parts.push(`x${r.lifeOrbMultiplier.toFixed(1)} Life Orb`);
   if (r.typeEffectiveness !== 1.0) parts.push(`x${r.typeEffectiveness.toFixed(2)} Type`);
   if (r.bloomingCycleReduction > 0) parts.push(`-${r.bloomingCycleReduction} Blooming`);
   if (r.staticFieldReduction > 0) parts.push(`-${r.staticFieldReduction} Static`);
   if (r.thickHideReduction > 0) parts.push(`-${r.thickHideReduction} Hide`);
   if (r.friendGuardReduction > 0) parts.push(`-${r.friendGuardReduction} Guard`);
+  if (r.itemDamageReduction > 0) parts.push(`-${r.itemDamageReduction} Item`);
   if (r.thickFatMultiplier < 1.0) parts.push(`x0.75 Fat`);
   if (r.multiscaleMultiplier < 1.0) parts.push(`x0.50 Multiscale`);
   if (r.evasion > 0) parts.push(`-${r.evasion} Evasion`);
   if (r.blockedAmount > 0) parts.push(`${r.blockedAmount} blocked`);
   return parts.length > 0 ? ` (${r.baseDamage} base${parts.map(p => ', ' + p).join('')})` : '';
+}
+
+// ── Consolidated post-damage trigger chain ──────────────────────────
+// Called after every damage application (damage, multi_hit, heal_on_hit, recoil, self_ko).
+// Handles: passive triggers (onDamageDealt/onDamageTaken), Gust Force, Poison Point,
+// Counter Stance, Evasion decay, poison tracking, and defeat logging.
+
+interface PostDamageContext {
+  state: CombatState;
+  source: Combatant;
+  target: Combatant;
+  card: MoveDefinition;
+  hpDamage: number;
+  targetWasPoisoned: boolean;
+  logDefeat?: boolean;  // default true — set false for multi_hit per-hit
+}
+
+interface PostDamageResult {
+  logs: LogEntry[];
+  damageToPoisoned: number;
+}
+
+function resolvePostDamageEffects(ctx: PostDamageContext): PostDamageResult {
+  const { state, source, target, card, hpDamage, targetWasPoisoned, logDefeat = true } = ctx;
+  const logs: LogEntry[] = [];
+  let damageToPoisoned = 0;
+
+  if (hpDamage > 0) {
+    // Track damage to poisoned enemies for Toxic Horn / Protective Toxins
+    if (targetWasPoisoned) {
+      damageToPoisoned += hpDamage;
+    }
+
+    // Passive effects triggered by dealing damage (Kindling, Numbing Strike, etc.)
+    const postDmgLogs = onDamageDealt(state, source, target, card, hpDamage);
+    logs.push(...postDmgLogs);
+
+    // Gust Force: Gust applies +1 Slow
+    if (checkGustForce(source, card) && target.alive) {
+      applyStatus(state, target, 'slow', 1, source.id);
+      logs.push({
+        round: state.round,
+        combatantId: source.id,
+        message: `Gust Force: +1 Slow applied to ${target.name}!`,
+      });
+    }
+
+    // Poison Point: Unblocked Poison attacks apply +1 Poison
+    if (checkPoisonPoint(source, card, hpDamage) && target.alive) {
+      applyStatus(state, target, 'poison', 1, source.id);
+      logs.push({
+        round: state.round,
+        combatantId: source.id,
+        message: `Poison Point (on contact): ${target.name} gains 1 Poison!`,
+      });
+    }
+
+    // Passive effects triggered by taking damage (Raging Bull, Flash Fire, etc.)
+    const takenLogs = onDamageTaken(state, source, target, hpDamage, card);
+    logs.push(...takenLogs);
+  }
+
+  // Counter Stance triggers on any attack, before evasion decays
+  const counterLogs = triggerCounterStance(state, source, target);
+  logs.push(...counterLogs);
+
+  // Evasion decays on any attack, even if fully absorbed
+  decayEvasionOnHit(target);
+
+  // Kill hook + defeat log
+  if (!target.alive) {
+    const killLogs = onKill(state, source, target, card);
+    logs.push(...killLogs);
+
+    if (logDefeat) {
+      logs.push({
+        round: state.round,
+        combatantId: target.id,
+        message: `${target.name} is defeated!`,
+      });
+    }
+  }
+
+  return { logs, damageToPoisoned };
 }
 
 /**
@@ -993,6 +1133,8 @@ function resolveEffects(
         if (effect.bonusValue && effect.bonusCondition) {
           if (effect.bonusCondition === 'user_below_half_hp' && source.hp < source.maxHp * 0.5) {
             damageValue += effect.bonusValue;
+          } else if (effect.bonusCondition === 'target_below_half_hp' && target.hp < target.maxHp * 0.5) {
+            damageValue += effect.bonusValue;
           } else if (effect.bonusCondition === 'target_debuff_stacks') {
             damageValue += effect.bonusValue * getTotalDebuffStacks(target);
           } else if (effect.bonusCondition === 'target_burn_stacks') {
@@ -1018,6 +1160,15 @@ function resolveEffects(
           damageValue = Math.floor(damageValue * ratio);
         }
 
+        // Inverse weight-ratio scaling (e.g. Grass Knot: damage × targetWeight/userWeight, capped at 2.0)
+        if (effect.inverseWeightScaling) {
+          const userWeight = POKEMON_WEIGHTS[source.pokemonId] ?? 50;
+          const targetWeight = POKEMON_WEIGHTS[target.pokemonId] ?? 50;
+          const ratio = Math.min(targetWeight / userWeight, 2.0);
+          damageValue = Math.floor(damageValue * ratio);
+        }
+
+        const sashBefore = target.focusSashUsed;
         const r = applyCardDamage(source, target, damageValue, card.type, mods);
 
         // Build breakdown string
@@ -1031,6 +1182,15 @@ function resolveEffects(
           message: dmgMsg,
         });
 
+        // Focus Sash survival log
+        if (!sashBefore && target.focusSashUsed) {
+          logs.push({
+            round: state.round,
+            combatantId: target.id,
+            message: `focus_sash: ${target.name} survived with 1 HP!`,
+          });
+        }
+
         // Gold on Hit: Gain gold equal to damage dealt (Pay Day)
         if (card.goldOnHit && r.hpDamage > 0) {
           state.goldEarned += r.hpDamage;
@@ -1041,53 +1201,14 @@ function resolveEffects(
           });
         }
 
-        // Trigger post-damage passive effects (e.g., Kindling, Numbing Strike)
-        if (r.hpDamage > 0) {
-          // Track damage to poisoned enemies for Toxic Horn / Protective Toxins
-          if (targetWasPoisoned) {
-            damageToPoisoned += r.hpDamage;
-          }
-
-          const postDmgLogs = onDamageDealt(state, source, target, card, r.hpDamage);
-          logs.push(...postDmgLogs);
-
-          // Gust Force: Gust applies +1 Slow
-          if (checkGustForce(source, card)) {
-            applyStatus(state, target, 'slow', 1, source.id);
-            logs.push({
-              round: state.round,
-              combatantId: source.id,
-              message: `Gust Force: +1 Slow applied to ${target.name}!`,
-            });
-          }
-
-          // Poison Point: Unblocked Poison attacks apply +1 Poison
-          if (checkPoisonPoint(source, card, r.hpDamage)) {
-            applyStatus(state, target, 'poison', 1, source.id);
-            logs.push({
-              round: state.round,
-              combatantId: source.id,
-              message: `Poison Point (on contact): ${target.name} gains 1 Poison!`,
-            });
-          }
-
-          // Trigger onDamageTaken for target's passives (Anger Point, etc.)
-          const takenLogs = onDamageTaken(state, source, target, r.hpDamage, card);
-          logs.push(...takenLogs);
-        }
-        // Counter Stance triggers on any attack, before evasion decays
-        const counterLogs = triggerCounterStance(state, source, target);
-        logs.push(...counterLogs);
-        // Evasion decays on any attack, even if fully absorbed
-        decayEvasionOnHit(target);
-
-        if (!target.alive) {
-          logs.push({
-            round: state.round,
-            combatantId: target.id,
-            message: `${target.name} is defeated!`,
-          });
-        }
+        // Trigger post-damage passive effects
+        const postDmg = resolvePostDamageEffects({
+          state, source, target, card,
+          hpDamage: r.hpDamage,
+          targetWasPoisoned,
+        });
+        logs.push(...postDmg.logs);
+        damageToPoisoned += postDmg.damageToPoisoned;
         break;
       }
 
@@ -1102,43 +1223,14 @@ function resolveEffects(
           const r = applyCardDamage(source, target, effect.value, card.type, mods);
           totalDamage += r.hpDamage;
 
-          if (r.hpDamage > 0) {
-            const postDmgLogs = onDamageDealt(state, source, target, card, r.hpDamage);
-            logs.push(...postDmgLogs);
-
-            // Gust Force: Gust applies +1 Slow (each hit)
-            if (checkGustForce(source, card) && target.alive) {
-              applyStatus(state, target, 'slow', 1, source.id);
-              logs.push({
-                round: state.round,
-                combatantId: source.id,
-                message: `Gust Force: +1 Slow applied to ${target.name}!`,
-              });
-            }
-
-            // Poison Point: Unblocked Poison attacks apply +1 Poison (each hit)
-            if (checkPoisonPoint(source, card, r.hpDamage) && target.alive) {
-              applyStatus(state, target, 'poison', 1, source.id);
-              logs.push({
-                round: state.round,
-                combatantId: source.id,
-                message: `Poison Point (on contact): ${target.name} gains 1 Poison!`,
-              });
-            }
-
-            const takenLogs = onDamageTaken(state, source, target, r.hpDamage, card);
-            logs.push(...takenLogs);
-          }
-          // Counter Stance triggers on any attack, before evasion decays
-          const counterLogsMulti = triggerCounterStance(state, source, target);
-          logs.push(...counterLogsMulti);
-          // Evasion decays on any attack, even if fully absorbed
-          decayEvasionOnHit(target);
-        }
-
-        // Track total damage to poisoned enemies for Toxic Horn / Protective Toxins
-        if (targetWasPoisoned && totalDamage > 0) {
-          damageToPoisoned += totalDamage;
+          const postDmgMulti = resolvePostDamageEffects({
+            state, source, target, card,
+            hpDamage: r.hpDamage,
+            targetWasPoisoned,
+            logDefeat: false,
+          });
+          logs.push(...postDmgMulti.logs);
+          damageToPoisoned += postDmgMulti.damageToPoisoned;
         }
 
         logs.push({
@@ -1181,49 +1273,13 @@ function resolveEffects(
           });
         }
 
-        if (r.hpDamage > 0) {
-          // Track damage to poisoned enemies for Toxic Horn / Protective Toxins
-          if (targetWasPoisoned) {
-            damageToPoisoned += r.hpDamage;
-          }
-
-          const postDmgLogs = onDamageDealt(state, source, target, card, r.hpDamage);
-          logs.push(...postDmgLogs);
-
-          if (checkGustForce(source, card) && target.alive) {
-            applyStatus(state, target, 'slow', 1, source.id);
-            logs.push({
-              round: state.round,
-              combatantId: source.id,
-              message: `Gust Force: +1 Slow applied to ${target.name}!`,
-            });
-          }
-
-          if (checkPoisonPoint(source, card, r.hpDamage) && target.alive) {
-            applyStatus(state, target, 'poison', 1, source.id);
-            logs.push({
-              round: state.round,
-              combatantId: source.id,
-              message: `Poison Point (on contact): ${target.name} gains 1 Poison!`,
-            });
-          }
-
-          const takenLogs = onDamageTaken(state, source, target, r.hpDamage, card);
-          logs.push(...takenLogs);
-        }
-        // Counter Stance triggers on any attack, before evasion decays
-        const counterLogsHeal = triggerCounterStance(state, source, target);
-        logs.push(...counterLogsHeal);
-        // Evasion decays on any attack, even if fully absorbed
-        decayEvasionOnHit(target);
-
-        if (!target.alive) {
-          logs.push({
-            round: state.round,
-            combatantId: target.id,
-            message: `${target.name} is defeated!`,
-          });
-        }
+        const postDmgHeal = resolvePostDamageEffects({
+          state, source, target, card,
+          hpDamage: r.hpDamage,
+          targetWasPoisoned,
+        });
+        logs.push(...postDmgHeal.logs);
+        damageToPoisoned += postDmgHeal.damageToPoisoned;
         break;
       }
 
@@ -1243,49 +1299,13 @@ function resolveEffects(
           message: dmgMsg,
         });
 
-        if (r.hpDamage > 0) {
-          // Track damage to poisoned enemies for Toxic Horn / Protective Toxins
-          if (targetWasPoisoned) {
-            damageToPoisoned += r.hpDamage;
-          }
-
-          const postDmgLogs = onDamageDealt(state, source, target, card, r.hpDamage);
-          logs.push(...postDmgLogs);
-
-          if (checkGustForce(source, card) && target.alive) {
-            applyStatus(state, target, 'slow', 1, source.id);
-            logs.push({
-              round: state.round,
-              combatantId: source.id,
-              message: `Gust Force: +1 Slow applied to ${target.name}!`,
-            });
-          }
-
-          if (checkPoisonPoint(source, card, r.hpDamage) && target.alive) {
-            applyStatus(state, target, 'poison', 1, source.id);
-            logs.push({
-              round: state.round,
-              combatantId: source.id,
-              message: `Poison Point (on contact): ${target.name} gains 1 Poison!`,
-            });
-          }
-
-          const takenLogs = onDamageTaken(state, source, target, r.hpDamage, card);
-          logs.push(...takenLogs);
-        }
-        // Counter Stance triggers on any attack, before evasion decays
-        const counterLogsRecoil = triggerCounterStance(state, source, target);
-        logs.push(...counterLogsRecoil);
-        // Evasion decays on any attack, even if fully absorbed
-        decayEvasionOnHit(target);
-
-        if (!target.alive) {
-          logs.push({
-            round: state.round,
-            combatantId: target.id,
-            message: `${target.name} is defeated!`,
-          });
-        }
+        const postDmgRecoil = resolvePostDamageEffects({
+          state, source, target, card,
+          hpDamage: r.hpDamage,
+          targetWasPoisoned,
+        });
+        logs.push(...postDmgRecoil.logs);
+        damageToPoisoned += postDmgRecoil.damageToPoisoned;
 
         // Apply recoil damage to source (bypasses block/evasion)
         // Rock Head prevents recoil damage
@@ -1373,102 +1393,18 @@ function resolveEffects(
       }
 
       case 'self_ko': {
-        // Deal massive damage, then user dies
-        // Volatile: Self-KO attacks deal 50% more damage
-        const volatileMultiplier = checkVolatile(source);
-        const boostedValue = Math.floor(effect.value * volatileMultiplier);
-        // Only log Volatile boost once (source.alive is false after first target)
-        if (volatileMultiplier > 1 && source.alive) {
-          logs.push({
-            round: state.round,
-            combatantId: source.id,
-            message: `Volatile: Self-KO damage boosted to ${boostedValue}!`,
-          });
-        }
-
-        const mods = buildDamageModifiers(state, source, target, card, logs, false);
-        const r = applyCardDamage(source, target, boostedValue, card.type, mods);
-
+        // Charging mechanic: prime the self-KO instead of detonating immediately.
+        // The combatant will detonate at end of round via a deferred turn.
+        // If killed before detonation, the explosion is prevented.
+        source.primedSelfKo = {
+          cardId: card.id,
+          baseDamage: effect.value,
+        };
         logs.push({
           round: state.round,
-          combatantId: target.id,
-          message: `${target.name} takes ${r.hpDamage} damage. (HP: ${target.hp}/${target.maxHp})`,
+          combatantId: source.id,
+          message: `${source.name} is charging ${card.name}!`,
         });
-
-        if (r.hpDamage > 0) {
-          // Track damage to poisoned enemies for Toxic Horn / Protective Toxins
-          if (targetWasPoisoned) {
-            damageToPoisoned += r.hpDamage;
-          }
-
-          const postDmgLogs = onDamageDealt(state, source, target, card, r.hpDamage);
-          logs.push(...postDmgLogs);
-
-          if (checkGustForce(source, card) && target.alive) {
-            applyStatus(state, target, 'slow', 1, source.id);
-            logs.push({
-              round: state.round,
-              combatantId: source.id,
-              message: `Gust Force: +1 Slow applied to ${target.name}!`,
-            });
-          }
-
-          if (checkPoisonPoint(source, card, r.hpDamage) && target.alive) {
-            applyStatus(state, target, 'poison', 1, source.id);
-            logs.push({
-              round: state.round,
-              combatantId: source.id,
-              message: `Poison Point (on contact): ${target.name} gains 1 Poison!`,
-            });
-          }
-
-          const takenLogs = onDamageTaken(state, source, target, r.hpDamage, card);
-          logs.push(...takenLogs);
-        }
-        // Counter Stance triggers on any attack, before evasion decays
-        const counterLogsSelfKo = triggerCounterStance(state, source, target);
-        logs.push(...counterLogsSelfKo);
-        // Evasion decays on any attack, even if fully absorbed
-        decayEvasionOnHit(target);
-
-        if (!target.alive) {
-          logs.push({
-            round: state.round,
-            combatantId: target.id,
-            message: `${target.name} is defeated!`,
-          });
-        }
-
-        // Final Spark + faint only on first target (source still alive)
-        if (source.alive) {
-          // Final Spark: When playing a Self-KO card, all allies gain 3 Strength and 2 Haste
-          // Trigger before fainting so allies are buffed
-          if (source.passiveIds.includes('final_spark')) {
-            const allies = state.combatants.filter(c =>
-              c.alive && c.side === source.side && c.id !== source.id
-            );
-            for (const ally of allies) {
-              applyStatus(state, ally, 'strength', 3, source.id);
-              applyStatus(state, ally, 'haste', 2, source.id);
-            }
-            if (allies.length > 0) {
-              logs.push({
-                round: state.round,
-                combatantId: source.id,
-                message: `Final Spark: ${allies.map(a => a.name).join(', ')} ${allies.length === 1 ? 'gains' : 'gain'} 3 Strength and 2 Haste!`,
-              });
-            }
-          }
-
-          // User faints
-          source.hp = 0;
-          source.alive = false;
-          logs.push({
-            round: state.round,
-            combatantId: source.id,
-            message: `${source.name} faints from the attack!`,
-          });
-        }
         break;
       }
 
@@ -1550,7 +1486,7 @@ function resolveEffects(
       case 'cleanse': {
         // Remove debuffs (highest stacks first), from target for ally-targeting cards
         const cleanseRecipient = card.range === 'any_ally' ? target : source;
-        const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt'];
+        const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt', 'provoke', 'fatigue'];
         const debuffs = cleanseRecipient.statuses
           .filter(s => debuffTypes.includes(s.type))
           .sort((a, b) => b.stacks - a.stacks);
@@ -1590,6 +1526,62 @@ function resolveEffects(
             round: state.round,
             combatantId: source.id,
             message: `${source.name} lost its ${effect.moveType} type!`,
+          });
+        }
+        break;
+      }
+
+      case 'add_echo_to_hand': {
+        // Add N echo copies of this card to the user's hand (half damage, 0 cost, vanish)
+        const baseId = card.id.replace('__parental', '');
+        const echoId = `${baseId}__parental`;
+        for (let i = 0; i < effect.count; i++) {
+          source.hand.push(echoId);
+        }
+        logs.push({
+          round: state.round,
+          combatantId: source.id,
+          message: `${card.name}: ${effect.count} Echo cop${effect.count === 1 ? 'y' : 'ies'} added to hand!`,
+        });
+        break;
+      }
+
+      case 'copy_enemy_card': {
+        // Copy cards from the target's hand as echo copies into the user's hand
+        let copied = 0;
+        for (let i = 0; i < effect.count; i++) {
+          if (target.hand.length === 0) break;
+          if (source.hand.length >= MAX_HAND_SIZE) {
+            logs.push({
+              round: state.round,
+              combatantId: source.id,
+              message: `${source.name}'s hand is full — can't copy more cards!`,
+            });
+            break;
+          }
+
+          // Copy from the top (first) card in the target's hand
+          const stolenCardId = target.hand[i];
+          if (!stolenCardId) break;
+
+          // Strip __parental suffix if present to avoid double-suffixing
+          const baseCardId = stolenCardId.replace('__parental', '');
+          const echoCardId = `${baseCardId}__parental`;
+          source.hand.push(echoCardId);
+
+          const stolenCard = getMove(stolenCardId);
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${card.name}: Copied an Echo of ${stolenCard.name}!`,
+          });
+          copied++;
+        }
+        if (copied === 0 && target.hand.length === 0) {
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${card.name}: ${target.name}'s hand is empty — nothing to copy!`,
           });
         }
         break;
@@ -1635,17 +1627,21 @@ function resolveEffects(
           break;
         }
 
-        const statusResult = applyStatus(state, target, effect.status, effect.stacks, source.id);
+        // Fuchsia Shuriken: Double status stacks on cards that deal damage AND apply status
+        const statusMult = getItemStatusStacksMultiplier(source, card);
+        const effectiveStacks = effect.stacks * statusMult;
+
+        const statusResult = applyStatus(state, target, effect.status, effectiveStacks, source.id);
         if (statusResult.applied) {
           logs.push({
             round: state.round,
             combatantId: target.id,
-            message: `${effect.status} ${effect.stacks} applied to ${target.name}.`,
+            message: `${effect.status} ${effectiveStacks} applied to ${target.name}.`,
           });
 
           // Trigger passive effects for status application (e.g., Spreading Flames)
           const statusPassiveLogs = onStatusApplied(
-            state, source, target, effect.status, effect.stacks
+            state, source, target, effect.status, effectiveStacks
           );
           logs.push(...statusPassiveLogs);
         } else {
@@ -1667,18 +1663,18 @@ function resolveEffects(
 
 /**
  * Get playable cards from a combatant's hand (cards they can afford).
- * When Taunted, only attack cards are playable.
  */
 export function getPlayableCards(combatant: Combatant): string[] {
-  const hasTaunt = getStatusStacks(combatant, 'taunt') > 0;
   return combatant.hand.filter((cardId, idx) => {
     const effectiveCost = getEffectiveCost(combatant, idx);
     if (combatant.energy < effectiveCost) return false;
-    // Taunt restricts to attack cards only
-    if (hasTaunt) {
+
+    // Item restrictions (Choice Band, Assault Vest, Choice Specs)
+    if (combatant.heldItemIds.length > 0) {
       const card = getMove(cardId);
-      if (!isAttackCard(card)) return false;
+      if (!checkItemPlayRestriction(combatant, card)) return false;
     }
+
     return true;
   });
 }
@@ -1745,4 +1741,101 @@ export function getEffectiveCost(combatant: Combatant, handIndex: number): numbe
   cost += checkHypnoticGazeCostIncrease(combatant, card);
 
   return Math.max(0, cost);
+}
+
+/**
+ * Resolve a primed self-KO detonation.
+ * Called from turns.ts when the deferred turn arrives.
+ * Reproduces the full self_ko damage pipeline: Volatile, damage modifiers,
+ * passive triggers, Final Spark, and source faint.
+ */
+export function resolvePrimedDetonation(
+  state: CombatState,
+  source: Combatant,
+): LogEntry[] {
+  const logs: LogEntry[] = [];
+  const primed = source.primedSelfKo;
+  if (!primed) return logs;
+
+  const card = getMove(primed.cardId);
+
+  logs.push({
+    round: state.round,
+    combatantId: source.id,
+    message: `${source.name}'s ${card.name} detonates!`,
+  });
+
+  // Volatile: Self-KO attacks deal 50% more damage
+  const volatileMultiplier = checkVolatile(source);
+  const boostedValue = Math.floor(primed.baseDamage * volatileMultiplier);
+  if (volatileMultiplier > 1) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Volatile: Self-KO damage boosted to ${boostedValue}!`,
+    });
+  }
+
+  // Resolve targets: all alive enemies
+  const targets = state.combatants.filter(c => c.alive && c.side !== source.side);
+
+  let damageToPoisoned = 0;
+
+  for (const target of targets) {
+    const targetWasPoisoned = isPoisoned(target);
+    const mods = buildDamageModifiers(state, source, target, card, logs, false);
+    const r = applyCardDamage(source, target, boostedValue, card.type, mods);
+
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `${target.name} takes ${r.hpDamage} damage. (HP: ${target.hp}/${target.maxHp})`,
+    });
+
+    const postDmgDet = resolvePostDamageEffects({
+      state, source, target, card,
+      hpDamage: r.hpDamage,
+      targetWasPoisoned,
+    });
+    logs.push(...postDmgDet.logs);
+    damageToPoisoned += postDmgDet.damageToPoisoned;
+  }
+
+  // Toxic Horn / Protective Toxins
+  if (damageToPoisoned > 0) {
+    const toxicHornLogs = processToxicHorn(state, source, damageToPoisoned);
+    logs.push(...toxicHornLogs);
+    const protToxinsLogs = processProtectiveToxins(state, source, damageToPoisoned);
+    logs.push(...protToxinsLogs);
+  }
+
+  // Final Spark: all allies gain 3 Strength and 2 Haste
+  if (source.passiveIds.includes('final_spark')) {
+    const allies = state.combatants.filter(c =>
+      c.alive && c.side === source.side && c.id !== source.id
+    );
+    for (const ally of allies) {
+      applyStatus(state, ally, 'strength', 3, source.id);
+      applyStatus(state, ally, 'haste', 2, source.id);
+    }
+    if (allies.length > 0) {
+      logs.push({
+        round: state.round,
+        combatantId: source.id,
+        message: `Final Spark: ${allies.map(a => a.name).join(', ')} ${allies.length === 1 ? 'gains' : 'gain'} 3 Strength and 2 Haste!`,
+      });
+    }
+  }
+
+  // User faints
+  source.hp = 0;
+  source.alive = false;
+  source.primedSelfKo = undefined;
+  logs.push({
+    round: state.round,
+    combatantId: source.id,
+    message: `${source.name} faints from the explosion!`,
+  });
+
+  return logs;
 }

@@ -11,6 +11,8 @@ import {
   canLevelUp,
   type ProgressionRung,
 } from './progression';
+import { generateEncountersForAct } from './encounters';
+import { ITEM_DEFS, type ItemDefinition } from '../data/items';
 
 // ============================================================
 // EXP Constants
@@ -56,6 +58,7 @@ export function createRunState(
       knockedOut: false,
       energyModifier: 0,
       drawModifier: 0,
+      heldItemIds: [],
     };
   });
 
@@ -82,6 +85,9 @@ export function createRunState(
   // Assign random events from Act 1 pool (no repeats)
   const { nodes: eventNodes, seenEventIds } = assignRandomEvents(nodes, 1, actualSeed, []);
 
+  // Generate randomized encounters for non-fixed battle nodes
+  const generatedNodes = generateEncountersForAct(eventNodes, 1, actualSeed);
+
   return {
     seed: actualSeed,
     campaignId,
@@ -90,12 +96,13 @@ export function createRunState(
     graveyard: [],
     currentNodeId: firstAct.spawnNodeId,
     visitedNodeIds: [firstAct.spawnNodeId],
-    nodes: eventNodes,
+    nodes: generatedNodes,
     currentAct: 1,
     actVariants: {},
     recruitSeed,
     gold: startingGold,
     seenEventIds,
+    itemInventory: [],
   };
 }
 
@@ -181,7 +188,7 @@ export function isRunComplete(run: RunState): boolean {
  */
 export function isAct1Complete(run: RunState): boolean {
   if (run.currentAct !== 1) return false;
-  const arianaNode = run.nodes.find(n => n.id === 's6-boss-ariana');
+  const arianaNode = run.nodes.find(n => n.id === '1ab');
   return arianaNode?.completed ?? false;
 }
 
@@ -190,7 +197,7 @@ export function isAct1Complete(run: RunState): boolean {
  */
 export function isAct2Complete(run: RunState): boolean {
   if (run.currentAct !== 2) return false;
-  const giovanniNode = run.nodes.find(n => n.id === 'a2-s6-boss-giovanni');
+  const giovanniNode = run.nodes.find(n => n.id === '2z');
   return giovanniNode?.completed ?? false;
 }
 
@@ -227,12 +234,15 @@ export function transitionToAct2(run: RunState): RunState {
   // Assign random events from Act 2 pool (no repeats across run)
   const { nodes: eventNodes, seenEventIds } = assignRandomEvents(act2Nodes, 2, run.seed, run.seenEventIds);
 
+  // Generate randomized encounters for non-fixed battle nodes
+  const generatedNodes = generateEncountersForAct(eventNodes, 2, run.seed);
+
   return {
     ...run,
     currentAct: 2,
-    currentNodeId: 'a2-s0-spawn',
-    visitedNodeIds: ['a2-s0-spawn'],
-    nodes: eventNodes,
+    currentNodeId: '2a',
+    visitedNodeIds: ['2a'],
+    nodes: generatedNodes,
     seenEventIds,
   };
 }
@@ -293,19 +303,19 @@ function advanceToBossNode(run: RunState, restNodeId: string, throughStage: numb
 /** Test shortcut: drop right before Act 1 boss (Ariana). */
 export function createAct1BossTestState(): RunState {
   const run = createTestPartyRun(300);
-  return advanceToBossNode(run, 's5-rest', 5);
+  return advanceToBossNode(run, '1aa', 5);
 }
 
 /** Test shortcut: drop right before Act 2 boss (Giovanni). */
 export function createAct2BossTestState(): RunState {
   const run = createTestPartyRun(300);
-  return advanceToBossNode(transitionToAct2(run), 'a2-s5-rest', 5);
+  return advanceToBossNode(transitionToAct2(run), '2y', 5);
 }
 
 /** Test shortcut: drop right before Act 3 boss (Mewtwo). */
 export function createAct3BossTestState(): RunState {
   const run = createTestPartyRun(500);
-  return advanceToBossNode(transitionToAct3(run), 'a3-s5-rest', 5);
+  return advanceToBossNode(transitionToAct3(run), '3p', 5);
 }
 
 /**
@@ -327,9 +337,9 @@ export function createLevelUpTestState(): RunState {
     ...run,
     party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL - 1 })),
   };
-  run = moveToNode(run, 's1-battle-rattata');
+  run = moveToNode(run, '1b');
   run = applyFullHealAll(run);
-  const rattataNode = getNodeById(run.nodes, 's1-battle-rattata');
+  const rattataNode = getNodeById(run.nodes, '1b');
   const gold = rattataNode && rattataNode.type === 'battle'
     ? applyPickupBonus(run, getBattleGoldReward(rattataNode as BattleNode, 1))
     : 50;
@@ -355,9 +365,9 @@ export function createEvolutionTestState(): RunState {
     ...run,
     party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL - 1 })),
   };
-  run = moveToNode(run, 's1-battle-rattata');
+  run = moveToNode(run, '1b');
   run = applyFullHealAll(run);
-  const rattataNode = getNodeById(run.nodes, 's1-battle-rattata');
+  const rattataNode = getNodeById(run.nodes, '1b');
   const gold = rattataNode && rattataNode.type === 'battle'
     ? applyPickupBonus(run, getBattleGoldReward(rattataNode as BattleNode, 1))
     : 50;
@@ -390,9 +400,9 @@ export function createEvolutionLargePartyTestState(): RunState {
     const recruit = createRecruitPokemon(id, 1, EXP_PER_LEVEL - 1);
     run = recruitToRoster(run, recruit);
   }
-  run = moveToNode(run, 's1-battle-rattata');
+  run = moveToNode(run, '1b');
   run = applyFullHealAll(run);
-  const rattataNode = getNodeById(run.nodes, 's1-battle-rattata');
+  const rattataNode = getNodeById(run.nodes, '1b');
   const gold = rattataNode && rattataNode.type === 'battle'
     ? applyPickupBonus(run, getBattleGoldReward(rattataNode as BattleNode, 1))
     : 50;
@@ -418,12 +428,15 @@ export function transitionToAct3(run: RunState): RunState {
   // Assign random events from Act 3 pool (no repeats across run)
   const { nodes: eventNodes, seenEventIds } = assignRandomEvents(act3Nodes, 3, run.seed + 200000, run.seenEventIds);
 
+  // Generate randomized encounters for non-fixed battle nodes
+  const generatedNodes = generateEncountersForAct(eventNodes, 3, run.seed);
+
   return {
     ...run,
     currentAct: 3,
-    currentNodeId: 'a3-s0-spawn',
-    visitedNodeIds: ['a3-s0-spawn'],
-    nodes: eventNodes,
+    currentNodeId: '3a',
+    visitedNodeIds: ['3a'],
+    nodes: generatedNodes,
     seenEventIds,
   };
 }
@@ -1395,6 +1408,65 @@ function seededRandom(seed: number): { value: number; nextSeed: number } {
 }
 
 /**
+ * Roll for a post-battle item reward.
+ * 50% chance to drop. Always draws from the common pool.
+ * Excludes items already held by the party (by ID).
+ */
+export function rollItemReward(
+  _act: number,
+  seed: number,
+  excludeItemIds: string[],
+): { item: ItemDefinition | null; nextSeed: number } {
+  // 50% drop chance
+  let rng = seededRandom(seed);
+  if (rng.value >= 0.5) {
+    return { item: null, nextSeed: rng.nextSeed };
+  }
+
+  // Build pool: common items only, excluding already-held
+  const excludeSet = new Set(excludeItemIds);
+  const pool = Object.entries(ITEM_DEFS)
+    .filter(([id, def]) =>
+      def.rarity === 'common' &&
+      !excludeSet.has(id)
+    );
+
+  if (pool.length === 0) {
+    return { item: null, nextSeed: rng.nextSeed };
+  }
+
+  // Pick random item from pool
+  rng = seededRandom(rng.nextSeed);
+  const idx = Math.floor(rng.value * pool.length);
+  const [, itemDef] = pool[idx];
+
+  return { item: itemDef, nextSeed: rng.nextSeed };
+}
+
+/**
+ * Roll a guaranteed boss-rarity item reward (for act boss victories).
+ * Excludes items already held by the party.
+ */
+export function rollBossItemReward(
+  seed: number,
+  excludeItemIds: string[],
+): { item: ItemDefinition | null; nextSeed: number } {
+  const excludeSet = new Set(excludeItemIds);
+  const pool = Object.entries(ITEM_DEFS)
+    .filter(([id, def]) => def.rarity === 'boss' && !excludeSet.has(id));
+
+  if (pool.length === 0) {
+    const rng = seededRandom(seed);
+    return { item: null, nextSeed: rng.nextSeed };
+  }
+
+  const rng = seededRandom(seed);
+  const idx = Math.floor(rng.value * pool.length);
+  const [, itemDef] = pool[idx];
+  return { item: itemDef, nextSeed: rng.nextSeed };
+}
+
+/**
  * Assign pokemonIds to recruit nodes using seeded RNG.
  * Excludes any baseFormIds already in the party.
  * Pass a custom pool for campaign-specific recruit pools.
@@ -1535,6 +1607,7 @@ export function createRecruitPokemon(pokemonId: string, level: number, exp: numb
     knockedOut: false,
     energyModifier: 0,
     drawModifier: 0,
+    heldItemIds: [],
   };
 }
 
@@ -1627,12 +1700,25 @@ export function migrateRunState(run: RunState): RunState {
     };
   }
 
-  // Add energyModifier and drawModifier to party/bench/graveyard if missing
-  const migrateRunPokemon = (p: RunPokemon): RunPokemon => ({
-    ...p,
-    energyModifier: p.energyModifier ?? 0,
-    drawModifier: p.drawModifier ?? 0,
-  });
+  // Add itemInventory if missing
+  if (!(migrated as unknown as Record<string, unknown>).itemInventory) {
+    migrated = { ...migrated, itemInventory: [] };
+  }
+
+  // Add energyModifier, drawModifier, and migrate classId/heldPin/heldItemId → heldItemIds
+  const migrateRunPokemon = (p: RunPokemon): RunPokemon => {
+    const legacy = p as unknown as Record<string, unknown>;
+    // Collect legacy item from old single-item fields
+    const legacyItemId = (legacy.heldItemId as string | undefined)
+      ?? (legacy.heldPin as string | undefined)
+      ?? (legacy.classId as string | undefined);
+    return {
+      ...p,
+      energyModifier: p.energyModifier ?? 0,
+      drawModifier: p.drawModifier ?? 0,
+      heldItemIds: p.heldItemIds ?? (legacyItemId ? [legacyItemId] : []),
+    };
+  };
   migrated = {
     ...migrated,
     party: migrated.party.map(migrateRunPokemon),

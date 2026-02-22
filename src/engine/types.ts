@@ -54,15 +54,18 @@ export type CardEffectType =
   | 'gain_energy'
   | 'apply_status_self'
   | 'cleanse'
-  | 'remove_type';
+  | 'remove_type'
+  | 'add_echo_to_hand'
+  | 'copy_enemy_card';
 
 export interface DamageEffect {
   type: 'damage';
   value: number;
   bonusValue?: number;           // extra damage if condition met
-  bonusCondition?: 'user_below_half_hp' | 'target_debuff_stacks' | 'target_burn_stacks' | 'target_buff_stacks' | 'user_vanished_cards';  // condition type
+  bonusCondition?: 'user_below_half_hp' | 'target_below_half_hp' | 'target_debuff_stacks' | 'target_burn_stacks' | 'target_buff_stacks' | 'user_vanished_cards';  // condition type
   hpScaling?: boolean;           // if true, multiply base damage by user's currentHP / maxHP (e.g. Eruption)
   weightScaling?: boolean;       // if true, multiply base damage by user's weight / target's weight (e.g. Heat Crash)
+  inverseWeightScaling?: boolean; // if true, multiply base damage by target's weight / user's weight (e.g. Grass Knot)
 }
 
 export interface BlockEffect {
@@ -158,6 +161,18 @@ export interface RemoveTypeEffect {
   moveType: MoveType;  // the type to remove from the user
 }
 
+/** Add echo copies of a card to the user's hand (e.g. Outrage creates 2 half-damage echoes) */
+export interface AddEchoToHandEffect {
+  type: 'add_echo_to_hand';
+  count: number;  // number of echo copies to add
+}
+
+/** Copy a card from the target's hand as an echo into the user's hand (e.g. Flower Trick) */
+export interface CopyEnemyCardEffect {
+  type: 'copy_enemy_card';
+  count: number;  // number of cards to copy (from top of target's hand)
+}
+
 export type CardEffect =
   | DamageEffect
   | BlockEffect
@@ -174,7 +189,9 @@ export type CardEffect =
   | GainEnergyEffect
   | ApplyStatusSelfEffect
   | CleanseEffect
-  | RemoveTypeEffect;
+  | RemoveTypeEffect
+  | AddEchoToHandEffect
+  | CopyEnemyCardEffect;
 
 // --- Move Types (elemental) ---
 
@@ -248,7 +265,10 @@ export type StatusType =
   | 'evasion'
   | 'strength'
   | 'haste'
-  | 'taunt';
+  | 'taunt'
+  | 'provoke'
+  | 'fatigue'
+  | 'thorns';
 
 export interface StatusInstance {
   type: StatusType;
@@ -280,6 +300,7 @@ export interface CombatantTurnFlags {
   switchesThisTurn: number;  // Number of switches used this turn (max 3)
   finisherUsedThisTurn: boolean;  // First 3+ cost attack deals double, clears Strength (Machamp line)
   overclockReduction: number;  // Accumulated cost reduction from Overclock swaps (Porygon-Z)
+  quickClawBonusTurn: boolean;  // Quick Claw: gets a bonus turn at battle start
 }
 
 export interface Combatant {
@@ -316,13 +337,27 @@ export interface Combatant {
   passiveIds: string[];      // IDs of all passive abilities (e.g., ["kindling", "spreading_flames"])
   turnFlags: CombatantTurnFlags;  // Per-turn flags, reset at turn start
   costModifiers: Record<string | number, number>;  // Temporary cost modifiers and passive counters
+  itemState: Record<string, number>;  // Generic per-turn item counters (booleans stored as 0/1)
+
+  heldItemIds: string[];     // Held item IDs (from items.ts)
+  focusSashUsed: boolean;    // Focus Sash: once per battle
+
+  // Primed Self-KO: charging state for Self-Destruct / Explosion
+  // When set, the combatant will detonate at the end of the round (deferred turn).
+  // If killed before detonation, the explosion is prevented.
+  primedSelfKo?: {
+    cardId: string;          // Card ID for damage type and name lookup
+    baseDamage: number;      // Raw damage value from the self_ko effect
+  };
 }
 
 // --- Combat State ---
 
 export interface TurnQueueEntry {
+  entryId: number;       // Unique per entry — needed for React keys when a combatant has multiple entries (Quick Claw)
   combatantId: string;
   hasActed: boolean;
+  bonusTurn?: boolean;
 }
 
 export interface CombatState {

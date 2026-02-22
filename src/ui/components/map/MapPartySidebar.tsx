@@ -3,6 +3,8 @@ import type { RunPokemon } from '../../../run/types';
 import { getPokemon } from '../../../data/loaders';
 import { canPokemonLevelUp, EXP_PER_LEVEL } from '../../../run/state';
 import { getSpriteSize } from '../../../data/heights';
+import { ITEM_DEFS, RARITY_COLORS } from '../../../data/items';
+import { HeldItemBadge } from '../HeldItemBadge';
 import { THEME } from '../../theme';
 import { GoldCoin } from '../GoldCoin';
 import { getSpriteUrl } from '../../utils/sprites';
@@ -132,6 +134,25 @@ function PokemonRow({ pokemon, isDead, canLevel, onClick, isSwapTarget, onSwapCl
         <div style={{ fontSize: 10, color: THEME.text.tertiary, marginTop: 1 }}>
           {pokemon.currentHp}/{pokemon.maxHp} HP
         </div>
+        {pokemon.heldItemIds.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 3 }}>
+            {pokemon.heldItemIds.map(itemId => {
+              const itemDef = ITEM_DEFS[itemId];
+              if (!itemDef) return null;
+              return (
+                <div key={itemId} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <HeldItemBadge itemId={itemDef.id} size={18} />
+                  <span style={{
+                    fontSize: 10, color: RARITY_COLORS[itemDef.rarity],
+                    fontWeight: 'bold',
+                  }}>
+                    {itemDef.name}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

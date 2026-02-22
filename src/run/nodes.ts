@@ -22,10 +22,10 @@ export const ACT1_NODES: MapNode[] = [
   // Stage 0: Spawn
   // ============================================
   {
-    id: 's0-spawn',
+    id: '1a',
     type: 'spawn',
     stage: 0,
-    connectsTo: ['s1-battle-rattata', 's1-battle-pidgey'],
+    connectsTo: ['1b', '1c'],
     completed: false,
     x: 0.05, y: 0.44,
   },
@@ -34,20 +34,20 @@ export const ACT1_NODES: MapNode[] = [
   // Stage 1: First Split
   // ============================================
   {
-    id: 's1-battle-rattata',
+    id: '1b',
     type: 'battle',
     stage: 1,
-    connectsTo: ['s2-rest', 's2-battle-duo', 'detour-tl-battle'],
+    connectsTo: ['1h', '1i', '1d'],
     completed: false,
     enemies: ['rattata'],
     enemyPositions: [{ row: 'front', column: 1 }],
     x: 0.24, y: 0.36,
   },
   {
-    id: 's1-battle-pidgey',
+    id: '1c',
     type: 'battle',
     stage: 1,
-    connectsTo: ['s2-battle-duo', 's2-battle-duo-2', 'detour-bl-battle'],
+    connectsTo: ['1i', '1j', '1f'],
     completed: false,
     enemies: ['pidgey'],
     enemyPositions: [{ row: 'front', column: 1 }],
@@ -58,10 +58,10 @@ export const ACT1_NODES: MapNode[] = [
   // Top-Left Corner Detour (recruit path from rattata)
   // ============================================
   {
-    id: 'detour-tl-battle',
+    id: '1d',
     type: 'battle',
     stage: 1,
-    connectsTo: ['detour-tl-recruit'],
+    connectsTo: ['1e'],
     completed: false,
     enemies: ['pidgey', 'pidgey'],
     enemyPositions: [
@@ -71,10 +71,10 @@ export const ACT1_NODES: MapNode[] = [
     x: 0.16, y: 0.16,
   },
   {
-    id: 'detour-tl-recruit',
+    id: '1e',
     type: 'recruit',
     stage: 1,
-    connectsTo: ['s2-rest', 's2-battle-duo'],
+    connectsTo: ['1h', '1i'],
     completed: false,
     pokemonId: '',
     recruited: false,
@@ -86,10 +86,10 @@ export const ACT1_NODES: MapNode[] = [
   // Bottom-Left Corner Detour (recruit path from pidgey)
   // ============================================
   {
-    id: 'detour-bl-battle',
+    id: '1f',
     type: 'battle',
     stage: 1,
-    connectsTo: ['detour-bl-recruit'],
+    connectsTo: ['1g'],
     completed: false,
     enemies: ['rattata', 'rattata'],
     enemyPositions: [
@@ -99,10 +99,10 @@ export const ACT1_NODES: MapNode[] = [
     x: 0.16, y: 0.76,
   },
   {
-    id: 'detour-bl-recruit',
+    id: '1g',
     type: 'recruit',
     stage: 1,
-    connectsTo: ['s2-battle-duo', 's2-battle-duo-2'],
+    connectsTo: ['1i', '1j'],
     completed: false,
     pokemonId: '',
     recruited: false,
@@ -114,10 +114,10 @@ export const ACT1_NODES: MapNode[] = [
   // Stage 2: Early Mid
   // ============================================
   {
-    id: 's2-rest',
+    id: '1h',
     type: 'battle',
     stage: 2,
-    connectsTo: ['s3-battle-raticate'],
+    connectsTo: ['1k'],
     completed: false,
     enemies: ['ekans', 'pidgey'],
     enemyPositions: [
@@ -127,10 +127,10 @@ export const ACT1_NODES: MapNode[] = [
     x: 0.36, y: 0.33,
   },
   {
-    id: 's2-battle-duo',
+    id: '1i',
     type: 'battle',
     stage: 2,
-    connectsTo: ['s3-battle-raticate', 's3-battle-pidgeotto'],
+    connectsTo: ['1k', '1l'],
     completed: false,
     enemies: ['pidgey', 'rattata'],
     enemyPositions: [
@@ -140,10 +140,10 @@ export const ACT1_NODES: MapNode[] = [
     x: 0.36, y: 0.515,
   },
   {
-    id: 's2-battle-duo-2',
+    id: '1j',
     type: 'rest',
     stage: 2,
-    connectsTo: ['s3-battle-pidgeotto', 's3-battle-arbok'],
+    connectsTo: ['1l', '1m'],
     completed: false,
     x: 0.36, y: 0.70,
   },
@@ -152,30 +152,30 @@ export const ACT1_NODES: MapNode[] = [
   // Stage 3: Center Room
   // ============================================
   {
-    id: 's3-battle-raticate',
+    id: '1k',
     type: 'battle',
     stage: 3,
-    connectsTo: ['s4-rest', 's4-battle-combo', 's3-event-train'],
+    connectsTo: ['1p', '1r', '1n'],
     completed: false,
     enemies: ['raticate'],
     enemyPositions: [{ row: 'front', column: 1 }],
     x: 0.47, y: 0.33,
   },
   {
-    id: 's3-battle-pidgeotto',
+    id: '1l',
     type: 'battle',
     stage: 3,
-    connectsTo: ['s4-battle-combo', 's4-battle-evolved'],
+    connectsTo: ['1r', '1s'],
     completed: false,
     enemies: ['pidgeotto'],
     enemyPositions: [{ row: 'front', column: 1 }],
     x: 0.47, y: 0.515,
   },
   {
-    id: 's3-battle-arbok',
+    id: '1m',
     type: 'battle',
     stage: 3,
-    connectsTo: ['s4-battle-evolved', 's3-event-meditate'],
+    connectsTo: ['1s', '1o'],
     completed: false,
     enemies: ['arbok'],
     enemyPositions: [{ row: 'front', column: 1 }],
@@ -186,19 +186,19 @@ export const ACT1_NODES: MapNode[] = [
   // Stage 3: Events (above/below center room)
   // ============================================
   {
-    id: 's3-event-train',
+    id: '1n',
     type: 'event',
     stage: 3,
-    connectsTo: ['s4-rest'],
+    connectsTo: ['1p'],
     completed: false,
     eventId: '',
     x: 0.44, y: 0.14,
   },
   {
-    id: 's3-event-meditate',
+    id: '1o',
     type: 'event',
     stage: 3,
-    connectsTo: ['s4-battle-evolved'],
+    connectsTo: ['1s'],
     completed: false,
     eventId: '',
     x: 0.41, y: 0.90,
@@ -208,10 +208,10 @@ export const ACT1_NODES: MapNode[] = [
   // Stage 4: Harder
   // ============================================
   {
-    id: 's4-rest',
+    id: '1p',
     type: 'rest',
     stage: 4,
-    connectsTo: ['s5-battle-tauros', 'detour-tc-event'],
+    connectsTo: ['1w', '1q'],
     completed: false,
     x: 0.57, y: 0.33,
   },
@@ -220,19 +220,19 @@ export const ACT1_NODES: MapNode[] = [
   // Top-Center Detour (random event from s4-rest)
   // ============================================
   {
-    id: 'detour-tc-event',
+    id: '1q',
     type: 'event',
     stage: 4,
-    connectsTo: ['s5-battle-tauros'],
+    connectsTo: ['1w'],
     completed: false,
     eventId: '',  // Assigned at runtime by assignRandomEvents()
     x: 0.60, y: 0.14,
   },
   {
-    id: 's4-battle-combo',
+    id: '1r',
     type: 'battle',
     stage: 4,
-    connectsTo: ['s5-battle-tauros', 's5-battle-pidgeot'],
+    connectsTo: ['1w', '1x'],
     completed: false,
     enemies: ['raticate', 'pidgeotto'],
     enemyPositions: [
@@ -242,10 +242,10 @@ export const ACT1_NODES: MapNode[] = [
     x: 0.57, y: 0.515,
   },
   {
-    id: 's4-battle-evolved',
+    id: '1s',
     type: 'battle',
     stage: 4,
-    connectsTo: ['s5-battle-pidgeot', 's5-battle-snorlax', 's5-battle-kangaskhan', 's4-event-forget'],
+    connectsTo: ['1x', '1y', '1z', '1t'],
     completed: false,
     enemies: ['arbok', 'raticate'],
     enemyPositions: [
@@ -255,10 +255,10 @@ export const ACT1_NODES: MapNode[] = [
     x: 0.57, y: 0.70,
   },
   {
-    id: 's4-event-forget',
+    id: '1t',
     type: 'event',
     stage: 4,
-    connectsTo: ['s5-battle-snorlax', 's5-battle-kangaskhan'],
+    connectsTo: ['1y', '1z'],
     completed: false,
     eventId: '',
     x: 0.60, y: 0.90,
@@ -268,20 +268,20 @@ export const ACT1_NODES: MapNode[] = [
   // Top-Right Corner Detour (recruit path from s4-rest)
   // ============================================
   {
-    id: 'detour-tr-battle',
+    id: '1u',
     type: 'battle',
     stage: 4,
-    connectsTo: ['detour-tr-recruit'],
+    connectsTo: ['1v'],
     completed: false,
     enemies: ['kangaskhan'],
     enemyPositions: [{ row: 'front', column: 1 }],
     x: 0.86, y: 0.16,
   },
   {
-    id: 'detour-tr-recruit',
+    id: '1v',
     type: 'recruit',
     stage: 4,
-    connectsTo: ['s6-boss-ariana'],
+    connectsTo: ['1ab'],
     completed: false,
     pokemonId: '',
     recruited: false,
@@ -293,50 +293,50 @@ export const ACT1_NODES: MapNode[] = [
   // Stage 5: Pre-Boss
   // ============================================
   {
-    id: 's5-battle-tauros',
+    id: '1w',
     type: 'battle',
     stage: 5,
-    connectsTo: ['s6-boss-ariana', 'detour-tr-battle'],
+    connectsTo: ['1ab', '1u'],
     completed: false,
     enemies: ['tauros'],
     enemyPositions: [{ row: 'front', column: 1 }],
     x: 0.68, y: 0.32,
   },
   {
-    id: 's5-battle-pidgeot',
+    id: '1x',
     type: 'battle',
     stage: 5,
-    connectsTo: ['s6-boss-ariana'],
+    connectsTo: ['1ab'],
     completed: false,
     enemies: ['pidgeot'],
     enemyPositions: [{ row: 'front', column: 1 }],
     x: 0.68, y: 0.45,
   },
   {
-    id: 's5-battle-snorlax',
+    id: '1y',
     type: 'battle',
     stage: 5,
-    connectsTo: ['s6-boss-ariana'],
+    connectsTo: ['1ab'],
     completed: false,
     enemies: ['snorlax'],
     enemyPositions: [{ row: 'front', column: 1 }],
     x: 0.68, y: 0.58,
   },
   {
-    id: 's5-battle-kangaskhan',
+    id: '1z',
     type: 'battle',
     stage: 5,
-    connectsTo: ['s6-boss-ariana', 's5-rest'],
+    connectsTo: ['1ab', '1aa'],
     completed: false,
     enemies: ['kangaskhan'],
     enemyPositions: [{ row: 'front', column: 1 }],
     x: 0.68, y: 0.70,
   },
   {
-    id: 's5-rest',
+    id: '1aa',
     type: 'rest',
     stage: 5,
-    connectsTo: ['s6-boss-ariana'],
+    connectsTo: ['1ab'],
     completed: false,
     x: 0.80, y: 0.78,
   },
@@ -345,17 +345,18 @@ export const ACT1_NODES: MapNode[] = [
   // Stage 6: Ariana Boss Fight
   // ============================================
   {
-    id: 's6-boss-ariana',
+    id: '1ab',
     type: 'battle',
     stage: 6,
-    connectsTo: ['act1-complete'],
+    connectsTo: ['1ac'],
     completed: false,
     enemies: ['arbok', 'raticate', 'hypno'],
     enemyPositions: [
       { row: 'front', column: 0 },
-      { row: 'front', column: 1 },
+      { row: 'back', column: 0 },
       { row: 'front', column: 2 },
     ],
+    enemyHpMultiplier: 1.5,
     x: 0.88, y: 0.44,
     size: 'large',
   },
@@ -364,7 +365,7 @@ export const ACT1_NODES: MapNode[] = [
   // Act Transition Node
   // ============================================
   {
-    id: 'act1-complete',
+    id: '1ac',
     type: 'act_transition',
     stage: 7,
     connectsTo: [],
@@ -395,10 +396,10 @@ export const ACT2_NODES: MapNode[] = [
   // Stage 0: Spawn
   // ============================================
   {
-    id: 'a2-s0-spawn',
+    id: '2a',
     type: 'spawn',
     stage: 0,
-    connectsTo: ['a2-s1-battle-upper', 'a2-s1-battle-lower'],
+    connectsTo: ['2b', '2c'],
     completed: false,
     x: 0.08, y: 0.48,
   },
@@ -407,10 +408,10 @@ export const ACT2_NODES: MapNode[] = [
   // Stage 1: First Split
   // ============================================
   {
-    id: 'a2-s1-battle-upper',
+    id: '2b',
     type: 'battle',
     stage: 1,
-    connectsTo: ['a2-s2-rest', 'a2-s2-battle-1', 'detour-a2-tl-battle'],
+    connectsTo: ['2h', '2i', '2d'],
     completed: false,
     enemies: ['arbok', 'pidgeotto'],
     enemyPositions: [
@@ -420,10 +421,10 @@ export const ACT2_NODES: MapNode[] = [
     x: 0.24, y: 0.36,
   },
   {
-    id: 'a2-s1-battle-lower',
+    id: '2c',
     type: 'battle',
     stage: 1,
-    connectsTo: ['a2-s2-battle-1', 'a2-s2-battle-2', 'detour-a2-bl-battle'],
+    connectsTo: ['2i', '2k', '2f'],
     completed: false,
     enemies: ['raticate', 'raticate'],
     enemyPositions: [
@@ -437,20 +438,20 @@ export const ACT2_NODES: MapNode[] = [
   // Top-Left Corner Detour (recruit)
   // ============================================
   {
-    id: 'detour-a2-tl-battle',
+    id: '2d',
     type: 'battle',
     stage: 1,
-    connectsTo: ['detour-a2-tl-recruit'],
+    connectsTo: ['2e'],
     completed: false,
     enemies: ['pidgeot'],
     enemyPositions: [{ row: 'front', column: 1 }],
     x: 0.16, y: 0.14,
   },
   {
-    id: 'detour-a2-tl-recruit',
+    id: '2e',
     type: 'recruit',
     stage: 1,
-    connectsTo: ['a2-s2-rest', 'a2-s2-battle-1'],
+    connectsTo: ['2h', '2i'],
     completed: false,
     pokemonId: '',
     recruited: false,
@@ -462,20 +463,20 @@ export const ACT2_NODES: MapNode[] = [
   // Bottom-Left Corner Detour (recruit)
   // ============================================
   {
-    id: 'detour-a2-bl-battle',
+    id: '2f',
     type: 'battle',
     stage: 1,
-    connectsTo: ['detour-a2-bl-recruit'],
+    connectsTo: ['2g'],
     completed: false,
     enemies: ['kangaskhan'],
     enemyPositions: [{ row: 'front', column: 1 }],
     x: 0.16, y: 0.80,
   },
   {
-    id: 'detour-a2-bl-recruit',
+    id: '2g',
     type: 'recruit',
     stage: 1,
-    connectsTo: ['a2-s2-battle-1', 'a2-s2-battle-2'],
+    connectsTo: ['2i', '2k'],
     completed: false,
     pokemonId: '',
     recruited: false,
@@ -487,28 +488,28 @@ export const ACT2_NODES: MapNode[] = [
   // Stage 2: Left-Center
   // ============================================
   {
-    id: 'a2-s2-rest',
+    id: '2h',
     type: 'rest',
     stage: 2,
-    connectsTo: ['a2-s3-battle-1'],
+    connectsTo: ['2l'],
     completed: false,
     x: 0.36, y: 0.34,
   },
   {
-    id: 'a2-s2-battle-1',
+    id: '2i',
     type: 'event',
     stage: 2,
-    connectsTo: ['a2-s3-battle-1', 'a2-s3-battle-3'],
+    connectsTo: ['2l', '2m'],
     completed: false,
     eventId: 'the_chasm',
     x: 0.36, y: 0.50,
   },
   // Chasm ghost battle — unlocked by choosing "Brave the Chasm" at the event above
   {
-    id: 'a2-chasm-ghosts',
+    id: '2j',
     type: 'battle',
     stage: 3,
-    connectsTo: ['a2-s5-battle-2'],
+    connectsTo: ['2u'],
     completed: false,
     enemies: ['gengar', 'haunter', 'gastly'],
     enemyPositions: [
@@ -519,10 +520,10 @@ export const ACT2_NODES: MapNode[] = [
     x: 0.54, y: 0.50,
   },
   {
-    id: 'a2-s2-battle-2',
+    id: '2k',
     type: 'battle',
     stage: 2,
-    connectsTo: ['a2-s3-battle-3'],
+    connectsTo: ['2m'],
     completed: false,
     enemies: ['snorlax'],
     enemyPositions: [{ row: 'front', column: 1 }],
@@ -534,10 +535,10 @@ export const ACT2_NODES: MapNode[] = [
   // Stage 3: Center (crater area)
   // ============================================
   {
-    id: 'a2-s3-battle-1',
+    id: '2l',
     type: 'battle',
     stage: 3,
-    connectsTo: ['a2-s4-battle-1', 'detour-a2-tc-event'],
+    connectsTo: ['2p', '2n'],
     completed: false,
     enemies: ['snorlax', 'kangaskhan'],
     enemyPositions: [
@@ -548,10 +549,10 @@ export const ACT2_NODES: MapNode[] = [
     x: 0.48, y: 0.34,
   },
   {
-    id: 'a2-s3-battle-3',
+    id: '2m',
     type: 'battle',
     stage: 3,
-    connectsTo: ['a2-s4-battle-3', 'a2-s3-event-meditate'],
+    connectsTo: ['2r', '2o'],
     completed: false,
     enemies: ['arbok', 'raticate', 'pidgeotto'],
     enemyPositions: [
@@ -566,10 +567,10 @@ export const ACT2_NODES: MapNode[] = [
   // Top-Center Detour (random event)
   // ============================================
   {
-    id: 'detour-a2-tc-event',
+    id: '2n',
     type: 'event',
     stage: 3,
-    connectsTo: ['a2-s4-battle-1'],
+    connectsTo: ['2p'],
     completed: false,
     eventId: '',  // Assigned at runtime by assignRandomEvents()
     x: 0.44, y: 0.12,
@@ -579,10 +580,10 @@ export const ACT2_NODES: MapNode[] = [
   // Bottom-Center Detour (meditate)
   // ============================================
   {
-    id: 'a2-s3-event-meditate',
+    id: '2o',
     type: 'event',
     stage: 3,
-    connectsTo: ['a2-s4-battle-3'],
+    connectsTo: ['2r'],
     completed: false,
     eventId: '',
     x: 0.48, y: 0.90,
@@ -592,10 +593,10 @@ export const ACT2_NODES: MapNode[] = [
   // Stage 4: Right-Center
   // ============================================
   {
-    id: 'a2-s4-battle-1',
+    id: '2p',
     type: 'battle',
     stage: 4,
-    connectsTo: ['a2-s5-battle-1', 'a2-s5-battle-2', 'detour-a2-tr-event'],
+    connectsTo: ['2t', '2u', '2q'],
     completed: false,
     enemies: ['pidgeot', 'kangaskhan'],
     enemyPositions: [
@@ -610,20 +611,20 @@ export const ACT2_NODES: MapNode[] = [
   // Top-Right Detour (train event from a2-s4-battle-1)
   // ============================================
   {
-    id: 'detour-a2-tr-event',
+    id: '2q',
     type: 'event',
     stage: 4,
-    connectsTo: ['a2-s5-battle-1', 'a2-s5-battle-2'],
+    connectsTo: ['2t', '2u'],
     completed: false,
     eventId: '',
     x: 0.60, y: 0.12,
   },
 
   {
-    id: 'a2-s4-battle-3',
+    id: '2r',
     type: 'battle',
     stage: 4,
-    connectsTo: ['a2-s5-battle-2', 'a2-s5-battle-3', 'a2-s4-event-forget'],
+    connectsTo: ['2u', '2v', '2s'],
     completed: false,
     enemies: ['tauros', 'pidgeot'],
     enemyPositions: [
@@ -638,10 +639,10 @@ export const ACT2_NODES: MapNode[] = [
   // Bottom-Right-Center Detour (forget)
   // ============================================
   {
-    id: 'a2-s4-event-forget',
+    id: '2s',
     type: 'event',
     stage: 4,
-    connectsTo: ['a2-s5-battle-2', 'a2-s5-battle-3'],
+    connectsTo: ['2u', '2v'],
     completed: false,
     eventId: '',
     x: 0.60, y: 0.90,
@@ -651,10 +652,10 @@ export const ACT2_NODES: MapNode[] = [
   // Stage 5: Pre-Boss
   // ============================================
   {
-    id: 'a2-s5-battle-1',
+    id: '2t',
     type: 'battle',
     stage: 5,
-    connectsTo: ['a2-s6-boss-giovanni', 'detour-a2-tr-battle'],
+    connectsTo: ['2z', '2w'],
     completed: false,
     enemies: ['snorlax', 'tauros', 'kangaskhan'],
     enemyPositions: [
@@ -665,10 +666,10 @@ export const ACT2_NODES: MapNode[] = [
     x: 0.72, y: 0.36,
   },
   {
-    id: 'a2-s5-battle-2',
+    id: '2u',
     type: 'battle',
     stage: 5,
-    connectsTo: ['a2-s6-boss-giovanni'],
+    connectsTo: ['2z'],
     completed: false,
     enemies: ['pidgeot', 'kangaskhan'],
     enemyPositions: [
@@ -679,10 +680,10 @@ export const ACT2_NODES: MapNode[] = [
     x: 0.72, y: 0.56,
   },
   {
-    id: 'a2-s5-battle-3',
+    id: '2v',
     type: 'battle',
     stage: 5,
-    connectsTo: ['a2-s6-boss-giovanni', 'a2-s5-rest'],
+    connectsTo: ['2z', '2y'],
     completed: false,
     enemies: ['snorlax', 'pidgeot'],
     enemyPositions: [
@@ -697,10 +698,10 @@ export const ACT2_NODES: MapNode[] = [
   // Top-Right Corner Detour (recruit)
   // ============================================
   {
-    id: 'detour-a2-tr-battle',
+    id: '2w',
     type: 'battle',
     stage: 5,
-    connectsTo: ['detour-a2-tr-recruit'],
+    connectsTo: ['2x'],
     completed: false,
     enemies: ['snorlax'],
     enemyPositions: [{ row: 'front', column: 1 }],
@@ -708,10 +709,10 @@ export const ACT2_NODES: MapNode[] = [
     x: 0.88, y: 0.14,
   },
   {
-    id: 'detour-a2-tr-recruit',
+    id: '2x',
     type: 'recruit',
     stage: 5,
-    connectsTo: ['a2-s6-boss-giovanni'],
+    connectsTo: ['2z'],
     completed: false,
     pokemonId: '',
     recruited: false,
@@ -723,10 +724,10 @@ export const ACT2_NODES: MapNode[] = [
   // Bottom-Right Corner Detour (rest)
   // ============================================
   {
-    id: 'a2-s5-rest',
+    id: '2y',
     type: 'rest',
     stage: 5,
-    connectsTo: ['a2-s6-boss-giovanni'],
+    connectsTo: ['2z'],
     completed: false,
     x: 0.90, y: 0.66,
   },
@@ -735,10 +736,10 @@ export const ACT2_NODES: MapNode[] = [
   // Stage 6: Giovanni Boss Fight
   // ============================================
   {
-    id: 'a2-s6-boss-giovanni',
+    id: '2z',
     type: 'battle',
     stage: 6,
-    connectsTo: ['a2-act2-complete'],
+    connectsTo: ['2aa'],
     completed: false,
     enemies: ['persian', 'nidoking', 'rhydon'],
     enemyPositions: [
@@ -746,6 +747,7 @@ export const ACT2_NODES: MapNode[] = [
       { row: 'front', column: 1 },
       { row: 'front', column: 2 },
     ],
+    enemyHpMultiplier: 1.75,
     x: 0.90, y: 0.44,
     size: 'large',
   },
@@ -754,7 +756,7 @@ export const ACT2_NODES: MapNode[] = [
   // Act Transition Node
   // ============================================
   {
-    id: 'a2-act2-complete',
+    id: '2aa',
     type: 'act_transition',
     stage: 7,
     connectsTo: [],
@@ -782,10 +784,10 @@ export const ACT3_NODES: MapNode[] = [
   // Stage 0: Spawn
   // ============================================
   {
-    id: 'a3-s0-spawn',
+    id: '3a',
     type: 'spawn',
     stage: 0,
-    connectsTo: ['a3-s1-battle-1', 'a3-s1-battle-2'],
+    connectsTo: ['3b', '3c'],
     completed: false,
     x: 0.05, y: 0.44,
   },
@@ -794,10 +796,10 @@ export const ACT3_NODES: MapNode[] = [
   // Stage 1: First Split (evolved Pokemon)
   // ============================================
   {
-    id: 'a3-s1-battle-1',
+    id: '3b',
     type: 'battle',
     stage: 1,
-    connectsTo: ['a3-s2-battle-1', 'a3-s2-rest'],
+    connectsTo: ['3d', '3e'],
     completed: false,
     enemies: ['arcanine', 'nidoking', 'sandslash'],
     enemyPositions: [
@@ -808,10 +810,10 @@ export const ACT3_NODES: MapNode[] = [
     x: 0.18, y: 0.30,
   },
   {
-    id: 'a3-s1-battle-2',
+    id: '3c',
     type: 'battle',
     stage: 1,
-    connectsTo: ['a3-s2-rest', 'a3-s2-battle-2'],
+    connectsTo: ['3e', '3f'],
     completed: false,
     enemies: ['gyarados', 'nidoqueen', 'fearow'],
     enemyPositions: [
@@ -826,10 +828,10 @@ export const ACT3_NODES: MapNode[] = [
   // Stage 2: Mid-early (2 battles + 1 rest)
   // ============================================
   {
-    id: 'a3-s2-battle-1',
+    id: '3d',
     type: 'battle',
     stage: 2,
-    connectsTo: ['a3-s3-battle-1', 'a3-s3-battle-2'],
+    connectsTo: ['3g', '3h'],
     completed: false,
     enemies: ['rhydon', 'electrode', 'hypno'],
     enemyPositions: [
@@ -840,18 +842,18 @@ export const ACT3_NODES: MapNode[] = [
     x: 0.30, y: 0.24,
   },
   {
-    id: 'a3-s2-rest',
+    id: '3e',
     type: 'rest',
     stage: 2,
-    connectsTo: ['a3-s3-battle-2'],
+    connectsTo: ['3h'],
     completed: false,
     x: 0.30, y: 0.44,
   },
   {
-    id: 'a3-s2-battle-2',
+    id: '3f',
     type: 'battle',
     stage: 2,
-    connectsTo: ['a3-s3-battle-2', 'a3-s3-battle-3'],
+    connectsTo: ['3h', '3i'],
     completed: false,
     enemies: ['dragonair', 'lapras', 'pidgeot'],
     enemyPositions: [
@@ -866,10 +868,10 @@ export const ACT3_NODES: MapNode[] = [
   // Stage 3: Center (3 battles, 3-4 enemies, 1.15x HP)
   // ============================================
   {
-    id: 'a3-s3-battle-1',
+    id: '3g',
     type: 'battle',
     stage: 3,
-    connectsTo: ['a3-s4-battle-1', 'a3-s4-event-train'],
+    connectsTo: ['3j', '3k'],
     completed: false,
     enemies: ['nidoking', 'nidoqueen', 'arcanine'],
     enemyPositions: [
@@ -881,10 +883,10 @@ export const ACT3_NODES: MapNode[] = [
     x: 0.42, y: 0.24,
   },
   {
-    id: 'a3-s3-battle-2',
+    id: '3h',
     type: 'battle',
     stage: 3,
-    connectsTo: ['a3-s4-battle-1', 'a3-s4-battle-2'],
+    connectsTo: ['3j', '3l'],
     completed: false,
     enemies: ['snorlax', 'kangaskhan', 'lapras', 'hypno'],
     enemyPositions: [
@@ -897,10 +899,10 @@ export const ACT3_NODES: MapNode[] = [
     x: 0.42, y: 0.44,
   },
   {
-    id: 'a3-s3-battle-3',
+    id: '3i',
     type: 'battle',
     stage: 3,
-    connectsTo: ['a3-s4-battle-2', 'a3-s4-event-train'],
+    connectsTo: ['3l', '3k'],
     completed: false,
     enemies: ['gyarados', 'dragonair', 'rhydon'],
     enemyPositions: [
@@ -916,10 +918,10 @@ export const ACT3_NODES: MapNode[] = [
   // Stage 4: Harder (2 battles + 1 train event, 1.2x HP)
   // ============================================
   {
-    id: 'a3-s4-battle-1',
+    id: '3j',
     type: 'battle',
     stage: 4,
-    connectsTo: ['a3-s5-battle-1', 'a3-s5-battle-2'],
+    connectsTo: ['3m', '3n'],
     completed: false,
     enemies: ['dragonite', 'arcanine', 'nidoking'],
     enemyPositions: [
@@ -931,19 +933,19 @@ export const ACT3_NODES: MapNode[] = [
     x: 0.55, y: 0.30,
   },
   {
-    id: 'a3-s4-event-train',
+    id: '3k',
     type: 'event',
     stage: 4,
-    connectsTo: ['a3-s5-battle-2'],
+    connectsTo: ['3n'],
     completed: false,
     eventId: '',
     x: 0.55, y: 0.44,
   },
   {
-    id: 'a3-s4-battle-2',
+    id: '3l',
     type: 'battle',
     stage: 4,
-    connectsTo: ['a3-s5-battle-2', 'a3-s5-battle-3'],
+    connectsTo: ['3n', '3o'],
     completed: false,
     enemies: ['gyarados', 'lapras', 'electrode', 'sandslash'],
     enemyPositions: [
@@ -960,10 +962,10 @@ export const ACT3_NODES: MapNode[] = [
   // Stage 5: Pre-Boss (3 battles + 1 rest, 1.25x HP)
   // ============================================
   {
-    id: 'a3-s5-battle-1',
+    id: '3m',
     type: 'battle',
     stage: 5,
-    connectsTo: ['a3-s6-boss-mewtwo'],
+    connectsTo: ['3q'],
     completed: false,
     enemies: ['dragonite', 'snorlax', 'kangaskhan'],
     enemyPositions: [
@@ -975,10 +977,10 @@ export const ACT3_NODES: MapNode[] = [
     x: 0.68, y: 0.26,
   },
   {
-    id: 'a3-s5-battle-2',
+    id: '3n',
     type: 'battle',
     stage: 5,
-    connectsTo: ['a3-s6-boss-mewtwo', 'a3-s5-rest'],
+    connectsTo: ['3q', '3p'],
     completed: false,
     enemies: ['nidoking', 'nidoqueen', 'arcanine', 'rhydon'],
     enemyPositions: [
@@ -991,10 +993,10 @@ export const ACT3_NODES: MapNode[] = [
     x: 0.68, y: 0.44,
   },
   {
-    id: 'a3-s5-battle-3',
+    id: '3o',
     type: 'battle',
     stage: 5,
-    connectsTo: ['a3-s6-boss-mewtwo'],
+    connectsTo: ['3q'],
     completed: false,
     enemies: ['gyarados', 'dragonite', 'lapras'],
     enemyPositions: [
@@ -1006,10 +1008,10 @@ export const ACT3_NODES: MapNode[] = [
     x: 0.68, y: 0.62,
   },
   {
-    id: 'a3-s5-rest',
+    id: '3p',
     type: 'rest',
     stage: 5,
-    connectsTo: ['a3-s6-boss-mewtwo'],
+    connectsTo: ['3q'],
     completed: false,
     x: 0.80, y: 0.58,
   },
@@ -1018,13 +1020,14 @@ export const ACT3_NODES: MapNode[] = [
   // Stage 6: Mewtwo Final Boss
   // ============================================
   {
-    id: 'a3-s6-boss-mewtwo',
+    id: '3q',
     type: 'battle',
     stage: 6,
     connectsTo: [],
     completed: false,
     enemies: ['mewtwo'],
     enemyPositions: [{ row: 'front', column: 1 }],
+    enemyHpMultiplier: 2.0,
     x: 0.88, y: 0.44,
     size: 'large',
   },

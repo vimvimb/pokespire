@@ -16,6 +16,7 @@ export interface TestCombatantOptions {
   slotIndex?: number;
   passiveIds?: string[];
   block?: number;
+  heldItemIds?: string[];
 }
 
 /**
@@ -63,8 +64,12 @@ export function createTestCombatant(options: TestCombatantOptions = {}): Combata
       switchesThisTurn: 0,
       finisherUsedThisTurn: false,
       overclockReduction: 0,
+      quickClawBonusTurn: false,
     },
     costModifiers: {},
+    itemState: {},
+    heldItemIds: options.heldItemIds ?? [],
+    focusSashUsed: false,
   };
 }
 
@@ -74,7 +79,7 @@ export function createTestCombatant(options: TestCombatantOptions = {}): Combata
 export function createTestCombatState(combatants: Combatant[]): CombatState {
   return {
     combatants,
-    turnOrder: combatants.map(c => ({ combatantId: c.id, hasActed: false })),
+    turnOrder: combatants.map((c, i) => ({ entryId: i, combatantId: c.id, hasActed: false })),
     currentTurnIndex: 0,
     round: 1,
     phase: 'ongoing',

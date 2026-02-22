@@ -200,12 +200,14 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
                 if (pState === 'locked' && node.id.includes('detour') && !targetId.includes('detour')) {
                   return null;
                 }
+                const isDetour = node.id.includes('detour') || targetId.includes('detour');
                 return (
                   <MapPath
                     key={`${node.id}-${targetId}`}
                     fromPos={fromPos}
                     toPos={toPos}
                     state={pState}
+                    isDetour={isDetour}
                   />
                 );
               });

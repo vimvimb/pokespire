@@ -1,15 +1,16 @@
 import type { CombatState, BattleAction, LogEntry, Combatant, Position } from './types';
 import {
   getCurrentCombatant, checkBattleEnd, removeDeadFromTurnOrder, advanceRound,
-  getCombatant,
+  getCombatant, nextEntryId,
 } from './combat';
 import { processStartOfTurnStatuses, processEndOfTurnStatuses, applyStatus } from './status';
 import { drawCards, discardHand } from './deck';
-import { playCard } from './cards';
+import { playCard, resolvePrimedDetonation } from './cards';
 import { getStatus } from './status';
 import { onTurnStart, onTurnEnd } from './passives';
 import { getMove } from '../data/loaders';
 import { getValidSwitchTargets } from './position';
+import { processItemOnSwitch, getItemMaxSwitches } from './itemEffects';
 
 // ============================================================
 // Turn Sequence — Section 4 of spec
@@ -30,6 +31,15 @@ export function startTurn(state: CombatState): { logs: LogEntry[]; skipped: bool
   const logs: LogEntry[] = [];
   const combatant = getCurrentCombatant(state);
 
+  // Primed Self-KO: detonation-only turn (no energy, no draw, no cards)
+  if (combatant.primedSelfKo) {
+    const detLogs = resolvePrimedDetonation(state, combatant);
+    logs.push(...detLogs);
+    removeDeadFromTurnOrder(state);
+    checkBattleEnd(state);
+    return { logs, skipped: true };
+  }
+
   logs.push({
     round: state.round,
     combatantId: combatant.id,
@@ -47,24 +57,50 @@ export function startTurn(state: CombatState): { logs: LogEntry[]; skipped: bool
     return { logs, skipped: true };
   }
 
-  // Step 2: Gain energy (Sleep reduces energy gain by 1, regardless of stacks; stacks = duration)
-  const sleep = getStatus(combatant, 'sleep');
-  const isSleeping = sleep && sleep.stacks > 0;
-  const energyGain = Math.max(0, combatant.energyPerTurn - (isSleeping ? 1 : 0));
-  combatant.energy = Math.min(combatant.energy + energyGain, combatant.energyCap);
+  // Step 2: Gain energy
+  const currentEntry = state.turnOrder[state.currentTurnIndex];
+  const isBonusTurn = currentEntry?.bonusTurn === true;
 
-  if (isSleeping) {
+  if (isBonusTurn) {
+    // Bonus turn (Quick Claw): gain exactly 1 energy
+    combatant.energy = Math.min(combatant.energy + 1, combatant.energyCap);
     logs.push({
       round: state.round,
       combatantId: combatant.id,
-      message: `${combatant.name} is drowsy! Gains ${energyGain} energy (${combatant.energyPerTurn} - 1 Sleep). (Energy: ${combatant.energy})`,
+      message: `Quick Claw: ${combatant.name} gets a bonus turn with 1 energy! (Energy: ${combatant.energy})`,
     });
   } else {
-    logs.push({
-      round: state.round,
-      combatantId: combatant.id,
-      message: `${combatant.name} gains ${energyGain} energy. (Energy: ${combatant.energy})`,
-    });
+    // Normal energy gain (Sleep reduces by 1, Fatigue reduces by stacks)
+    const sleep = getStatus(combatant, 'sleep');
+    const isSleeping = sleep && sleep.stacks > 0;
+    const fatigue = getStatus(combatant, 'fatigue');
+    const fatigueStacks = fatigue ? fatigue.stacks : 0;
+    const energyGain = Math.max(0, combatant.energyPerTurn - (isSleeping ? 1 : 0) - fatigueStacks);
+    combatant.energy = Math.min(combatant.energy + energyGain, combatant.energyCap);
+
+    // Fatigue: all stacks clear at once at the start of your turn
+    if (fatigueStacks > 0) {
+      combatant.statuses = combatant.statuses.filter(s => s.type !== 'fatigue');
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `${combatant.name} is fatigued! Loses ${fatigueStacks} energy (Fatigue ${fatigueStacks}). Fatigue wears off. (Energy: ${combatant.energy})`,
+      });
+    }
+
+    if (isSleeping) {
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `${combatant.name} is drowsy! Gains ${energyGain} energy (${combatant.energyPerTurn} - 1 Sleep). (Energy: ${combatant.energy})`,
+      });
+    } else if (fatigueStacks === 0) {
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `${combatant.name} gains ${energyGain} energy. (Energy: ${combatant.energy})`,
+      });
+    }
   }
 
   // Step 4: Hand is already pre-drawn from end of previous turn (or initializeBattle)
@@ -90,6 +126,15 @@ export function processAction(
     const cardLogs = playCard(state, combatant, action);
     logs.push(...cardLogs);
 
+    // If the combatant just became primed, insert a deferred turn at end of turn order
+    if (combatant.primedSelfKo) {
+      state.turnOrder.push({
+        entryId: nextEntryId(),
+        combatantId: combatant.id,
+        hasActed: false,
+      });
+    }
+
     // Remove dead from turn order
     removeDeadFromTurnOrder(state);
     checkBattleEnd(state);
@@ -102,14 +147,24 @@ export function processAction(
   return logs;
 }
 
-const BASE_SWITCH_COST = 2;
+const BASE_SWITCH_COST = 1;
+
+/**
+ * Get the maximum switches per turn for a combatant.
+ * Class-assigned combatants use class-specific limit (default 1).
+ * Regular combatants get 3.
+ */
+export function getMaxSwitches(combatant: Combatant): number {
+  const itemLimit = getItemMaxSwitches(combatant);
+  if (itemLimit !== null) return itemLimit;
+  return 3;
+}
 
 /**
  * Get the effective switch cost for a combatant.
- * Download passive reduces it to 1.
+ * Base cost is 1 for all combatants.
  */
-export function getSwitchCost(combatant: Combatant): number {
-  if (combatant.passiveIds.includes('download')) return 1;
+export function getSwitchCost(_combatant: Combatant): number {
   return BASE_SWITCH_COST;
 }
 
@@ -137,7 +192,8 @@ function executeSwitchPosition(
   }
 
   // Validate: hasn't exceeded max switches this turn
-  if (combatant.turnFlags.switchesThisTurn >= 3) {
+  const maxSwitches = getMaxSwitches(combatant);
+  if (combatant.turnFlags.switchesThisTurn >= maxSwitches) {
     logs.push({
       round: state.round,
       combatantId: combatant.id,
@@ -242,6 +298,7 @@ function executeSwitchPosition(
         });
       }
     }
+
   } else {
     // Move to empty cell
     combatant.position = targetPos;
@@ -251,6 +308,9 @@ function executeSwitchPosition(
       message: `${combatant.name} moves to ${targetPos.row} row! (Energy: ${combatant.energy})`,
     });
   }
+
+  // --- Item effects that trigger on any switch (swap or move to empty) ---
+  logs.push(...processItemOnSwitch(state, combatant, oldPos));
 
   return logs;
 }
@@ -312,6 +372,12 @@ export function skipTurnAndAdvance(state: CombatState): LogEntry[] {
  */
 function advanceToNextTurn(state: CombatState): LogEntry[] {
   const logs: LogEntry[] = [];
+
+  // Guard: if the current entry was already acted (duplicate endTurn call), bail out.
+  // This prevents state corruption from race conditions in the UI layer.
+  if (state.turnOrder[state.currentTurnIndex]?.hasActed) {
+    return logs;
+  }
 
   // Mark current as acted
   state.turnOrder[state.currentTurnIndex].hasActed = true;

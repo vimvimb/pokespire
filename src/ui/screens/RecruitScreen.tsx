@@ -1,6 +1,9 @@
+import { useState, useMemo } from 'react';
 import type { RunState, RecruitNode } from '../../run/types';
 import { getPokemon } from '../../data/loaders';
 import { getRecruitLevel, createRecruitPokemon } from '../../run/state';
+import { STARTER_ITEM_IDS, ITEM_DEFS, RARITY_COLORS } from '../../data/items';
+import { HeldItemMotif } from '../components/HeldItemMotif';
 
 // Legendary beasts fight the full party, not 1v1
 const LEGENDARY_BEAST_IDS = new Set(['raikou', 'entei', 'suicune']);
@@ -13,7 +16,7 @@ interface Props {
   node: RecruitNode;
   battleResult: 'pending' | 'victory' | 'defeat' | null;
   onStartFight: (partyIndex: number) => void;
-  onRecruit: () => void;
+  onRecruit: (itemId?: string) => void;
   onDecline: () => void;
   onRestart: () => void;
 }
@@ -25,6 +28,15 @@ export function RecruitScreen({ run, node, battleResult, onStartFight, onRecruit
   const wildPokemon = getPokemon(recruitMon.formId);
   const isLegendaryBeast = LEGENDARY_BEAST_IDS.has(node.pokemonId);
   const benchFull = run.bench.length >= 4;
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+
+  // Starter items not held by any party or bench member
+  const availableItems = useMemo(() => {
+    const heldIds = new Set<string>();
+    for (const p of run.party) for (const id of p.heldItemIds) heldIds.add(id);
+    for (const p of run.bench) for (const id of p.heldItemIds) heldIds.add(id);
+    return STARTER_ITEM_IDS.filter(id => !heldIds.has(id));
+  }, [run.party, run.bench]);
 
   const header = (
     <div style={{
@@ -212,9 +224,91 @@ export function RecruitScreen({ run, node, battleResult, onStartFight, onRecruit
               {wildPokemon.name} wants to join your team!
             </div>
 
+            {/* Item picker */}
+            {!benchFull && availableItems.length > 0 && (
+              <div style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                width: '100%', maxWidth: 600,
+              }}>
+                <div style={{
+                  fontSize: 13, color: THEME.text.secondary, textAlign: 'center',
+                }}>
+                  Give {wildPokemon.name} a starter item? <span style={{ color: THEME.text.tertiary, fontStyle: 'italic' }}>(optional)</span>
+                </div>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                  gap: 8,
+                  width: '100%',
+                }}>
+                  {availableItems.map(itemId => {
+                    const item = ITEM_DEFS[itemId];
+                    const color = RARITY_COLORS[item.rarity];
+                    const isSelected = selectedItemId === itemId;
+                    return (
+                      <button
+                        key={itemId}
+                        onClick={() => setSelectedItemId(prev => prev === itemId ? null : itemId)}
+                        style={{
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0,
+                          padding: '12px 8px 10px',
+                          background: isSelected
+                            ? `linear-gradient(180deg, ${color}12, ${THEME.bg.panelDark})`
+                            : THEME.bg.panelDark,
+                          border: isSelected
+                            ? `1.5px solid ${color}`
+                            : `1.5px solid ${THEME.border.subtle}`,
+                          borderRadius: 10,
+                          cursor: 'pointer',
+                          color: THEME.text.primary,
+                          textAlign: 'center',
+                          transition: 'all 0.15s',
+                          boxShadow: isSelected
+                            ? `0 0 16px ${color}20, inset 0 0 24px ${color}08`
+                            : 'none',
+                        }}
+                      >
+                        <HeldItemMotif itemId={itemId} size={36} />
+                        <div style={{
+                          fontSize: 11, fontWeight: 'bold',
+                          color,
+                          ...THEME.heading,
+                          lineHeight: 1.2,
+                          marginTop: 6,
+                        }}>
+                          {item.name}
+                        </div>
+                        <div style={{
+                          fontSize: 8, fontWeight: 'bold',
+                          color: THEME.text.tertiary,
+                          ...THEME.heading,
+                          letterSpacing: '0.12em',
+                          textTransform: 'uppercase',
+                          marginTop: 2, marginBottom: 5,
+                        }}>
+                          {item.rarity}
+                        </div>
+                        <div style={{
+                          width: '80%', height: 1,
+                          background: `linear-gradient(to right, transparent, ${color}50, transparent)`,
+                          marginBottom: 5,
+                        }} />
+                        <div style={{
+                          fontSize: 10, color: THEME.text.secondary,
+                          lineHeight: 1.3,
+                        }}>
+                          {item.description}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: 16 }}>
               <button
-                onClick={onRecruit}
+                onClick={() => onRecruit(selectedItemId ?? undefined)}
                 disabled={benchFull}
                 style={{
                   padding: '14px 36px',

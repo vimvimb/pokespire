@@ -84,7 +84,7 @@ const RARITY_COLORS: Record<CardRarity, string | null> = {
 
 /** Build a live description reflecting current modifiers from passives. */
 function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered: boolean): React.ReactNode {
-  const { additive: additiveMod, multiplier, tags } = calculateHandPreview(combatant, card);
+  const { additive: additiveMod, multiplier, statusStacksMult, tags } = calculateHandPreview(combatant, card);
 
   const hasDamageEffect = card.effects.some(e =>
     e.type === 'damage' || e.type === 'multi_hit' || e.type === 'heal_on_hit' ||
@@ -105,7 +105,7 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
         }
         const afterAdditive = Math.max(displayBase + additiveMod, 1);
         const effective = Math.floor(afterAdditive * multiplier);
-        const changed = additiveMod !== 0 || multiplier > 1 || conditionActive;
+        const changed = additiveMod !== 0 || multiplier !== 1 || conditionActive;
         parts.push(
           <span key={parts.length}>
             Deal{' '}
@@ -132,11 +132,17 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
             {effect.bonusCondition === 'user_below_half_hp' && !conditionActive && (
               <span style={{ opacity: 0.6 }}>{' '}+{effect.bonusValue} below half HP.</span>
             )}
+            {effect.bonusCondition === 'target_below_half_hp' && (
+              <span style={{ color: '#f87171' }}>{' '}+{effect.bonusValue} if target below half HP.</span>
+            )}
             {effect.hpScaling && (
               <span style={{ color: '#fb923c', opacity: 0.8 }}>{' '}Scales with HP.</span>
             )}
             {effect.weightScaling && (
               <span style={{ color: '#d4d4d8', opacity: 0.8 }}>{' '}Scales with weight.</span>
+            )}
+            {effect.inverseWeightScaling && (
+              <span style={{ color: '#4ade80', opacity: 0.8 }}>{' '}More vs heavy targets.</span>
             )}
           </span>
         );
@@ -148,13 +154,26 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
       case 'heal':
         parts.push(<span key={parts.length}>Heal {effect.value} HP.</span>);
         break;
-      case 'apply_status':
-        parts.push(<span key={parts.length}>Apply {effect.status} {effect.stacks}.</span>);
+      case 'apply_status': {
+        const effectiveStacks = effect.stacks * statusStacksMult;
+        const stacksChanged = statusStacksMult !== 1;
+        parts.push(
+          <span key={parts.length}>
+            Apply {effect.status}{' '}
+            {stacksChanged ? (
+              <span style={{ color: '#4ade80', fontWeight: 'bold' }}>{effectiveStacks}</span>
+            ) : (
+              <>{effectiveStacks}</>
+            )}
+            .
+          </span>
+        );
         break;
+      }
       case 'multi_hit': {
         const perHit = Math.floor(Math.max(effect.value + additiveMod, 1) * multiplier);
         const total = perHit * effect.hits;
-        const changed = additiveMod !== 0 || multiplier > 1;
+        const changed = additiveMod !== 0 || multiplier !== 1;
         parts.push(
           <span key={parts.length}>
             Hit {effect.hits}× for{' '}
@@ -173,7 +192,7 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
         const effective = Math.floor(afterAdditive * multiplier);
         const hasVerdantDrain = combatant.passiveIds.includes('verdant_drain');
         const displayHealPct = hasVerdantDrain ? 100 : Math.round(effect.healPercent * 100);
-        const changed = additiveMod !== 0 || multiplier > 1;
+        const changed = additiveMod !== 0 || multiplier !== 1;
         const healChanged = hasVerdantDrain && effect.healPercent < 1.0;
         parts.push(
           <span key={parts.length}>
@@ -198,7 +217,7 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
         const afterAdditive = Math.max(effect.value + additiveMod, 1);
         const effective = Math.floor(afterAdditive * multiplier);
         const recoilPct = Math.round(effect.recoilPercent * 100);
-        const changed = additiveMod !== 0 || multiplier > 1;
+        const changed = additiveMod !== 0 || multiplier !== 1;
         const recoilNegated = hasRockHead(combatant);
         parts.push(
           <span key={parts.length}>
@@ -236,7 +255,7 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
       case 'self_ko': {
         const afterAdditive = Math.max(effect.value + additiveMod, 1);
         const effective = Math.floor(afterAdditive * multiplier);
-        const changed = additiveMod !== 0 || multiplier > 1;
+        const changed = additiveMod !== 0 || multiplier !== 1;
         parts.push(
           <span key={parts.length} style={{ color: '#ef4444' }}>
             Deal{' '}
@@ -282,6 +301,20 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
         parts.push(
           <span key={parts.length} style={{ color: '#f87171' }}>
             Lose {effect.moveType} type.
+          </span>
+        );
+        break;
+      case 'add_echo_to_hand':
+        parts.push(
+          <span key={parts.length} style={{ color: '#c084fc' }}>
+            Add {effect.count} Echo{effect.count > 1 ? 'es' : ''} to hand.
+          </span>
+        );
+        break;
+      case 'copy_enemy_card':
+        parts.push(
+          <span key={parts.length} style={{ color: '#c084fc' }}>
+            Copy Echo of target's top card.
           </span>
         );
         break;

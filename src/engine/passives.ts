@@ -12,9 +12,14 @@
  */
 
 import type { CombatState, Combatant, LogEntry, MoveDefinition, MoveType } from './types';
-import { applyStatus, getEffectiveSpeed, getStatusStacks } from './status';
+import { applyStatus, getEffectiveSpeed, getStatusStacks, getStatus } from './status';
 import { applyHeal, applyBypassDamage } from './damage';
 import { isInEffectiveFrontRow } from './position';
+import {
+  processItemBattleStart, resetItemTurnState, processItemTurnStart,
+  processItemRoundStart, processItemOnDamageDealt, processItemOnKO,
+  processItemOnDamageTaken, processItemTurnEnd, hasItem,
+} from './itemEffects';
 
 // ============================================================
 // Helper Functions
@@ -198,6 +203,11 @@ export function onBattleStart(state: CombatState): LogEntry[] {
     });
   }
 
+  // --- Item onBattleStart effects ---
+  for (const combatant of state.combatants) {
+    logs.push(...processItemBattleStart(state, combatant));
+  }
+
   return logs;
 }
 
@@ -217,12 +227,15 @@ export function onTurnStart(
   combatant.turnFlags.infernoMomentumReducedIndex = null;
   combatant.turnFlags.relentlessUsedThisTurn = false;
   combatant.turnFlags.overgrowHealUsedThisTurn = false;
+  combatant.turnFlags.torrentShieldUsedThisTurn = false;
   combatant.turnFlags.swarmStrikeUsedThisTurn = false;
   combatant.turnFlags.surgeMomentumReducedIndex = null;
   combatant.turnFlags.dragonsMajestyReducedIndex = null;
   combatant.turnFlags.sniperUsedThisTurn = false;
   combatant.turnFlags.switchesThisTurn = 0;
   combatant.turnFlags.overclockReduction = 0;
+  combatant.turnFlags.quickClawBonusTurn = false;
+  combatant.itemState['guerillaFront'] = 0;
 
   // Inferno Momentum: Reduce highest-cost FIRE card's cost by 3
   if (combatant.passiveIds.includes('inferno_momentum')) {
@@ -332,6 +345,12 @@ export function onTurnStart(
 
   // Reset Relentless bonus counter at turn start
   combatant.costModifiers['relentlessBonus'] = 0;
+
+  // Reset item turn flags
+  resetItemTurnState(combatant);
+
+  // --- Item effects at turn start ---
+  logs.push(...processItemTurnStart(state, combatant));
 
   return logs;
 }
@@ -456,18 +475,7 @@ export function onDamageDealt(
     logs.push(...auraLogs);
   }
 
-  // Moxie: When you KO an enemy, gain 3 energy
-  if (attacker.passiveIds.includes('moxie') && !target.alive && damageDealt > 0) {
-    const energyGained = Math.min(3, attacker.energyCap - attacker.energy);
-    if (energyGained > 0) {
-      attacker.energy += energyGained;
-      logs.push({
-        round: state.round,
-        combatantId: attacker.id,
-        message: `Moxie: ${attacker.name} gains ${energyGained} energy from the KO!`,
-      });
-    }
-  }
+  // Moxie: Kill-triggered — handled in onKill() instead
 
   // No Guard: When you deal unblocked damage, strip own defenses for Strength
   if (attacker.passiveIds.includes('no_guard') && damageDealt > 0) {
@@ -562,6 +570,52 @@ export function onDamageDealt(
     });
   }
 
+  // Spiked Hide: When you deal damage, gain Thorns equal to damage/4 (min 1)
+  if (attacker.passiveIds.includes('spiked_hide') && damageDealt > 0) {
+    const thornStacks = Math.max(1, Math.floor(damageDealt / 4));
+    applyStatus(state, attacker, 'thorns', thornStacks, attacker.id);
+    logs.push({
+      round: state.round,
+      combatantId: attacker.id,
+      message: `Spiked Hide: ${attacker.name} gains Thorns ${thornStacks}!`,
+    });
+  }
+
+  // --- Item onDamageDealt effects ---
+  logs.push(...processItemOnDamageDealt(state, attacker, target, damageDealt, card));
+
+  return logs;
+}
+
+/**
+ * Called when a combatant is KO'd by an attack.
+ * Fires ONCE per kill, after all post-damage effects.
+ * Used for: Moxie (gain energy on KO), future items (Rocky Helmet, etc.)
+ */
+export function onKill(
+  state: CombatState,
+  killer: Combatant,
+  victim: Combatant,
+  _card: MoveDefinition
+): LogEntry[] {
+  const logs: LogEntry[] = [];
+
+  // Moxie: When you KO an enemy, gain 3 energy
+  if (killer.passiveIds.includes('moxie') && killer.alive) {
+    const energyGained = Math.min(3, killer.energyCap - killer.energy);
+    if (energyGained > 0) {
+      killer.energy += energyGained;
+      logs.push({
+        round: state.round,
+        combatantId: killer.id,
+        message: `Moxie: ${killer.name} gains ${energyGained} energy from the KO!`,
+      });
+    }
+  }
+
+  // --- Item onKO effects ---
+  logs.push(...processItemOnKO(state, killer, victim));
+
   return logs;
 }
 
@@ -621,8 +675,22 @@ export function onStatusApplied(
     }
   }
 
+  // King's Rock: When source applies a debuff, also apply Slow 1 (not on slow itself to prevent recursion)
+  const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt', 'provoke', 'fatigue'];
+  if (hasItem(source, 'kings_rock') &&
+      debuffTypes.includes(statusType) &&
+      statusType !== 'slow' &&
+      source.side !== target.side &&
+      target.alive) {
+    applyStatusDirect(state, target, 'slow', 1, source.id);
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `King's Rock: ${target.name} is slowed!`,
+    });
+  }
+
   // Guts: When an enemy applies a debuff to you, gain 1 Strength (once per application, not per stack)
-  const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt'];
   if (target.passiveIds.includes('guts') &&
       source.side !== target.side &&
       debuffTypes.includes(statusType)) {
@@ -706,7 +774,7 @@ export function onTurnEnd(
 
   // Shed Skin: At end of turn, remove 1 stack from ALL debuffs
   if (combatant.passiveIds.includes('shed_skin') && combatant.alive) {
-    const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt'];
+    const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt', 'provoke', 'fatigue'];
     const debuffs = combatant.statuses.filter(s => debuffTypes.includes(s.type));
     if (debuffs.length > 0) {
       const expiredTypes: string[] = [];
@@ -733,6 +801,9 @@ export function onTurnEnd(
       }
     }
   }
+
+  // --- Item turn-end effects ---
+  logs.push(...processItemTurnEnd(state, combatant));
 
   // Stench: Enemy directly facing this combatant gains 2 Poison
   if (combatant.passiveIds.includes('stench') && combatant.alive) {
@@ -768,6 +839,23 @@ export function onRoundEnd(state: CombatState): void {
   for (const c of state.combatants) {
     c.turnFlags.alliesDamagedThisRound = new Set();
   }
+}
+
+/**
+ * Called at the START of each round (before any turn).
+ * Used for: Vanguard (round-start block based on allies in row).
+ */
+export function processRoundStartPassives(state: CombatState): LogEntry[] {
+  const logs: LogEntry[] = [];
+
+  for (const combatant of state.combatants) {
+    if (!combatant.alive) continue;
+
+    // Item round-start effects (Iron Plate, Assault Vest)
+    logs.push(...processItemRoundStart(state, combatant));
+  }
+
+  return logs;
 }
 
 /**
@@ -848,31 +936,37 @@ export function onDamageTaken(
     });
   }
 
-  // Spiked Hide: When hit by a front-row attack, deal 2 damage back to the attacker
-  if (target.passiveIds.includes('spiked_hide') && target.alive && attacker.alive && card.range === 'front_enemy') {
-    applyBypassDamage(attacker, 2);
+  // (Spiked Hide moved to onDamageDealt — now grants Thorns instead of flat damage)
+
+  // Bristling Rampart: When you take unblocked damage, gain 3 Block
+  if (target.passiveIds.includes('bristling_rampart') && target.alive) {
+    target.block += 3;
     logs.push({
       round: state.round,
       combatantId: target.id,
-      message: `Spiked Hide: ${attacker.name} takes 2 damage from ${target.name}'s spikes!`,
+      message: `Bristling Rampart: ${target.name} gains 3 Block!`,
+    });
+  }
+
+  // --- Item onDamageTaken effects ---
+  logs.push(...processItemOnDamageTaken(state, target, hpDamage));
+
+  // Thorns: When hit by any attack, deal thorns stacks as bypass damage to attacker
+  const thornsStacks = getStatusStacks(target, 'thorns');
+  if (thornsStacks > 0 && target.alive && attacker.alive) {
+    applyBypassDamage(attacker, thornsStacks);
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Thorns: ${attacker.name} takes ${thornsStacks} damage from ${target.name}!`,
     });
     if (!attacker.alive) {
       logs.push({
         round: state.round,
         combatantId: attacker.id,
-        message: `${attacker.name} was KO'd by Spiked Hide!`,
+        message: `${attacker.name} was KO'd by Thorns!`,
       });
     }
-  }
-
-  // Bristling Rampart: When you take unblocked damage, gain 2 Block
-  if (target.passiveIds.includes('bristling_rampart') && target.alive) {
-    target.block += 2;
-    logs.push({
-      round: state.round,
-      combatantId: target.id,
-      message: `Bristling Rampart: ${target.name} gains 2 Block!`,
-    });
   }
 
   // Track ally damage and trigger Protective Instinct
@@ -1185,22 +1279,22 @@ export function checkFortifiedCannons(
 
 /**
  * Check if Fortified Spines should provide bonus damage.
- * Fortified Spines: Ground attacks deal +25% of current Block as bonus damage.
+ * Fortified Spines: ALL attacks deal bonus damage equal to attacker's Thorns stacks.
  */
 export function checkFortifiedSpines(
   state: CombatState,
   attacker: Combatant,
-  card: MoveDefinition
+  _card: MoveDefinition
 ): { bonusDamage: number; logs: LogEntry[] } {
   const logs: LogEntry[] = [];
 
-  if (attacker.passiveIds.includes('fortified_spines') && card.type === 'ground' && attacker.block > 0) {
-    const bonus = Math.floor(attacker.block * 0.25);
+  if (attacker.passiveIds.includes('fortified_spines')) {
+    const bonus = getStatusStacks(attacker, 'thorns');
     if (bonus > 0) {
       logs.push({
         round: state.round,
         combatantId: attacker.id,
-        message: `Fortified Spines: +${bonus} bonus damage from Block!`,
+        message: `Fortified Spines: +${bonus} bonus damage from Thorns!`,
       });
       return { bonusDamage: bonus, logs };
     }
@@ -1866,7 +1960,7 @@ export function checkImpactGuard(
  * Used by Hex card for scaling damage.
  */
 export function getTotalDebuffStacks(combatant: Combatant): number {
-  const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt'];
+  const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt', 'provoke', 'fatigue'];
   return combatant.statuses
     .filter(s => debuffTypes.includes(s.type))
     .reduce((total, s) => total + s.stacks, 0);
@@ -1877,8 +1971,18 @@ export function getTotalDebuffStacks(combatant: Combatant): number {
  * Used by Burning Jealousy for scaling damage against buffed targets.
  */
 export function getTotalBuffStacks(combatant: Combatant): number {
-  const buffTypes = ['strength', 'evasion', 'haste'];
+  const buffTypes = ['strength', 'evasion', 'haste', 'thorns'];
   return combatant.statuses
     .filter(s => buffTypes.includes(s.type))
     .reduce((total, s) => total + s.stacks, 0);
 }
+
+// ============================================================
+// Held Item Damage Checks — delegated to itemEffects.ts
+// Re-exported here for backwards compatibility with existing callers.
+// ============================================================
+export {
+  getItemDamageBonus as checkItemDamageBonus,
+  getItemDamageReduction as checkItemDamageReduction,
+  getItemDamageBonusSourceOnly as checkItemDamageBonusSourceOnly,
+} from './itemEffects';

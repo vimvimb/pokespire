@@ -25,7 +25,7 @@ export const ACT_MAP_CONFIGS: Record<number, ActMapConfig> = {
     tintColor: 'rgba(10, 30, 15, 0.4)',
     ambientColor: '#4ade80',
     title: 'Act 1 — Rocket Hideout',
-    bossNodeId: 's6-boss-ariana',
+    bossNodeId: '1ab',
     bossName: 'Ariana',
   },
   2: {
@@ -33,7 +33,7 @@ export const ACT_MAP_CONFIGS: Record<number, ActMapConfig> = {
     tintColor: 'rgba(25, 10, 35, 0.4)',
     ambientColor: '#a855f7',
     title: 'Act 2 — Floor 2',
-    bossNodeId: 'a2-s6-boss-giovanni',
+    bossNodeId: '2z',
     bossName: 'Giovanni',
   },
   3: {
@@ -41,7 +41,7 @@ export const ACT_MAP_CONFIGS: Record<number, ActMapConfig> = {
     tintColor: 'rgba(15, 10, 30, 0.15)',
     ambientColor: '#60a5fa',
     title: 'Act 3 — The Depths',
-    bossNodeId: 'a3-s6-boss-mewtwo',
+    bossNodeId: '3q',
     bossName: 'Mewtwo',
   },
 };
