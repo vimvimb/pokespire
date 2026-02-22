@@ -3,7 +3,7 @@ import type { RunState, RunPokemon, MapNode, BattleNode, ActTransitionNode, Card
 import { getEventsForAct } from '../data/events';
 import { getPokemon, getMove } from '../data/loaders';
 import { STARTING_GOLD } from '../data/shop';
-import { ACT1_NODES, ACT2_NODES, ACT3_NODES, getNodeById } from './nodes';
+import { ACT2_NODES, ACT3_NODES, getNodeById } from './nodes';
 import { getCampaign } from '../data/campaigns';
 import {
   getProgressionTree,

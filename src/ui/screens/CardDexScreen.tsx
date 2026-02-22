@@ -22,8 +22,8 @@ const ALL_RARITIES: CardRarity[] = [
 ];
 
 const ALL_STATUSES: StatusType[] = [
-  'burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt',
-  'strength', 'evasion', 'haste',
+  'burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt', 'provoke', 'fatigue',
+  'strength', 'evasion', 'haste', 'thorns',
 ];
 
 const STATUS_COLORS: Record<StatusType, string> = {
@@ -38,6 +38,9 @@ const STATUS_COLORS: Record<StatusType, string> = {
   evasion: '#67e8f9',
   haste: '#fbbf24',
   taunt: '#dc2626',
+  provoke: '#e040a0',
+  fatigue: '#78716c',
+  thorns: '#84cc16',
 };
 
 const TYPE_COLORS: Record<MoveType, string> = {

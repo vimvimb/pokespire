@@ -5,7 +5,7 @@ import { ALL_EVENTS, needsPokemonSelection } from '../../data/events';
 import { resolveOutcome, processEffects } from '../../run/events';
 import type { PendingInteractive } from '../../run/events';
 import { getPokemon, getMove } from '../../data/loaders';
-import { removeCardsFromDeck, addCardToDeck, createRecruitPokemon, getRecruitLevel, recruitToRoster, reviveFromGraveyard, fullHealPartyMember } from '../../run/state';
+import { removeCardsFromDeck, addCardToDeck, createRecruitPokemon, getRecruitLevel, recruitToRoster, reviveFromGraveyard } from '../../run/state';
 import { buildTypePool } from '../../run/draft';
 import { createRng, sampleCards } from '../../run/rng';
 import { SHOP_ITEMS } from '../../data/shop';

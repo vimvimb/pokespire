@@ -131,10 +131,10 @@ function CornerAccents({ color }: { color: string }) {
   );
   return (
     <>
-      {corner(6, undefined, undefined, 6, true, false, false, true)}
-      {corner(6, 6, undefined, undefined, true, true, false, false)}
-      {corner(undefined, undefined, 6, 6, false, false, true, true)}
-      {corner(undefined, 6, 6, undefined, false, true, true, false)}
+      {corner(6, 'auto', 'auto', 6, true, false, false, true)}
+      {corner(6, 6, 'auto', 'auto', true, true, false, false)}
+      {corner('auto', 'auto', 6, 6, false, false, true, true)}
+      {corner('auto', 6, 6, 'auto', false, true, true, false)}
     </>
   );
 }

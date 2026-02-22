@@ -147,8 +147,8 @@ function ItemCard({ item, isSelected, onClick, delay }: {
         fontWeight: 'bold',
         color: isSelected ? rarityColor : THEME.text.primary,
         textAlign: 'center',
-        letterSpacing: '0.05em',
         ...THEME.heading,
+        letterSpacing: '0.05em',
         transition: 'color 0.2s',
       }}>
         {item.name.toUpperCase()}

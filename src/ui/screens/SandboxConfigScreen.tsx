@@ -49,6 +49,8 @@ const STATUS_COLORS: Record<StatusType, string> = {
   haste: '#fbbf24',
   taunt: '#dc2626',
   provoke: '#e040a0',
+  fatigue: '#78716c',
+  thorns: '#84cc16',
 };
 
 
