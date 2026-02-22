@@ -4725,5 +4725,76 @@
     ],
     "description": "Deal 33 damage to a column. Apply Enfeeble 6 to self.",
     "contact": false
+  },
+  "ancient-power": {
+    "name": "AncientPower",
+    "cost": 2,
+    "type": "rock",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 18 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["rock"],
+    "description": "Deal 18 damage.",
+    "contact": false
+  },
+  "magical-leaf": {
+    "name": "Magical Leaf",
+    "cost": 2,
+    "type": "grass",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 16 }
+    ],
+    "rarity": "basic",
+    "pools": ["grass"],
+    "description": "Deal 16 damage. Never misses.",
+    "contact": false
+  },
+  "sacred-fire": {
+    "name": "Sacred Fire",
+    "cost": 3,
+    "type": "fire",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 30 },
+      { "type": "status", "status": "burn", "chance": 0.5 }
+    ],
+    "rarity": "rare",
+    "pools": ["fire"],
+    "description": "Deal 30 damage. 50% chance to Burn.",
+    "contact": false
+  },
+  "aeroblast": {
+    "name": "Aeroblast",
+    "cost": 3,
+    "type": "flying",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 24 }
+    ],
+    "rarity": "rare",
+    "pools": ["flying"],
+    "description": "Deal 24 damage to all enemies.",
+    "contact": false
+  },
+  "future-sight": {
+    "name": "Future Sight",
+    "cost": 2,
+    "type": "psychic",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 22 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["psychic"],
+    "description": "Deal 22 damage.",
+    "contact": false
   }
 }

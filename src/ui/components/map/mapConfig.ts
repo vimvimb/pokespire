@@ -4,14 +4,16 @@ import act3Bg from '../../../../assets/backgrounds/campaign_1_act_3_map_backgrou
 
 export interface ActMapConfig {
   backgroundImage: string;
-  tintColor: string;       // RGBA overlay tint
-  ambientColor: string;    // Particle / glow base color
+  tintColor: string;             // RGBA overlay tint
+  ambientColor: string;          // Particle / glow base color
   title: string;
   bossNodeId: string;
   bossName: string;
+  /** Optional campaign-specific combat background. Overrides the default Campaign 1 logic in BattleScreen. */
+  combatBackgroundImage?: string;
 }
 
-const ACT_MAP_CONFIGS: Record<number, ActMapConfig> = {
+export const ACT_MAP_CONFIGS: Record<number, ActMapConfig> = {
   1: {
     backgroundImage: act1Bg,
     tintColor: 'rgba(10, 30, 15, 0.4)',

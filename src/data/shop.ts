@@ -60,4 +60,8 @@ export const POKEMON_COSTS: Record<string, number> = {
   machop: 300,
   // 400g — high base stats or legendary potential
   tauros: 400, kangaskhan: 400, snorlax: 400, lapras: 400, dratini: 400,
+  // Gen 2 (Johto) starters
+  chikorita: 250, cyndaquil: 250, totodile: 250,
+  // Gen 2 (Johto) companions
+  sentret: 100, hoothoot: 150, ledyba: 100, spinarak: 100,
 };

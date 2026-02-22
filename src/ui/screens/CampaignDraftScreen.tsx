@@ -3,6 +3,7 @@ import type { PokemonData } from "../../engine/types";
 import { getPokemon } from "../../data/loaders";
 import { POKEMON_COSTS, STARTING_GOLD } from "../../data/shop";
 import { getUnlockedPokemonIds } from "../../run/playerProfile";
+import { getCampaign } from "../../data/campaigns";
 import { ScreenShell } from "../components/ScreenShell";
 import { PokemonTile } from "../components/PokemonTile";
 import { GoldCoin } from "../components/GoldCoin";
@@ -12,6 +13,7 @@ import { getSpriteUrl } from "../utils/sprites";
 interface Props {
   onComplete: (selectedPokemon: PokemonData[], gold: number) => void;
   onBack: () => void;
+  campaignId?: string;
 }
 
 type Phase =
@@ -21,8 +23,6 @@ type Phase =
   | "draft_3"
   | "draft_4"
   | "done";
-
-const STARTER_IDS = ["bulbasaur", "charmander", "squirtle", "pikachu"];
 
 /** Seeded shuffle using a simple LCG. */
 function seededShuffle<T>(arr: T[], seed: number): T[] {
@@ -36,16 +36,25 @@ function seededShuffle<T>(arr: T[], seed: number): T[] {
   return result;
 }
 
-export function CampaignDraftScreen({ onComplete, onBack }: Props) {
+export function CampaignDraftScreen({ onComplete, onBack, campaignId = "rocket_tower" }: Props) {
+  const campaign = getCampaign(campaignId);
+  const starterIds = campaign.starterIds;
+
   const [phase, setPhase] = useState<Phase>("story_intro");
   const [gold, setGold] = useState(STARTING_GOLD);
   const [picked, setPicked] = useState<PokemonData[]>([]);
 
-  // Compute draft pool once per mount — unlocked Pokemon excluding starters
+  // Compute draft pool once per mount.
+  // Fixed campaigns use their defined pool; Campaign 1 uses the player's unlocked Pokemon.
   const draftPool = useMemo(() => {
-    const unlocked = getUnlockedPokemonIds();
     const seed = Date.now();
-    const eligible = unlocked.filter((id) => !STARTER_IDS.includes(id));
+    if (campaign.draftPool !== null) {
+      // Fixed pool: shuffle and use as-is
+      return seededShuffle(campaign.draftPool, seed);
+    }
+    // Unlock-based pool: filter out starters
+    const unlocked = getUnlockedPokemonIds();
+    const eligible = unlocked.filter((id) => !starterIds.includes(id));
     return seededShuffle(eligible, seed);
   }, []);
 
@@ -213,8 +222,7 @@ export function CampaignDraftScreen({ onComplete, onBack }: Props) {
               fontStyle: "italic",
             }}
           >
-            There have been some strange disturbances in the old Team Rocket
-            hideout. You've been sent to investigate, but you'll need help.
+            {campaign.narrativeTexts.draftIntro}
           </div>
           <button
             onClick={() => setPhase("starter_pick")}
@@ -234,7 +242,7 @@ export function CampaignDraftScreen({ onComplete, onBack }: Props) {
   // ── Starter Pick ────────────────────────────────────────────────
 
   if (phase === "starter_pick") {
-    const starters = STARTER_IDS.map((id) => getPokemon(id));
+    const starters = starterIds.map((id) => getPokemon(id));
 
     return (
       <ScreenShell

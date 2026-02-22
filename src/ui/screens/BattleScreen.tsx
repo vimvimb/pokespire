@@ -44,6 +44,7 @@ import { simulateEnemyIntents } from "../../engine/intentPreview";
 import type { EnemyIntent } from "../../engine/intentPreview";
 import { THEME } from "../theme";
 import battleBgAct1 from "../../../assets/backgrounds/rocket_lab_act_1_v4.png";
+import { getRunActMapConfig } from "../../data/campaigns";
 import { playSound, type SoundEffect } from "../utils/sound";
 
 export type BattleResult = "victory" | "defeat";
@@ -1362,9 +1363,20 @@ export function BattleScreen({
   }, [gameOver, phase, state.combatants, state.goldEarned, onBattleEnd]);
 
   const act = runState?.currentAct ?? 1;
-  const [battleBackground, setBattleBackground] = useState<string>(battleBgAct1);
+  const [battleBackground, setBattleBackground] = useState<string>(() => {
+    // Use campaign-specific combat background if available, otherwise default to C1 act 1
+    const campaignBg = runState ? getRunActMapConfig(runState).combatBackgroundImage : null;
+    return campaignBg ?? battleBgAct1;
+  });
 
   useEffect(() => {
+    // Campaign-specific combat background takes priority (variant-aware via getRunActMapConfig)
+    const campaignBg = runState ? getRunActMapConfig(runState).combatBackgroundImage : null;
+    if (campaignBg) {
+      setBattleBackground(campaignBg);
+      return;
+    }
+    // Campaign 1 fallback — lazy-load act backgrounds to avoid bundling everything upfront
     if (act === 1) {
       setBattleBackground(battleBgAct1);
       return;
@@ -1378,7 +1390,7 @@ export function BattleScreen({
     import("../../../assets/backgrounds/rocket_lab_act_3.png").then((m) =>
       setBattleBackground(m.default),
     );
-  }, [act]);
+  }, [act, runState]);
 
   return (
     <div

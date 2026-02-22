@@ -5,7 +5,7 @@ import { PokemonDetailsPanel } from '../components/PokemonDetailsPanel';
 import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
 
-import { getActMapConfig } from '../components/map/mapConfig';
+import { getRunActMapConfig } from '../../data/campaigns';
 import { MapBackground } from '../components/map/MapBackground';
 import { MapNode as MapNodeComponent, type NodeState } from '../components/map/MapNode';
 import { MapPath, type PathState } from '../components/map/MapPath';
@@ -63,7 +63,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
   const [showMoveDeleter, setShowMoveDeleter] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  const actConfig = getActMapConfig(run.currentAct);
+  const actConfig = getRunActMapConfig(run);
   const availableNodes = getAvailableNextNodes(run);
   const availableNodeIds = new Set(availableNodes.map(n => n.id));
   const visitedNodeIds = new Set(run.visitedNodeIds);

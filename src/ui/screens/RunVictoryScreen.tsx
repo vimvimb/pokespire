@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import type { RunState } from '../../run/types';
 import { getPokemon } from '../../data/loaders';
 import { PASSIVE_DEFINITIONS } from '../../run/progression';
+import { getCampaign } from '../../data/campaigns';
 import { AmbientBackground } from '../components/AmbientBackground';
 import { Flourish } from '../components/Flourish';
 import { THEME } from '../theme';
@@ -90,9 +91,19 @@ export function RunVictoryScreen({ run, onNewRun }: Props) {
           zIndex: 1,
         }}
       >
-        Mewtwo has been subdued. Team Rocket's ambitions lie in ruins.
-        <br />
-        Your team emerges from the caverns, triumphant.
+        {(() => {
+          const campaign = getCampaign(run.campaignId ?? 'rocket_tower');
+          const texts = campaign.narrativeTexts;
+          // Check for act-variant-specific victory text first
+          const lastActNumber = campaign.acts[campaign.acts.length - 1].actNumber;
+          const variant = run.actVariants?.[lastActNumber];
+          const subtitle = (variant && texts.victorySubtitleVariants?.[variant])
+            ? texts.victorySubtitleVariants[variant]
+            : texts.victorySubtitle;
+          return subtitle.split('\n').map((line, i) => (
+            <span key={i}>{line}{i < subtitle.split('\n').length - 1 && <br />}</span>
+          ));
+        })()}
       </div>
 
       {/* ── Party Roster ── */}

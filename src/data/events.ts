@@ -878,12 +878,419 @@ const FIXED_EVENTS: EventDefinition[] = [
 ];
 
 // ============================================================
+// Campaign 2 — Johto Events (pre-assigned to nodes, not in random pool)
+// ============================================================
+
+const CAMPAIGN2_EVENTS: EventDefinition[] = [
+  // Act 1 — Ilex Forest
+  {
+    id: 'c2_gs_ball',
+    act: 1,
+    title: 'The GS Ball',
+    narrativeText: "Half-buried in the roots of an ancient tree, a golden Poké Ball catches the light. It hums with an energy you can't name. Carvings on its surface depict Celebi, wings spread.",
+    choices: [
+      {
+        id: 'pick_up',
+        label: 'Pick it up carefully',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 60, effects: [{ type: 'maxHpBoost', target: 'one', amount: 8 }], description: 'The energy pulses steadily through your hands.' },
+            { weight: 40, effects: [{ type: 'damage', target: 'one', amount: 6 }, { type: 'gold', amount: 50 }], description: 'The energy discharges unexpectedly. A coin purse falls from your bag.' },
+          ],
+        },
+      },
+      {
+        id: 'leave_it',
+        label: 'Leave it where it lies',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'gold', amount: 150 }, { type: 'healPercent', target: 'all', percent: 0.15 }],
+          description: 'The forest exhales. Nothing disturbed — the energy settles.',
+        },
+      },
+    ],
+  },
+  {
+    id: 'c2_forest_sprite',
+    act: 1,
+    title: 'Forest Sprite Sighting',
+    narrativeText: "A flash of green darts between the trunks — gone before you can focus. Your Pokemon are restless with excitement.",
+    choices: [
+      {
+        id: 'give_chase',
+        label: 'Give chase',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 55, effects: [{ type: 'recruit' }], description: 'A small Pokemon, startled but curious.' },
+            { weight: 45, effects: [{ type: 'damage', target: 'random', amount: 8 }], description: 'You tripped in the roots. The sprite escaped.' },
+          ],
+        },
+      },
+      {
+        id: 'stay_still',
+        label: 'Stay still and wait',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'epicDraft', picks: 1 }],
+          description: 'The forest settles. Something was watching — and left a gift.',
+        },
+      },
+    ],
+  },
+  {
+    id: 'c2_shrine_keeper',
+    act: 1,
+    title: 'The Shrine Keeper',
+    narrativeText: "An elderly man crouches by the Celebi shrine, replacing offerings. He doesn't look surprised to see you. \"The guardian has been restless. Something disturbs its timeline.\"",
+    choices: [
+      {
+        id: 'make_offering',
+        label: 'Make an offering',
+        disabled: (run) => run.gold < 100,
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'gold', amount: -100 }, { type: 'maxHpBoost', target: 'all', amount: 10 }, { type: 'healPercent', target: 'all', percent: 0.2 }],
+          description: "The shrine's energy responds. Worth the price.",
+        },
+      },
+      {
+        id: 'ask_about',
+        label: 'Ask about the rift',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 70, effects: [{ type: 'xp', target: 'all', amount: 2 }], description: 'His knowledge prepares you.' },
+            { weight: 30, effects: [{ type: 'xp', target: 'all', amount: 1 }, { type: 'addDazed', target: 'one', count: 1 }], description: 'The information was overwhelming for one Pokemon.' },
+          ],
+        },
+      },
+    ],
+  },
+
+  // Act 2 — Past Johto
+  {
+    id: 'c2_ecruteak_bell',
+    act: 2,
+    title: "Ecruteak's Bell",
+    narrativeText: "A clear tone rolls across the hillside from the Tin Tower. The monks say the bell rings when something extraordinary draws near — a worthy trainer, or a disaster about to strike.",
+    choices: [
+      {
+        id: 'meditate',
+        label: "Meditate to the bell's tone",
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 60, effects: [{ type: 'maxHpBoost', target: 'all', amount: 6 }], description: 'The resonance strengthens your team.' },
+            { weight: 40, effects: [{ type: 'maxHpBoost', target: 'one', amount: 6 }, { type: 'damage', target: 'one', amount: 8 }], description: 'The frequency overwhelms a less resilient team member.' },
+          ],
+        },
+      },
+      {
+        id: 'press_on',
+        label: 'Cover your ears and press on',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'gold', amount: 100 }, { type: 'healPercent', target: 'all', percent: 0.15 }],
+          description: 'Staying detached costs you nothing today.',
+        },
+      },
+    ],
+  },
+  {
+    id: 'c2_wild_blissey',
+    act: 2,
+    title: 'Wild Blissey',
+    narrativeText: "A round, pink shape waddles into your path carrying a soft-boiled egg in both hands. A Blissey. It regards your party with shining eyes, then slowly extends the egg toward whichever of your Pokemon looks worst off.",
+    choices: [
+      {
+        id: 'accept',
+        label: 'Accept the gift graciously',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'healPercent', target: 'all', percent: 0.4 }, { type: 'gold', amount: 30 }],
+          description: 'The Blissey watches your party recover, then wobbles back into the grass.',
+        },
+      },
+      {
+        id: 'challenge',
+        label: 'Challenge it — gently',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 55, effects: [{ type: 'recruit' }], description: 'It holds its ground, then seems to decide it likes you.' },
+            { weight: 45, effects: [{ type: 'healPercent', target: 'all', percent: 0.2 }], description: 'It dodges every attack with disarming grace, then wanders off. It healed your team on the way out.' },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: 'c2_suicune_sighting',
+    act: 2,
+    title: 'Suicune Sighting',
+    narrativeText: "Over a hill, a sleek blue shape races across the open plain — mane like a cresting wave, eyes like cold glass. A legendary beast, newly made. It pauses, locks eyes with you for exactly one second.",
+    choices: [
+      {
+        id: 'give_chase',
+        label: 'Give chase',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 65, effects: [{ type: 'xp', target: 'all', amount: 3 }], description: 'It led you somewhere.' },
+            { weight: 35, effects: [{ type: 'damage', target: 'random', amount: 10 }], description: 'It outran you completely. You stumbled.' },
+          ],
+        },
+      },
+      {
+        id: 'stand_still',
+        label: 'Stand very still',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'maxHpBoost', target: 'random', amount: 10 }],
+          description: 'Something about its gaze left a mark.',
+        },
+      },
+    ],
+  },
+  {
+    id: 'c2_tower_fire_aftermath',
+    act: 2,
+    title: 'Tower Fire Aftermath',
+    narrativeText: "The ground is still warm here. Charred timber and glowing embers dot the ruins. Among the debris, something moves — sluggish, molten, confused. It survived the fire by becoming part of it.",
+    choices: [
+      {
+        id: 'rescue',
+        label: 'Rescue the Pokemon',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 60, effects: [{ type: 'recruit' }], description: 'It follows you, heat steady.' },
+            { weight: 40, effects: [{ type: 'damage', target: 'random', amount: 12 }, { type: 'gold', amount: 50 }], description: 'It panics and lashes out before fleeing — but drops something useful.' },
+          ],
+        },
+      },
+      {
+        id: 'leave_it',
+        label: 'Leave it to the ruins',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'gold', amount: 150 }, { type: 'cardClone' }],
+          description: 'You find a cache of supplies from the tower workers.',
+        },
+      },
+    ],
+  },
+
+  // Act 3A — Tin Tower
+  {
+    id: 'c2_legends_stir_a',
+    act: 3,
+    title: 'Legends Stir',
+    narrativeText: "Through a high window, you see three shapes moving across the hillside far below — one crackling with electricity, one wreathed in flame, one leaving frost on every surface it crosses. They're climbing the tower on the outside.",
+    choices: [
+      {
+        id: 'watch',
+        label: 'Watch until they disappear',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'xp', target: 'all', amount: 2 }, { type: 'maxHpBoost', target: 'all', amount: 5 }],
+          description: 'The sight of them hardens something in your team.',
+        },
+      },
+      {
+        id: 'call_out',
+        label: 'Call out to them',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 70, effects: [{ type: 'healPercent', target: 'all', percent: 0.25 }, { type: 'xp', target: 'all', amount: 1 }], description: 'One of them turns briefly, almost acknowledging you.' },
+            { weight: 30, effects: [{ type: 'damage', target: 'one', amount: 8 }, { type: 'healPercent', target: 'all', percent: 0.15 }], description: 'Raikou answers with a thunderbolt, then keeps moving.' },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: 'c2_sacred_ash',
+    act: 3,
+    title: 'Sacred Ash',
+    narrativeText: "In a stone bowl surrounded by offerings, a faint ember still smolders. Sacred Ash — embers from Ho-Oh's last descent, decades ago. The monks say it can restore life.",
+    choices: [
+      {
+        id: 'touch',
+        label: 'Touch the ash',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 65, effects: [{ type: 'healPercent', target: 'all', percent: 0.5 }], description: "Ho-Oh's warmth spreads through your team." },
+            { weight: 35, effects: [{ type: 'healPercent', target: 'all', percent: 0.2 }, { type: 'damage', target: 'one', amount: 10 }], description: 'The flame flares; one Pokemon recoils from the intensity.' },
+          ],
+        },
+      },
+      {
+        id: 'leave',
+        label: 'Leave it for the monks',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'maxHpBoost', target: 'all', amount: 10 }, { type: 'gold', amount: 100 }],
+          description: 'A monk watches you go and presses coins into your hand.',
+        },
+      },
+    ],
+  },
+  {
+    id: 'c2_rainbow_feather',
+    act: 3,
+    title: 'Rainbow Feather',
+    narrativeText: "A single feather drifts down — iridescent, shifting through every color as light catches it. It did not fall by accident.",
+    choices: [
+      {
+        id: 'give_strongest',
+        label: 'Give it to your strongest Pokemon',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 70, effects: [{ type: 'maxHpBoost', target: 'one', amount: 15 }], description: 'It bonds completely.' },
+            { weight: 30, effects: [{ type: 'maxHpBoost', target: 'one', amount: 8 }], description: 'The feather only partially takes.' },
+          ],
+        },
+      },
+      {
+        id: 'study',
+        label: 'Study it carefully',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 60, effects: [{ type: 'epicDraft', picks: 2 }], description: 'The patterns reveal techniques.' },
+            { weight: 40, effects: [{ type: 'epicDraft', picks: 1 }], description: "The colors are cryptic — you extract only part of what they hold." },
+          ],
+        },
+      },
+    ],
+  },
+
+  // Act 3B — Brass Tower
+  {
+    id: 'c2_lugia_presence',
+    act: 3,
+    title: "Lugia's Presence",
+    narrativeText: "On the second floor, the air thickens. Every mind in your party registers the same thing simultaneously — weight, depth, cold focus. Something is reading you. Then it withdraws. You are found acceptable. Probably.",
+    choices: [
+      {
+        id: 'open_mind',
+        label: 'Open your mind to it',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 60, effects: [{ type: 'maxHpBoost', target: 'all', amount: 12 }], description: 'The psychic current strengthens you.' },
+            { weight: 40, effects: [{ type: 'damage', target: 'one', amount: 10 }, { type: 'maxHpBoost', target: 'all', amount: 6 }], description: 'The contact is too intense for one team member to handle cleanly.' },
+          ],
+        },
+      },
+      {
+        id: 'shield',
+        label: 'Shield your thoughts',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'gold', amount: 150 }, { type: 'healPercent', target: 'all', percent: 0.2 }],
+          description: 'Staying closed-off costs you nothing here. Small mercy.',
+        },
+      },
+    ],
+  },
+  {
+    id: 'c2_the_three_pokemon',
+    act: 3,
+    title: 'The Three Pokemon',
+    narrativeText: "On the third floor, three scorch marks ring a central column. The wood did not burn like wood — it burned clean, as if something intensely alive passed through it and left only the shape of its absence.",
+    choices: [
+      {
+        id: 'pay_respects',
+        label: 'Pay your respects',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'epicDraft', picks: 1 }],
+          description: 'The silence here is unexpectedly generous.',
+        },
+      },
+      {
+        id: 'investigate',
+        label: 'Investigate the scorch marks',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 65, effects: [{ type: 'gold', amount: 200 }, { type: 'maxHpBoost', target: 'one', amount: 8 }], description: 'Something preserved by the heat.' },
+            { weight: 35, effects: [{ type: 'damage', target: 'one', amount: 10 }, { type: 'gold', amount: 100 }], description: 'Disturbing sacred ground has consequences — but there was still something here.' },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    id: 'c2_silver_feather',
+    act: 3,
+    title: 'Silver Feather',
+    narrativeText: "A feather — purely silver — lands on the back of your hand with no wind to carry it. Weightless. When you hold it to the light, it doesn't reflect — it absorbs. Then it dissolves, leaving only cold.",
+    choices: [
+      {
+        id: 'give_weakest',
+        label: 'Give it to your weakest Pokemon',
+        outcome: {
+          type: 'random',
+          branches: [
+            { weight: 70, effects: [{ type: 'maxHpBoost', target: 'one', amount: 18 }], description: 'Something in them changes — quieter, deeper.' },
+            { weight: 30, effects: [{ type: 'maxHpBoost', target: 'one', amount: 10 }, { type: 'addDazed', target: 'one', count: 1 }], description: 'The cold was too much.' },
+          ],
+        },
+      },
+      {
+        id: 'hold_on',
+        label: 'Hold onto it for now',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'healPercent', target: 'all', percent: 0.3 }, { type: 'gold', amount: 75 }],
+          description: 'It dissolves in your pack eventually. But slowly.',
+        },
+      },
+    ],
+  },
+  {
+    id: 'c2_legends_stir_b',
+    act: 3,
+    title: 'Legends Stir',
+    narrativeText: "A high window in the tower looks out over the bay. Far below, three shapes move through the mist — one airborne, one cresting a wave, one barely visible between bolts of distant lightning. They're circling the tower.",
+    choices: [
+      {
+        id: 'watch',
+        label: 'Watch them for a moment',
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'xp', target: 'all', amount: 2 }, { type: 'maxHpBoost', target: 'all', amount: 5 }],
+          description: 'The sight of them hardens something in your team.',
+        },
+      },
+      {
+        id: 'turn_away',
+        label: "Turn away — don't tempt fate",
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'healPercent', target: 'all', percent: 0.2 }, { type: 'gold', amount: 100 }],
+          description: 'Wisdom is sometimes knowing when not to look.',
+        },
+      },
+    ],
+  },
+];
+
+// ============================================================
 // Master Lookup
 // ============================================================
 
 export const ALL_EVENTS: Record<string, EventDefinition> = {};
 
-for (const event of [...ACT1_EVENTS, ...ACT2_EVENTS, ...ACT3_EVENTS, ...FIXED_EVENTS]) {
+for (const event of [...ACT1_EVENTS, ...ACT2_EVENTS, ...ACT3_EVENTS, ...FIXED_EVENTS, ...CAMPAIGN2_EVENTS]) {
   ALL_EVENTS[event.id] = event;
 }
 

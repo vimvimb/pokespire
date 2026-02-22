@@ -11,6 +11,7 @@ import { useBattle } from "./ui/hooks/useBattle";
 import { useTutorial } from "./ui/hooks/useTutorial";
 import { PartySelectScreen } from "./ui/screens/PartySelectScreen";
 import { CampaignDraftScreen } from "./ui/screens/CampaignDraftScreen";
+import { CampaignSelectScreen } from "./ui/screens/CampaignSelectScreen";
 import { TutorialStarterScreen } from "./ui/screens/TutorialStarterScreen";
 import { BattleScreen } from "./ui/screens/BattleScreen";
 import type { BattleResult } from "./ui/screens/BattleScreen";
@@ -74,6 +75,9 @@ import {
 import {
   unlockPokemon,
   resetProfile,
+  recordCampaignComplete,
+  resetCampaignProgress,
+  unlockAllCampaignsDebug,
 } from "./run/playerProfile";
 import { SHOP_ITEMS, CARD_FORGET_COST } from "./data/shop";
 import {
@@ -86,6 +90,19 @@ import {
   createLevelUpTestState,
   createEvolutionTestState,
   createEvolutionLargePartyTestState,
+  createCampaign2Act1TestState,
+  createCampaign2Act1BossTestState,
+  createCampaign2Act2TestState,
+  createCampaign2Act2GoldBossTestState,
+  createCampaign2Act2SilverBossTestState,
+  createCampaign2Act3ATestState,
+  createCampaign2Act3ABossTestState,
+  createCampaign2Act3BTestState,
+  createCampaign2Act3BBossTestState,
+  createCampaign2Act3ABeforeDogsTestState,
+  createCampaign2Act3BBeforeDogsTestState,
+  createCampaign2GoldTransitionTestState,
+  createCampaign2SilverTransitionTestState,
   applyPartyPercentHeal,
   applyFullHealAll,
   addCardToDeck,
@@ -93,12 +110,9 @@ import {
   moveKnockedOutToGraveyard,
   moveToNode,
   isRunComplete,
-  isAct1Complete,
-  isAct2Complete,
   getCurrentNode,
   applyLevelUp,
-  transitionToAct2,
-  transitionToAct3,
+  transitionToNextAct,
   removeCardsFromDeck,
   removeCardFromBench,
   getCurrentCardRemovalNode,
@@ -118,6 +132,7 @@ import {
   anyPokemonCanLevelUp,
 } from "./run/state";
 import { getActMapConfig } from "./ui/components/map/mapConfig";
+import { isCurrentActComplete, hasNextAct, getCampaignStatus, CAMPAIGNS } from "./data/campaigns";
 import type { Screen } from "./types/screens";
 
 // localStorage keys
@@ -195,6 +210,7 @@ export default function App() {
   const [pendingPostLevelUpScreen, setPendingPostLevelUpScreen] =
     useState<Screen | null>(null);
   const [isTutorialMode, setIsTutorialMode] = useState(false);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>("rocket_tower");
   const [draftResults, setDraftResults] = useState<{
     pokemon: PokemonData[];
     gold: number;
@@ -258,12 +274,12 @@ export default function App() {
   // Start a new run after party selection
   const handleStart = useCallback(
     (party: PokemonData[], positions: Position[], gold: number) => {
-      const run = createRunState(party, positions, Date.now(), gold);
+      const run = createRunState(party, positions, Date.now(), gold, selectedCampaignId);
       setRunState(run);
       setDraftResults(null);
       setScreen("map");
     },
-    [],
+    [selectedCampaignId],
   );
 
   // Tutorial: start practice battle (1 starter vs Magikarp with Splash-only deck)
@@ -287,6 +303,22 @@ export default function App() {
       setScreen("battle");
     },
     [battle],
+  );
+
+  // Campaign select: pick a campaign then advance to draft/tutorial
+  const handleCampaignSelect = useCallback(
+    (campaignId: string) => {
+      // Guard: don't proceed if locked (CampaignSelectScreen also disables the button,
+      // but this is a second line of defence)
+      if (getCampaignStatus(campaignId) === "locked") return;
+      setSelectedCampaignId(campaignId);
+      if (campaignId === "rocket_tower" && !isTutorialComplete()) {
+        setScreen("tutorial_select");
+      } else {
+        setScreen("campaign_draft");
+      }
+    },
+    [],
   );
 
   // Tutorial: skip and go to campaign draft
@@ -463,12 +495,14 @@ export default function App() {
         const allDead = newParty.every((p) => p.currentHp <= 0 || p.knockedOut);
         if (allDead) {
           setIsRecruitBattle(false);
+          setPendingBattleNodeId(null);
           setScreen("run_defeat");
           return;
         }
 
         setRecruitBattleResult(result === "victory" ? "victory" : "defeat");
         setIsRecruitBattle(false);
+        setPendingBattleNodeId(null);
         setScreen("recruit");
         return;
       }
@@ -504,6 +538,18 @@ export default function App() {
 
       // Check if this was the final boss (Mewtwo in Act 3)
       if (isRunComplete(newRun)) {
+        // Persist campaign completion with run metadata for future story use
+        recordCampaignComplete(newRun.campaignId, {
+          completedAt: Date.now(),
+          path: newRun.actVariants?.[newRun.currentAct],
+          metadata: {
+            starter:         newRun.party[0]?.baseFormId ?? null,
+            partyWiped:      newRun.graveyard.length > 0,
+            graveyardCount:  newRun.graveyard.length,
+            activeSurvivors: newRun.party.filter(p => !p.knockedOut).length,
+            goldAtCompletion: newRun.gold,
+          },
+        });
         setRunState(newRun);
         if (anyPokemonCanLevelUp(newRun)) {
           setPendingPostLevelUpScreen("run_victory");
@@ -511,18 +557,8 @@ export default function App() {
         } else {
           setScreen("run_victory");
         }
-      } else if (isAct2Complete(newRun)) {
-        // Giovanni defeated in Act 2 - full heal and go to act transition
-        newRun = applyFullHealAll(newRun);
-        setRunState(newRun);
-        if (anyPokemonCanLevelUp(newRun)) {
-          setPendingPostLevelUpScreen("act_transition");
-          setScreen("level_up");
-        } else {
-          setScreen("act_transition");
-        }
-      } else if (isAct1Complete(newRun)) {
-        // Ariana defeated - full heal and go to act transition
+      } else if (isCurrentActComplete(newRun) && hasNextAct(newRun)) {
+        // Act boss defeated and there is a next act — full heal and show act transition
         newRun = applyFullHealAll(newRun);
         setRunState(newRun);
         if (anyPokemonCanLevelUp(newRun)) {
@@ -633,12 +669,7 @@ export default function App() {
   // Handle act transition - continue to next act
   const handleActTransitionContinue = useCallback(() => {
     if (!runState) return;
-    let newRun: RunState;
-    if (runState.currentAct === 1) {
-      newRun = transitionToAct2(runState);
-    } else {
-      newRun = transitionToAct3(runState);
-    }
+    const newRun = transitionToNextAct(runState);
     setRunState(newRun);
     setScreen("map");
   }, [runState]);
@@ -742,6 +773,9 @@ export default function App() {
       setIsRecruitBattle(true);
       setRecruitFighterIndex(partyIndex);
       setRecruitBattleResult("pending");
+      // Set the recruit node ID so getMusicForScreen can resolve campaign-specific
+      // battle music (e.g. legendary beast track for c2-a3x-s5-recruit-* nodes)
+      setPendingBattleNodeId(recruitNode.id);
       setScreen("battle");
     },
     [runState, battle],
@@ -887,6 +921,45 @@ export default function App() {
     setRunState(run);
     setLastGoldEarned(50);
     setScreen("card_draft");
+  }, []);
+
+  // Campaign 2 (Threads of Time) test shortcuts
+  const handleTestC2Act1 = useCallback(() => { clearSave(); setRunState(createCampaign2Act1TestState()); setScreen("map"); }, []);
+  const handleTestC2Act1Boss = useCallback(() => { clearSave(); setRunState(createCampaign2Act1BossTestState()); setScreen("map"); }, []);
+  const handleTestC2Act2 = useCallback(() => { clearSave(); setRunState(createCampaign2Act2TestState()); setScreen("map"); }, []);
+  const handleTestC2Act2GoldBoss = useCallback(() => { clearSave(); setRunState(createCampaign2Act2GoldBossTestState()); setScreen("map"); }, []);
+  const handleTestC2Act2SilverBoss = useCallback(() => { clearSave(); setRunState(createCampaign2Act2SilverBossTestState()); setScreen("map"); }, []);
+  const handleTestC2Act3A = useCallback(() => { clearSave(); setRunState(createCampaign2Act3ATestState()); setScreen("map"); }, []);
+  const handleTestC2Act3ABoss = useCallback(() => { clearSave(); setRunState(createCampaign2Act3ABossTestState()); setScreen("map"); }, []);
+  const handleTestC2Act3B = useCallback(() => { clearSave(); setRunState(createCampaign2Act3BTestState()); setScreen("map"); }, []);
+  const handleTestC2Act3BBoss = useCallback(() => { clearSave(); setRunState(createCampaign2Act3BBossTestState()); setScreen("map"); }, []);
+  const handleTestC2Act3ABeforeDogs = useCallback(() => { clearSave(); setRunState(createCampaign2Act3ABeforeDogsTestState()); setScreen("map"); }, []);
+  const handleTestC2Act3BBeforeDogs = useCallback(() => { clearSave(); setRunState(createCampaign2Act3BBeforeDogsTestState()); setScreen("map"); }, []);
+  // Gold path — post-Gold dialog (no C1 metadata needed)
+  const handleTestC2GoldTransition = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2GoldTransitionTestState());
+    setScreen("act_transition");
+  }, []);
+  // Silver path — C1 flawless (Giovanni reference triggers)
+  const handleTestC2SilverGiovanniDialog = useCallback(() => {
+    recordCampaignComplete("rocket_tower", {
+      completedAt: Date.now(),
+      metadata: { starter: "charizard", partyWiped: false, graveyardCount: 0, activeSurvivors: 3, debugUnlock: true },
+    });
+    clearSave();
+    setRunState(createCampaign2SilverTransitionTestState());
+    setScreen("act_transition");
+  }, []);
+  // Silver path — C1 not flawless (neutral Silver dialog, no Giovanni reference)
+  const handleTestC2SilverNormalDialog = useCallback(() => {
+    recordCampaignComplete("rocket_tower", {
+      completedAt: Date.now(),
+      metadata: { starter: "charizard", partyWiped: true, graveyardCount: 2, activeSurvivors: 1, debugUnlock: true },
+    });
+    clearSave();
+    setRunState(createCampaign2SilverTransitionTestState());
+    setScreen("act_transition");
   }, []);
 
   // Jump straight to a boss fight from Event Tester
@@ -1040,9 +1113,7 @@ export default function App() {
               clearSave();
               setHasSavedGame(false);
               setDraftResults(null);
-              setScreen(
-                isTutorialComplete() ? "campaign_draft" : "tutorial_select",
-              );
+              setScreen("campaign_select");
             }}
             style={{
               padding: "12px 0",
@@ -1394,6 +1465,10 @@ export default function App() {
             margin: "0 auto",
           }}
         >
+          {/* ── Campaign 1 — Rocket Tower ── */}
+          <div style={{ fontSize: 11, fontWeight: "bold", color: THEME.text.tertiary, letterSpacing: "0.1em", textTransform: "uppercase", paddingTop: 4 }}>
+            Campaign 1 — Rocket Tower
+          </div>
           <button onClick={handleTestAct2} style={devBtnStyle}>
             Test Act 2
           </button>
@@ -1409,6 +1484,90 @@ export default function App() {
           <button onClick={handleTestAct3Boss} style={devBtnStyle}>
             Test Act 3 Boss
           </button>
+
+          {/* ── Campaign 2 — Threads of Time ── */}
+          <div style={{ fontSize: 11, fontWeight: "bold", color: THEME.text.tertiary, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 8 }}>
+            Campaign 2 — Threads of Time
+          </div>
+          <button onClick={handleTestC2Act1} style={devBtnStyle}>
+            C2: Ilex Forest (Act 1)
+          </button>
+          <button onClick={handleTestC2Act1Boss} style={devBtnStyle}>
+            C2: Before Celebi
+          </button>
+          <button onClick={handleTestC2Act2} style={devBtnStyle}>
+            C2: Act 2 — Past Johto
+          </button>
+          <button onClick={handleTestC2Act2GoldBoss} style={devBtnStyle}>
+            C2: Before Gold
+          </button>
+          <button onClick={handleTestC2Act2SilverBoss} style={devBtnStyle}>
+            C2: Before Silver
+          </button>
+          <button onClick={handleTestC2Act3A} style={devBtnStyle}>
+            C2: Tin Tower (Act 3A)
+          </button>
+          <button onClick={handleTestC2Act3ABoss} style={devBtnStyle}>
+            C2: Before Ho-Oh
+          </button>
+          <button onClick={handleTestC2Act3ABeforeDogs} style={devBtnStyle}>
+            C2: Before Legendary Dogs (3A)
+          </button>
+          <button onClick={handleTestC2Act3B} style={devBtnStyle}>
+            C2: Brass Tower (Act 3B)
+          </button>
+          <button onClick={handleTestC2Act3BBoss} style={devBtnStyle}>
+            C2: Before Lugia
+          </button>
+          <button onClick={handleTestC2Act3BBeforeDogs} style={devBtnStyle}>
+            C2: Before Legendary Dogs (3B)
+          </button>
+          <button onClick={handleTestC2GoldTransition} style={devBtnStyle}>
+            C2: Gold Act 2 Transition
+          </button>
+          <button onClick={handleTestC2SilverGiovanniDialog} style={devBtnStyle}>
+            C2: Silver Act 2 Transition (C1 Flawless)
+          </button>
+          <button onClick={handleTestC2SilverNormalDialog} style={devBtnStyle}>
+            C2: Silver Act 2 Transition (C1 Not Flawless)
+          </button>
+
+          {/* ── Campaign Progress ── */}
+          <div style={{ fontSize: 11, fontWeight: "bold", color: THEME.text.tertiary, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 8 }}>
+            Campaign Progress
+          </div>
+          <button
+            onClick={() => {
+              recordCampaignComplete("rocket_tower", {
+                completedAt: Date.now(),
+                metadata: { starter: "charizard", partyWiped: false, graveyardCount: 0, activeSurvivors: 3, debugUnlock: true },
+              });
+            }}
+            style={devBtnStyle}
+          >
+            Debug: Mark C1 Complete
+          </button>
+          <button
+            onClick={() => {
+              unlockAllCampaignsDebug(CAMPAIGNS.map(c => c.id));
+            }}
+            style={devBtnStyle}
+          >
+            Debug: Unlock All Campaigns
+          </button>
+          <button
+            onClick={() => {
+              resetCampaignProgress();
+            }}
+            style={devBtnStyle}
+          >
+            Debug: Reset Campaign Progress
+          </button>
+
+          {/* ── Other ── */}
+          <div style={{ fontSize: 11, fontWeight: "bold", color: THEME.text.tertiary, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 8 }}>
+            Other
+          </div>
           <button onClick={handleTestLevelUp} style={devBtnStyle}>
             Test Level Up
           </button>
@@ -1682,6 +1841,16 @@ export default function App() {
     );
   }
 
+  if (screen === "campaign_select") {
+    return (
+      <CampaignSelectScreen
+        onSelect={handleCampaignSelect}
+        onBack={() => setScreen("main_menu")}
+        getCampaignStatus={getCampaignStatus}
+      />
+    );
+  }
+
   if (screen === "tutorial_select") {
     return (
       <TutorialStarterScreen
@@ -1694,6 +1863,7 @@ export default function App() {
   if (screen === "campaign_draft") {
     return (
       <CampaignDraftScreen
+        campaignId={selectedCampaignId}
         onComplete={(pokemon, gold) => {
           setDraftResults({ pokemon, gold });
           setScreen("select");

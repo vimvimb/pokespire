@@ -2143,6 +2143,735 @@ export const PORYGON_PROGRESSION: ProgressionTree = {
   ],
 };
 
+// ============================================================
+// Gen 2 (Johto) Progression Trees
+// ============================================================
+
+// Chikorita progression — defensive Grass starter, support-oriented
+export const CHIKORITA_PROGRESSION: ProgressionTree = {
+  baseFormId: 'chikorita',
+  rungs: [
+    {
+      level: 1,
+      name: 'Chikorita',
+      description: 'Starting form.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Bayleef',
+      description: 'Evolve to Bayleef. Add Razor Leaf.',
+      evolvesTo: 'bayleef',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['razor-leaf'],
+    },
+    {
+      level: 3,
+      name: 'Meganium',
+      description: 'Evolve to Meganium. Add Body Slam.',
+      evolvesTo: 'meganium',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['body-slam'],
+    },
+    {
+      level: 4,
+      name: 'Meganium (Mastered)',
+      description: 'Add Growth.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['growth'],
+    },
+  ],
+};
+
+// Cyndaquil progression — fast Fire starter, burst attacker
+export const CYNDAQUIL_PROGRESSION: ProgressionTree = {
+  baseFormId: 'cyndaquil',
+  rungs: [
+    {
+      level: 1,
+      name: 'Cyndaquil',
+      description: 'Starting form.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Quilava',
+      description: 'Evolve to Quilava. Add Flamethrower.',
+      evolvesTo: 'quilava',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['flamethrower'],
+    },
+    {
+      level: 3,
+      name: 'Typhlosion',
+      description: 'Evolve to Typhlosion. Add Swift.',
+      evolvesTo: 'typhlosion',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['swift'],
+    },
+    {
+      level: 4,
+      name: 'Typhlosion (Mastered)',
+      description: 'Add Slash.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['slash'],
+    },
+  ],
+};
+
+// Totodile progression — aggressive Water starter, biting melee fighter
+export const TOTODILE_PROGRESSION: ProgressionTree = {
+  baseFormId: 'totodile',
+  rungs: [
+    {
+      level: 1,
+      name: 'Totodile',
+      description: 'Starting form.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Croconaw',
+      description: 'Evolve to Croconaw. Add Slash.',
+      evolvesTo: 'croconaw',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['slash'],
+    },
+    {
+      level: 3,
+      name: 'Feraligatr',
+      description: 'Evolve to Feraligatr. Add Surf.',
+      evolvesTo: 'feraligatr',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['surf'],
+    },
+    {
+      level: 4,
+      name: 'Feraligatr (Mastered)',
+      description: 'Add Slam.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['slam'],
+    },
+  ],
+};
+
+// Sentret progression — quick Normal-type scrapper
+export const SENTRET_PROGRESSION: ProgressionTree = {
+  baseFormId: 'sentret',
+  rungs: [
+    {
+      level: 1,
+      name: 'Sentret',
+      description: 'Starting form.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Furret',
+      description: 'Evolve to Furret. Add Slam.',
+      evolvesTo: 'furret',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['slam'],
+    },
+    {
+      level: 3,
+      name: 'Furret',
+      description: 'Add Slash.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['slash'],
+    },
+    {
+      level: 4,
+      name: 'Furret (Mastered)',
+      description: 'Add Fury Swipes.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['fury-swipes'],
+    },
+  ],
+};
+
+// Hoothoot progression — status-utility Flying-type
+export const HOOTHOOT_PROGRESSION: ProgressionTree = {
+  baseFormId: 'hoothoot',
+  rungs: [
+    {
+      level: 1,
+      name: 'Hoothoot',
+      description: 'Starting form.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Noctowl',
+      description: 'Evolve to Noctowl. Add Wing Attack.',
+      evolvesTo: 'noctowl',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['wing-attack'],
+    },
+    {
+      level: 3,
+      name: 'Noctowl',
+      description: 'Add Gust.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['gust'],
+    },
+    {
+      level: 4,
+      name: 'Noctowl (Mastered)',
+      description: 'Add Swift.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['swift'],
+    },
+  ],
+};
+
+// Ledyba progression — multi-hit Bug/Flying attacker
+export const LEDYBA_PROGRESSION: ProgressionTree = {
+  baseFormId: 'ledyba',
+  rungs: [
+    {
+      level: 1,
+      name: 'Ledyba',
+      description: 'Starting form.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Ledian',
+      description: 'Evolve to Ledian. Add Comet Punch.',
+      evolvesTo: 'ledian',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['comet-punch'],
+    },
+    {
+      level: 3,
+      name: 'Ledian',
+      description: 'Add Swift.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['swift'],
+    },
+    {
+      level: 4,
+      name: 'Ledian (Mastered)',
+      description: 'Add Wing Attack.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['wing-attack'],
+    },
+  ],
+};
+
+// Spinarak progression — poison/drain Bug/Poison type
+export const SPINARAK_PROGRESSION: ProgressionTree = {
+  baseFormId: 'spinarak',
+  rungs: [
+    {
+      level: 1,
+      name: 'Spinarak',
+      description: 'Starting form.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Ariados',
+      description: 'Evolve to Ariados. Add Night Shade.',
+      evolvesTo: 'ariados',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['night-shade'],
+    },
+    {
+      level: 3,
+      name: 'Ariados',
+      description: 'Add Shadow Ball.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['shadow-ball'],
+    },
+    {
+      level: 4,
+      name: 'Ariados (Mastered)',
+      description: 'Add Leech Life.',
+      passiveId: 'none',
+      hpBoost: 0,
+      cardsToAdd: ['leech-life'],
+    },
+  ],
+};
+
+
+// ============================================================
+// Gen 2 — Batch 1: Ilex Forest Pokemon
+// ============================================================
+
+export const HOPPIP_PROGRESSION: ProgressionTree = {
+  baseFormId: 'hoppip',
+  rungs: [
+    { level: 1, name: 'Hoppip', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Skiploom', description: 'Evolve to Skiploom. Add Gust.', evolvesTo: 'skiploom', passiveId: 'none', hpBoost: 0, cardsToAdd: ['gust'] },
+    { level: 3, name: 'Jumpluff', description: 'Evolve to Jumpluff. Add Razor Leaf.', evolvesTo: 'jumpluff', passiveId: 'none', hpBoost: 0, cardsToAdd: ['razor-leaf'] },
+    { level: 4, name: 'Jumpluff (Mastered)', description: 'Add Swift.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['swift'] },
+  ],
+};
+
+export const SUNKERN_PROGRESSION: ProgressionTree = {
+  baseFormId: 'sunkern',
+  rungs: [
+    { level: 1, name: 'Sunkern', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Sunflora', description: 'Evolve to Sunflora. Add Razor Leaf.', evolvesTo: 'sunflora', passiveId: 'none', hpBoost: 0, cardsToAdd: ['razor-leaf'] },
+    { level: 3, name: 'Sunflora', description: 'Add Solar Beam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['solar-beam'] },
+    { level: 4, name: 'Sunflora (Mastered)', description: 'Add Growth.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['growth'] },
+  ],
+};
+
+export const AIPOM_PROGRESSION: ProgressionTree = {
+  baseFormId: 'aipom',
+  rungs: [
+    { level: 1, name: 'Aipom', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Aipom', description: 'Add Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slam'] },
+    { level: 3, name: 'Aipom', description: 'Add Fury Swipes.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['fury-swipes'] },
+    { level: 4, name: 'Aipom (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const YANMA_PROGRESSION: ProgressionTree = {
+  baseFormId: 'yanma',
+  rungs: [
+    { level: 1, name: 'Yanma', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Yanma', description: 'Add Wing Attack.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['wing-attack'] },
+    { level: 3, name: 'Yanma', description: 'Add Gust.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['gust'] },
+    { level: 4, name: 'Yanma (Mastered)', description: 'Add Body Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+  ],
+};
+
+export const MISDREAVUS_PROGRESSION: ProgressionTree = {
+  baseFormId: 'misdreavus',
+  rungs: [
+    { level: 1, name: 'Misdreavus', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Misdreavus', description: 'Add Shadow Ball.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['shadow-ball'] },
+    { level: 3, name: 'Misdreavus', description: 'Add Confuse Ray.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['confuse-ray'] },
+    { level: 4, name: 'Misdreavus (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const SUDOWOODO_PROGRESSION: ProgressionTree = {
+  baseFormId: 'sudowoodo',
+  rungs: [
+    { level: 1, name: 'Sudowoodo', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Sudowoodo', description: 'Add Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slam'] },
+    { level: 3, name: 'Sudowoodo', description: 'Add Rock Throw.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['rock-throw'] },
+    { level: 4, name: 'Sudowoodo (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const WOOPER_PROGRESSION: ProgressionTree = {
+  baseFormId: 'wooper',
+  rungs: [
+    { level: 1, name: 'Wooper', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Quagsire', description: 'Evolve to Quagsire. Add Body Slam.', evolvesTo: 'quagsire', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 3, name: 'Quagsire', description: 'Add Surf.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['surf'] },
+    { level: 4, name: 'Quagsire (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const CELEBI_PROGRESSION: ProgressionTree = {
+  baseFormId: 'celebi',
+  rungs: [
+    { level: 1, name: 'Celebi', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Celebi', description: 'Add Magical Leaf.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['magical-leaf'] },
+    { level: 3, name: 'Celebi', description: 'Add Ancient Power.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['ancient-power'] },
+    { level: 4, name: 'Celebi (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+// ============================================================
+// Gen 2 — Batch 2: Past Johto Pokemon
+// ============================================================
+
+export const STANTLER_PROGRESSION: ProgressionTree = {
+  baseFormId: 'stantler',
+  rungs: [
+    { level: 1, name: 'Stantler', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Stantler', description: 'Add Stomp.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['stomp'] },
+    { level: 3, name: 'Stantler', description: 'Add Body Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 4, name: 'Stantler (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const MARILL_PROGRESSION: ProgressionTree = {
+  baseFormId: 'marill',
+  rungs: [
+    { level: 1, name: 'Marill', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Azumarill', description: 'Evolve to Azumarill. Add Body Slam.', evolvesTo: 'azumarill', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 3, name: 'Azumarill', description: 'Add Surf.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['surf'] },
+    { level: 4, name: 'Azumarill (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const FLAAFFY_PROGRESSION: ProgressionTree = {
+  baseFormId: 'flaaffy',
+  rungs: [
+    { level: 1, name: 'Flaaffy', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Ampharos', description: 'Evolve to Ampharos. Add Thunderbolt.', evolvesTo: 'ampharos', passiveId: 'none', hpBoost: 0, cardsToAdd: ['thunderbolt'] },
+    { level: 3, name: 'Ampharos', description: 'Add Thunder.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['thunder'] },
+    { level: 4, name: 'Ampharos (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const TOGETIC_PROGRESSION: ProgressionTree = {
+  baseFormId: 'togetic',
+  rungs: [
+    { level: 1, name: 'Togetic', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Togetic', description: 'Add Wing Attack.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['wing-attack'] },
+    { level: 3, name: 'Togetic', description: 'Add Gust.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['gust'] },
+    { level: 4, name: 'Togetic (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const ESPEON_PROGRESSION: ProgressionTree = {
+  baseFormId: 'espeon',
+  rungs: [
+    { level: 1, name: 'Espeon', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Espeon', description: 'Add Shadow Ball.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['shadow-ball'] },
+    { level: 3, name: 'Espeon', description: 'Add Confuse Ray.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['confuse-ray'] },
+    { level: 4, name: 'Espeon (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const UMBREON_PROGRESSION: ProgressionTree = {
+  baseFormId: 'umbreon',
+  rungs: [
+    { level: 1, name: 'Umbreon', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Umbreon', description: 'Add Shadow Ball.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['shadow-ball'] },
+    { level: 3, name: 'Umbreon', description: 'Add Bite.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['bite'] },
+    { level: 4, name: 'Umbreon (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const HERACROSS_PROGRESSION: ProgressionTree = {
+  baseFormId: 'heracross',
+  rungs: [
+    { level: 1, name: 'Heracross', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Heracross', description: 'Add Slash.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slash'] },
+    { level: 3, name: 'Heracross', description: 'Add Fury Swipes.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['fury-swipes'] },
+    { level: 4, name: 'Heracross (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const HOUNDOUR_PROGRESSION: ProgressionTree = {
+  baseFormId: 'houndour',
+  rungs: [
+    { level: 1, name: 'Houndour', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Houndoom', description: 'Evolve to Houndoom. Add Flamethrower.', evolvesTo: 'houndoom', passiveId: 'none', hpBoost: 0, cardsToAdd: ['flamethrower'] },
+    { level: 3, name: 'Houndoom', description: 'Add Shadow Ball.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['shadow-ball'] },
+    { level: 4, name: 'Houndoom (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const SNEASEL_PROGRESSION: ProgressionTree = {
+  baseFormId: 'sneasel',
+  rungs: [
+    { level: 1, name: 'Sneasel', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Sneasel', description: 'Add Ice Beam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['ice-beam'] },
+    { level: 3, name: 'Sneasel', description: 'Add Slash.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slash'] },
+    { level: 4, name: 'Sneasel (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const TEDDIURSA_PROGRESSION: ProgressionTree = {
+  baseFormId: 'teddiursa',
+  rungs: [
+    { level: 1, name: 'Teddiursa', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Ursaring', description: 'Evolve to Ursaring. Add Body Slam.', evolvesTo: 'ursaring', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 3, name: 'Ursaring', description: 'Add Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slam'] },
+    { level: 4, name: 'Ursaring (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const LARVITAR_PROGRESSION: ProgressionTree = {
+  baseFormId: 'larvitar',
+  rungs: [
+    { level: 1, name: 'Larvitar', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Pupitar', description: 'Evolve to Pupitar. Add Bite.', evolvesTo: 'pupitar', passiveId: 'none', hpBoost: 0, cardsToAdd: ['bite'] },
+    { level: 3, name: 'Tyranitar', description: 'Evolve to Tyranitar. Add Rock Throw.', evolvesTo: 'tyranitar', passiveId: 'none', hpBoost: 0, cardsToAdd: ['rock-throw'] },
+    { level: 4, name: 'Tyranitar (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const MILTANK_PROGRESSION: ProgressionTree = {
+  baseFormId: 'miltank',
+  rungs: [
+    { level: 1, name: 'Miltank', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Miltank', description: 'Add Stomp.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['stomp'] },
+    { level: 3, name: 'Miltank', description: 'Add Body Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 4, name: 'Miltank (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const WOBBUFFET_PROGRESSION: ProgressionTree = {
+  baseFormId: 'wobbuffet',
+  rungs: [
+    { level: 1, name: 'Wobbuffet', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Wobbuffet', description: 'Add Counter.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['counter'] },
+    { level: 3, name: 'Wobbuffet', description: 'Add Confuse Ray.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['confuse-ray'] },
+    { level: 4, name: 'Wobbuffet (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const BLISSEY_PROGRESSION: ProgressionTree = {
+  baseFormId: 'blissey',
+  rungs: [
+    { level: 1, name: 'Blissey', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Blissey', description: 'Add Body Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 3, name: 'Blissey', description: 'Add Defend.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['defend'] },
+    { level: 4, name: 'Blissey (Mastered)', description: '+12 max HP.', passiveId: 'none', hpBoost: 12, cardsToAdd: [] },
+  ],
+};
+
+export const PINECO_PROGRESSION: ProgressionTree = {
+  baseFormId: 'pineco',
+  rungs: [
+    { level: 1, name: 'Pineco', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Forretress', description: 'Evolve to Forretress. Add Metal Claw.', evolvesTo: 'forretress', passiveId: 'none', hpBoost: 0, cardsToAdd: ['metal-claw'] },
+    { level: 3, name: 'Forretress', description: 'Add Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slam'] },
+    { level: 4, name: 'Forretress (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const STEELIX_PROGRESSION: ProgressionTree = {
+  baseFormId: 'steelix',
+  rungs: [
+    { level: 1, name: 'Steelix', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Steelix', description: 'Add Metal Claw.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['metal-claw'] },
+    { level: 3, name: 'Steelix', description: 'Add Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slam'] },
+    { level: 4, name: 'Steelix (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const SCIZOR_PROGRESSION: ProgressionTree = {
+  baseFormId: 'scizor',
+  rungs: [
+    { level: 1, name: 'Scizor', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Scizor', description: 'Add Slash.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slash'] },
+    { level: 3, name: 'Scizor', description: 'Add Fury Swipes.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['fury-swipes'] },
+    { level: 4, name: 'Scizor (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const DUNSPARCE_PROGRESSION: ProgressionTree = {
+  baseFormId: 'dunsparce',
+  rungs: [
+    { level: 1, name: 'Dunsparce', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Dunsparce', description: 'Add Body Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 3, name: 'Dunsparce', description: 'Add Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slam'] },
+    { level: 4, name: 'Dunsparce (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const GIRAFARIG_PROGRESSION: ProgressionTree = {
+  baseFormId: 'girafarig',
+  rungs: [
+    { level: 1, name: 'Girafarig', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Girafarig', description: 'Add Psychic.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['psychic'] },
+    { level: 3, name: 'Girafarig', description: 'Add Confuse Ray.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['confuse-ray'] },
+    { level: 4, name: 'Girafarig (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+// ============================================================
+// Gen 2 — Batch 3: Tin Tower Pokemon
+// ============================================================
+
+export const SLUGMA_PROGRESSION: ProgressionTree = {
+  baseFormId: 'slugma',
+  rungs: [
+    { level: 1, name: 'Slugma', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Magcargo', description: 'Evolve to Magcargo. Add Flamethrower.', evolvesTo: 'magcargo', passiveId: 'none', hpBoost: 0, cardsToAdd: ['flamethrower'] },
+    { level: 3, name: 'Magcargo', description: 'Add Body Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 4, name: 'Magcargo (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const PHANPY_PROGRESSION: ProgressionTree = {
+  baseFormId: 'phanpy',
+  rungs: [
+    { level: 1, name: 'Phanpy', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Donphan', description: 'Evolve to Donphan. Add Body Slam.', evolvesTo: 'donphan', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 3, name: 'Donphan', description: 'Add Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slam'] },
+    { level: 4, name: 'Donphan (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const SKARMORY_PROGRESSION: ProgressionTree = {
+  baseFormId: 'skarmory',
+  rungs: [
+    { level: 1, name: 'Skarmory', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Skarmory', description: 'Add Wing Attack.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['wing-attack'] },
+    { level: 3, name: 'Skarmory', description: 'Add Metal Claw.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['metal-claw'] },
+    { level: 4, name: 'Skarmory (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const HO_OH_PROGRESSION: ProgressionTree = {
+  baseFormId: 'ho-oh',
+  rungs: [
+    { level: 1, name: 'Ho-Oh', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Ho-Oh', description: 'Add Solar Beam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['solar-beam'] },
+    { level: 3, name: 'Ho-Oh', description: 'Add Earthquake.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['earthquake'] },
+    { level: 4, name: 'Ho-Oh (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+// ============================================================
+// Gen 2 — Batch 4: Brass Tower Pokemon
+// ============================================================
+
+export const SLOWKING_PROGRESSION: ProgressionTree = {
+  baseFormId: 'slowking',
+  rungs: [
+    { level: 1, name: 'Slowking', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Slowking', description: 'Add Psychic.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['psychic'] },
+    { level: 3, name: 'Slowking', description: 'Add Ice Beam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['ice-beam'] },
+    { level: 4, name: 'Slowking (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const CORSOLA_PROGRESSION: ProgressionTree = {
+  baseFormId: 'corsola',
+  rungs: [
+    { level: 1, name: 'Corsola', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Corsola', description: 'Add Rock Throw.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['rock-throw'] },
+    { level: 3, name: 'Corsola', description: 'Add Body Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 4, name: 'Corsola (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const MANTINE_PROGRESSION: ProgressionTree = {
+  baseFormId: 'mantine',
+  rungs: [
+    { level: 1, name: 'Mantine', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Mantine', description: 'Add Wing Attack.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['wing-attack'] },
+    { level: 3, name: 'Mantine', description: 'Add Gust.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['gust'] },
+    { level: 4, name: 'Mantine (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const CHINCHOU_PROGRESSION: ProgressionTree = {
+  baseFormId: 'chinchou',
+  rungs: [
+    { level: 1, name: 'Chinchou', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Lanturn', description: 'Evolve to Lanturn. Add Thunderbolt.', evolvesTo: 'lanturn', passiveId: 'none', hpBoost: 0, cardsToAdd: ['thunderbolt'] },
+    { level: 3, name: 'Lanturn', description: 'Add Surf.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['surf'] },
+    { level: 4, name: 'Lanturn (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const POLITOED_PROGRESSION: ProgressionTree = {
+  baseFormId: 'politoed',
+  rungs: [
+    { level: 1, name: 'Politoed', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Politoed', description: 'Add Body Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 3, name: 'Politoed', description: 'Add Hypnosis.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['hypnosis'] },
+    { level: 4, name: 'Politoed (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const QWILFISH_PROGRESSION: ProgressionTree = {
+  baseFormId: 'qwilfish',
+  rungs: [
+    { level: 1, name: 'Qwilfish', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Qwilfish', description: 'Add Water Gun.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['water-gun'] },
+    { level: 3, name: 'Qwilfish', description: 'Add Poison Sting.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['poison-sting'] },
+    { level: 4, name: 'Qwilfish (Mastered)', description: '+6 max HP.', passiveId: 'none', hpBoost: 6, cardsToAdd: [] },
+  ],
+};
+
+export const KINGDRA_PROGRESSION: ProgressionTree = {
+  baseFormId: 'kingdra',
+  rungs: [
+    { level: 1, name: 'Kingdra', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Kingdra', description: 'Add Hydro Pump.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['hydro-pump'] },
+    { level: 3, name: 'Kingdra', description: 'Add Ice Beam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['ice-beam'] },
+    { level: 4, name: 'Kingdra (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+  ],
+};
+
+export const LUGIA_PROGRESSION: ProgressionTree = {
+  baseFormId: 'lugia',
+  rungs: [
+    { level: 1, name: 'Lugia', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Lugia', description: 'Add Aeroblast.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['aeroblast'] },
+    { level: 3, name: 'Lugia', description: 'Add Recover.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['recover'] },
+    { level: 4, name: 'Lugia (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+// ============================================================
+// Gen 2 — Batch 5: Legendary Beasts
+// ============================================================
+
+export const RAIKOU_PROGRESSION: ProgressionTree = {
+  baseFormId: 'raikou',
+  rungs: [
+    { level: 1, name: 'Raikou', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Raikou', description: 'Add Thunderbolt.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['thunderbolt'] },
+    { level: 3, name: 'Raikou', description: 'Add Shadow Ball.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['shadow-ball'] },
+    { level: 4, name: 'Raikou (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const ENTEI_PROGRESSION: ProgressionTree = {
+  baseFormId: 'entei',
+  rungs: [
+    { level: 1, name: 'Entei', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Entei', description: 'Add Fire Blast.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['fire-blast'] },
+    { level: 3, name: 'Entei', description: 'Add Body Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
+    { level: 4, name: 'Entei (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+export const SUICUNE_PROGRESSION: ProgressionTree = {
+  baseFormId: 'suicune',
+  rungs: [
+    { level: 1, name: 'Suicune', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Suicune', description: 'Add Surf.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['surf'] },
+    { level: 3, name: 'Suicune', description: 'Add Ice Beam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['ice-beam'] },
+    { level: 4, name: 'Suicune (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+  ],
+};
+
+
 // All progression trees indexed by base form ID
 export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   charmander: CHARMANDER_PROGRESSION,
@@ -2181,6 +2910,61 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   zubat: ZUBAT_PROGRESSION,
   venonat: VENONAT_PROGRESSION,
   porygon: PORYGON_PROGRESSION,
+  // Gen 2 (Johto)
+  chikorita: CHIKORITA_PROGRESSION,
+  cyndaquil: CYNDAQUIL_PROGRESSION,
+  totodile: TOTODILE_PROGRESSION,
+  sentret: SENTRET_PROGRESSION,
+  hoothoot: HOOTHOOT_PROGRESSION,
+  ledyba: LEDYBA_PROGRESSION,
+  spinarak: SPINARAK_PROGRESSION,
+  // Gen 2 — Batch 1 (Ilex Forest)
+  hoppip: HOPPIP_PROGRESSION,
+  sunkern: SUNKERN_PROGRESSION,
+  aipom: AIPOM_PROGRESSION,
+  yanma: YANMA_PROGRESSION,
+  misdreavus: MISDREAVUS_PROGRESSION,
+  sudowoodo: SUDOWOODO_PROGRESSION,
+  wooper: WOOPER_PROGRESSION,
+  celebi: CELEBI_PROGRESSION,
+  // Gen 2 — Batch 2 (Past Johto)
+  stantler: STANTLER_PROGRESSION,
+  marill: MARILL_PROGRESSION,
+  flaaffy: FLAAFFY_PROGRESSION,
+  togetic: TOGETIC_PROGRESSION,
+  espeon: ESPEON_PROGRESSION,
+  umbreon: UMBREON_PROGRESSION,
+  heracross: HERACROSS_PROGRESSION,
+  houndour: HOUNDOUR_PROGRESSION,
+  sneasel: SNEASEL_PROGRESSION,
+  teddiursa: TEDDIURSA_PROGRESSION,
+  larvitar: LARVITAR_PROGRESSION,
+  miltank: MILTANK_PROGRESSION,
+  wobbuffet: WOBBUFFET_PROGRESSION,
+  blissey: BLISSEY_PROGRESSION,
+  pineco: PINECO_PROGRESSION,
+  steelix: STEELIX_PROGRESSION,
+  scizor: SCIZOR_PROGRESSION,
+  dunsparce: DUNSPARCE_PROGRESSION,
+  girafarig: GIRAFARIG_PROGRESSION,
+  // Gen 2 — Batch 3 (Tin Tower)
+  slugma: SLUGMA_PROGRESSION,
+  phanpy: PHANPY_PROGRESSION,
+  skarmory: SKARMORY_PROGRESSION,
+  'ho-oh': HO_OH_PROGRESSION,
+  // Gen 2 — Batch 4 (Brass Tower)
+  slowking: SLOWKING_PROGRESSION,
+  corsola: CORSOLA_PROGRESSION,
+  mantine: MANTINE_PROGRESSION,
+  chinchou: CHINCHOU_PROGRESSION,
+  politoed: POLITOED_PROGRESSION,
+  qwilfish: QWILFISH_PROGRESSION,
+  kingdra: KINGDRA_PROGRESSION,
+  lugia: LUGIA_PROGRESSION,
+  // Gen 2 — Batch 5 (Legendary Beasts)
+  raikou: RAIKOU_PROGRESSION,
+  entei: ENTEI_PROGRESSION,
+  suicune: SUICUNE_PROGRESSION,
 };
 
 /**
@@ -2286,6 +3070,41 @@ export function getProgressionTree(pokemonId: string): ProgressionTree | null {
   if (pokemonId === 'porygon2' || pokemonId === 'porygon-z') {
     return PORYGON_PROGRESSION;
   }
+  // Gen 2 (Johto)
+  if (pokemonId === 'bayleef' || pokemonId === 'meganium') {
+    return CHIKORITA_PROGRESSION;
+  }
+  if (pokemonId === 'quilava' || pokemonId === 'typhlosion') {
+    return CYNDAQUIL_PROGRESSION;
+  }
+  if (pokemonId === 'croconaw' || pokemonId === 'feraligatr') {
+    return TOTODILE_PROGRESSION;
+  }
+  if (pokemonId === 'furret') {
+    return SENTRET_PROGRESSION;
+  }
+  if (pokemonId === 'noctowl') {
+    return HOOTHOOT_PROGRESSION;
+  }
+  if (pokemonId === 'ledian') {
+    return LEDYBA_PROGRESSION;
+  }
+  if (pokemonId === 'ariados') {
+    return SPINARAK_PROGRESSION;
+  }
+  // Gen 2 evolved forms
+  if (pokemonId === 'skiploom' || pokemonId === 'jumpluff') return HOPPIP_PROGRESSION;
+  if (pokemonId === 'sunflora') return SUNKERN_PROGRESSION;
+  if (pokemonId === 'quagsire') return WOOPER_PROGRESSION;
+  if (pokemonId === 'azumarill') return MARILL_PROGRESSION;
+  if (pokemonId === 'ampharos') return FLAAFFY_PROGRESSION;
+  if (pokemonId === 'houndoom') return HOUNDOUR_PROGRESSION;
+  if (pokemonId === 'ursaring') return TEDDIURSA_PROGRESSION;
+  if (pokemonId === 'pupitar' || pokemonId === 'tyranitar') return LARVITAR_PROGRESSION;
+  if (pokemonId === 'forretress') return PINECO_PROGRESSION;
+  if (pokemonId === 'magcargo') return SLUGMA_PROGRESSION;
+  if (pokemonId === 'donphan') return PHANPY_PROGRESSION;
+  if (pokemonId === 'lanturn') return CHINCHOU_PROGRESSION;
   return null;
 }
 
@@ -2386,6 +3205,41 @@ export function getBaseFormId(pokemonId: string): string {
   if (pokemonId === 'porygon2' || pokemonId === 'porygon-z') {
     return 'porygon';
   }
+  // Gen 2 (Johto)
+  if (pokemonId === 'bayleef' || pokemonId === 'meganium') {
+    return 'chikorita';
+  }
+  if (pokemonId === 'quilava' || pokemonId === 'typhlosion') {
+    return 'cyndaquil';
+  }
+  if (pokemonId === 'croconaw' || pokemonId === 'feraligatr') {
+    return 'totodile';
+  }
+  if (pokemonId === 'furret') {
+    return 'sentret';
+  }
+  if (pokemonId === 'noctowl') {
+    return 'hoothoot';
+  }
+  if (pokemonId === 'ledian') {
+    return 'ledyba';
+  }
+  if (pokemonId === 'ariados') {
+    return 'spinarak';
+  }
+  // Gen 2 evolved forms
+  if (pokemonId === 'skiploom' || pokemonId === 'jumpluff') return 'hoppip';
+  if (pokemonId === 'sunflora') return 'sunkern';
+  if (pokemonId === 'quagsire') return 'wooper';
+  if (pokemonId === 'azumarill') return 'marill';
+  if (pokemonId === 'ampharos') return 'flaaffy';
+  if (pokemonId === 'houndoom') return 'houndour';
+  if (pokemonId === 'ursaring') return 'teddiursa';
+  if (pokemonId === 'pupitar' || pokemonId === 'tyranitar') return 'larvitar';
+  if (pokemonId === 'forretress') return 'pineco';
+  if (pokemonId === 'magcargo') return 'slugma';
+  if (pokemonId === 'donphan') return 'phanpy';
+  if (pokemonId === 'lanturn') return 'chinchou';
   return pokemonId;
 }
 

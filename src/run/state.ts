@@ -4,6 +4,7 @@ import { getEventsForAct } from '../data/events';
 import { getPokemon, getMove } from '../data/loaders';
 import { STARTING_GOLD } from '../data/shop';
 import { ACT1_NODES, ACT2_NODES, ACT3_NODES, getNodeById } from './nodes';
+import { getCampaign } from '../data/campaigns';
 import {
   getProgressionTree,
   getRungForLevel,
@@ -30,7 +31,8 @@ export function createRunState(
   party: PokemonData[],
   positions: Position[],
   seed?: number,
-  startingGold: number = STARTING_GOLD
+  startingGold: number = STARTING_GOLD,
+  campaignId: string = 'rocket_tower'
 ): RunState {
   const runParty: RunPokemon[] = party.map((pokemon, i) => {
     // Get the initial passive from the progression tree (level 1 rung)
@@ -57,8 +59,12 @@ export function createRunState(
     };
   });
 
+  // Look up first act from campaign registry
+  const campaign = getCampaign(campaignId);
+  const firstAct = campaign.acts[0];
+
   // Deep copy nodes to avoid mutating the original
-  let nodes: MapNode[] = ACT1_NODES.map(node => ({ ...node }));
+  let nodes: MapNode[] = firstAct.nodes.map(node => ({ ...node }));
 
   // Mark spawn as completed
   const spawnNode = nodes.find(n => n.type === 'spawn');
@@ -69,22 +75,24 @@ export function createRunState(
   const actualSeed = seed ?? Date.now();
   const recruitSeed = actualSeed + 12345;
 
-  // Assign random Pokemon to recruit nodes
+  // Assign random Pokemon to recruit nodes (use campaign's recruit pool)
   const partyBaseFormIds = party.map(p => p.id);
-  nodes = assignRecruitPokemon(nodes, recruitSeed, partyBaseFormIds);
+  nodes = assignRecruitPokemon(nodes, recruitSeed, partyBaseFormIds, campaign.recruitPool);
 
   // Assign random events from Act 1 pool (no repeats)
   const { nodes: eventNodes, seenEventIds } = assignRandomEvents(nodes, 1, actualSeed, []);
 
   return {
     seed: actualSeed,
+    campaignId,
     party: runParty,
     bench: [],
     graveyard: [],
-    currentNodeId: 's0-spawn', // Start at spawn
-    visitedNodeIds: ['s0-spawn'],
+    currentNodeId: firstAct.spawnNodeId,
+    visitedNodeIds: [firstAct.spawnNodeId],
     nodes: eventNodes,
     currentAct: 1,
+    actVariants: {},
     recruitSeed,
     gold: startingGold,
     seenEventIds,
@@ -152,12 +160,18 @@ export function moveToNode(run: RunState, nodeId: string): RunState {
 }
 
 /**
- * Check if the run is complete (Mewtwo defeated in Act 3).
+ * Check if the run is complete (final act boss defeated).
+ * Campaign and variant-aware.
  */
 export function isRunComplete(run: RunState): boolean {
-  if (run.currentAct !== 3) return false;
-  const mewtwoNode = run.nodes.find(n => n.id === 'a3-s6-boss-mewtwo');
-  return mewtwoNode?.completed ?? false;
+  const campaign = getCampaign(run.campaignId ?? 'rocket_tower');
+  const lastAct = campaign.acts[campaign.acts.length - 1];
+  if (run.currentAct !== lastAct.actNumber) return false;
+  const variant = run.actVariants?.[lastAct.actNumber];
+  const bossNodeId = (variant && lastAct.variants?.[variant]?.bossNodeId)
+    ? lastAct.variants[variant].bossNodeId
+    : lastAct.bossNodeId;
+  return run.nodes.some(n => n.id === bossNodeId && n.completed);
 }
 
 /**
@@ -413,12 +427,268 @@ export function transitionToAct3(run: RunState): RunState {
 }
 
 /**
+ * Resolve Gold and Silver boss teams based on the player's starter.
+ * Called when transitioning into Act 2 for campaign_2.
+ */
+function assignGoldSilverEnemies(nodes: MapNode[], starterBaseFormId: string): MapNode[] {
+  const counterMap: Record<string, { gold: string; silver: string }> = {
+    chikorita: { gold: 'feraligatr', silver: 'typhlosion' },
+    cyndaquil: { gold: 'meganium',   silver: 'feraligatr' },
+    totodile:  { gold: 'typhlosion', silver: 'meganium'   },
+  };
+  const assignment = counterMap[starterBaseFormId];
+  if (!assignment) return nodes;
+  return nodes.map(node => {
+    if (node.type !== 'battle') return node;
+    if (node.id === 'c2-a2-boss-gold') {
+      return { ...node, enemies: [assignment.gold, 'ampharos', 'espeon'] };
+    }
+    if (node.id === 'c2-a2-boss-silver') {
+      return { ...node, enemies: [assignment.silver, 'sneasel', 'houndoom'] };
+    }
+    return node;
+  });
+}
+
+/**
+ * Transition to the next act in the current campaign.
+ * For Campaign 1 (rocket_tower), delegates to the existing act-specific functions
+ * to preserve exact seed/event behavior. For other campaigns, uses a generic path.
+ */
+export function transitionToNextAct(run: RunState): RunState {
+  const campaignId = run.campaignId ?? 'rocket_tower';
+
+  // Campaign 1 delegates to the original functions to keep deterministic behavior
+  if (campaignId === 'rocket_tower') {
+    if (run.currentAct === 1) return transitionToAct2(run);
+    if (run.currentAct === 2) return transitionToAct3(run);
+    throw new Error('transitionToNextAct: no next act for rocket_tower act 3');
+  }
+
+  // Generic implementation for other campaigns
+  const campaign = getCampaign(campaignId);
+  const nextActNumber = run.currentAct + 1;
+
+  // Determine if the current act transition node specifies a variant
+  const currentNode = getCurrentNode(run);
+  const actVariant = (currentNode?.type === 'act_transition')
+    ? (currentNode as import('./types').ActTransitionNode).actVariant
+    : undefined;
+
+  const baseActDef = campaign.acts.find(a => a.actNumber === nextActNumber);
+  if (!baseActDef) {
+    throw new Error(`transitionToNextAct: no act ${nextActNumber} in campaign '${campaignId}'`);
+  }
+
+  // Use variant nodes/spawnNodeId if specified, otherwise use the default
+  const actVariantDef = (actVariant && baseActDef.variants?.[actVariant])
+    ? baseActDef.variants[actVariant]
+    : null;
+  const sourceNodes = actVariantDef ? actVariantDef.nodes : baseActDef.nodes;
+  const spawnNodeId = actVariantDef ? actVariantDef.spawnNodeId : baseActDef.spawnNodeId;
+
+  let nodes: MapNode[] = sourceNodes.map(n => ({ ...n }));
+
+  const spawnNode = nodes.find(n => n.type === 'spawn');
+  if (spawnNode) {
+    spawnNode.completed = true;
+  }
+
+  // For campaign_2 Act 2: resolve Gold/Silver teams based on player's starter
+  if (campaignId === 'campaign_2' && nextActNumber === 2) {
+    const starterBaseFormId = run.party[0]?.baseFormId ?? '';
+    nodes = assignGoldSilverEnemies(nodes, starterBaseFormId);
+  }
+
+  const excludeIds = [
+    ...run.party.map(p => p.baseFormId),
+    ...run.bench.map(p => p.baseFormId),
+    ...run.graveyard.map(p => p.baseFormId),
+  ];
+  nodes = assignRecruitPokemon(nodes, run.recruitSeed + 99999 * nextActNumber, excludeIds, campaign.recruitPool);
+
+  const { nodes: eventNodes, seenEventIds } = assignRandomEvents(
+    nodes, nextActNumber, run.seed + 100000 * nextActNumber, run.seenEventIds
+  );
+
+  const newActVariants = { ...(run.actVariants ?? {}) };
+  if (actVariant) newActVariants[nextActNumber] = actVariant;
+
+  return {
+    ...run,
+    currentAct: nextActNumber,
+    actVariants: newActVariants,
+    currentNodeId: spawnNodeId,
+    visitedNodeIds: [spawnNodeId],
+    nodes: eventNodes,
+    seenEventIds,
+  };
+}
+
+/**
  * Create a test run state that starts at Act 3 with a leveled, healthy party.
  * Used for dev testing only.
  */
 export function createAct3TestState(): RunState {
   const run = createTestPartyRun(500);
   return transitionToAct3(run);
+}
+
+// ============================================================
+// Campaign 2 (Threads of Time) Test State Helpers
+// ============================================================
+
+/** Base helper: Johto starters at level 4, fully healed. Used for all C2 test states. */
+function createCampaign2TestPartyRun(gold: number): RunState {
+  const starters = ['chikorita', 'cyndaquil', 'totodile'];
+  const positions: Position[] = [
+    { row: 'front', column: 0 },
+    { row: 'front', column: 1 },
+    { row: 'front', column: 2 },
+  ];
+  const party = starters.map(id => getPokemon(id));
+  let run = createRunState(party, positions, Date.now(), gold, 'campaign_2');
+  run = { ...run, party: run.party.map(p => ({ ...p, exp: EXP_PER_LEVEL * 3 })) };
+  for (let lvl = 0; lvl < 3; lvl++) {
+    for (let i = 0; i < run.party.length; i++) {
+      run = applyLevelUp(run, i);
+    }
+  }
+  return applyFullHealAll(run);
+}
+
+/** Test shortcut: start of Campaign 2 Act 1 (Ilex Forest). */
+export function createCampaign2Act1TestState(): RunState {
+  return createCampaign2TestPartyRun(300);
+}
+
+/** Test shortcut: drop right before Act 1 boss (Celebi). */
+export function createCampaign2Act1BossTestState(): RunState {
+  const run = createCampaign2TestPartyRun(300);
+  return advanceToBossNode(run, 'c2-a1-s5-rest', 5);
+}
+
+/** Test shortcut: start of Campaign 2 Act 2 (Past Johto — both paths accessible). */
+export function createCampaign2Act2TestState(): RunState {
+  const run = createCampaign2TestPartyRun(350);
+  return transitionToNextAct(run); // Act 1 → Act 2
+}
+
+/** Test shortcut: drop right before Act 2 boss (Gold — Tin Tower path). */
+export function createCampaign2Act2GoldBossTestState(): RunState {
+  const run = createCampaign2TestPartyRun(350);
+  const act2 = transitionToNextAct(run);
+  // Position at the recruit node (stage 5) that connects directly to the Gold boss (stage 6).
+  // Stages 0–4 are completed so the Gold boss is the only reachable next node.
+  // Do NOT position at the boss node itself — being "on" a battle node means the map
+  // shows what it connects to (the transition), skipping the fight entirely.
+  return advanceToBossNode(act2, 'c2-a2-upper-recruit', 4);
+}
+
+/** Test shortcut: drop right before Act 2 boss (Silver — Brass Tower path). */
+export function createCampaign2Act2SilverBossTestState(): RunState {
+  const run = createCampaign2TestPartyRun(350);
+  const act2 = transitionToNextAct(run);
+  // Same pattern: position at the stage-5 recruit node before the Silver boss.
+  return advanceToBossNode(act2, 'c2-a2-lower-recruit', 4);
+}
+
+/** Test shortcut: start of Campaign 2 Act 3A (Tin Tower). */
+export function createCampaign2Act3ATestState(): RunState {
+  const run = createCampaign2TestPartyRun(400);
+  const act2 = transitionToNextAct(run); // → Act 2
+  // Position at the Tin Tower act_transition node so transitionToNextAct reads actVariant: 'tin_tower'
+  const atTinTower = { ...act2, currentNodeId: 'c2-a2-transition-tin-tower' };
+  return applyFullHealAll(transitionToNextAct(atTinTower)); // → Act 3A
+}
+
+/** Test shortcut: drop right before Act 3A boss (Ho-Oh). */
+export function createCampaign2Act3ABossTestState(): RunState {
+  const run = createCampaign2TestPartyRun(400);
+  const act2 = transitionToNextAct(run);
+  const atTinTower = { ...act2, currentNodeId: 'c2-a2-transition-tin-tower' };
+  const act3a = transitionToNextAct(atTinTower);
+  return advanceToBossNode(act3a, 'c2-a3a-s6-rest', 6);
+}
+
+/** Test shortcut: start of Campaign 2 Act 3B (Brass Tower). */
+export function createCampaign2Act3BTestState(): RunState {
+  const run = createCampaign2TestPartyRun(400);
+  const act2 = transitionToNextAct(run); // → Act 2
+  // Position at the Brass Tower act_transition node so transitionToNextAct reads actVariant: 'brass_tower'
+  const atBrassTower = { ...act2, currentNodeId: 'c2-a2-transition-brass-tower' };
+  return applyFullHealAll(transitionToNextAct(atBrassTower)); // → Act 3B
+}
+
+/** Test shortcut: drop right before Act 3B boss (Lugia). */
+export function createCampaign2Act3BBossTestState(): RunState {
+  const run = createCampaign2TestPartyRun(400);
+  const act2 = transitionToNextAct(run);
+  const atBrassTower = { ...act2, currentNodeId: 'c2-a2-transition-brass-tower' };
+  const act3b = transitionToNextAct(atBrassTower);
+  return advanceToBossNode(act3b, 'c2-a3b-s6-rest', 6);
+}
+
+/** Test shortcut: position before the legendary beast choice in Act 3A (Tin Tower).
+ *  Player is at the stage-4 card-removal node; all three beast recruit nodes are one click away. */
+export function createCampaign2Act3ABeforeDogsTestState(): RunState {
+  const run = createCampaign2TestPartyRun(400);
+  const act2 = transitionToNextAct(run);
+  const atTinTower = { ...act2, currentNodeId: 'c2-a2-transition-tin-tower' };
+  const act3a = transitionToNextAct(atTinTower);
+  return advanceToBossNode(act3a, 'c2-a3a-s4-card-removal', 3);
+}
+
+/**
+ * Test shortcut: Campaign 2 positioned at the Act 2 → Act 3A (Gold path) transition screen.
+ * Use this to test Gold's post-defeat dialog.
+ */
+export function createCampaign2GoldTransitionTestState(): RunState {
+  const run = createCampaign2TestPartyRun(350);
+  const act2 = transitionToNextAct(run);
+  const nodes = act2.nodes.map(n => ({
+    ...n,
+    completed: n.stage <= 7 ? true : n.completed,
+  }));
+  return {
+    ...act2,
+    nodes,
+    currentNodeId: 'c2-a2-transition-tin-tower',
+    visitedNodeIds: nodes.filter(n => n.completed).map(n => n.id),
+  };
+}
+
+/**
+ * Test shortcut: Campaign 2 positioned at the Act 2 → Act 3B (Silver path) transition screen.
+ * Use this to test the Silver post-defeat dialog — especially the variant that references Giovanni
+ * when Campaign 1 was completed without any Pokemon casualties.
+ * Call recordCampaignComplete('rocket_tower', { metadata: { graveyardCount: 0, ... } }) before
+ * or after to control which dialog variant appears.
+ */
+export function createCampaign2SilverTransitionTestState(): RunState {
+  const run = createCampaign2TestPartyRun(350);
+  const act2 = transitionToNextAct(run);
+  // Mark all nodes through stage 7 as completed so Silver boss is defeated
+  const nodes = act2.nodes.map(n => ({
+    ...n,
+    completed: n.stage <= 7 ? true : n.completed,
+  }));
+  return {
+    ...act2,
+    nodes,
+    currentNodeId: 'c2-a2-transition-brass-tower',
+    visitedNodeIds: nodes.filter(n => n.completed).map(n => n.id),
+  };
+}
+
+/** Test shortcut: position before the legendary beast choice in Act 3B (Brass Tower).
+ *  Player is at the stage-4 card-removal node; all three beast recruit nodes are one click away. */
+export function createCampaign2Act3BBeforeDogsTestState(): RunState {
+  const run = createCampaign2TestPartyRun(400);
+  const act2 = transitionToNextAct(run);
+  const atBrassTower = { ...act2, currentNodeId: 'c2-a2-transition-brass-tower' };
+  const act3b = transitionToNextAct(atBrassTower);
+  return advanceToBossNode(act3b, 'c2-a3b-s4-card-removal', 3);
 }
 
 /**
@@ -1114,14 +1384,16 @@ function seededRandom(seed: number): { value: number; nextSeed: number } {
 /**
  * Assign pokemonIds to recruit nodes using seeded RNG.
  * Excludes any baseFormIds already in the party.
+ * Pass a custom pool for campaign-specific recruit pools.
  */
 export function assignRecruitPokemon(
   nodes: MapNode[],
   recruitSeed: number,
-  excludeIds: string[]
+  excludeIds: string[],
+  pool: string[] = RECRUIT_POOL_ALL
 ): MapNode[] {
-  const pool = RECRUIT_POOL_ALL.filter(id => !excludeIds.includes(id));
-  if (pool.length === 0) return nodes;
+  const pool_ = pool.filter(id => !excludeIds.includes(id));
+  if (pool_.length === 0) return nodes;
 
   let currentSeed = Math.max(1, Math.abs(recruitSeed)); // Ensure positive non-zero seed
   const usedIds = new Set<string>();
@@ -1129,8 +1401,8 @@ export function assignRecruitPokemon(
   return nodes.map(node => {
     if (node.type !== 'recruit' || node.pokemonId !== '') return node;
 
-    // Pick a random Pokemon from pool that hasn't been used yet
-    const available = pool.filter(id => !usedIds.has(id));
+    // Pick a random Pokemon from pool_ that hasn't been used yet
+    const available = pool_.filter(id => !usedIds.has(id));
     if (available.length === 0) return node;
 
     const { value, nextSeed } = seededRandom(currentSeed);
@@ -1195,12 +1467,13 @@ export function getRecruitLevel(run: RunState): number {
  * Excludes any baseFormId already in party or bench.
  */
 export function getAvailableRecruitPool(run: RunState): string[] {
+  const campaign = getCampaign(run.campaignId ?? 'rocket_tower');
   const usedBaseFormIds = new Set([
     ...run.party.map(p => p.baseFormId),
     ...run.bench.map(p => p.baseFormId),
     ...run.graveyard.map(p => p.baseFormId),
   ]);
-  return RECRUIT_POOL_ALL.filter(id => !usedBaseFormIds.has(id));
+  return campaign.recruitPool.filter(id => !usedBaseFormIds.has(id));
 }
 
 /**
@@ -1294,6 +1567,16 @@ export function migrateRunState(run: RunState): RunState {
   // Add seenEventIds if missing (pre-event-overhaul saves)
   if (!migrated.seenEventIds) {
     migrated = { ...migrated, seenEventIds: [] };
+  }
+
+  // Add campaignId if missing (pre-multi-campaign saves are always Campaign 1)
+  if (!migrated.campaignId) {
+    migrated = { ...migrated, campaignId: 'rocket_tower' };
+  }
+
+  // Add actVariants if missing
+  if (!migrated.actVariants) {
+    migrated = { ...migrated, actVariants: {} };
   }
 
   // Add x,y to nodes if missing (pre-free-form saves)

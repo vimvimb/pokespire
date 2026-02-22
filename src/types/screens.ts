@@ -21,4 +21,5 @@ export type Screen =
   | "disclaimer"
   | "debugging"
   | "campaign_draft"
+  | "campaign_select"
   | "classes_plan";

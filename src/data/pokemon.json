@@ -1500,5 +1500,1367 @@
       "charge-beam", "charge-beam"
     ],
     "abilities": []
+  },
+
+  "chikorita": {
+    "name": "Chikorita",
+    "types": ["grass"],
+    "maxHp": 36,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "vine-whip", "vine-whip",
+      "razor-leaf",
+      "growth",
+      "leech-seed"
+    ],
+    "abilities": [],
+    "description": "A gentle Grass-type that heals teammates and outlasts foes through attrition."
+  },
+  "bayleef": {
+    "name": "Bayleef",
+    "types": ["grass"],
+    "maxHp": 46,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "vine-whip", "vine-whip",
+      "razor-leaf",
+      "growth",
+      "leech-seed"
+    ],
+    "abilities": []
+  },
+  "meganium": {
+    "name": "Meganium",
+    "types": ["grass"],
+    "maxHp": 58,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "vine-whip", "vine-whip",
+      "razor-leaf",
+      "growth",
+      "leech-seed"
+    ],
+    "abilities": []
+  },
+
+  "cyndaquil": {
+    "name": "Cyndaquil",
+    "types": ["fire"],
+    "maxHp": 30,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch",
+      "ember", "ember", "ember",
+      "quick-attack",
+      "swift"
+    ],
+    "abilities": [],
+    "description": "A nimble Fire-type that builds momentum with quick attacks and scorching bursts."
+  },
+  "quilava": {
+    "name": "Quilava",
+    "types": ["fire"],
+    "maxHp": 42,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch",
+      "ember", "ember", "ember",
+      "quick-attack",
+      "swift"
+    ],
+    "abilities": []
+  },
+  "typhlosion": {
+    "name": "Typhlosion",
+    "types": ["fire"],
+    "maxHp": 54,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch",
+      "ember", "ember", "ember",
+      "quick-attack",
+      "swift"
+    ],
+    "abilities": []
+  },
+
+  "totodile": {
+    "name": "Totodile",
+    "types": ["water"],
+    "maxHp": 40,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch",
+      "water-gun", "water-gun",
+      "bite", "bite",
+      "defend"
+    ],
+    "abilities": [],
+    "description": "An aggressive Water-type that overwhelms foes with relentless biting attacks."
+  },
+  "croconaw": {
+    "name": "Croconaw",
+    "types": ["water"],
+    "maxHp": 50,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch",
+      "water-gun", "water-gun",
+      "bite", "bite",
+      "defend"
+    ],
+    "abilities": []
+  },
+  "feraligatr": {
+    "name": "Feraligatr",
+    "types": ["water"],
+    "maxHp": 62,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch",
+      "water-gun", "water-gun",
+      "bite", "bite",
+      "defend"
+    ],
+    "abilities": []
+  },
+
+  "sentret": {
+    "name": "Sentret",
+    "types": ["normal"],
+    "maxHp": 28,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch", "scratch",
+      "quick-attack", "quick-attack",
+      "slam",
+      "swift"
+    ],
+    "abilities": [],
+    "description": "A scrappy Normal-type that chips away with a flurry of fast physical attacks."
+  },
+  "furret": {
+    "name": "Furret",
+    "types": ["normal"],
+    "maxHp": 46,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch", "scratch",
+      "quick-attack", "quick-attack",
+      "slam",
+      "swift"
+    ],
+    "abilities": []
+  },
+
+  "hoothoot": {
+    "name": "Hoothoot",
+    "types": ["normal", "flying"],
+    "maxHp": 36,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "peck", "peck",
+      "gust", "gust",
+      "hypnosis",
+      "swift",
+      "quick-attack"
+    ],
+    "abilities": [],
+    "description": "A nocturnal Flying-type that puts foes to sleep and picks them apart from above."
+  },
+  "noctowl": {
+    "name": "Noctowl",
+    "types": ["normal", "flying"],
+    "maxHp": 52,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "peck", "peck",
+      "gust", "gust",
+      "hypnosis",
+      "swift",
+      "quick-attack"
+    ],
+    "abilities": []
+  },
+
+  "ledyba": {
+    "name": "Ledyba",
+    "types": ["bug", "flying"],
+    "maxHp": 28,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "swift", "swift",
+      "comet-punch", "comet-punch",
+      "peck", "peck",
+      "scratch"
+    ],
+    "abilities": [],
+    "description": "A swarm Bug-type that hammers foes with rapid multi-hit attacks."
+  },
+  "ledian": {
+    "name": "Ledian",
+    "types": ["bug", "flying"],
+    "maxHp": 38,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "swift", "swift",
+      "comet-punch", "comet-punch",
+      "peck", "peck",
+      "scratch"
+    ],
+    "abilities": []
+  },
+
+  "spinarak": {
+    "name": "Spinarak",
+    "types": ["bug", "poison"],
+    "maxHp": 30,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "poison-sting", "poison-sting", "poison-sting",
+      "leech-life", "leech-life",
+      "night-shade",
+      "scratch"
+    ],
+    "abilities": [],
+    "description": "A trapping Bug/Poison-type that drains life and stacks poison while its web holds foes in place."
+  },
+  "ariados": {
+    "name": "Ariados",
+    "types": ["bug", "poison"],
+    "maxHp": 44,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "poison-sting", "poison-sting", "poison-sting",
+      "leech-life", "leech-life",
+      "night-shade",
+      "scratch"
+    ],
+    "abilities": []
+  },
+
+  "murkrow": {
+    "name": "Murkrow",
+    "types": ["dark", "flying"],
+    "maxHp": 50,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "peck", "peck",
+      "wing-attack", "wing-attack",
+      "night-shade", "night-shade",
+      "shadow-ball", "shadow-ball",
+      "gust", "gust"
+    ],
+    "abilities": []
+  },
+
+  "hoppip": {
+    "name": "Hoppip",
+    "types": ["grass", "flying"],
+    "maxHp": 26,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "gust", "gust",
+      "vine-whip", "vine-whip",
+      "swift",
+      "growth",
+      "razor-leaf"
+    ],
+    "abilities": [],
+    "description": "A tiny Grass/Flying-type that drifts on the wind, chipping away with gusts and vine attacks."
+  },
+  "skiploom": {
+    "name": "Skiploom",
+    "types": ["grass", "flying"],
+    "maxHp": 38,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "gust", "gust",
+      "vine-whip", "vine-whip",
+      "swift",
+      "growth",
+      "razor-leaf"
+    ],
+    "abilities": []
+  },
+  "jumpluff": {
+    "name": "Jumpluff",
+    "types": ["grass", "flying"],
+    "maxHp": 50,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "gust", "gust",
+      "vine-whip", "vine-whip",
+      "swift",
+      "growth",
+      "razor-leaf"
+    ],
+    "abilities": []
+  },
+
+  "sunkern": {
+    "name": "Sunkern",
+    "types": ["grass"],
+    "maxHp": 22,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "vine-whip", "vine-whip",
+      "growth", "growth",
+      "razor-leaf", "razor-leaf",
+      "leech-seed"
+    ],
+    "abilities": [],
+    "description": "A fragile Grass-type that powers up in sunlight and overwhelms foes with sheer solar energy."
+  },
+  "sunflora": {
+    "name": "Sunflora",
+    "types": ["grass"],
+    "maxHp": 48,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "vine-whip", "vine-whip",
+      "growth", "growth",
+      "razor-leaf", "razor-leaf",
+      "leech-seed"
+    ],
+    "abilities": []
+  },
+
+  "aipom": {
+    "name": "Aipom",
+    "types": ["normal"],
+    "maxHp": 38,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "scratch", "scratch", "scratch",
+      "swift", "swift",
+      "slam", "slam",
+      "fury-swipes", "fury-swipes",
+      "quick-attack"
+    ],
+    "abilities": [],
+    "description": "An acrobatic Normal-type with a dexterous tail — quick, slippery, and relentless."
+  },
+
+  "yanma": {
+    "name": "Yanma",
+    "types": ["bug", "flying"],
+    "maxHp": 44,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "wing-attack", "wing-attack",
+      "gust", "gust",
+      "swift", "swift",
+      "quick-attack"
+    ],
+    "abilities": [],
+    "description": "An extremely fast Bug/Flying-type that overwhelms foes with aerial speed and agility."
+  },
+
+  "misdreavus": {
+    "name": "Misdreavus",
+    "types": ["ghost"],
+    "maxHp": 42,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "night-shade", "night-shade", "night-shade",
+      "shadow-ball", "shadow-ball",
+      "confuse-ray", "confuse-ray",
+      "swift"
+    ],
+    "abilities": [],
+    "description": "A ghostly prankster that haunts the night, draining energy and confusing foes."
+  },
+
+  "sudowoodo": {
+    "name": "Sudowoodo",
+    "types": ["rock"],
+    "maxHp": 52,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend", "defend",
+      "slam", "slam",
+      "body-slam", "body-slam"
+    ],
+    "abilities": [],
+    "description": "A stubborn Rock-type that stands its ground — slow but tanky, blocking paths like a boulder."
+  },
+
+  "wooper": {
+    "name": "Wooper",
+    "types": ["water", "ground"],
+    "maxHp": 38,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "water-gun", "water-gun",
+      "defend", "defend",
+      "slam", "slam",
+      "bite"
+    ],
+    "abilities": [],
+    "description": "A slow but resilient Water/Ground-type that absorbs hits and retaliates with mud and water."
+  },
+  "quagsire": {
+    "name": "Quagsire",
+    "types": ["water", "ground"],
+    "maxHp": 62,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "water-gun", "water-gun",
+      "defend", "defend",
+      "slam", "slam",
+      "bite"
+    ],
+    "abilities": []
+  },
+
+  "celebi": {
+    "name": "Celebi",
+    "types": ["grass", "psychic"],
+    "maxHp": 70,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "leech-seed", "leech-seed",
+      "ancient-power", "ancient-power",
+      "recover", "recover",
+      "vine-whip", "vine-whip",
+      "magical-leaf", "magical-leaf"
+    ],
+    "abilities": []
+  },
+
+  "stantler": {
+    "name": "Stantler",
+    "types": ["normal"],
+    "maxHp": 50,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "stomp", "stomp", "stomp",
+      "body-slam", "body-slam",
+      "slam", "slam"
+    ],
+    "abilities": [],
+    "description": "A proud Normal-type with hypnotic antlers — charges headlong and tramples with practiced force."
+  },
+
+  "marill": {
+    "name": "Marill",
+    "types": ["water"],
+    "maxHp": 44,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "water-gun", "water-gun", "water-gun",
+      "defend", "defend",
+      "quick-attack",
+      "body-slam"
+    ],
+    "abilities": [],
+    "description": "A buoyant little Water-type that bounces back from hits and soaks foes with relentless water attacks."
+  },
+  "azumarill": {
+    "name": "Azumarill",
+    "types": ["water"],
+    "maxHp": 64,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "water-gun", "water-gun", "water-gun",
+      "defend", "defend",
+      "quick-attack",
+      "body-slam"
+    ],
+    "abilities": []
+  },
+
+  "flaaffy": {
+    "name": "Flaaffy",
+    "types": ["electric"],
+    "maxHp": 46,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "thunder-shock", "thunder-shock",
+      "thunderbolt", "thunderbolt",
+      "defend", "defend",
+      "swift"
+    ],
+    "abilities": [],
+    "description": "A woolly Electric-type that builds static in its fleece and discharges it in crackling volleys."
+  },
+  "ampharos": {
+    "name": "Ampharos",
+    "types": ["electric"],
+    "maxHp": 62,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "thunder-shock", "thunder-shock",
+      "thunderbolt", "thunderbolt",
+      "defend", "defend",
+      "swift"
+    ],
+    "abilities": []
+  },
+
+  "togetic": {
+    "name": "Togetic",
+    "types": ["normal", "flying"],
+    "maxHp": 38,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "swift", "swift",
+      "wing-attack", "wing-attack",
+      "gust", "gust",
+      "pound",
+      "defend"
+    ],
+    "abilities": [],
+    "description": "A joyful Flying-type said to bring happiness — floats gracefully and supports allies from above."
+  },
+
+  "espeon": {
+    "name": "Espeon",
+    "types": ["psychic"],
+    "maxHp": 44,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "psychic", "psychic", "psychic",
+      "swift", "swift",
+      "quick-attack", "quick-attack",
+      "shadow-ball", "shadow-ball",
+      "confuse-ray"
+    ],
+    "abilities": [],
+    "description": "A prescient Psychic-type with a split tail that lets it sense the future — fast and devastatingly precise."
+  },
+
+  "umbreon": {
+    "name": "Umbreon",
+    "types": ["dark"],
+    "maxHp": 66,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "bite", "bite", "bite",
+      "shadow-ball", "shadow-ball",
+      "confuse-ray", "confuse-ray",
+      "defend"
+    ],
+    "abilities": [],
+    "description": "A patient Dark-type that lurks in the shadows — tanky, unsettling, and wearing opponents down slowly."
+  },
+
+  "heracross": {
+    "name": "Heracross",
+    "types": ["bug", "fighting"],
+    "maxHp": 56,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "slash", "slash",
+      "body-slam", "body-slam",
+      "fury-swipes", "fury-swipes",
+      "slam"
+    ],
+    "abilities": [],
+    "description": "A powerful Bug/Fighting-type with a mighty horn — charges hard and presses the advantage relentlessly."
+  },
+
+  "houndour": {
+    "name": "Houndour",
+    "types": ["dark", "fire"],
+    "maxHp": 32,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "bite", "bite", "bite",
+      "ember", "ember",
+      "night-shade", "night-shade",
+      "slash"
+    ],
+    "abilities": [],
+    "description": "A fierce Dark/Fire-type that hunts in packs — bites hard and scorches with relentless fire."
+  },
+  "houndoom": {
+    "name": "Houndoom",
+    "types": ["dark", "fire"],
+    "maxHp": 52,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "bite", "bite", "bite",
+      "ember", "ember",
+      "night-shade", "night-shade",
+      "slash"
+    ],
+    "abilities": []
+  },
+
+  "sneasel": {
+    "name": "Sneasel",
+    "types": ["dark", "ice"],
+    "maxHp": 38,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "scratch", "scratch", "scratch",
+      "bite", "bite",
+      "slash", "slash",
+      "ice-beam", "ice-beam",
+      "quick-attack"
+    ],
+    "abilities": [],
+    "description": "An incredibly fast Dark/Ice-type that tears through foes with sharp claws and freezing strikes."
+  },
+
+  "teddiursa": {
+    "name": "Teddiursa",
+    "types": ["normal"],
+    "maxHp": 42,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch",
+      "slam", "slam",
+      "body-slam", "body-slam",
+      "fury-swipes"
+    ],
+    "abilities": [],
+    "description": "A deceptively strong Normal-type — looks cuddly, hits like a freight train."
+  },
+  "ursaring": {
+    "name": "Ursaring",
+    "types": ["normal"],
+    "maxHp": 62,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "scratch", "scratch",
+      "slam", "slam",
+      "body-slam", "body-slam",
+      "fury-swipes"
+    ],
+    "abilities": []
+  },
+
+  "larvitar": {
+    "name": "Larvitar",
+    "types": ["rock", "ground"],
+    "maxHp": 36,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "bite", "bite",
+      "rock-throw", "rock-throw",
+      "slam", "slam",
+      "screech"
+    ],
+    "abilities": [],
+    "description": "A hardy Rock/Ground larva — eats mountains to grow, and it shows."
+  },
+  "pupitar": {
+    "name": "Pupitar",
+    "types": ["rock", "ground"],
+    "maxHp": 48,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "bite", "bite",
+      "rock-throw", "rock-throw",
+      "slam", "slam",
+      "screech"
+    ],
+    "abilities": []
+  },
+  "tyranitar": {
+    "name": "Tyranitar",
+    "types": ["rock", "dark"],
+    "maxHp": 70,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "bite", "bite",
+      "rock-throw", "rock-throw",
+      "slam", "slam",
+      "screech"
+    ],
+    "abilities": []
+  },
+
+  "miltank": {
+    "name": "Miltank",
+    "types": ["normal"],
+    "maxHp": 66,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "body-slam", "body-slam",
+      "stomp", "stomp",
+      "slam"
+    ],
+    "abilities": [],
+    "description": "A famously tenacious Normal-type — absurdly durable and capable of rolling right over the opposition."
+  },
+
+  "wobbuffet": {
+    "name": "Wobbuffet",
+    "types": ["psychic"],
+    "maxHp": 78,
+    "baseSpeed": 2,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "counter", "counter", "counter",
+      "confuse-ray", "confuse-ray",
+      "defend", "defend",
+      "slam"
+    ],
+    "abilities": [],
+    "description": "An enigmatic Psychic-type with massive HP — it does almost nothing, and yet it always wins."
+  },
+
+  "blissey": {
+    "name": "Blissey",
+    "types": ["normal"],
+    "maxHp": 86,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "defend", "defend", "defend",
+      "body-slam", "body-slam",
+      "slam", "slam",
+      "pound"
+    ],
+    "abilities": [],
+    "description": "The kindest Normal-type there is — and the hardest to knock down. An egg full of love and absurd durability."
+  },
+
+  "pineco": {
+    "name": "Pineco",
+    "types": ["bug"],
+    "maxHp": 36,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "screech", "screech",
+      "slam", "slam",
+      "swift"
+    ],
+    "abilities": [],
+    "description": "A defensive Bug-type that hangs from trees and tightens its shell under pressure."
+  },
+  "forretress": {
+    "name": "Forretress",
+    "types": ["bug", "steel"],
+    "maxHp": 52,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "screech", "screech",
+      "slam", "slam",
+      "swift"
+    ],
+    "abilities": []
+  },
+
+  "steelix": {
+    "name": "Steelix",
+    "types": ["steel", "ground"],
+    "maxHp": 52,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "defend", "defend", "defend",
+      "metal-claw", "metal-claw",
+      "slam", "slam",
+      "screech"
+    ],
+    "abilities": [],
+    "description": "An ironclad Steel/Ground-type — compressed by the earth into something nearly indestructible."
+  },
+
+  "scizor": {
+    "name": "Scizor",
+    "types": ["bug", "steel"],
+    "maxHp": 48,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "metal-claw", "metal-claw", "metal-claw",
+      "slash", "slash",
+      "fury-swipes", "fury-swipes",
+      "quick-attack", "quick-attack",
+      "screech"
+    ],
+    "abilities": [],
+    "description": "A swift Bug/Steel predator — its reinforced claws strike with terrifying speed and precision."
+  },
+
+  "dunsparce": {
+    "name": "Dunsparce",
+    "types": ["normal"],
+    "maxHp": 64,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "slam", "slam",
+      "body-slam", "body-slam",
+      "swift"
+    ],
+    "abilities": [],
+    "description": "A mysterious Normal-type with surprising bulk — slow, strange, and oddly hard to finish off."
+  },
+
+  "girafarig": {
+    "name": "Girafarig",
+    "types": ["normal", "psychic"],
+    "maxHp": 48,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "psychic", "psychic",
+      "swift", "swift",
+      "stomp", "stomp",
+      "confuse-ray", "confuse-ray"
+    ],
+    "abilities": [],
+    "description": "A dual-minded Normal/Psychic-type — its tail has a mind of its own, and between them they're relentless."
+  },
+
+  "slugma": {
+    "name": "Slugma",
+    "types": ["fire", "rock"],
+    "maxHp": 30,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "ember", "ember", "ember",
+      "defend", "defend",
+      "slam", "slam"
+    ],
+    "abilities": [],
+    "description": "A sluggish Fire/Rock-type made of magma — slow but persistent, its body never cools."
+  },
+  "magcargo": {
+    "name": "Magcargo",
+    "types": ["fire", "rock"],
+    "maxHp": 42,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "ember", "ember", "ember",
+      "defend", "defend",
+      "slam", "slam"
+    ],
+    "abilities": []
+  },
+
+  "phanpy": {
+    "name": "Phanpy",
+    "types": ["ground"],
+    "maxHp": 60,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "slam", "slam",
+      "body-slam", "body-slam",
+      "defend", "defend",
+      "stomp"
+    ],
+    "abilities": [],
+    "description": "A rotund Ground-type with surprising force — rolls into battle and keeps rolling."
+  },
+  "donphan": {
+    "name": "Donphan",
+    "types": ["ground"],
+    "maxHp": 62,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "slam", "slam",
+      "body-slam", "body-slam",
+      "defend", "defend",
+      "stomp"
+    ],
+    "abilities": []
+  },
+
+  "skarmory": {
+    "name": "Skarmory",
+    "types": ["steel", "flying"],
+    "maxHp": 44,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "wing-attack", "wing-attack",
+      "metal-claw", "metal-claw",
+      "gust", "gust",
+      "screech", "screech"
+    ],
+    "abilities": [],
+    "description": "A sleek Steel/Flying guardian that shrugs off physical attacks while shearing through foes with steel feathers."
+  },
+
+  "ho-oh": {
+    "name": "Ho-Oh",
+    "types": ["fire", "flying"],
+    "maxHp": 76,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "sacred-fire", "sacred-fire", "sacred-fire",
+      "solar-beam", "solar-beam",
+      "earthquake", "earthquake",
+      "recover", "recover",
+      "wing-attack"
+    ],
+    "abilities": []
+  },
+
+  "slowking": {
+    "name": "Slowking",
+    "types": ["water", "psychic"],
+    "maxHp": 66,
+    "baseSpeed": 2,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "water-gun", "water-gun",
+      "psychic", "psychic",
+      "confuse-ray", "confuse-ray",
+      "ice-beam", "ice-beam"
+    ],
+    "abilities": [],
+    "description": "A contemplative Water/Psychic-type — unhurried, unruffled, and inexplicably formidable."
+  },
+
+  "corsola": {
+    "name": "Corsola",
+    "types": ["water", "rock"],
+    "maxHp": 38,
+    "baseSpeed": 3,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "water-gun", "water-gun",
+      "defend", "defend",
+      "rock-throw", "rock-throw",
+      "body-slam"
+    ],
+    "abilities": [],
+    "description": "A living coral Water/Rock-type — fragile-looking, but its layers of reef armor run deep."
+  },
+
+  "mantine": {
+    "name": "Mantine",
+    "types": ["water", "flying"],
+    "maxHp": 58,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "water-gun", "water-gun",
+      "wing-attack", "wing-attack",
+      "gust", "gust",
+      "swift", "swift"
+    ],
+    "abilities": [],
+    "description": "A graceful Water/Flying-type that glides through air and sea alike — elegant and surprisingly hard to hit."
+  },
+
+  "chinchou": {
+    "name": "Chinchou",
+    "types": ["water", "electric"],
+    "maxHp": 50,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "water-gun", "water-gun",
+      "thunder-shock", "thunder-shock",
+      "thunderbolt", "thunderbolt",
+      "confuse-ray", "confuse-ray"
+    ],
+    "abilities": [],
+    "description": "A bioluminescent Water/Electric deep-sea type — its lure shocks prey and disorients attackers."
+  },
+  "lanturn": {
+    "name": "Lanturn",
+    "types": ["water", "electric"],
+    "maxHp": 80,
+    "baseSpeed": 4,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "water-gun", "water-gun",
+      "thunder-shock", "thunder-shock",
+      "thunderbolt", "thunderbolt",
+      "confuse-ray", "confuse-ray"
+    ],
+    "abilities": []
+  },
+
+  "politoed": {
+    "name": "Politoed",
+    "types": ["water"],
+    "maxHp": 62,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "water-gun", "water-gun", "water-gun",
+      "body-slam", "body-slam",
+      "hypnosis",
+      "swift"
+    ],
+    "abilities": [],
+    "description": "A commanding Water-type frog whose croak controls rain — brings hypnosis and bulk to the battlefield."
+  },
+
+  "qwilfish": {
+    "name": "Qwilfish",
+    "types": ["water", "poison"],
+    "maxHp": 44,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle",
+      "water-gun", "water-gun",
+      "poison-sting", "poison-sting", "poison-sting",
+      "swift", "swift",
+      "slam"
+    ],
+    "abilities": [],
+    "description": "A spiky Water/Poison-type that inflates with water and fires poisoned needles — fast and venomous."
+  },
+
+  "kingdra": {
+    "name": "Kingdra",
+    "types": ["water", "dragon"],
+    "maxHp": 52,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "water-gun", "water-gun",
+      "hydro-pump", "hydro-pump",
+      "ice-beam", "ice-beam",
+      "swift", "swift",
+      "body-slam",
+      "slam"
+    ],
+    "abilities": [],
+    "description": "A regal Water/Dragon-type that dwells in the deep — when it stirs, ocean currents follow."
+  },
+
+  "lugia": {
+    "name": "Lugia",
+    "types": ["psychic", "flying"],
+    "maxHp": 76,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "aeroblast", "aeroblast", "aeroblast",
+      "hydro-pump", "hydro-pump",
+      "psychic", "psychic",
+      "future-sight",
+      "recover", "recover"
+    ],
+    "abilities": []
+  },
+
+  "raikou": {
+    "name": "Raikou",
+    "types": ["electric"],
+    "maxHp": 72,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "thunderbolt", "thunderbolt", "thunderbolt",
+      "thunder", "thunder",
+      "shadow-ball", "shadow-ball",
+      "quick-attack",
+      "swift",
+      "bite"
+    ],
+    "abilities": [],
+    "description": "The legendary beast of lightning — races across the land in a blur of electric fury."
+  },
+
+  "entei": {
+    "name": "Entei",
+    "types": ["fire"],
+    "maxHp": 76,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "flamethrower", "flamethrower", "flamethrower",
+      "fire-blast", "fire-blast",
+      "stomp", "stomp",
+      "body-slam", "body-slam",
+      "slam"
+    ],
+    "abilities": [],
+    "description": "The legendary beast of fire — each of its roars causes a volcano to erupt somewhere in the world."
+  },
+
+  "suicune": {
+    "name": "Suicune",
+    "types": ["water"],
+    "maxHp": 74,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "surf", "surf", "surf",
+      "water-gun", "water-gun",
+      "gust", "gust",
+      "psychic", "psychic",
+      "recover",
+      "ice-beam"
+    ],
+    "abilities": [],
+    "description": "The legendary beast of the north wind — purifies any water it touches and cannot be outrun."
   }
 }

@@ -29,13 +29,15 @@ export interface RunPokemon {
  */
 export interface RunState {
   seed: number;               // RNG seed for deterministic drafting
+  campaignId: string;         // Which campaign this run belongs to (e.g. 'rocket_tower')
   party: RunPokemon[];        // Party with run-specific state
   bench: RunPokemon[];        // Bench Pokemon (not in active party, no EXP, no healing)
   graveyard: RunPokemon[];    // KO'd Pokemon (removed from party, kept for future resurrection)
   currentNodeId: string;      // Current node ID
   visitedNodeIds: string[];   // All visited node IDs (for path tracking)
   nodes: MapNode[];           // All nodes in the map
-  currentAct: number;         // 1 = Act 1, 2 = Act 2
+  currentAct: number;         // 1 = Act 1, 2 = Act 2, etc.
+  actVariants: Record<number, string>; // Active variant per act (e.g. { 3: 'tin_tower' })
   recruitSeed: number;        // Separate seed for recruit encounter RNG
   gold: number;               // PokeGold currency
   seenEventIds: string[];     // Event IDs already encountered this run (no repeats)
@@ -81,6 +83,7 @@ export interface CardRemovalNode extends BaseNode {
 export interface ActTransitionNode extends BaseNode {
   type: 'act_transition';
   nextAct: number;            // Act number to transition to
+  actVariant?: string;        // Optional: selects which variant of the next act (e.g. 'tin_tower' | 'brass_tower')
 }
 
 export interface EventNode extends BaseNode {

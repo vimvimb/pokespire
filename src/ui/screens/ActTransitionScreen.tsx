@@ -1,5 +1,6 @@
 import type { RunState } from '../../run/types';
 import { getPokemon } from '../../data/loaders';
+import { getCampaign, getDynamicActTransitionContent } from '../../data/campaigns';
 import { THEME } from '../theme';
 import { getSpriteUrl } from '../utils/sprites';
 
@@ -16,7 +17,18 @@ interface TransitionContent {
   accentColor: string;
 }
 
-function getTransitionContent(act: number): TransitionContent {
+function getTransitionContent(act: number, run: RunState): TransitionContent {
+  // Dynamic metadata-aware content takes priority (e.g. Silver referencing Giovanni)
+  const dynamic = getDynamicActTransitionContent(run);
+  if (dynamic) return dynamic;
+
+  // Campaign-specific static content
+  const campaign = getCampaign(run.campaignId ?? 'rocket_tower');
+  const campaignTransition = campaign.narrativeTexts?.actTransitions?.[act];
+  if (campaignTransition) {
+    return campaignTransition;
+  }
+  // Fallback for rocket_tower (or any campaign without transition text for this act)
   if (act === 1) {
     return {
       heading: 'Act 1 Complete!',
@@ -34,7 +46,7 @@ function getTransitionContent(act: number): TransitionContent {
 }
 
 export function ActTransitionScreen({ run, onContinue, onRestart }: Props) {
-  const content = getTransitionContent(run.currentAct);
+  const content = getTransitionContent(run.currentAct, run);
 
   return (
     <div style={{
