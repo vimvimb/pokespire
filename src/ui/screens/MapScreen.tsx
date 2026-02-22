@@ -217,7 +217,8 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
             const pos = nodePositions.get(node.id);
             if (!pos) return null;
             const nState = getNodeState(node.id, run.currentNodeId, visitedNodeIds, availableNodeIds);
-            const isBoss = node.id === actConfig.bossNodeId;
+            const isBoss = node.id === actConfig.bossNodeId ||
+              (actConfig.bossByNodeId != null && node.id in actConfig.bossByNodeId);
 
             return (
               <MapNodeComponent

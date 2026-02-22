@@ -168,10 +168,12 @@ export function isRunComplete(run: RunState): boolean {
   const lastAct = campaign.acts[campaign.acts.length - 1];
   if (run.currentAct !== lastAct.actNumber) return false;
   const variant = run.actVariants?.[lastAct.actNumber];
-  const bossNodeId = (variant && lastAct.variants?.[variant]?.bossNodeId)
+  const primaryBossNodeId = (variant && lastAct.variants?.[variant]?.bossNodeId)
     ? lastAct.variants[variant].bossNodeId
     : lastAct.bossNodeId;
-  return run.nodes.some(n => n.id === bossNodeId && n.completed);
+  // Also check alternateBossNodeIds so multi-boss acts (e.g. Gold/Silver) work correctly
+  const bossIds = [primaryBossNodeId, ...(lastAct.alternateBossNodeIds ?? [])];
+  return run.nodes.some(n => bossIds.includes(n.id) && n.completed);
 }
 
 /**
@@ -816,14 +818,25 @@ export function applyPercentHeal(
  */
 export function applyFullHealAll(run: RunState): RunState {
   const newParty = run.party.map(pokemon => {
-    // Don't heal knocked out Pokemon
     if (pokemon.knockedOut) return pokemon;
-    return {
-      ...pokemon,
-      currentHp: pokemon.maxHp,
-    };
+    return { ...pokemon, currentHp: pokemon.maxHp };
   });
+  // Also heal alive bench Pokemon (Fix: bench was excluded before)
+  const newBench = run.bench.map(pokemon => {
+    if (pokemon.knockedOut) return pokemon;
+    return { ...pokemon, currentHp: pokemon.maxHp };
+  });
+  return { ...run, party: newParty, bench: newBench };
+}
 
+/**
+ * Fully heal one specific party member (by index). Used by Sacred Ash event.
+ */
+export function fullHealPartyMember(run: RunState, pokemonIndex: number): RunState {
+  if (pokemonIndex < 0 || pokemonIndex >= run.party.length) return run;
+  const newParty = run.party.map((p, i) =>
+    i === pokemonIndex ? { ...p, currentHp: p.maxHp } : p
+  );
   return { ...run, party: newParty };
 }
 

@@ -29,6 +29,7 @@ export type EventEffect =
   | { type: 'cardClone' }
   | { type: 'recruit' }
   | { type: 'setPath'; connections: string[] }
+  | { type: 'reviveGraveyardFull' }
   | { type: 'nothing' };
 
 export type ChoiceOutcome =
@@ -57,7 +58,7 @@ export interface EventDefinition {
 
 /** Effects that need UI interaction (card picking, drafting, etc.) */
 export const INTERACTIVE_EFFECT_TYPES = new Set([
-  'cardRemoval', 'epicDraft', 'shopDraft', 'cardClone', 'recruit',
+  'cardRemoval', 'epicDraft', 'shopDraft', 'cardClone', 'recruit', 'reviveGraveyardFull',
 ]);
 
 export function isInteractiveEffect(effect: EventEffect): boolean {
@@ -1116,17 +1117,28 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
     id: 'c2_sacred_ash',
     act: 3,
     title: 'Sacred Ash',
-    narrativeText: "In a stone bowl surrounded by offerings, a faint ember still smolders. Sacred Ash — embers from Ho-Oh's last descent, decades ago. The monks say it can restore life.",
+    narrativeText: "In a stone bowl surrounded by offerings, a faint ember still smolders. Sacred Ash — embers from Ho-Oh's last descent, decades ago. The monks say it can restore life. Choose wisely.",
     choices: [
       {
-        id: 'touch',
-        label: 'Touch the ash',
+        id: 'revive',
+        label: 'Call to the fallen',
+        flavorText: 'Revive one KO\'d Pokemon to full health.',
+        disabled: (run: RunState) => run.graveyard.length === 0,
         outcome: {
-          type: 'random',
-          branches: [
-            { weight: 65, effects: [{ type: 'healPercent', target: 'all', percent: 0.5 }], description: "Ho-Oh's warmth spreads through your team." },
-            { weight: 35, effects: [{ type: 'healPercent', target: 'all', percent: 0.2 }, { type: 'damage', target: 'one', amount: 10 }], description: 'The flame flares; one Pokemon recoils from the intensity.' },
-          ],
+          type: 'fixed',
+          effects: [{ type: 'reviveGraveyardFull' }],
+          description: 'The ash blazes gold. A fallen companion stirs and rises — restored.',
+        },
+      },
+      {
+        id: 'restore',
+        label: 'Let the warmth flow',
+        flavorText: 'Restore one party member to full health.',
+        disabled: (run: RunState) => run.graveyard.length > 0,
+        outcome: {
+          type: 'fixed',
+          effects: [{ type: 'fullHeal', target: 'one' as const }],
+          description: "Ho-Oh's warmth flows into your chosen Pokemon. Fully restored.",
         },
       },
       {

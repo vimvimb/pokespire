@@ -13,6 +13,34 @@ import {
   type ProgressionTree,
   type ProgressionRung,
 } from '../../run/progression';
+
+// ── Region classification ────────────────────────────────────────────
+// Johto base-form IDs (Gen 2). Everything else is Kanto (Gen 1).
+const JOHTO_BASE_IDS = new Set([
+  // Starters
+  'chikorita', 'cyndaquil', 'totodile',
+  // Draft / recruit pool
+  'sentret', 'hoothoot', 'ledyba', 'spinarak', 'wooper', 'aipom', 'hoppip',
+  // Act 1 enemies & bosses
+  'sunkern', 'yanma', 'misdreavus', 'sudowoodo', 'murkrow', 'celebi',
+  // Act 2 enemies — both paths
+  'stantler', 'marill', 'flaaffy', 'togetic', 'espeon', 'umbreon',
+  'heracross', 'houndour', 'sneasel', 'teddiursa', 'larvitar',
+  'miltank', 'wobbuffet', 'blissey', 'pineco', 'forretress',
+  'steelix', 'scizor', 'dunsparce', 'girafarig',
+  // Act 3A — Tin Tower
+  'slugma', 'phanpy', 'skarmory', 'ho-oh',
+  // Act 3B — Brass Tower
+  'slowking', 'corsola', 'mantine', 'chinchou', 'politoed', 'qwilfish', 'kingdra', 'lugia',
+  // Legendary beasts
+  'raikou', 'entei', 'suicune',
+]);
+
+type Region = 'kanto' | 'johto';
+
+function getRegion(pokemonId: string): Region {
+  return JOHTO_BASE_IDS.has(getBaseFormId(pokemonId)) ? 'johto' : 'kanto';
+}
 import { THEME } from '../theme';
 import { getSpriteUrl } from '../utils/sprites';
 
@@ -72,6 +100,12 @@ const availableTypes = (Object.keys(typeCounts) as MoveType[])
   .filter(t => t !== 'item')
   .sort((a, b) => (typeCounts[b] || 0) - (typeCounts[a] || 0));
 
+// Region counts
+const regionCounts: Record<Region, number> = { kanto: 0, johto: 0 };
+for (const p of allPokemon) {
+  regionCounts[getRegion(p.id)]++;
+}
+
 // Set of base form IDs for distinguishing base vs evolved in the UI
 const BASE_FORM_IDS = new Set(Object.keys(STARTER_POKEMON));
 
@@ -80,11 +114,15 @@ const BASE_FORM_IDS = new Set(Object.keys(STARTER_POKEMON));
 export function PokeDexScreen({ onBack }: Props) {
   const [selectedPokemon, setSelectedPokemon] = useState<PokemonData | null>(null);
   const [typeFilter, setTypeFilter] = useState<MoveType | null>(null);
+  const [regionFilter, setRegionFilter] = useState<Region | null>(null);
 
   const filteredPokemon = useMemo(() => {
-    if (!typeFilter) return allPokemon;
-    return allPokemon.filter(p => p.types.includes(typeFilter));
-  }, [typeFilter]);
+    return allPokemon.filter(p => {
+      if (typeFilter && !p.types.includes(typeFilter)) return false;
+      if (regionFilter && getRegion(p.id) !== regionFilter) return false;
+      return true;
+    });
+  }, [typeFilter, regionFilter]);
 
   // Detail page — full takeover
   if (selectedPokemon) {
@@ -140,6 +178,45 @@ export function PokeDexScreen({ onBack }: Props) {
         }}>
           <DexFrame>
             <div style={{ padding: '14px 12px' }}>
+              {/* ── Region Filter ── */}
+              <div style={{
+                fontSize: 10,
+                color: THEME.text.tertiary,
+                ...THEME.heading,
+                letterSpacing: '0.12em',
+                marginBottom: 10,
+                paddingLeft: 4,
+              }}>
+                REGION
+              </div>
+
+              <Flourish variant="heading" width={60} color={THEME.border.medium} />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 10, marginBottom: 18 }}>
+                <TypeFilterButton
+                  label="All Regions"
+                  count={allPokemon.length}
+                  color={THEME.text.secondary}
+                  isActive={regionFilter === null}
+                  onClick={() => setRegionFilter(null)}
+                />
+                <TypeFilterButton
+                  label="Kanto"
+                  count={regionCounts.kanto}
+                  color="#f97316"
+                  isActive={regionFilter === 'kanto'}
+                  onClick={() => setRegionFilter(regionFilter === 'kanto' ? null : 'kanto')}
+                />
+                <TypeFilterButton
+                  label="Johto"
+                  count={regionCounts.johto}
+                  color="#34d399"
+                  isActive={regionFilter === 'johto'}
+                  onClick={() => setRegionFilter(regionFilter === 'johto' ? null : 'johto')}
+                />
+              </div>
+
+              {/* ── Type Filter ── */}
               <div style={{
                 fontSize: 10,
                 color: THEME.text.tertiary,
@@ -162,7 +239,7 @@ export function PokeDexScreen({ onBack }: Props) {
                 {/* All button */}
                 <TypeFilterButton
                   label="All"
-                  count={allPokemon.length}
+                  count={regionFilter ? filteredPokemon.length : allPokemon.length}
                   color={THEME.text.secondary}
                   isActive={typeFilter === null}
                   onClick={() => setTypeFilter(null)}
@@ -196,10 +273,13 @@ export function PokeDexScreen({ onBack }: Props) {
                 fontSize: 14,
                 marginBottom: 24,
               }}>
-                {typeFilter
-                  ? `${filteredPokemon.length} ${typeFilter}-type Pokemon`
-                  : 'Choose a Pokemon to inspect'
-                }
+                {(() => {
+                  const parts: string[] = [];
+                  if (regionFilter) parts.push(regionFilter === 'kanto' ? 'Kanto' : 'Johto');
+                  if (typeFilter) parts.push(`${typeFilter}-type`);
+                  if (parts.length > 0) return `${filteredPokemon.length} ${parts.join(' ')} Pokémon`;
+                  return 'Choose a Pokemon to inspect';
+                })()}
               </div>
 
               {/* Grid */}

@@ -28,20 +28,12 @@ function getTransitionContent(act: number, run: RunState): TransitionContent {
   if (campaignTransition) {
     return campaignTransition;
   }
-  // Fallback for rocket_tower (or any campaign without transition text for this act)
-  if (act === 1) {
-    return {
-      heading: 'Act 1 Complete!',
-      story: 'Ariana has been defeated, but she was only a diversion. Giovanni himself waits on the floor below...',
-      buttonLabel: 'Continue to Act 2',
-      accentColor: '#60a5fa',
-    };
-  }
+  // Generic fallback — all campaigns should define actTransitions in their narrativeTexts config.
   return {
-    heading: 'Act 2 Complete!',
-    story: "Giovanni has fallen. His final words: \"You're too late \u2014 Mewtwo has escaped into the caverns below.\"",
-    buttonLabel: 'Descend to Act 3',
-    accentColor: '#a855f7',
+    heading: `Act ${act} Complete!`,
+    story: 'Your team prepares for what comes next.',
+    buttonLabel: 'Continue',
+    accentColor: '#60a5fa',
   };
 }
 

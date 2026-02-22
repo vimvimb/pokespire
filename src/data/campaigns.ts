@@ -318,7 +318,11 @@ export const CAMPAIGNS: CampaignDefinition[] = [
           ambientColor: "#fbbf24",
           title: "Act 2 — Past Johto",
           bossNodeId: "c2-a2-boss-gold",
-          bossName: "Gold / Silver",
+          bossName: "Gold",
+          bossByNodeId: {
+            "c2-a2-boss-gold":   "Gold",
+            "c2-a2-boss-silver": "Silver",
+          },
         },
       },
       {
@@ -443,8 +447,10 @@ export function getDynamicActTransitionContent(
   // Only applies during Campaign 2 Act 2
   if (run.campaignId !== 'campaign_2' || run.currentAct !== 2) return null;
 
-  const isGoldPath   = run.currentNodeId === 'c2-a2-transition-tin-tower';
-  const isSilverPath = run.currentNodeId === 'c2-a2-transition-brass-tower';
+  // Check which boss was defeated — NOT currentNodeId, which is the boss node itself
+  // when the act_transition screen is shown (before the player clicks Continue).
+  const isGoldPath   = run.nodes.some(n => n.id === 'c2-a2-boss-gold'   && n.completed);
+  const isSilverPath = run.nodes.some(n => n.id === 'c2-a2-boss-silver' && n.completed);
 
   if (isGoldPath) {
     return {

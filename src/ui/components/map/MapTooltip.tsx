@@ -63,7 +63,10 @@ function renderContent(node: MapNode, actConfig: ActMapConfig) {
   switch (node.type) {
     case 'battle': {
       const battle = node as BattleNode;
-      const isBoss = node.id === actConfig.bossNodeId;
+      // Resolve boss name — per-node map takes priority over the single bossName
+      const bossName = actConfig.bossByNodeId?.[node.id]
+        ?? (node.id === actConfig.bossNodeId ? actConfig.bossName : null);
+      const isBoss = bossName != null;
 
       if (isBoss) {
         return (
@@ -75,7 +78,7 @@ function renderContent(node: MapNode, actConfig: ActMapConfig) {
               marginBottom: 4,
               letterSpacing: '0.08em',
             }}>
-              {actConfig.bossName}
+              {bossName}
             </div>
             <div style={{ fontSize: 11, color: THEME.text.tertiary }}>Boss Battle</div>
             <div style={{

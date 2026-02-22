@@ -5,7 +5,7 @@ import { ALL_EVENTS, needsPokemonSelection } from '../../data/events';
 import { resolveOutcome, processEffects } from '../../run/events';
 import type { PendingInteractive } from '../../run/events';
 import { getPokemon, getMove } from '../../data/loaders';
-import { removeCardsFromDeck, addCardToDeck, createRecruitPokemon, getRecruitLevel, recruitToRoster } from '../../run/state';
+import { removeCardsFromDeck, addCardToDeck, createRecruitPokemon, getRecruitLevel, recruitToRoster, reviveFromGraveyard, fullHealPartyMember } from '../../run/state';
 import { buildTypePool } from '../../run/draft';
 import { createRng, sampleCards } from '../../run/rng';
 import { SHOP_ITEMS } from '../../data/shop';
@@ -535,35 +535,67 @@ export function EventScreen({ run, eventId, onComplete, onRestart }: Props) {
           </>
         )}
 
-        {/* Outcome Phase */}
-        {phase.type === 'outcome' && (
-          <>
-            <div className="evt-fadein" style={{ width: '100%', maxWidth: 500 }}>
-              <DexFrame>
-                <div style={{
-                  padding: '20px 28px',
-                  background: NAVY_BG,
-                  borderRadius: 2,
-                  color: THEME.text.primary,
-                  fontSize: 16,
-                  textAlign: 'center',
-                }}>
-                  {phase.description}
-                </div>
-              </DexFrame>
-            </div>
-            <button
-              onClick={handleOutcomeContinue}
-              style={{
-                ...THEME.button.primary,
-                padding: '12px 32px',
-                fontSize: 16,
-              }}
-            >
-              Continue
-            </button>
-          </>
-        )}
+        {/* Outcome Phase — shows result description + a summary of what changed (Fix #1) */}
+        {phase.type === 'outcome' && (() => {
+          // Compute a diff between the run before the event and after applying effects
+          const goldDiff = phase.workingRun.gold - run.gold;
+          const statChanges: Array<{ label: string; positive: boolean }> = [];
+          if (goldDiff !== 0) {
+            statChanges.push({ label: `${goldDiff > 0 ? '+' : ''}${goldDiff} gold`, positive: goldDiff > 0 });
+          }
+          phase.workingRun.party.forEach((p, i) => {
+            const old = run.party[i];
+            if (!old) return;
+            const hpDiff = p.currentHp - old.currentHp;
+            if (hpDiff > 0) statChanges.push({ label: `+${hpDiff} HP (${p.formId})`, positive: true });
+            if (hpDiff < 0) statChanges.push({ label: `${hpDiff} HP (${p.formId})`, positive: false });
+            const maxDiff = p.maxHp - old.maxHp;
+            if (maxDiff > 0) statChanges.push({ label: `+${maxDiff} max HP (${p.formId})`, positive: true });
+            const expDiff = p.exp - old.exp;
+            if (expDiff > 0) statChanges.push({ label: `+${expDiff} XP (${p.formId})`, positive: true });
+          });
+          const newKOs = phase.workingRun.graveyard.length - run.graveyard.length;
+          if (newKOs > 0) statChanges.push({ label: `${newKOs} KO'd`, positive: false });
+
+          return (
+            <>
+              <div className="evt-fadein" style={{ width: '100%', maxWidth: 500 }}>
+                <DexFrame>
+                  <div style={{ padding: '20px 28px', background: NAVY_BG, borderRadius: 2, textAlign: 'center' }}>
+                    {/* Stat-change chips */}
+                    {statChanges.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginBottom: 14 }}>
+                        {statChanges.map((c, i) => (
+                          <span key={i} style={{
+                            fontSize: 13,
+                            fontWeight: 'bold',
+                            padding: '3px 10px',
+                            borderRadius: 6,
+                            background: c.positive ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                            color: c.positive ? '#4ade80' : '#f87171',
+                            border: `1px solid ${c.positive ? '#4ade8044' : '#f8717144'}`,
+                          }}>
+                            {c.label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {/* Description */}
+                    <div style={{ color: THEME.text.primary, fontSize: 17, fontStyle: 'italic', lineHeight: 1.55 }}>
+                      {phase.description}
+                    </div>
+                  </div>
+                </DexFrame>
+              </div>
+              <button
+                onClick={handleOutcomeContinue}
+                style={{ ...THEME.button.primary, padding: '12px 32px', fontSize: 16 }}
+              >
+                Continue
+              </button>
+            </>
+          );
+        })()}
 
         {/* Interactive Phase */}
         {phase.type === 'interactive' && (() => {
@@ -713,6 +745,53 @@ export function EventScreen({ run, eventId, onComplete, onRestart }: Props) {
                 >
                   Welcome Aboard
                 </button>
+              </>
+            );
+          }
+
+          // Revive Graveyard Full — Sacred Ash (Fix #6)
+          if (effect.type === 'reviveGraveyardFull') {
+            const graveyard = phase.workingRun.graveyard;
+            if (graveyard.length === 0) {
+              // No fainted Pokemon — fall through
+              advanceInteractive(phase.workingRun, phase.queue, phase.currentIndex);
+              return null;
+            }
+            return (
+              <>
+                <SectionHeading color={color}>CHOOSE A POKEMON TO REVIVE</SectionHeading>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, justifyContent: 'center' }}>
+                  {graveyard.map((pokemon, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        const newRun = reviveFromGraveyard(phase.workingRun, i, 1.0);
+                        advanceInteractive(newRun, phase.queue, phase.currentIndex);
+                      }}
+                      style={{
+                        background: NAVY_BG,
+                        border: `2px solid ${color}55`,
+                        borderRadius: 12,
+                        padding: '12px 16px',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        color: THEME.text.primary,
+                        transition: 'border-color 0.15s',
+                        minWidth: 120,
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.borderColor = color)}
+                      onMouseLeave={e => (e.currentTarget.style.borderColor = `${color}55`)}
+                    >
+                      <img
+                        src={getSpriteUrl(pokemon.formId)}
+                        alt={pokemon.formId}
+                        style={{ width: 72, height: 72, imageRendering: 'pixelated', objectFit: 'contain', filter: 'grayscale(60%)' }}
+                      />
+                      <div style={{ fontSize: 14, fontWeight: 'bold', marginTop: 4 }}>{pokemon.formId}</div>
+                      <div style={{ fontSize: 11, color: THEME.text.tertiary }}>Lv. {pokemon.level}</div>
+                    </button>
+                  ))}
+                </div>
               </>
             );
           }

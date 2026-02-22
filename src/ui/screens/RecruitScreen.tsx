@@ -1,6 +1,9 @@
 import type { RunState, RecruitNode } from '../../run/types';
 import { getPokemon } from '../../data/loaders';
-import { getRecruitLevel } from '../../run/state';
+import { getRecruitLevel, createRecruitPokemon } from '../../run/state';
+
+// Legendary beasts fight the full party, not 1v1
+const LEGENDARY_BEAST_IDS = new Set(['raikou', 'entei', 'suicune']);
 import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
 import { getSpriteUrl } from '../utils/sprites';
@@ -16,8 +19,11 @@ interface Props {
 }
 
 export function RecruitScreen({ run, node, battleResult, onStartFight, onRecruit, onDecline, onRestart }: Props) {
-  const wildPokemon = getPokemon(node.pokemonId);
   const recruitLevel = getRecruitLevel(run);
+  // Determine actual form (may be evolved if level is high enough) — Fix #5
+  const recruitMon = createRecruitPokemon(node.pokemonId, recruitLevel);
+  const wildPokemon = getPokemon(recruitMon.formId);
+  const isLegendaryBeast = LEGENDARY_BEAST_IDS.has(node.pokemonId);
   const benchFull = run.bench.length >= 4;
 
   const header = (
@@ -67,7 +73,7 @@ export function RecruitScreen({ run, node, battleResult, onStartFight, onRecruit
           borderRadius: 16,
         }}>
           <img
-            src={getSpriteUrl(node.pokemonId)}
+            src={getSpriteUrl(recruitMon.formId)}
             alt={wildPokemon.name}
             style={{
               width: 120,
@@ -80,7 +86,7 @@ export function RecruitScreen({ run, node, battleResult, onStartFight, onRecruit
             {wildPokemon.name}
           </div>
           <div style={{ fontSize: 14, color: THEME.text.secondary, marginTop: 4 }}>
-            Level {recruitLevel} | {wildPokemon.maxHp} HP
+            Level {recruitLevel} | {recruitMon.maxHp} HP
           </div>
           <div style={{ fontSize: 12, color: THEME.text.tertiary, marginTop: 2 }}>
             Type: {wildPokemon.types.join(' / ')}
@@ -91,10 +97,35 @@ export function RecruitScreen({ run, node, battleResult, onStartFight, onRecruit
         {!battleResult && (
           <>
             <p style={{ color: THEME.text.secondary, margin: 0, textAlign: 'center', maxWidth: 450 }}>
-              A wild {wildPokemon.name} appears! Choose one of your Pokemon to fight it 1-on-1. Win to recruit it to your bench.
+              {isLegendaryBeast
+                ? `A legendary ${wildPokemon.name} awaits. Your entire party will face it — only a full team can challenge a beast of this power.`
+                : `A wild ${wildPokemon.name} appears! Choose one of your Pokemon to fight it 1-on-1. Win to recruit it to your bench.`
+              }
             </p>
 
-            <div style={{
+            {/* Legendary beast: single full-party challenge button */}
+            {isLegendaryBeast && (
+              <button
+                onClick={() => onStartFight(-1)}
+                style={{
+                  padding: '14px 40px',
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  background: 'linear-gradient(135deg, #f97316, #ef4444)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 10,
+                  cursor: 'pointer',
+                  letterSpacing: '0.06em',
+                  boxShadow: '0 0 20px rgba(249,115,22,0.4)',
+                }}
+              >
+                Challenge {wildPokemon.name}
+              </button>
+            )}
+
+            {/* Individual fighter picker — only for non-legendary Pokemon */}
+            {!isLegendaryBeast && <div style={{
               display: 'flex',
               gap: 16,
               flexWrap: 'wrap',
@@ -166,7 +197,7 @@ export function RecruitScreen({ run, node, battleResult, onStartFight, onRecruit
                   </div>
                 );
               })}
-            </div>
+            </div>}
           </>
         )}
 

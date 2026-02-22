@@ -372,13 +372,22 @@ export default function App() {
   );
 
   // Handle rest: Chansey heals whole party 30%
+  // Navigate to map, but check for pending level-ups first (Fix #2)
+  const goToMapOrLevelUp = useCallback((updatedRun: RunState) => {
+    setRunState(updatedRun);
+    if (anyPokemonCanLevelUp(updatedRun)) {
+      setPendingPostLevelUpScreen("map");
+      setScreen("level_up");
+    } else {
+      setScreen("map");
+    }
+  }, []);
+
   const handleRestHeal = useCallback(() => {
     if (!runState) return;
-
     const newRun = applyPartyPercentHeal(runState, 0.3);
-    setRunState(newRun);
-    setScreen("map");
-  }, [runState]);
+    goToMapOrLevelUp(newRun);
+  }, [runState, goToMapOrLevelUp]);
 
   // Handle event completion (new data-driven event system)
   const handleEventComplete = useCallback((newRun: RunState) => {
@@ -391,9 +400,8 @@ export default function App() {
         ? { ...newRun, seenEventIds: [...newRun.seenEventIds, eventId] }
         : newRun;
 
-    setRunState(updatedRun);
-    setScreen("map");
-  }, []);
+    goToMapOrLevelUp(updatedRun);
+  }, [goToMapOrLevelUp]);
 
   // Handle card draft completion (happens after battles)
   const handleDraftComplete = useCallback(
@@ -472,7 +480,26 @@ export default function App() {
 
       if (!runState) return;
 
-      // Recruit battles: sync HP back to fighter, return to recruit screen
+      // Legendary beast: full party battle — sync all combatants (Fix #9)
+      if (isRecruitBattle && recruitFighterIndex === null) {
+        let newRun = syncBattleResults(runState, combatants);
+        newRun = moveKnockedOutToGraveyard(newRun);
+        const allDead = newRun.party.every((p) => p.currentHp <= 0 || p.knockedOut);
+        if (allDead) {
+          setIsRecruitBattle(false);
+          setPendingBattleNodeId(null);
+          setScreen("run_defeat");
+          return;
+        }
+        setRecruitBattleResult(result === "victory" ? "victory" : "defeat");
+        setIsRecruitBattle(false);
+        setPendingBattleNodeId(null);
+        setRunState(newRun);
+        setScreen("recruit");
+        return;
+      }
+
+      // Normal 1v1 recruit battles: sync HP back to fighter, return to recruit screen
       if (isRecruitBattle && recruitFighterIndex !== null) {
         const playerCombatant = combatants.find((c) => c.side === "player");
         let newParty = runState.party;
@@ -684,16 +711,16 @@ export default function App() {
         newRun = removeCardsFromDeck(newRun, pokemonIndex, cardIndices);
       });
 
-      setRunState(newRun);
-      setScreen("map");
+      goToMapOrLevelUp(newRun);
     },
-    [runState],
+    [runState, goToMapOrLevelUp],
   );
 
   // Handle card removal skip
   const handleCardRemovalSkip = useCallback(() => {
-    setScreen("map");
-  }, []);
+    if (runState) goToMapOrLevelUp(runState);
+    else setScreen("map");
+  }, [runState, goToMapOrLevelUp]);
 
   // Handle swap between party and bench
   const handleSwap = useCallback(
@@ -726,7 +753,11 @@ export default function App() {
     [runState],
   );
 
-  // Handle starting a 1v1 recruit fight
+  // Legendary beasts fight the whole party (Fix #9)
+  const LEGENDARY_BEAST_IDS = new Set(["raikou", "entei", "suicune"]);
+
+  // Handle recruit fight — 1v1 for normal wild Pokemon, full party for legendary beasts.
+  // partyIndex === -1 means "challenge with full party" (sent by RecruitScreen for beasts).
   const handleRecruitFight = useCallback(
     (partyIndex: number) => {
       if (!runState) return;
@@ -735,14 +766,8 @@ export default function App() {
       if (!currentNode || currentNode.type !== "recruit") return;
       const recruitNode = currentNode as RecruitNode;
 
-      const fighter = runState.party[partyIndex];
       const recruitLevel = getRecruitLevel(runState);
-      const recruitMon = createRecruitPokemon(
-        recruitNode.pokemonId,
-        recruitLevel,
-      );
-
-      // Build enemy data at recruit level with proper HP and deck
+      const recruitMon = createRecruitPokemon(recruitNode.pokemonId, recruitLevel);
       const enemyData = getPokemon(recruitMon.formId);
       const enemyWithHp = {
         ...enemyData,
@@ -750,7 +775,35 @@ export default function App() {
         deck: [...recruitMon.deck],
       };
 
-      // Start 1v1 battle: fighter vs wild Pokemon (with passives from progression tree)
+      const isLegendaryBeast = LEGENDARY_BEAST_IDS.has(recruitNode.pokemonId);
+
+      if (isLegendaryBeast || partyIndex === -1) {
+        // Full party vs legendary beast
+        const partyData = runState.party.map(p => getRunPokemonData(p));
+        const partyPositions = runState.party.map(p => p.position);
+        const partyPassives = new Map(runState.party.map((p, i) => [i, p.passiveIds]));
+        const hpOverrides = new Map(
+          runState.party.map((p, i) => [`player-${i}`, { maxHp: p.maxHp, startPercent: p.currentHp / p.maxHp }])
+        );
+        battle.startConfiguredBattle(
+          partyData,
+          [enemyWithHp],
+          partyPositions,
+          [{ row: "front", column: 1 }],
+          partyPassives,
+          new Map([[0, recruitMon.passiveIds]]),
+          hpOverrides,
+        );
+        setIsRecruitBattle(true);
+        setRecruitFighterIndex(null); // null = full party battle
+        setRecruitBattleResult("pending");
+        setPendingBattleNodeId(recruitNode.id);
+        setScreen("battle");
+        return;
+      }
+
+      // Normal 1v1 recruit fight
+      const fighter = runState.party[partyIndex];
       const fighterData = getRunPokemonData(fighter);
       battle.startConfiguredBattle(
         [fighterData],
@@ -759,22 +812,12 @@ export default function App() {
         [{ row: "front", column: 1 }],
         new Map([[0, fighter.passiveIds]]),
         new Map([[0, recruitMon.passiveIds]]),
-        new Map([
-          [
-            "player-0",
-            {
-              maxHp: fighter.maxHp,
-              startPercent: fighter.currentHp / fighter.maxHp,
-            },
-          ],
-        ]),
+        new Map([["player-0", { maxHp: fighter.maxHp, startPercent: fighter.currentHp / fighter.maxHp }]]),
       );
 
       setIsRecruitBattle(true);
       setRecruitFighterIndex(partyIndex);
       setRecruitBattleResult("pending");
-      // Set the recruit node ID so getMusicForScreen can resolve campaign-specific
-      // battle music (e.g. legendary beast track for c2-a3x-s5-recruit-* nodes)
       setPendingBattleNodeId(recruitNode.id);
       setScreen("battle");
     },
@@ -811,11 +854,10 @@ export default function App() {
       ),
     };
 
-    setRunState(newRun);
     setRecruitBattleResult(null);
     setRecruitFighterIndex(null);
-    setScreen("map");
-  }, [runState]);
+    goToMapOrLevelUp(newRun);
+  }, [runState, goToMapOrLevelUp]);
 
   // Handle recruit decline (skip recruitment, back to map)
   const handleRecruitDecline = useCallback(() => {
@@ -836,15 +878,15 @@ export default function App() {
     (graveyardIndex: number) => {
       if (!runState) return;
       const newRun = reviveFromGraveyard(runState, graveyardIndex, 0.5);
-      setRunState(newRun);
-      setScreen("map");
+      goToMapOrLevelUp(newRun);
     },
-    [runState],
+    [runState, goToMapOrLevelUp],
   );
 
   const handleGhostReviveSkip = useCallback(() => {
-    setScreen("map");
-  }, []);
+    if (runState) goToMapOrLevelUp(runState);
+    else setScreen("map");
+  }, [runState, goToMapOrLevelUp]);
 
   // Abandon run and return to main menu (clears save)
   const handleRestart = useCallback(() => {

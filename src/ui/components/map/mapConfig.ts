@@ -11,6 +11,12 @@ export interface ActMapConfig {
   bossName: string;
   /** Optional campaign-specific combat background. Overrides the default Campaign 1 logic in BattleScreen. */
   combatBackgroundImage?: string;
+  /**
+   * Optional per-node boss names for acts with multiple boss nodes (e.g. Gold and Silver in C2 Act 2).
+   * Maps node ID → display name. Any node listed here is treated as a boss (gets the purple glow).
+   * Falls back to bossNodeId + bossName when absent.
+   */
+  bossByNodeId?: Record<string, string>;
 }
 
 export const ACT_MAP_CONFIGS: Record<number, ActMapConfig> = {
