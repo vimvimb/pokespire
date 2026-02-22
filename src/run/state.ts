@@ -85,8 +85,11 @@ export function createRunState(
   // Assign random events from Act 1 pool (no repeats)
   const { nodes: eventNodes, seenEventIds } = assignRandomEvents(nodes, 1, actualSeed, []);
 
-  // Generate randomized encounters for non-fixed battle nodes
-  const generatedNodes = generateEncountersForAct(eventNodes, 1, actualSeed);
+  // Generate randomized encounters for non-fixed battle nodes (Campaign 1 only;
+  // Campaign 2 uses static encounters until Gen 2 Pokemon are balanced)
+  const finalNodes = campaignId === 'rocket_tower'
+    ? generateEncountersForAct(eventNodes, 1, actualSeed)
+    : eventNodes;
 
   return {
     seed: actualSeed,
@@ -96,7 +99,7 @@ export function createRunState(
     graveyard: [],
     currentNodeId: firstAct.spawnNodeId,
     visitedNodeIds: [firstAct.spawnNodeId],
-    nodes: generatedNodes,
+    nodes: finalNodes,
     currentAct: 1,
     actVariants: {},
     recruitSeed,
