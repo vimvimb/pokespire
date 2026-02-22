@@ -2245,7 +2245,7 @@
     "deck": [
       "tackle", "tackle",
       "bite", "bite", "bite",
-      "ember", "ember",
+      "flamethrower", "flamethrower",
       "night-shade", "night-shade",
       "slash"
     ],
@@ -2555,8 +2555,9 @@
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "ember", "ember", "ember",
+      "tackle", "tackle",
+      "ember", "ember",
+      "flamethrower", "flamethrower",
       "defend", "defend",
       "slam", "slam"
     ],

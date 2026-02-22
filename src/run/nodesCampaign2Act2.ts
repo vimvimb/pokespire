@@ -113,6 +113,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'back', column: 0 },
       { row: 'front', column: 1 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.34, y: 0.18,
   },
   {
@@ -126,6 +127,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.34, y: 0.04,
   },
 
@@ -149,6 +151,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.45, y: 0.26,
   },
   {
@@ -171,6 +174,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'back', column: 2 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.54, y: 0.26,
   },
 
@@ -186,7 +190,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
-    enemyHpMultiplier: 1.1,
+    enemyHpMultiplier: 1.2,
     x: 0.64, y: 0.16,
   },
   {
@@ -213,7 +217,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'front', column: 2 },
       { row: 'back', column: 1 },
     ],
-    enemyHpMultiplier: 1.3,
+    enemyHpMultiplier: 1.4,
     size: 'large',
     x: 0.83, y: 0.16,
   },
@@ -245,6 +249,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'front', column: 2 },
       { row: 'back', column: 1 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.34, y: 0.82,
   },
   {
@@ -258,6 +263,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.34, y: 0.96,
   },
 
@@ -281,6 +287,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.45, y: 0.9,
   },
   {
@@ -303,6 +310,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'back', column: 2 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.54, y: 0.9,
   },
 
@@ -315,7 +323,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
     completed: false,
     enemies: ['steelix'],
     enemyPositions: [{ row: 'front', column: 1 }],
-    enemyHpMultiplier: 1.2,
+    enemyHpMultiplier: 1.1,
     x: 0.61, y: 0.82,
   },
 
@@ -356,7 +364,7 @@ export const CAMPAIGN2_ACT2_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'back', column: 1 },
     ],
-    enemyHpMultiplier: 1.3,
+    enemyHpMultiplier: 1.4,
     size: 'large',
     x: 0.85, y: 0.82,
   },

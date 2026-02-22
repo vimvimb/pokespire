@@ -98,6 +98,7 @@ export const CAMPAIGN2_ACT1_NODES: MapNode[] = [
       { row: 'front', column: 1 },
       { row: 'back', column: 1 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.52, y: 0.3,
   },
   {
@@ -111,6 +112,7 @@ export const CAMPAIGN2_ACT1_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.52, y: 0.7,
   },
   {
@@ -151,7 +153,7 @@ export const CAMPAIGN2_ACT1_NODES: MapNode[] = [
     completed: false,
     enemies: ['sudowoodo'],
     enemyPositions: [{ row: 'front', column: 1 }],
-    enemyHpMultiplier: 1.2,
+    enemyHpMultiplier: 1.25,
     x: 0.76, y: 0.7,
   },
 

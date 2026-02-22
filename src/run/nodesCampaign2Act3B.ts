@@ -30,6 +30,7 @@ export const CAMPAIGN2_ACT3B_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'front', column: 2 },
     ],
+    enemyHpMultiplier: 1.2,
     x: 0.16, y: 0.3,
   },
   {
@@ -43,6 +44,7 @@ export const CAMPAIGN2_ACT3B_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'back', column: 2 },
     ],
+    enemyHpMultiplier: 1.1,
     x: 0.16, y: 0.7,
   },
 
@@ -58,6 +60,7 @@ export const CAMPAIGN2_ACT3B_NODES: MapNode[] = [
       { row: 'back', column: 1 },
       { row: 'front', column: 1 },
     ],
+    enemyHpMultiplier: 1.2,
     x: 0.28, y: 0.28,
   },
   {
@@ -91,7 +94,7 @@ export const CAMPAIGN2_ACT3B_NODES: MapNode[] = [
       { row: 'front', column: 0 },
       { row: 'back', column: 2 },
     ],
-    enemyHpMultiplier: 1.1,
+    enemyHpMultiplier: 1.2,
     x: 0.4, y: 0.72,
   },
 
