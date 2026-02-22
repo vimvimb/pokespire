@@ -36,5 +36,7 @@ export const CAMPAIGN2_ACT1_NODES: MapNode[] = [
     enemyPositions: [{ row: 'front', column: 1 }],
     enemyHpMultiplier: 1.5,
     size: 'large',
+    x: 0.8,
+    y: 0.5,
   },
 ];

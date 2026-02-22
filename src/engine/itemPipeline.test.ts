@@ -18,8 +18,8 @@ import { getMove } from '../data/loaders';
 import {
   processItemBattleStart, processItemTurnStart, processItemRoundStart,
   processItemBattleEnd, checkItemPlayRestriction,
-  processItemPostCard, processItemTurnEnd, processItemOnDamageDealt,
-  processItemOnDamageTaken, processItemOnKO, getItemHealModifier,
+  processItemTurnEnd,
+  processItemOnDamageTaken, processItemOnKO,
 } from './itemEffects';
 import { getTypeEffectiveness } from './typeChart';
 import { applyHeal } from './damage';
@@ -46,14 +46,14 @@ function makeScenario(opts: ScenarioOpts) {
     types: opts.sourceTypes, heldItemIds: opts.itemId ? [opts.itemId] : [],
     hp: opts.sourceHp ?? 100, maxHp: 100,
   });
-  source.position = { row: 'front', column: opts.sourceCol ?? 1 };
+  source.position = { row: 'front', column: (opts.sourceCol ?? 1) as 0 | 1 | 2 };
 
   const target = createTestCombatant({
     id: 'tgt', name: 'Target', side: 'enemy',
     types: opts.targetTypes,
     hp: opts.targetHp ?? 100, maxHp: 100,
   });
-  target.position = { row: 'front', column: opts.targetCol ?? 1 };
+  target.position = { row: 'front', column: (opts.targetCol ?? 1) as 0 | 1 | 2 };
 
   const state = createTestCombatState([source, target, ...(opts.extras ?? [])]);
   return { state, source, target };

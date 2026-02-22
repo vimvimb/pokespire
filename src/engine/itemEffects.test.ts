@@ -13,7 +13,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   createTestCombatant,
   createTestCombatState,
-  addStatus,
   resetTestIds,
 } from './test-helpers';
 import {
@@ -38,7 +37,7 @@ import {
 import { calculateHandPreview, calculateDamagePreview } from './preview';
 import { playCard } from './cards';
 import { getMove } from '../data/loaders';
-import type { MoveDefinition, Position } from './types';
+import type { Position } from './types';
 
 // ============================================================
 // Helpers
@@ -79,12 +78,6 @@ function makeSimpleState(opts?: {
 
   const state = createTestCombatState([player, enemy]);
   return { state, player, enemy };
-}
-
-/** Put a card in a combatant's hand and return the card definition. */
-function giveCard(combatant: ReturnType<typeof createTestCombatant>, cardId: string): MoveDefinition {
-  combatant.hand.push(cardId);
-  return getMove(cardId);
 }
 
 // ============================================================

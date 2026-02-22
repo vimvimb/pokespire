@@ -12,7 +12,7 @@
  */
 
 import type { CombatState, Combatant, LogEntry, MoveDefinition, MoveType } from './types';
-import { applyStatus, getEffectiveSpeed, getStatusStacks, getStatus } from './status';
+import { applyStatus, getEffectiveSpeed, getStatusStacks } from './status';
 import { applyHeal, applyBypassDamage } from './damage';
 import { isInEffectiveFrontRow } from './position';
 import {

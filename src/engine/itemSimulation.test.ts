@@ -56,7 +56,7 @@ interface BattleResult {
 
 /** AI: select a card to play. Prefers highest damage, then status, then anything. */
 function aiSelectCard(
-  state: CombatState,
+  _state: CombatState,
   combatant: Combatant,
 ): { handIndex: number; card: MoveDefinition } | null {
   const playableCardIds = new Set(getPlayableCards(combatant));
