@@ -1,4 +1,5 @@
-# Build on every PR commit; build + deploy on merge to main or manual trigger
+# Build on every PR commit
+# Build and deploy on merge to main or manual trigger
 name: Build
 
 on:
@@ -8,7 +9,7 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Default permissions for the build job (checkout only)
+# Default permissions for all job steps
 permissions:
   contents: read
 
