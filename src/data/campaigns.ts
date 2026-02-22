@@ -188,22 +188,22 @@ export const CAMPAIGNS: CampaignDefinition[] = [
       {
         actNumber: 1,
         nodes: ACT1_NODES,
-        spawnNodeId: "s0-spawn",
-        bossNodeId: "s6-boss-ariana",
+        spawnNodeId: "1a",
+        bossNodeId: "1ab",
         mapConfig: ACT_MAP_CONFIGS[1],
       },
       {
         actNumber: 2,
         nodes: ACT2_NODES,
-        spawnNodeId: "a2-s0-spawn",
-        bossNodeId: "a2-s6-boss-giovanni",
+        spawnNodeId: "2a",
+        bossNodeId: "2z",
         mapConfig: ACT_MAP_CONFIGS[2],
       },
       {
         actNumber: 3,
         nodes: ACT3_NODES,
-        spawnNodeId: "a3-s0-spawn",
-        bossNodeId: "a3-s6-boss-mewtwo",
+        spawnNodeId: "3a",
+        bossNodeId: "3q",
         mapConfig: ACT_MAP_CONFIGS[3],
       },
     ],
@@ -447,10 +447,10 @@ export function getDynamicActTransitionContent(
   // Only applies during Campaign 2 Act 2
   if (run.campaignId !== 'campaign_2' || run.currentAct !== 2) return null;
 
-  // Check which boss was defeated — NOT currentNodeId, which is the boss node itself
-  // when the act_transition screen is shown (before the player clicks Continue).
-  const isGoldPath   = run.nodes.some(n => n.id === 'c2-a2-boss-gold'   && n.completed);
-  const isSilverPath = run.nodes.some(n => n.id === 'c2-a2-boss-silver' && n.completed);
+  // moveToNode() advances currentNodeId to the act_transition node before the
+  // act_transition screen renders, so currentNodeId reliably identifies the path.
+  const isGoldPath   = run.currentNodeId === 'c2-a2-transition-tin-tower';
+  const isSilverPath = run.currentNodeId === 'c2-a2-transition-brass-tower';
 
   if (isGoldPath) {
     return {

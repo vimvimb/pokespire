@@ -10,3 +10,9 @@ if (rootEl) {
     </React.StrictMode>
   );
 }
+
+// Request persistent storage so the browser (especially iOS) doesn't evict
+// the service worker cache under storage pressure.
+if ('storage' in navigator && 'persist' in navigator.storage) {
+  navigator.storage.persist();
+}
