@@ -28,8 +28,12 @@ export async function getAudioCacheStatus(): Promise<{ cached: number; total: nu
 }
 
 /**
- * Fetch every uncached audio file so Workbox's CacheFirst strategy stores them.
- * Calls onProgress after each file. Stops early if cancelledRef.current is true.
+ * Fetch and cache every uncached audio file into the service worker's audio cache.
+ * Uses cache.add() instead of bare fetch() so the full response body is read and
+ * stored before we move on — bare fetch() drops the body stream before Workbox
+ * can finish writing the clone, which silently fails over slow CDN connections
+ * (e.g. GitHub Pages). Calls onProgress after each file. Stops early if
+ * cancelledRef.current is true.
  */
 export async function cacheAllAudio(
   onProgress: (done: number, total: number) => void,
@@ -37,12 +41,21 @@ export async function cacheAllAudio(
 ): Promise<void> {
   const urls = getAllAudioUrls();
   let done = 0;
+  if (!('caches' in window)) {
+    onProgress(urls.length, urls.length);
+    return;
+  }
+  const cache = await caches.open(AUDIO_CACHE_NAME);
   for (const url of urls) {
     if (cancelledRef.current) break;
     try {
-      await fetch(url);
+      if (!(await cache.match(url))) {
+        // cache.add() fetches the URL, reads the full body, and stores it
+        // atomically — guaranteed to be in cache when the await resolves.
+        await cache.add(url);
+      }
     } catch {
-      // Network error — skip this file and continue
+      // Network error or non-cacheable response — skip this file and continue
     }
     done++;
     onProgress(done, urls.length);
