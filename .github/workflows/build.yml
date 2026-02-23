@@ -1,5 +1,5 @@
-# Build on every PR commit
-# Build and deploy on merge to main or manual trigger
+# Build and test on every PR commit
+# Then, deploy on merge to main or manual trigger
 name: Build
 
 on:
@@ -24,6 +24,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: "npm"
 
       - name: Install dependencies and build project
         run: |
@@ -37,8 +38,26 @@ jobs:
         with:
           path: ./dist
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
   deploy:
-    needs: build
+    needs: [build, test]
     # Only deploy on pushes to main or manual workflow_dispatch runs
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest

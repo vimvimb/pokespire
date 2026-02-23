@@ -540,7 +540,7 @@ describe('Passive Abilities', () => {
   });
 
   describe('Shed Skin', () => {
-    it('removes 1 stack of highest debuff', () => {
+    it('removes 1 stack from all debuffs', () => {
       const combatant = createTestCombatant({ passiveIds: ['shed_skin'] });
       addStatus(combatant, 'burn', 3);
       addStatus(combatant, 'poison', 2);
@@ -549,7 +549,7 @@ describe('Passive Abilities', () => {
       onTurnEnd(state, combatant);
 
       expect(combatant.statuses.find(s => s.type === 'burn')?.stacks).toBe(2); // Reduced from 3
-      expect(combatant.statuses.find(s => s.type === 'poison')?.stacks).toBe(2); // Unchanged
+      expect(combatant.statuses.find(s => s.type === 'poison')?.stacks).toBe(1); // Reduced from 2
     });
 
     it('removes debuff entirely when stacks reach 0', () => {
@@ -1141,7 +1141,7 @@ describe('Passive Abilities', () => {
       expect(logs.some(l => l.message.includes('Flame Body'))).toBe(true);
     });
 
-    it('triggers on any damage type (not just Fire)', () => {
+    it('does not trigger on ranged (any_enemy) attacks', () => {
       const attacker = createTestCombatant({
         id: 'attacker',
         side: 'enemy',
@@ -1152,11 +1152,11 @@ describe('Passive Abilities', () => {
         passiveIds: ['flame_body'],
       });
       const state = createTestCombatState([attacker, target]);
-      const waterCard = getMove('water-gun');
+      const waterCard = getMove('water-gun'); // range: any_enemy
 
       onDamageTaken(state, attacker, target, 5, waterCard);
 
-      expect(getStatusStacks(attacker, 'burn')).toBe(1);
+      expect(getStatusStacks(attacker, 'burn')).toBe(0);
     });
 
     it('does not trigger when no HP damage dealt', () => {

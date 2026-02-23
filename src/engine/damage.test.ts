@@ -153,15 +153,15 @@ describe('Damage System', () => {
     });
 
     describe('Blaze Strike', () => {
-      it('doubles damage when isBlazeStrike is true', () => {
+      it('applies 1.3x multiplier when isBlazeStrike is true', () => {
         const source = createTestCombatant({ types: ['fire'] });
         const target = createTestCombatant({ hp: 100 });
 
         const result = applyCardDamage(source, target, 10, 'fire', { isBlazeStrike: true });
 
-        expect(result.blazeStrikeMultiplier).toBe(2);
-        // Base 10 + STAB 2 = 12, then x2 = 24
-        expect(result.hpDamage).toBe(24);
+        expect(result.blazeStrikeMultiplier).toBe(1.3);
+        // Base 10 + STAB 2 = 12, then x1.3 = 15.6 → floor → 15
+        expect(result.hpDamage).toBe(15);
       });
     });
 
