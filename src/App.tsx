@@ -1417,8 +1417,8 @@ export default function App() {
             }}
           >
             {offlineCachedCount !== null && offlineCachedCount >= 25
-              ? "✓ Offline Ready"
-              : "↓ Enable Offline Play"}
+              ? "✓ Audio Cached"
+              : "↓ Cache Audio"}
           </button>
 
           <button
