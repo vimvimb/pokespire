@@ -341,7 +341,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 3
+        "value": 8
       },
       {
         "type": "apply_status",
@@ -353,7 +353,7 @@
     "pools": [
       "normal"
     ],
-    "description": "Deal 3 damage. Apply Slow 2. (Front row).",
+    "description": "Deal 8 damage. Apply Slow 2. (Front row).",
     "contact": true
   },
   "stomp": {
@@ -1317,14 +1317,14 @@
       {
         "type": "apply_status",
         "status": "paralysis",
-        "stacks": 3
+        "stacks": 2
       }
     ],
     "rarity": "common",
     "pools": [
       "normal"
     ],
-    "description": "Apply Paralysis 3.",
+    "description": "Apply Paralysis 2.",
     "contact": false
   },
   "lovely-kiss": {
@@ -2571,14 +2571,14 @@
       {
         "type": "apply_status",
         "status": "paralysis",
-        "stacks": 3
+        "stacks": 2
       }
     ],
     "rarity": "common",
     "pools": [
       "grass"
     ],
-    "description": "Apply Paralysis 3.",
+    "description": "Apply Paralysis 2.",
     "contact": false
   },
   "sleep-powder": {
@@ -4109,7 +4109,7 @@
     "effects": [
       {
         "type": "damage",
-        "value": 8
+        "value": 11
       },
       {
         "type": "apply_status",
@@ -4121,7 +4121,7 @@
     "pools": [
       "water"
     ],
-    "description": "Deal 8 damage. Apply Slow 1.",
+    "description": "Deal 11 damage. Apply Slow 1.",
     "contact": false
   },
   "water-pulse": {
