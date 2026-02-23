@@ -203,6 +203,19 @@ export function onBattleStart(state: CombatState): LogEntry[] {
     });
   }
 
+  // Lucky: Increase hand size by 1
+  for (const combatant of state.combatants) {
+    if (!combatant.alive) continue;
+    if (!combatant.passiveIds.includes('lucky')) continue;
+
+    combatant.handSize += 1;
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Lucky: ${combatant.name}'s hand size increased to ${combatant.handSize}!`,
+    });
+  }
+
   // --- Item onBattleStart effects ---
   for (const combatant of state.combatants) {
     logs.push(...processItemBattleStart(state, combatant));
@@ -238,6 +251,8 @@ export function onTurnStart(
   combatant.turnFlags.regenerativeStrikeUsedThisTurn = false;
   combatant.turnFlags.overgrowGraceUsedThisTurn = false;
   combatant.turnFlags.torrentStrikeUsedThisTurn = false;
+  combatant.turnFlags.swarmSpeedUsedThisTurn = false;
+  combatant.turnFlags.freeSwitchThisTurn = false;
   combatant.itemState['guerillaFront'] = 0;
 
   // Inferno Momentum: Reduce highest-cost FIRE card's cost by 3
@@ -1728,7 +1743,7 @@ export function checkSwarmStrike(
       logs.push({
         round: state.round,
         combatantId: attacker.id,
-        message: `Swarm Strike: ${card.name} deals double damage!`,
+        message: `Swarm Strike: ${card.name} deals 1.3x damage!`,
       });
     }
     return { shouldApply: true, logs };

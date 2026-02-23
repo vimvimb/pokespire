@@ -68,6 +68,7 @@ export function createTestCombatant(options: TestCombatantOptions = {}): Combata
       regenerativeStrikeUsedThisTurn: false,
       overgrowGraceUsedThisTurn: false,
       torrentStrikeUsedThisTurn: false,
+      swarmSpeedUsedThisTurn: false,
       bloodFrenzyTriggered: false,
     },
     costModifiers: {},

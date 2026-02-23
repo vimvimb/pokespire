@@ -2042,6 +2042,246 @@
     "description": "Deal 36 damage. (Front row).",
     "contact": true
   },
+  "mach-punch": {
+    "name": "Mach Punch",
+    "cost": 0,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 2
+      },
+      {
+        "type": "draw_cards",
+        "count": 1
+      }
+    ],
+    "rarity": "basic",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Deal 2 damage. Draw 1. (Front row). Vanish.",
+    "contact": true
+  },
+  "rock-smash": {
+    "name": "Rock Smash",
+    "cost": 1,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 7
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Deal 7 damage. Apply Enfeeble 1. (Front row).",
+    "contact": true
+  },
+  "power-up-punch": {
+    "name": "Power-Up Punch",
+    "cost": 1,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 6
+      },
+      {
+        "type": "apply_status_self",
+        "status": "strength",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Deal 6 damage. Gain Strength 1. (Front row).",
+    "contact": true
+  },
+  "drain-punch": {
+    "name": "Drain Punch",
+    "cost": 1,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "heal_on_hit",
+        "value": 8,
+        "healPercent": 0.5
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Deal 8 damage. Heal 50% dealt. (Front row).",
+    "contact": true
+  },
+  "force-palm": {
+    "name": "Force Palm",
+    "cost": 1,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 7
+      },
+      {
+        "type": "apply_status",
+        "status": "paralysis",
+        "stacks": 1
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Deal 7 damage. Apply Paralysis 1. (Front row).",
+    "contact": true
+  },
+  "triple-kick": {
+    "name": "Triple Kick",
+    "cost": 2,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "multi_hit",
+        "value": 5,
+        "hits": 3
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Hit 3x for 5 each (15 total). (Front row).",
+    "contact": true
+  },
+  "brick-break": {
+    "name": "Brick Break",
+    "cost": 2,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 20
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Deal 20 damage. (Front row).",
+    "contact": true
+  },
+  "aura-sphere": {
+    "name": "Aura Sphere",
+    "cost": 2,
+    "type": "fighting",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 22
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Deal 22 damage.",
+    "contact": false
+  },
+  "hammer-arm": {
+    "name": "Hammer Arm",
+    "cost": 2,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 27
+      },
+      {
+        "type": "apply_status_self",
+        "status": "slow",
+        "stacks": 2
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Deal 27 damage. Gain Slow 2. (Front row).",
+    "contact": true
+  },
+  "close-combat": {
+    "name": "Close Combat",
+    "cost": 2,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 33
+      },
+      {
+        "type": "apply_status_self",
+        "status": "enfeeble",
+        "stacks": 4
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Deal 33 damage. Gain Enfeeble 4. (Front row).",
+    "contact": true
+  },
+  "focus-blast": {
+    "name": "Focus Blast",
+    "cost": 3,
+    "type": "fighting",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 39
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "fighting"
+    ],
+    "description": "Deal 39 damage.",
+    "contact": false
+  },
   "fire-spin": {
     "name": "Fire Spin",
     "cost": 1,
@@ -3291,6 +3531,237 @@
     "description": "Deal 20 damage to all enemies.",
     "contact": false
   },
+  "ice-shard": {
+    "name": "Ice Shard",
+    "cost": 0,
+    "type": "ice",
+    "range": "front_enemy",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 2
+      },
+      {
+        "type": "draw_cards",
+        "count": 1
+      }
+    ],
+    "rarity": "basic",
+    "pools": [
+      "ice"
+    ],
+    "description": "Deal 2 damage. Draw 1. (Front row). Vanish.",
+    "contact": true
+  },
+  "powder-snow": {
+    "name": "Powder Snow",
+    "cost": 1,
+    "type": "ice",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 5
+      },
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "ice"
+    ],
+    "description": "Deal 5 damage. Apply Slow 1. (Front row).",
+    "contact": false
+  },
+  "icy-wind": {
+    "name": "Icy Wind",
+    "cost": 1,
+    "type": "ice",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "ice"
+    ],
+    "description": "Apply Slow 1 to all enemies.",
+    "contact": false
+  },
+  "frost-breath": {
+    "name": "Frost Breath",
+    "cost": 1,
+    "type": "ice",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 9
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "ice"
+    ],
+    "description": "Deal 9 damage.",
+    "contact": false
+  },
+  "icicle-spear": {
+    "name": "Icicle Spear",
+    "cost": 2,
+    "type": "ice",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "multi_hit",
+        "value": 5,
+        "hits": 3
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "ice"
+    ],
+    "description": "Hit 3x for 5 each (15 total). (Front row).",
+    "contact": false
+  },
+  "freeze-dry": {
+    "name": "Freeze-Dry",
+    "cost": 2,
+    "type": "ice",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 19
+      },
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 1
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "ice"
+    ],
+    "description": "Deal 19 damage. Apply Slow 1.",
+    "contact": false
+  },
+  "avalanche": {
+    "name": "Avalanche",
+    "cost": 2,
+    "type": "ice",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 24
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "ice"
+    ],
+    "description": "Deal 24 damage. (Front row).",
+    "contact": true
+  },
+  "glaciate": {
+    "name": "Glaciate",
+    "cost": 2,
+    "type": "ice",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 8
+      },
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 1
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "ice"
+    ],
+    "description": "Deal 8 damage to all enemies. Apply Slow 1.",
+    "contact": false
+  },
+  "triple-axel": {
+    "name": "Triple Axel",
+    "cost": 2,
+    "type": "ice",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "multi_hit",
+        "value": 7,
+        "hits": 3
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "ice"
+    ],
+    "description": "Hit 3x for 7 each (21 total). (Front row).",
+    "contact": true
+  },
+  "icicle-crash": {
+    "name": "Icicle Crash",
+    "cost": 3,
+    "type": "ice",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 43
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "ice"
+    ],
+    "description": "Deal 43 damage. (Front row).",
+    "contact": true
+  },
+  "sheer-cold": {
+    "name": "Sheer Cold",
+    "cost": 3,
+    "type": "ice",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 45
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "ice"
+    ],
+    "description": "Deal 45 damage.",
+    "contact": false
+  },
   "poison-sting": {
     "name": "Poison Sting",
     "cost": 1,
@@ -4489,6 +4960,227 @@
     "description": "Deal 16 damage. Apply Poison 2.",
     "contact": false
   },
+  "poison-fang": {
+    "name": "Poison Fang",
+    "cost": 1,
+    "type": "poison",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 6
+      },
+      {
+        "type": "apply_status",
+        "status": "poison",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "poison"
+    ],
+    "description": "Deal 6 damage. Apply Poison 1. (Front row).",
+    "contact": true
+  },
+  "poison-jab": {
+    "name": "Poison Jab",
+    "cost": 1,
+    "type": "poison",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 10
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "poison"
+    ],
+    "description": "Deal 10 damage. (Front row).",
+    "contact": true
+  },
+  "cross-poison": {
+    "name": "Cross Poison",
+    "cost": 1,
+    "type": "poison",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "multi_hit",
+        "value": 3,
+        "hits": 2
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "poison"
+    ],
+    "description": "Hit 2x for 3 each (6 total). (Front row).",
+    "contact": true
+  },
+  "coil": {
+    "name": "Coil",
+    "cost": 1,
+    "type": "poison",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "apply_status_self",
+        "status": "strength",
+        "stacks": 2
+      },
+      {
+        "type": "apply_status_self",
+        "status": "evasion",
+        "stacks": 1
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "poison"
+    ],
+    "description": "Gain Strength 2. Gain Evasion 1.",
+    "contact": false
+  },
+  "venom-drench": {
+    "name": "Venom Drench",
+    "cost": 1,
+    "type": "poison",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 2
+      },
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 1
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "poison"
+    ],
+    "description": "Apply Enfeeble 2 and Slow 1.",
+    "contact": false
+  },
+  "toxic-spikes": {
+    "name": "Toxic Spikes",
+    "cost": 1,
+    "type": "poison",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "apply_status",
+        "status": "poison",
+        "stacks": 1
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "poison"
+    ],
+    "description": "Apply Poison 1 to all enemies.",
+    "contact": false
+  },
+  "venoshock": {
+    "name": "Venoshock",
+    "cost": 2,
+    "type": "poison",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 16,
+        "bonusValue": 2,
+        "bonusCondition": "target_poison_stacks"
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "poison"
+    ],
+    "description": "Deal 16 damage. +2 per Poison stack on target.",
+    "contact": false
+  },
+  "sludge-wave": {
+    "name": "Sludge Wave",
+    "cost": 2,
+    "type": "poison",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 8
+      },
+      {
+        "type": "apply_status",
+        "status": "poison",
+        "stacks": 1
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "poison"
+    ],
+    "description": "Deal 8 damage to all enemies. Apply Poison 1.",
+    "contact": false
+  },
+  "gunk-shot": {
+    "name": "Gunk Shot",
+    "cost": 3,
+    "type": "poison",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 43
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "poison"
+    ],
+    "description": "Deal 43 damage. (Front row).",
+    "contact": false
+  },
+  "malignant-chain": {
+    "name": "Malignant Chain",
+    "cost": 3,
+    "type": "poison",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 36
+      },
+      {
+        "type": "apply_status",
+        "status": "poison",
+        "stacks": 2
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "poison"
+    ],
+    "description": "Deal 36 damage. Apply Poison 2.",
+    "contact": false
+  },
   "megahorn": {
     "name": "Megahorn",
     "cost": 3,
@@ -4574,6 +5266,304 @@
     ],
     "description": "Deal 5 damage to all enemies. Apply Paralysis 1.",
     "contact": false
+  },
+  "shock-wave": {
+    "name": "Shock Wave",
+    "cost": 1,
+    "type": "electric",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 5
+      }
+    ],
+    "rarity": "basic",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 5 damage.",
+    "contact": false
+  },
+  "electroweb": {
+    "name": "Electroweb",
+    "cost": 1,
+    "type": "electric",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 4
+      },
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 4 damage. Apply Slow 1.",
+    "contact": false
+  },
+  "nuzzle": {
+    "name": "Nuzzle",
+    "cost": 1,
+    "type": "electric",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 5
+      },
+      {
+        "type": "apply_status",
+        "status": "paralysis",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 5 damage. Apply Paralysis 1. (Front row).",
+    "contact": true
+  },
+  "eerie-impulse": {
+    "name": "Eerie Impulse",
+    "cost": 1,
+    "type": "electric",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 3
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "electric"
+    ],
+    "description": "Apply Enfeeble 3.",
+    "contact": false
+  },
+  "charge": {
+    "name": "Charge",
+    "cost": 1,
+    "type": "electric",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "block",
+        "value": 7
+      },
+      {
+        "type": "apply_status_self",
+        "status": "strength",
+        "stacks": 1
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "electric"
+    ],
+    "description": "Gain 7 Block. Gain Strength 1.",
+    "contact": false
+  },
+  "volt-switch": {
+    "name": "Volt Switch",
+    "cost": 1,
+    "type": "electric",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 7
+      },
+      {
+        "type": "free_next_switch"
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 7 damage. Your next switch this turn costs 0.",
+    "contact": false
+  },
+  "parabolic-charge": {
+    "name": "Parabolic Charge",
+    "cost": 2,
+    "type": "electric",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "heal_on_hit",
+        "value": 7,
+        "healPercent": 0.5
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 7 damage to all enemies. Heal 50% of damage dealt.",
+    "contact": false
+  },
+  "wild-charge": {
+    "name": "Wild Charge",
+    "cost": 2,
+    "type": "electric",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "recoil",
+        "value": 30,
+        "recoilPercent": 0.25
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 30 damage. Take 25% recoil. (Front row).",
+    "contact": true
+  },
+  "overdrive": {
+    "name": "Overdrive",
+    "cost": 2,
+    "type": "electric",
+    "range": "front_row",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 14
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 14 damage to front row.",
+    "contact": false
+  },
+  "electro-ball": {
+    "name": "Electro Ball",
+    "cost": 2,
+    "type": "electric",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 18,
+        "speedScaling": true
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 18 damage. +1 per point of speed advantage.",
+    "contact": false
+  },
+  "zap-cannon": {
+    "name": "Zap Cannon",
+    "cost": 3,
+    "type": "electric",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 30
+      },
+      {
+        "type": "apply_status",
+        "status": "paralysis",
+        "stacks": 1
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 30 damage. Apply Paralysis 1.",
+    "contact": false
+  },
+  "volt-tackle": {
+    "name": "Volt Tackle",
+    "cost": 3,
+    "type": "electric",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "recoil",
+        "value": 54,
+        "recoilPercent": 0.25
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 54 damage. Take 25% recoil. (Front row).",
+    "contact": true
+  },
+  "double-shock": {
+    "name": "Double Shock",
+    "cost": 2,
+    "type": "electric",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 30
+      },
+      {
+        "type": "remove_type",
+        "moveType": "electric"
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 30 damage. Remove your Electric type for the rest of battle.",
+    "contact": false
+  },
+  "bolt-strike": {
+    "name": "Bolt Strike",
+    "cost": 3,
+    "type": "electric",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 50
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "electric"
+    ],
+    "description": "Deal 50 damage. (Front row).",
+    "contact": true
   },
   "bug-bite": {
     "name": "Bug Bite",
@@ -5496,6 +6486,225 @@
     "description": "Hit 3 times for 2 damage each. (Front row).",
     "contact": true
   },
+  "first-impression": {
+    "name": "First Impression",
+    "cost": 0,
+    "type": "bug",
+    "range": "front_enemy",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 2
+      },
+      {
+        "type": "draw_cards",
+        "count": 1
+      }
+    ],
+    "rarity": "basic",
+    "pools": [
+      "bug"
+    ],
+    "description": "Deal 2 damage. Draw 1. (Front row). Vanish.",
+    "contact": true
+  },
+  "lunge": {
+    "name": "Lunge",
+    "cost": 1,
+    "type": "bug",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 7
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "bug"
+    ],
+    "description": "Deal 7 damage. Apply Enfeeble 1. (Front row).",
+    "contact": true
+  },
+  "struggle-bug": {
+    "name": "Struggle Bug",
+    "cost": 1,
+    "type": "bug",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 3
+      },
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "bug"
+    ],
+    "description": "Deal 3 damage to all enemies. Apply Enfeeble 1.",
+    "contact": false
+  },
+  "sticky-web": {
+    "name": "Sticky Web",
+    "cost": 1,
+    "type": "bug",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "bug"
+    ],
+    "description": "Apply Slow 1 to all enemies.",
+    "contact": false
+  },
+  "u-turn": {
+    "name": "U-Turn",
+    "cost": 1,
+    "type": "bug",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 8
+      },
+      {
+        "type": "free_next_switch"
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "bug"
+    ],
+    "description": "Deal 8 damage. Next switch is free. (Front row).",
+    "contact": true
+  },
+  "x-scissor": {
+    "name": "X-Scissor",
+    "cost": 2,
+    "type": "bug",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 20
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "bug"
+    ],
+    "description": "Deal 20 damage. (Front row).",
+    "contact": true
+  },
+  "signal-beam": {
+    "name": "Signal Beam",
+    "cost": 2,
+    "type": "bug",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 18
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "bug"
+    ],
+    "description": "Deal 18 damage.",
+    "contact": false
+  },
+  "bug-buzz": {
+    "name": "Bug Buzz",
+    "cost": 2,
+    "type": "bug",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 22
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "bug"
+    ],
+    "description": "Deal 22 damage.",
+    "contact": false
+  },
+  "quiver-dance": {
+    "name": "Quiver Dance",
+    "cost": 2,
+    "type": "bug",
+    "range": "self",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "apply_status_self",
+        "status": "strength",
+        "stacks": 4
+      },
+      {
+        "type": "apply_status_self",
+        "status": "haste",
+        "stacks": 4
+      },
+      {
+        "type": "apply_status_self",
+        "status": "evasion",
+        "stacks": 3
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "bug"
+    ],
+    "description": "Gain Strength 4. Gain Haste 4. Gain Evasion 3. Vanish.",
+    "contact": false
+  },
+  "attack-order": {
+    "name": "Attack Order",
+    "cost": 3,
+    "type": "bug",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 45
+      }
+    ],
+    "rarity": "legendary",
+    "pools": [
+      "bug"
+    ],
+    "description": "Deal 45 damage.",
+    "contact": true
+  },
   "will-o-wisp": {
     "name": "Will-O-Wisp",
     "cost": 1,
@@ -5939,6 +7148,234 @@
     "rarity": "rare",
     "pools": ["flying"],
     "description": "Deal 24 damage to all enemies.",
+    "contact": false
+  },
+  "air-slash": {
+    "name": "Air Slash",
+    "cost": 1,
+    "type": "flying",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 4
+      },
+      {
+        "type": "apply_status",
+        "status": "slow",
+        "stacks": 1
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "flying"
+    ],
+    "description": "Deal 4 damage. Apply Slow 1.",
+    "contact": false
+  },
+  "acrobatics": {
+    "name": "Acrobatics",
+    "cost": 1,
+    "type": "flying",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 5,
+        "bonusValue": 5,
+        "bonusCondition": "user_no_held_items"
+      }
+    ],
+    "rarity": "common",
+    "pools": [
+      "flying"
+    ],
+    "description": "Deal 5 damage. +5 with no held item. (Front row).",
+    "contact": true
+  },
+  "feather-dance": {
+    "name": "Feather Dance",
+    "cost": 1,
+    "type": "flying",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "apply_status",
+        "status": "enfeeble",
+        "stacks": 3
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "flying"
+    ],
+    "description": "Apply Enfeeble 3.",
+    "contact": false
+  },
+  "tailwind": {
+    "name": "Tailwind",
+    "cost": 1,
+    "type": "flying",
+    "range": "self",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "apply_status_self",
+        "status": "haste",
+        "stacks": 3
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "flying"
+    ],
+    "description": "Gain Haste 3. Vanish.",
+    "contact": false
+  },
+  "dual-wingbeat": {
+    "name": "Dual Wingbeat",
+    "cost": 1,
+    "type": "flying",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "multi_hit",
+        "value": 3,
+        "hits": 2
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "flying"
+    ],
+    "description": "Hit 2x for 3 each (6 total). (Front row).",
+    "contact": true
+  },
+  "defog": {
+    "name": "Defog",
+    "cost": 1,
+    "type": "flying",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "cleanse",
+        "count": 2
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "flying"
+    ],
+    "description": "Cleanse 2 debuffs.",
+    "contact": false
+  },
+  "air-cutter": {
+    "name": "Air Cutter",
+    "cost": 2,
+    "type": "flying",
+    "range": "front_row",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 12
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "flying"
+    ],
+    "description": "Deal 12 damage to front row.",
+    "contact": false
+  },
+  "roost": {
+    "name": "Roost",
+    "cost": 2,
+    "type": "flying",
+    "range": "self",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "heal",
+        "value": 22
+      },
+      {
+        "type": "remove_type",
+        "moveType": "flying"
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "flying"
+    ],
+    "description": "Heal 22 HP. Lose Flying type. Vanish.",
+    "contact": false
+  },
+  "brave-bird": {
+    "name": "Brave Bird",
+    "cost": 2,
+    "type": "flying",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "recoil",
+        "value": 30,
+        "recoilPercent": 0.25
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "flying"
+    ],
+    "description": "Deal 30 damage. Take 25% recoil. (Front row).",
+    "contact": true
+  },
+  "oblivion-wing": {
+    "name": "Oblivion Wing",
+    "cost": 2,
+    "type": "flying",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "heal_on_hit",
+        "value": 18,
+        "healPercent": 0.5
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "flying"
+    ],
+    "description": "Deal 18 damage. Heal 50% of damage dealt.",
+    "contact": false
+  },
+  "hurricane": {
+    "name": "Hurricane",
+    "cost": 3,
+    "type": "flying",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 30
+      },
+      {
+        "type": "discard_intent"
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "flying"
+    ],
+    "description": "Deal 30 damage. Discard enemy's best card.",
     "contact": false
   },
   "future-sight": {

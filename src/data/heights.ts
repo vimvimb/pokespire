@@ -110,6 +110,7 @@ export const POKEDEX_NUMBERS: Record<string, number> = {
   skiploom: 188,
   jumpluff: 189,
   aipom: 190,
+  ambipom: 424,
   sunkern: 191,
   sunflora: 192,
   yanma: 193,
@@ -329,6 +330,7 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   wooper:      9,     // Real 8.5–11kg → 87px ✓
   quagsire:    50,    // Real 75kg → 157px (adjusted -33%)
   aipom:       11.5,  // Real 11.5kg → 94px ✓
+  ambipom:     39,    // Real 20.3kg → 141px (scaled up 50% from Aipom for visual presence)
   hoppip:      4,     // Real 0.5kg → 67px (increased; too tiny at real weight)
   murkrow:     6,     // Real 2.1kg → 80px (increased for visibility)
 

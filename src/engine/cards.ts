@@ -3,7 +3,7 @@ import { getMove, isParentalBondCopy } from '../data/loaders';
 import { getCombatant, snapshotSpeeds, checkSpeedChangesAndRebuild } from './combat';
 import { applyCardDamage, applyHeal, applyBypassDamage, getBloomingCycleReduction } from './damage';
 import type { DamageModifiers } from './damage';
-import { applyStatus, getStatusImmunitySource, decayEvasionOnHit, getStatusStacks } from './status';
+import { applyStatus, getStatusImmunitySource, decayEvasionOnHit, getStatusStacks, getEffectiveSpeed } from './status';
 import { getEffectiveFrontRow, isInEffectiveFrontRow } from './position';
 import {
   checkBlazeStrike, checkFortifiedCannons, checkCounterCurrent, checkStaticField,
@@ -334,6 +334,17 @@ export function playCard(
       round: state.round,
       combatantId: combatant.id,
       message: `Phase Form: ${combatant.name} gains ${card.cost} Evasion from ${card.name}!`,
+    });
+  }
+
+  // Swarm Speed: First Bug card each turn grants Haste equal to its energy cost
+  if (card.type === 'bug' && combatant.passiveIds.includes('swarm_speed') && !combatant.turnFlags.swarmSpeedUsedThisTurn && card.cost > 0) {
+    combatant.turnFlags.swarmSpeedUsedThisTurn = true;
+    applyStatus(state, combatant, 'haste', card.cost, combatant.id);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Swarm Speed: ${combatant.name} gains ${card.cost} Haste from ${card.name}!`,
     });
   }
 
@@ -1174,10 +1185,15 @@ function resolveEffects(
           } else if (effect.bonusCondition === 'target_burn_stacks') {
             const burnStacks = getStatusStacks(target, 'burn');
             damageValue += effect.bonusValue * burnStacks;
+          } else if (effect.bonusCondition === 'target_poison_stacks') {
+            const poisonStacks = getStatusStacks(target, 'poison');
+            damageValue += effect.bonusValue * poisonStacks;
           } else if (effect.bonusCondition === 'target_buff_stacks') {
             damageValue += effect.bonusValue * getTotalBuffStacks(target);
           } else if (effect.bonusCondition === 'user_vanished_cards') {
             damageValue += effect.bonusValue * source.vanishedPile.length;
+          } else if (effect.bonusCondition === 'user_no_held_items' && source.heldItemIds.length === 0) {
+            damageValue += effect.bonusValue;
           }
         }
 
@@ -1200,6 +1216,21 @@ function resolveEffects(
           const targetWeight = POKEMON_WEIGHTS[target.pokemonId] ?? 50;
           const ratio = Math.min(targetWeight / userWeight, 2.0);
           damageValue = Math.floor(damageValue * ratio);
+        }
+
+        // Speed-difference scaling (e.g. Electro Ball: +speedDiff if faster)
+        if (effect.speedScaling) {
+          const attackerSpeed = getEffectiveSpeed(source);
+          const targetSpeed = getEffectiveSpeed(target);
+          const speedBonus = Math.max(0, attackerSpeed - targetSpeed);
+          if (speedBonus > 0) {
+            damageValue += speedBonus;
+            logs.push({
+              round: state.round,
+              combatantId: source.id,
+              message: `Electro Ball: +${speedBonus} bonus damage (speed ${attackerSpeed} vs ${targetSpeed})!`,
+            });
+          }
         }
 
         const sashBefore = target.focusSashUsed;
@@ -1249,8 +1280,10 @@ function resolveEffects(
       case 'multi_hit': {
         // Multiple damage instances - each hit triggers Strength separately
         // Super Fang: Multi-hit attacks have each hit gain +1 damage
+        const bonusHits = source.passiveIds.includes('skill_link') ? 1 : 0;
+        const totalHits = effect.hits + bonusHits;
         let totalDamage = 0;
-        for (let i = 0; i < effect.hits; i++) {
+        for (let i = 0; i < totalHits; i++) {
           if (!target.alive) break;
 
           const mods = buildDamageModifiers(state, source, target, card, logs, true);  // isMultiHit = true
@@ -1267,10 +1300,18 @@ function resolveEffects(
           damageToPoisoned += postDmgMulti.damageToPoisoned;
         }
 
+        if (bonusHits > 0) {
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `Skill Link: +${bonusHits} hit!`,
+          });
+        }
+
         logs.push({
           round: state.round,
           combatantId: target.id,
-          message: `${target.name} is hit ${effect.hits} times for ${totalDamage} total damage. (HP: ${target.hp}/${target.maxHp})`,
+          message: `${target.name} is hit ${totalHits} times for ${totalDamage} total damage. (HP: ${target.hp}/${target.maxHp})`,
         });
 
         if (!target.alive) {
@@ -1642,6 +1683,16 @@ function resolveEffects(
           round: state.round,
           combatantId: target.id,
           message: `${card.name}: ${target.name}'s ${discardedCard.name} was discarded!`,
+        });
+        break;
+      }
+
+      case 'free_next_switch': {
+        source.turnFlags.freeSwitchThisTurn = true;
+        logs.push({
+          round: state.round,
+          combatantId: source.id,
+          message: `${source.name}'s next switch this turn is free!`,
         });
         break;
       }

@@ -124,6 +124,9 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
             {effect.bonusCondition === 'target_burn_stacks' && (
               <span style={{ color: '#fb923c' }}>{' '}+{effect.bonusValue} per Burn on target.</span>
             )}
+            {effect.bonusCondition === 'target_poison_stacks' && (
+              <span style={{ color: '#a855f7' }}>{' '}+{effect.bonusValue} per Poison on target.</span>
+            )}
             {effect.bonusCondition === 'target_buff_stacks' && (
               <span style={{ color: '#fbbf24' }}>{' '}+{effect.bonusValue} per buff on target.</span>
             )}
@@ -132,6 +135,11 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
             )}
             {effect.bonusCondition === 'user_below_half_hp' && !conditionActive && (
               <span style={{ opacity: 0.6 }}>{' '}+{effect.bonusValue} below half HP.</span>
+            )}
+            {effect.bonusCondition === 'user_no_held_items' && (
+              <span style={{ color: combatant.heldItemIds.length === 0 ? '#4ade80' : '#a1a1aa', fontWeight: combatant.heldItemIds.length === 0 ? 'bold' : undefined }}>
+                {' '}+{effect.bonusValue} with no item.
+              </span>
             )}
             {effect.bonusCondition === 'target_below_half_hp' && (
               <span style={{ color: '#f87171' }}>{' '}+{effect.bonusValue} if target below half HP.</span>
@@ -144,6 +152,9 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
             )}
             {effect.inverseWeightScaling && (
               <span style={{ color: '#4ade80', opacity: 0.8 }}>{' '}More vs heavy targets.</span>
+            )}
+            {effect.speedScaling && (
+              <span style={{ color: '#fbbf24', opacity: 0.8 }}>{' '}+1 per speed advantage.</span>
             )}
           </span>
         );
@@ -172,13 +183,21 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
         break;
       }
       case 'multi_hit': {
+        const bonusHits = combatant.passiveIds.includes('skill_link') ? 1 : 0;
+        const totalHits = effect.hits + bonusHits;
         const perHit = Math.floor(Math.max(effect.value + additiveMod, 1) * multiplier);
-        const total = perHit * effect.hits;
-        const changed = additiveMod !== 0 || multiplier !== 1;
+        const total = perHit * totalHits;
+        const damageChanged = additiveMod !== 0 || multiplier !== 1;
         parts.push(
           <span key={parts.length}>
-            Hit {effect.hits}× for{' '}
-            {changed ? (
+            Hit{' '}
+            {bonusHits > 0 ? (
+              <span style={{ color: '#4ade80', fontWeight: 'bold' }}>{totalHits}×</span>
+            ) : (
+              <>{totalHits}×</>
+            )}
+            {' '}for{' '}
+            {damageChanged ? (
               <span style={{ color: '#4ade80', fontWeight: 'bold' }}>{perHit}</span>
             ) : (
               <>{perHit}</>
@@ -323,6 +342,13 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
         parts.push(
           <span key={parts.length} style={{ color: '#f97316' }}>
             Discard enemy's best card.
+          </span>
+        );
+        break;
+      case 'free_next_switch':
+        parts.push(
+          <span key={parts.length} style={{ color: '#fbbf24' }}>
+            Next switch is free.
           </span>
         );
         break;

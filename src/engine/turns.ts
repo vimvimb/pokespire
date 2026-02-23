@@ -163,8 +163,10 @@ export function getMaxSwitches(combatant: Combatant): number {
 /**
  * Get the effective switch cost for a combatant.
  * Base cost is 1 for all combatants.
+ * Volt Switch: if freeSwitchThisTurn is set, next switch is free.
  */
-export function getSwitchCost(_combatant: Combatant): number {
+export function getSwitchCost(combatant: Combatant): number {
+  if (combatant.turnFlags.freeSwitchThisTurn) return 0;
   return BASE_SWITCH_COST;
 }
 
@@ -219,6 +221,11 @@ function executeSwitchPosition(
   // Deduct energy and set flag
   combatant.energy -= switchCost;
   combatant.turnFlags.switchesThisTurn++;
+
+  // Consume free switch from Volt Switch
+  if (combatant.turnFlags.freeSwitchThisTurn) {
+    combatant.turnFlags.freeSwitchThisTurn = false;
+  }
 
   // Check if target position is occupied by an alive ally
   const occupant = state.combatants.find(

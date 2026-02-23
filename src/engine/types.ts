@@ -57,16 +57,18 @@ export type CardEffectType =
   | 'remove_type'
   | 'add_echo_to_hand'
   | 'copy_enemy_card'
-  | 'discard_intent';
+  | 'discard_intent'
+  | 'free_next_switch';
 
 export interface DamageEffect {
   type: 'damage';
   value: number;
   bonusValue?: number;           // extra damage if condition met
-  bonusCondition?: 'user_below_half_hp' | 'target_below_half_hp' | 'target_debuff_stacks' | 'target_burn_stacks' | 'target_buff_stacks' | 'user_vanished_cards';  // condition type
+  bonusCondition?: 'user_below_half_hp' | 'target_below_half_hp' | 'target_debuff_stacks' | 'target_burn_stacks' | 'target_poison_stacks' | 'target_buff_stacks' | 'user_vanished_cards' | 'user_no_held_items';  // condition type
   hpScaling?: boolean;           // if true, multiply base damage by user's currentHP / maxHP (e.g. Eruption)
   weightScaling?: boolean;       // if true, multiply base damage by user's weight / target's weight (e.g. Heat Crash)
   inverseWeightScaling?: boolean; // if true, multiply base damage by target's weight / user's weight (e.g. Grass Knot)
+  speedScaling?: boolean;        // if true, add max(0, attackerSpeed - targetSpeed) to damage (e.g. Electro Ball)
 }
 
 export interface BlockEffect {
@@ -179,6 +181,11 @@ export interface DiscardIntentEffect {
   type: 'discard_intent';
 }
 
+/** Make the user's next position switch this turn cost 0 energy (e.g. Volt Switch) */
+export interface FreeNextSwitchEffect {
+  type: 'free_next_switch';
+}
+
 export type CardEffect =
   | DamageEffect
   | BlockEffect
@@ -198,7 +205,8 @@ export type CardEffect =
   | RemoveTypeEffect
   | AddEchoToHandEffect
   | CopyEnemyCardEffect
-  | DiscardIntentEffect;
+  | DiscardIntentEffect
+  | FreeNextSwitchEffect;
 
 // --- Move Types (elemental) ---
 
@@ -312,7 +320,9 @@ export interface CombatantTurnFlags {
   regenerativeStrikeUsedThisTurn: boolean;  // Regenerative Strike: first Grass attack applies Regen to self
   overgrowGraceUsedThisTurn: boolean;       // Overgrow Grace: first Grass attack heals all allies
   torrentStrikeUsedThisTurn: boolean;       // Torrent Strike: first Water attack deals 1.3x damage
+  swarmSpeedUsedThisTurn: boolean;          // Swarm Speed: first Bug card grants Haste equal to cost
   bloodFrenzyTriggered: boolean;            // Blood Frenzy: once per battle, gain Strength from low-HP hit
+  freeSwitchThisTurn: boolean;              // Volt Switch: next switch this turn costs 0 energy
 }
 
 export interface Combatant {

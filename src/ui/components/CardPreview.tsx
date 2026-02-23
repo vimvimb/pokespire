@@ -89,20 +89,26 @@ function buildDescription(card: MoveDefinition): React.ReactNode {
             ? ` (+${effect.bonusValue} below half HP)`
             : effect.bonusCondition === 'target_burn_stacks'
               ? ` (+${effect.bonusValue} per Burn on target)`
+              : effect.bonusCondition === 'target_poison_stacks'
+                ? ` (+${effect.bonusValue} per Poison on target)`
               : effect.bonusCondition === 'target_buff_stacks'
                 ? ` (+${effect.bonusValue} per buff on target)`
                 : effect.bonusCondition === 'user_vanished_cards'
                   ? ` (+${effect.bonusValue} per vanished card)`
                   : effect.bonusCondition === 'target_below_half_hp'
                     ? ` (+${effect.bonusValue} if target below half HP)`
-                    : '';
+                    : effect.bonusCondition === 'user_no_held_items'
+                      ? ` (+${effect.bonusValue} with no item)`
+                      : '';
         const scalingText = effect.hpScaling
           ? ' Scales with user HP.'
           : effect.weightScaling
             ? ' Scales with weight ratio.'
             : effect.inverseWeightScaling
               ? ' Deals more to heavier targets.'
-              : '';
+              : effect.speedScaling
+                ? ' +1 per speed advantage.'
+                : '';
         parts.push(
           <span key={parts.length}>
             Deal {effect.hpScaling || effect.weightScaling || effect.inverseWeightScaling ? 'up to ' : ''}{effect.value} damage{bonusText}.
@@ -224,6 +230,13 @@ function buildDescription(card: MoveDefinition): React.ReactNode {
         parts.push(
           <span key={parts.length} style={{ color: '#f97316' }}>
             Discard enemy's best card.
+          </span>
+        );
+        break;
+      case 'free_next_switch':
+        parts.push(
+          <span key={parts.length} style={{ color: '#fbbf24' }}>
+            Next switch is free.
           </span>
         );
         break;

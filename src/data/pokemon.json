@@ -1946,13 +1946,25 @@
     "deck": [
       "scratch", "scratch",
       "swift", "swift",
-      "quick-attack", "quick-attack",
-      "supersonic", "supersonic",
-      "screech",
-      "smokescreen"
+      "fake-out", "fake-out",
+      "confuse-ray",
+      "follow-me",
+      "defend", "defend"
     ],
     "abilities": [],
-    "description": "A mischievous utility pick — disrupts enemy hands, draws cards, and debuffs to support the team."
+    "description": "A nimble support — disrupts enemies, protects allies, and strikes fast with multi-hit attacks."
+  },
+  "ambipom": {
+    "name": "Ambipom",
+    "types": ["normal"],
+    "maxHp": 48,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [],
+    "abilities": [],
+    "description": "A nimble support — disrupts enemies, protects allies, and strikes fast with multi-hit attacks."
   },
 
   "yanma": {

@@ -1,5 +1,5 @@
 import type { Combatant, CombatState, MoveDefinition, CardEffect } from './types';
-import { getStatusStacks } from './status';
+import { getStatusStacks, getEffectiveSpeed } from './status';
 import { hasSTAB, STAB_BONUS } from './damage';
 import { getTypeEffectiveness, getEffectivenessLabel } from './typeChart';
 import {
@@ -90,10 +90,14 @@ export function calculateDamagePreview(
           baseDamage += damageEffect.bonusValue * getTotalDebuffStacks(target);
         } else if (damageEffect.bonusCondition === 'target_burn_stacks') {
           baseDamage += damageEffect.bonusValue * getStatusStacks(target, 'burn');
+        } else if (damageEffect.bonusCondition === 'target_poison_stacks') {
+          baseDamage += damageEffect.bonusValue * getStatusStacks(target, 'poison');
         } else if (damageEffect.bonusCondition === 'target_buff_stacks') {
           baseDamage += damageEffect.bonusValue * getTotalBuffStacks(target);
         } else if (damageEffect.bonusCondition === 'user_vanished_cards') {
           baseDamage += damageEffect.bonusValue * source.vanishedPile.length;
+        } else if (damageEffect.bonusCondition === 'user_no_held_items' && source.heldItemIds.length === 0) {
+          baseDamage += damageEffect.bonusValue;
         }
       }
       break;
@@ -105,7 +109,7 @@ export function calculateDamagePreview(
     case 'multi_hit':
       baseDamage = damageEffect.value;
       isMultiHit = true;
-      hits = damageEffect.hits;
+      hits = damageEffect.hits + (source.passiveIds.includes('skill_link') ? 1 : 0);
       break;
     default:
       return null;
@@ -130,6 +134,13 @@ export function calculateDamagePreview(
     const targetWeight = POKEMON_WEIGHTS[target.pokemonId] ?? 50;
     const ratio = Math.min(targetWeight / userWeight, 2.0);
     baseDamage = Math.floor(baseDamage * ratio);
+  }
+
+  // Speed-difference scaling (e.g. Electro Ball)
+  if (damageEffect.type === 'damage' && damageEffect.speedScaling) {
+    const attackerSpeed = getEffectiveSpeed(source);
+    const targetSpeed = getEffectiveSpeed(target);
+    baseDamage += Math.max(0, attackerSpeed - targetSpeed);
   }
 
   // Calculate all modifiers (mirroring buildDamageModifiers logic)
@@ -331,7 +342,7 @@ export function calculateHandPreview(
   const finisherActive = source.passiveIds.includes('finisher') &&
     !source.turnFlags.finisherUsedThisTurn &&
     isAttackCard(card) && card.cost >= 3;
-  const blazeSwarmMult = blazeStrikeActive ? 1.3 : swarmStrikeActive ? 2 : torrentStrikeActive ? 1.3 : finisherActive ? 2 : 1;
+  const blazeSwarmMult = blazeStrikeActive ? 1.3 : swarmStrikeActive ? 1.3 : torrentStrikeActive ? 1.3 : finisherActive ? 2 : 1;
 
   const angerPointMult = checkAngerPoint(source);
   const sheerForceMult = checkSheerForce(source);
@@ -340,7 +351,7 @@ export function calculateHandPreview(
   const dragonsMajestyMult = checkDragonsMajesty(source);
 
   if (blazeStrikeActive) tags.push('x1.3 Blaze');
-  if (swarmStrikeActive) tags.push('x2 Swarm');
+  if (swarmStrikeActive) tags.push('x1.3 Swarm');
   if (torrentStrikeActive) tags.push('x1.3 Torrent');
   if (finisherActive) tags.push('x2 Finisher');
   if (angerPointMult > 1) tags.push(`x${angerPointMult} Anger Pt`);
@@ -358,6 +369,11 @@ export function calculateHandPreview(
   if (consumingFlameMult > 1) tags.push(`x${consumingFlameMult} Flame`);
   if (itemDmgMult > 1) tags.push(`x${itemDmgMult} Item`);
   if (itemDmgMult < 1) tags.push(`x${itemDmgMult} Shuriken`);
+
+  // Skill Link: show +1 hit tag on multi-hit cards
+  if (source.passiveIds.includes('skill_link') && card.effects.some(e => e.type === 'multi_hit')) {
+    tags.push('+1 hit Skill Link');
+  }
 
   // Status stacks multiplier (Fuchsia Shuriken doubles status on damage+status cards)
   const statusStacksMult = getItemStatusStacksMultiplier(source, card);

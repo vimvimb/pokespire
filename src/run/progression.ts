@@ -98,6 +98,8 @@ export type PassiveId =
   | 'poison_barb'
   | 'adaptability'
   | 'swarm_strike'
+  // Ledyba/Ledian line
+  | 'swarm_speed'
   // Magikarp/Gyarados line
   | 'great_leap'
   | 'moxie'
@@ -178,7 +180,10 @@ export type PassiveId =
   // Totodile line
   | 'maul'
   | 'blood_frenzy'
-  | 'torrent_strike';
+  | 'torrent_strike'
+  // Aipom/Ambipom line
+  | 'lucky'
+  | 'skill_link';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -491,7 +496,11 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   },
   swarm_strike: {
     name: 'Swarm Strike',
-    description: 'The first Bug attack you play each turn deals double damage.',
+    description: 'The first Bug attack you play each turn deals 1.3x damage.',
+  },
+  swarm_speed: {
+    name: 'Swarm Speed',
+    description: 'The first Bug card you play each turn grants Haste equal to its energy cost.',
   },
   // Magikarp/Gyarados line
   great_leap: {
@@ -731,6 +740,15 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   torrent_strike: {
     name: 'Torrent Strike',
     description: 'The first Water attack you play each turn deals 1.3x damage.',
+  },
+  // Aipom/Ambipom line
+  lucky: {
+    name: 'Lucky',
+    description: 'Draw 1 extra card each turn.',
+  },
+  skill_link: {
+    name: 'Skill Link',
+    description: 'Multi-hit moves hit 1 additional time.',
   },
 };
 
@@ -2396,35 +2414,35 @@ export const LEDYBA_PROGRESSION: ProgressionTree = {
     {
       level: 1,
       name: 'Ledyba',
-      description: 'Starting form.',
-      passiveId: 'none',
+      description: 'Starting form with Keen Eye passive.',
+      passiveId: 'keen_eye',
       hpBoost: 0,
       cardsToAdd: [],
     },
     {
       level: 2,
       name: 'Ledian',
-      description: 'Evolve to Ledian. Add Comet Punch.',
+      description: 'Evolve to Ledian. Add Fury Cutter. Gain Technician.',
       evolvesTo: 'ledian',
-      passiveId: 'none',
+      passiveId: 'technician',
       hpBoost: 0,
-      cardsToAdd: ['comet-punch'],
+      cardsToAdd: ['fury-cutter'],
     },
     {
       level: 3,
       name: 'Ledian',
-      description: 'Add Swift.',
-      passiveId: 'none',
+      description: 'Add Silver Wind. Gain Swarm Speed.',
+      passiveId: 'swarm_speed',
       hpBoost: 0,
-      cardsToAdd: ['swift'],
+      cardsToAdd: ['silver-wind'],
     },
     {
       level: 4,
       name: 'Ledian (Mastered)',
-      description: 'Add Wing Attack.',
-      passiveId: 'none',
+      description: 'Gain Counter-Current.',
+      passiveId: 'counter_current',
       hpBoost: 0,
-      cardsToAdd: ['wing-attack'],
+      cardsToAdd: [],
     },
   ],
 };
@@ -2436,35 +2454,35 @@ export const SPINARAK_PROGRESSION: ProgressionTree = {
     {
       level: 1,
       name: 'Spinarak',
-      description: 'Starting form.',
-      passiveId: 'none',
+      description: 'Starting form with Poison Point passive.',
+      passiveId: 'poison_point',
       hpBoost: 0,
       cardsToAdd: [],
     },
     {
       level: 2,
       name: 'Ariados',
-      description: 'Evolve to Ariados. Add Night Shade.',
+      description: 'Evolve to Ariados. Add Toxic. Gain Predator\'s Patience.',
       evolvesTo: 'ariados',
-      passiveId: 'none',
+      passiveId: 'predators_patience',
       hpBoost: 0,
-      cardsToAdd: ['night-shade'],
+      cardsToAdd: ['toxic'],
     },
     {
       level: 3,
       name: 'Ariados',
-      description: 'Add Shadow Ball.',
-      passiveId: 'none',
+      description: 'Add Sludge Bomb. Gain Vampiricism.',
+      passiveId: 'vampiricism',
       hpBoost: 0,
-      cardsToAdd: ['shadow-ball'],
+      cardsToAdd: ['sludge-bomb'],
     },
     {
       level: 4,
       name: 'Ariados (Mastered)',
-      description: 'Add Leech Life.',
-      passiveId: 'none',
+      description: 'Gain Swarm Strike.',
+      passiveId: 'swarm_strike',
       hpBoost: 0,
-      cardsToAdd: ['leech-life'],
+      cardsToAdd: [],
     },
   ],
 };
@@ -2497,10 +2515,10 @@ export const SUNKERN_PROGRESSION: ProgressionTree = {
 export const AIPOM_PROGRESSION: ProgressionTree = {
   baseFormId: 'aipom',
   rungs: [
-    { level: 1, name: 'Aipom', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
-    { level: 2, name: 'Aipom', description: 'Add Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slam'] },
-    { level: 3, name: 'Aipom', description: 'Add Fury Swipes.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['fury-swipes'] },
-    { level: 4, name: 'Aipom (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+    { level: 1, name: 'Aipom', description: 'Starting form. Gain Limber.', passiveId: 'limber', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Aipom', description: 'Gain Friend Guard. Add Fury Swipes.', passiveId: 'friend_guard', hpBoost: 0, cardsToAdd: ['fury-swipes'] },
+    { level: 3, name: 'Ambipom', description: 'Evolve to Ambipom. Gain Lucky. Add Screech.', evolvesTo: 'ambipom', passiveId: 'lucky', hpBoost: 0, cardsToAdd: ['screech'] },
+    { level: 4, name: 'Ambipom (Mastered)', description: 'Gain Skill Link.', passiveId: 'skill_link', hpBoost: 0, cardsToAdd: [] },
   ],
 };
 

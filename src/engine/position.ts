@@ -1,4 +1,5 @@
 import type { Combatant, CombatState, CombatantSide, Position, Row, Column, MoveRange, MoveDefinition } from './types';
+import { getStatusStacks } from './status';
 
 // All valid grid positions
 const ALL_ROWS: Row[] = ['front', 'back'];
@@ -151,6 +152,22 @@ export function getCardValidTargets(
   if (isCleansOnly) {
     const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech'];
     targets = targets.filter(t => t.statuses.some(s => debuffTypes.includes(s.type)));
+  }
+
+  // Taunt: if any enemy has Taunt, player must target only taunted enemies
+  const enemyTargets = targets.filter(t => t.side !== source.side);
+  const tauntedEnemies = enemyTargets.filter(t => getStatusStacks(t, 'taunt') > 0);
+  if (tauntedEnemies.length > 0) {
+    targets = targets.filter(t => t.side === source.side || getStatusStacks(t, 'taunt') > 0);
+  }
+
+  // Provoke: if source has Provoke, force targeting the provoke source
+  const provokeStatus = source.statuses.find(s => s.type === 'provoke');
+  if (provokeStatus?.sourceId) {
+    const provokeSource = targets.find(t => t.id === provokeStatus.sourceId);
+    if (provokeSource) {
+      targets = targets.filter(t => t.side === source.side || t.id === provokeStatus.sourceId);
+    }
   }
 
   return targets;
