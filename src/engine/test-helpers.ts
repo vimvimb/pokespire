@@ -70,6 +70,7 @@ export function createTestCombatant(options: TestCombatantOptions = {}): Combata
       torrentStrikeUsedThisTurn: false,
       swarmSpeedUsedThisTurn: false,
       bloodFrenzyTriggered: false,
+      freeSwitchThisTurn: false,
     },
     costModifiers: {},
     itemState: {},
