@@ -38,7 +38,7 @@ export type MusicTrack =
   | 'c2_boss_legendary_beast'
   | 'c2_boss_final';
 
-const MUSIC_URLS: Record<MusicTrack, string> = {
+export const MUSIC_URLS: Record<MusicTrack, string> = {
   // Campaign 1
   early_dungeon:  earlyDungeonHazyPass,
   final_dungeon:  finalDungeonRocketHideout,

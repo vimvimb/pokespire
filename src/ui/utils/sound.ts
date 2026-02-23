@@ -14,7 +14,7 @@ export type SoundEffect =
   | 'physical_attack' | 'special_attack' | 'heal' | 'block'
   | 'debuff' | 'lower_stat' | 'raise_stat' | 'draw_card' | 'win_battle' | 'win_final' | 'lose_final';
 
-const SOUND_URLS: Record<SoundEffect, string> = {
+export const SOUND_URLS: Record<SoundEffect, string> = {
   physical_attack: physicalAttackSfx,
   special_attack: specialAttackSfx,
   heal: healSfx,

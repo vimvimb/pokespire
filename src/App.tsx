@@ -27,6 +27,8 @@ import { ActTransitionScreen } from "./ui/screens/ActTransitionScreen";
 import { CardRemovalScreen } from "./ui/screens/CardRemovalScreen";
 import { Flourish } from "./ui/components/Flourish";
 import { AmbientBackground } from "./ui/components/AmbientBackground";
+import { OfflineCacheModal } from "./ui/components/OfflineCacheModal";
+import { getAudioCacheStatus } from "./ui/utils/offlineCache";
 import { playSound } from "./ui/utils/sound";
 import { playMusic, getMusicForScreen } from "./ui/utils/music";
 import { ScreenShell } from "./ui/components/ScreenShell";
@@ -132,12 +134,20 @@ import {
   rollBossItemReward,
 } from "./run/state";
 import { getActMapConfig } from "./ui/components/map/mapConfig";
-import { isCurrentActComplete, hasNextAct, getCampaignStatus, CAMPAIGNS } from "./data/campaigns";
+import {
+  isCurrentActComplete,
+  hasNextAct,
+  getCampaignStatus,
+  CAMPAIGNS,
+} from "./data/campaigns";
 import type { Screen } from "./types/screens";
 import type { ItemDefinition } from "./data/items";
 
 // localStorage keys
 const SAVE_KEY = "pokespire_save";
+
+// Legendary beasts fight the whole party
+const LEGENDARY_BEAST_IDS = new Set(["raikou", "entei", "suicune"]);
 
 interface SaveData {
   screen: Screen;
@@ -203,6 +213,10 @@ export default function App() {
     [],
   );
   const [hasSavedGame, setHasSavedGame] = useState(() => loadGame() !== null);
+  const [showOfflineModal, setShowOfflineModal] = useState(false);
+  const [offlineCachedCount, setOfflineCachedCount] = useState<number | null>(
+    null,
+  );
   const [lastGoldEarned, setLastGoldEarned] = useState<number | undefined>(
     undefined,
   );
@@ -211,10 +225,13 @@ export default function App() {
   );
   const [pendingPostLevelUpScreen, setPendingPostLevelUpScreen] =
     useState<Screen | null>(null);
-  const [pendingItemReward, setPendingItemReward] = useState<ItemDefinition | null>(null);
-  const [pendingPostItemScreen, setPendingPostItemScreen] = useState<Screen | null>(null);
+  const [pendingItemReward, setPendingItemReward] =
+    useState<ItemDefinition | null>(null);
+  const [pendingPostItemScreen, setPendingPostItemScreen] =
+    useState<Screen | null>(null);
   const [isTutorialMode, setIsTutorialMode] = useState(false);
-  const [selectedCampaignId, setSelectedCampaignId] = useState<string>("rocket_tower");
+  const [selectedCampaignId, setSelectedCampaignId] =
+    useState<string>("rocket_tower");
   const [draftResults, setDraftResults] = useState<{
     pokemon: PokemonData[];
     gold: number;
@@ -253,6 +270,13 @@ export default function App() {
     }
   }, [screen]);
 
+  // Refresh offline audio cache count whenever the main menu is shown
+  useEffect(() => {
+    if (screen === "main_menu") {
+      getAudioCacheStatus().then(({ cached }) => setOfflineCachedCount(cached));
+    }
+  }, [screen]);
+
   // Background music: play the correct track for the current screen and game state
   useEffect(() => {
     const track = getMusicForScreen(screen, runState, pendingBattleNodeId);
@@ -278,7 +302,13 @@ export default function App() {
   // Start a new run after party selection
   const handleStart = useCallback(
     (party: PokemonData[], positions: Position[], gold: number) => {
-      const run = createRunState(party, positions, Date.now(), gold, selectedCampaignId);
+      const run = createRunState(
+        party,
+        positions,
+        Date.now(),
+        gold,
+        selectedCampaignId,
+      );
       setRunState(run);
       setScreen("starter_items");
     },
@@ -309,20 +339,17 @@ export default function App() {
   );
 
   // Campaign select: pick a campaign then advance to draft/tutorial
-  const handleCampaignSelect = useCallback(
-    (campaignId: string) => {
-      // Guard: don't proceed if locked (CampaignSelectScreen also disables the button,
-      // but this is a second line of defence)
-      if (getCampaignStatus(campaignId) === "locked") return;
-      setSelectedCampaignId(campaignId);
-      if (campaignId === "rocket_tower" && !isTutorialComplete()) {
-        setScreen("tutorial_select");
-      } else {
-        setScreen("campaign_draft");
-      }
-    },
-    [],
-  );
+  const handleCampaignSelect = useCallback((campaignId: string) => {
+    // Guard: don't proceed if locked (CampaignSelectScreen also disables the button,
+    // but this is a second line of defence)
+    if (getCampaignStatus(campaignId) === "locked") return;
+    setSelectedCampaignId(campaignId);
+    if (campaignId === "rocket_tower" && !isTutorialComplete()) {
+      setScreen("tutorial_select");
+    } else {
+      setScreen("campaign_draft");
+    }
+  }, []);
 
   // Tutorial: skip and go to campaign draft
   const handleTutorialSkip = useCallback(() => {
@@ -393,18 +420,21 @@ export default function App() {
   }, [runState, goToMapOrLevelUp]);
 
   // Handle event completion (new data-driven event system)
-  const handleEventComplete = useCallback((newRun: RunState) => {
-    // Mark the event as seen
-    const currentNode = getCurrentNode(newRun);
-    const eventId =
-      currentNode?.type === "event" ? (currentNode as EventNode).eventId : "";
-    const updatedRun =
-      eventId && !newRun.seenEventIds.includes(eventId)
-        ? { ...newRun, seenEventIds: [...newRun.seenEventIds, eventId] }
-        : newRun;
+  const handleEventComplete = useCallback(
+    (newRun: RunState) => {
+      // Mark the event as seen
+      const currentNode = getCurrentNode(newRun);
+      const eventId =
+        currentNode?.type === "event" ? (currentNode as EventNode).eventId : "";
+      const updatedRun =
+        eventId && !newRun.seenEventIds.includes(eventId)
+          ? { ...newRun, seenEventIds: [...newRun.seenEventIds, eventId] }
+          : newRun;
 
-    goToMapOrLevelUp(updatedRun);
-  }, [goToMapOrLevelUp]);
+      goToMapOrLevelUp(updatedRun);
+    },
+    [goToMapOrLevelUp],
+  );
 
   // Handle card draft completion (happens after battles)
   const handleDraftComplete = useCallback(
@@ -487,7 +517,9 @@ export default function App() {
       if (isRecruitBattle && recruitFighterIndex === null) {
         let newRun = syncBattleResults(runState, combatants);
         newRun = moveKnockedOutToGraveyard(newRun);
-        const allDead = newRun.party.every((p) => p.currentHp <= 0 || p.knockedOut);
+        const allDead = newRun.party.every(
+          (p) => p.currentHp <= 0 || p.knockedOut,
+        );
         if (allDead) {
           setIsRecruitBattle(false);
           setPendingBattleNodeId(null);
@@ -509,7 +541,9 @@ export default function App() {
         setRunState(updatedRun);
 
         // Check for full party wipe
-        const allDead = updatedRun.party.every((p) => p.currentHp <= 0 || p.knockedOut);
+        const allDead = updatedRun.party.every(
+          (p) => p.currentHp <= 0 || p.knockedOut,
+        );
         if (allDead) {
           setIsRecruitBattle(false);
           setPendingBattleNodeId(null);
@@ -560,10 +594,10 @@ export default function App() {
           completedAt: Date.now(),
           path: newRun.actVariants?.[newRun.currentAct],
           metadata: {
-            starter:         newRun.party[0]?.baseFormId ?? null,
-            partyWiped:      newRun.graveyard.length > 0,
-            graveyardCount:  newRun.graveyard.length,
-            activeSurvivors: newRun.party.filter(p => !p.knockedOut).length,
+            starter: newRun.party[0]?.baseFormId ?? null,
+            partyWiped: newRun.graveyard.length > 0,
+            graveyardCount: newRun.graveyard.length,
+            activeSurvivors: newRun.party.filter((p) => !p.knockedOut).length,
             goldAtCompletion: newRun.gold,
           },
         });
@@ -578,9 +612,10 @@ export default function App() {
         // Act boss defeated and there is a next act — full heal, roll boss item, then act transition
         newRun = applyFullHealAll(newRun);
 
-        const excludeIds = newRun.party.flatMap(p => p.heldItemIds);
+        const excludeIds = newRun.party.flatMap((p) => p.heldItemIds);
         const { item: bossItem, nextSeed } = rollBossItemReward(
-          newRun.seed, excludeIds,
+          newRun.seed,
+          excludeIds,
         );
         newRun = { ...newRun, seed: nextSeed };
         setRunState(newRun);
@@ -608,9 +643,11 @@ export default function App() {
         setLastGoldEarned(goldEarned > 0 ? goldEarned : undefined);
 
         // Roll for item reward (50% chance)
-        const excludeIds = newRun.party.flatMap(p => p.heldItemIds);
+        const excludeIds = newRun.party.flatMap((p) => p.heldItemIds);
         const { item: rewardItem, nextSeed } = rollItemReward(
-          newRun.currentAct, newRun.seed, excludeIds,
+          newRun.currentAct,
+          newRun.seed,
+          excludeIds,
         );
         newRun = { ...newRun, seed: nextSeed };
         setRunState(newRun);
@@ -775,9 +812,6 @@ export default function App() {
     [runState],
   );
 
-  // Legendary beasts fight the whole party (Fix #9)
-  const LEGENDARY_BEAST_IDS = new Set(["raikou", "entei", "suicune"]);
-
   // Handle recruit fight — 1v1 for normal wild Pokemon, full party for legendary beasts.
   // partyIndex === -1 means "challenge with full party" (sent by RecruitScreen for beasts).
   const handleRecruitFight = useCallback(
@@ -789,7 +823,10 @@ export default function App() {
       const recruitNode = currentNode as RecruitNode;
 
       const recruitLevel = getRecruitLevel(runState);
-      const recruitMon = createRecruitPokemon(recruitNode.pokemonId, recruitLevel);
+      const recruitMon = createRecruitPokemon(
+        recruitNode.pokemonId,
+        recruitLevel,
+      );
       const enemyData = getPokemon(recruitMon.formId);
       const enemyWithHp = {
         ...enemyData,
@@ -801,11 +838,16 @@ export default function App() {
 
       if (isLegendaryBeast || partyIndex === -1) {
         // Full party vs legendary beast
-        const partyData = runState.party.map(p => getRunPokemonData(p));
-        const partyPositions = runState.party.map(p => p.position);
-        const partyPassives = new Map(runState.party.map((p, i) => [i, p.passiveIds]));
+        const partyData = runState.party.map((p) => getRunPokemonData(p));
+        const partyPositions = runState.party.map((p) => p.position);
+        const partyPassives = new Map(
+          runState.party.map((p, i) => [i, p.passiveIds]),
+        );
         const hpOverrides = new Map(
-          runState.party.map((p, i) => [`player-${i}`, { maxHp: p.maxHp, startPercent: p.currentHp / p.maxHp }])
+          runState.party.map((p, i) => [
+            `player-${i}`,
+            { maxHp: p.maxHp, startPercent: p.currentHp / p.maxHp },
+          ]),
         );
         battle.startConfiguredBattle(
           partyData,
@@ -834,7 +876,15 @@ export default function App() {
         [{ row: "front", column: 1 }],
         new Map([[0, fighter.passiveIds]]),
         new Map([[0, recruitMon.passiveIds]]),
-        new Map([["player-0", { maxHp: fighter.maxHp, startPercent: fighter.currentHp / fighter.maxHp }]]),
+        new Map([
+          [
+            "player-0",
+            {
+              maxHp: fighter.maxHp,
+              startPercent: fighter.currentHp / fighter.maxHp,
+            },
+          ],
+        ]),
       );
 
       setIsRecruitBattle(true);
@@ -847,42 +897,45 @@ export default function App() {
   );
 
   // Handle recruit confirm (add to bench, optionally with a starter item)
-  const handleRecruitConfirm = useCallback((itemId?: string) => {
-    if (!runState) return;
+  const handleRecruitConfirm = useCallback(
+    (itemId?: string) => {
+      if (!runState) return;
 
-    const currentNode = getCurrentNode(runState);
-    if (!currentNode || currentNode.type !== "recruit") return;
-    const recruitNode = currentNode as RecruitNode;
+      const currentNode = getCurrentNode(runState);
+      if (!currentNode || currentNode.type !== "recruit") return;
+      const recruitNode = currentNode as RecruitNode;
 
-    const level = getRecruitLevel(runState);
-    const matchingExp = Math.min(...runState.party.map((p) => p.exp));
-    const newPokemon = createRecruitPokemon(
-      recruitNode.pokemonId,
-      level,
-      matchingExp,
-    );
-    if (itemId) {
-      newPokemon.heldItemIds = [itemId];
-    }
-    let newRun = recruitToRoster(runState, newPokemon);
+      const level = getRecruitLevel(runState);
+      const matchingExp = Math.min(...runState.party.map((p) => p.exp));
+      const newPokemon = createRecruitPokemon(
+        recruitNode.pokemonId,
+        level,
+        matchingExp,
+      );
+      if (itemId) {
+        newPokemon.heldItemIds = [itemId];
+      }
+      let newRun = recruitToRoster(runState, newPokemon);
 
-    // Permanently unlock this Pokemon for future drafts
-    unlockPokemon(recruitNode.pokemonId);
+      // Permanently unlock this Pokemon for future drafts
+      unlockPokemon(recruitNode.pokemonId);
 
-    // Mark the node as recruited
-    newRun = {
-      ...newRun,
-      nodes: newRun.nodes.map((n) =>
-        n.id === recruitNode.id && n.type === "recruit"
-          ? { ...n, recruited: true }
-          : n,
-      ),
-    };
+      // Mark the node as recruited
+      newRun = {
+        ...newRun,
+        nodes: newRun.nodes.map((n) =>
+          n.id === recruitNode.id && n.type === "recruit"
+            ? { ...n, recruited: true }
+            : n,
+        ),
+      };
 
-    setRecruitBattleResult(null);
-    setRecruitFighterIndex(null);
-    goToMapOrLevelUp(newRun);
-  }, [runState, goToMapOrLevelUp]);
+      setRecruitBattleResult(null);
+      setRecruitFighterIndex(null);
+      goToMapOrLevelUp(newRun);
+    },
+    [runState, goToMapOrLevelUp],
+  );
 
   // Handle recruit decline (skip recruitment, back to map)
   const handleRecruitDecline = useCallback(() => {
@@ -991,17 +1044,61 @@ export default function App() {
   }, []);
 
   // Campaign 2 (Threads of Time) test shortcuts
-  const handleTestC2Act1 = useCallback(() => { clearSave(); setRunState(createCampaign2Act1TestState()); setScreen("map"); }, []);
-  const handleTestC2Act1Boss = useCallback(() => { clearSave(); setRunState(createCampaign2Act1BossTestState()); setScreen("map"); }, []);
-  const handleTestC2Act2 = useCallback(() => { clearSave(); setRunState(createCampaign2Act2TestState()); setScreen("map"); }, []);
-  const handleTestC2Act2GoldBoss = useCallback(() => { clearSave(); setRunState(createCampaign2Act2GoldBossTestState()); setScreen("map"); }, []);
-  const handleTestC2Act2SilverBoss = useCallback(() => { clearSave(); setRunState(createCampaign2Act2SilverBossTestState()); setScreen("map"); }, []);
-  const handleTestC2Act3A = useCallback(() => { clearSave(); setRunState(createCampaign2Act3ATestState()); setScreen("map"); }, []);
-  const handleTestC2Act3ABoss = useCallback(() => { clearSave(); setRunState(createCampaign2Act3ABossTestState()); setScreen("map"); }, []);
-  const handleTestC2Act3B = useCallback(() => { clearSave(); setRunState(createCampaign2Act3BTestState()); setScreen("map"); }, []);
-  const handleTestC2Act3BBoss = useCallback(() => { clearSave(); setRunState(createCampaign2Act3BBossTestState()); setScreen("map"); }, []);
-  const handleTestC2Act3ABeforeDogs = useCallback(() => { clearSave(); setRunState(createCampaign2Act3ABeforeDogsTestState()); setScreen("map"); }, []);
-  const handleTestC2Act3BBeforeDogs = useCallback(() => { clearSave(); setRunState(createCampaign2Act3BBeforeDogsTestState()); setScreen("map"); }, []);
+  const handleTestC2Act1 = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act1TestState());
+    setScreen("map");
+  }, []);
+  const handleTestC2Act1Boss = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act1BossTestState());
+    setScreen("map");
+  }, []);
+  const handleTestC2Act2 = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act2TestState());
+    setScreen("map");
+  }, []);
+  const handleTestC2Act2GoldBoss = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act2GoldBossTestState());
+    setScreen("map");
+  }, []);
+  const handleTestC2Act2SilverBoss = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act2SilverBossTestState());
+    setScreen("map");
+  }, []);
+  const handleTestC2Act3A = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act3ATestState());
+    setScreen("map");
+  }, []);
+  const handleTestC2Act3ABoss = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act3ABossTestState());
+    setScreen("map");
+  }, []);
+  const handleTestC2Act3B = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act3BTestState());
+    setScreen("map");
+  }, []);
+  const handleTestC2Act3BBoss = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act3BBossTestState());
+    setScreen("map");
+  }, []);
+  const handleTestC2Act3ABeforeDogs = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act3ABeforeDogsTestState());
+    setScreen("map");
+  }, []);
+  const handleTestC2Act3BBeforeDogs = useCallback(() => {
+    clearSave();
+    setRunState(createCampaign2Act3BBeforeDogsTestState());
+    setScreen("map");
+  }, []);
   // Gold path — post-Gold dialog (no C1 metadata needed)
   const handleTestC2GoldTransition = useCallback(() => {
     clearSave();
@@ -1012,7 +1109,13 @@ export default function App() {
   const handleTestC2SilverGiovanniDialog = useCallback(() => {
     recordCampaignComplete("rocket_tower", {
       completedAt: Date.now(),
-      metadata: { starter: "charizard", partyWiped: false, graveyardCount: 0, activeSurvivors: 3, debugUnlock: true },
+      metadata: {
+        starter: "charizard",
+        partyWiped: false,
+        graveyardCount: 0,
+        activeSurvivors: 3,
+        debugUnlock: true,
+      },
     });
     clearSave();
     setRunState(createCampaign2SilverTransitionTestState());
@@ -1022,7 +1125,13 @@ export default function App() {
   const handleTestC2SilverNormalDialog = useCallback(() => {
     recordCampaignComplete("rocket_tower", {
       completedAt: Date.now(),
-      metadata: { starter: "charizard", partyWiped: true, graveyardCount: 2, activeSurvivors: 1, debugUnlock: true },
+      metadata: {
+        starter: "charizard",
+        partyWiped: true,
+        graveyardCount: 2,
+        activeSurvivors: 1,
+        debugUnlock: true,
+      },
     });
     clearSave();
     setRunState(createCampaign2SilverTransitionTestState());
@@ -1287,6 +1396,31 @@ export default function App() {
           >
             Item Dex
           </button>
+
+          <button
+            className="menu-item menu-item-secondary"
+            onClick={() => setShowOfflineModal(true)}
+            style={{
+              padding: "10px 0",
+              fontSize: 18,
+              fontWeight: "bold",
+              border: "none",
+              background: "transparent",
+              color:
+                offlineCachedCount !== null && offlineCachedCount >= 25
+                  ? "#4ade80"
+                  : THEME.text.secondary,
+              cursor: "pointer",
+              letterSpacing: "0.08em",
+              position: "relative",
+              animationDelay: `${menuIdx++ * 50 + 250}ms`,
+            }}
+          >
+            {offlineCachedCount !== null && offlineCachedCount >= 25
+              ? "✓ Offline Ready"
+              : "↓ Enable Offline Play"}
+          </button>
+
           <button
             className="menu-item menu-item-tertiary"
             onClick={() => setScreen("disclaimer")}
@@ -1326,6 +1460,18 @@ export default function App() {
             Debugging
           </button>
         </div>
+
+        {showOfflineModal && (
+          <OfflineCacheModal
+            onClose={() => {
+              setShowOfflineModal(false);
+              // Refresh the button label after the modal closes
+              getAudioCacheStatus().then(({ cached }) =>
+                setOfflineCachedCount(cached),
+              );
+            }}
+          />
+        )}
 
         {/* Menu animations */}
         <style>{`
@@ -1557,7 +1703,16 @@ export default function App() {
           }}
         >
           {/* ── Campaign 1 — Rocket Tower ── */}
-          <div style={{ fontSize: 11, fontWeight: "bold", color: THEME.text.tertiary, letterSpacing: "0.1em", textTransform: "uppercase", paddingTop: 4 }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: "bold",
+              color: THEME.text.tertiary,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              paddingTop: 4,
+            }}
+          >
             Campaign 1 — Rocket Tower
           </div>
           <button onClick={handleTestAct2} style={devBtnStyle}>
@@ -1577,7 +1732,16 @@ export default function App() {
           </button>
 
           {/* ── Campaign 2 — Threads of Time ── */}
-          <div style={{ fontSize: 11, fontWeight: "bold", color: THEME.text.tertiary, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 8 }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: "bold",
+              color: THEME.text.tertiary,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              marginTop: 8,
+            }}
+          >
             Campaign 2 — Threads of Time
           </div>
           <button onClick={handleTestC2Act1} style={devBtnStyle}>
@@ -1616,7 +1780,10 @@ export default function App() {
           <button onClick={handleTestC2GoldTransition} style={devBtnStyle}>
             C2: Gold Act 2 Transition
           </button>
-          <button onClick={handleTestC2SilverGiovanniDialog} style={devBtnStyle}>
+          <button
+            onClick={handleTestC2SilverGiovanniDialog}
+            style={devBtnStyle}
+          >
             C2: Silver Act 2 Transition (C1 Flawless)
           </button>
           <button onClick={handleTestC2SilverNormalDialog} style={devBtnStyle}>
@@ -1624,14 +1791,29 @@ export default function App() {
           </button>
 
           {/* ── Campaign Progress ── */}
-          <div style={{ fontSize: 11, fontWeight: "bold", color: THEME.text.tertiary, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 8 }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: "bold",
+              color: THEME.text.tertiary,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              marginTop: 8,
+            }}
+          >
             Campaign Progress
           </div>
           <button
             onClick={() => {
               recordCampaignComplete("rocket_tower", {
                 completedAt: Date.now(),
-                metadata: { starter: "charizard", partyWiped: false, graveyardCount: 0, activeSurvivors: 3, debugUnlock: true },
+                metadata: {
+                  starter: "charizard",
+                  partyWiped: false,
+                  graveyardCount: 0,
+                  activeSurvivors: 3,
+                  debugUnlock: true,
+                },
               });
             }}
             style={devBtnStyle}
@@ -1640,7 +1822,7 @@ export default function App() {
           </button>
           <button
             onClick={() => {
-              unlockAllCampaignsDebug(CAMPAIGNS.map(c => c.id));
+              unlockAllCampaignsDebug(CAMPAIGNS.map((c) => c.id));
             }}
             style={devBtnStyle}
           >
@@ -1656,7 +1838,16 @@ export default function App() {
           </button>
 
           {/* ── Other ── */}
-          <div style={{ fontSize: 11, fontWeight: "bold", color: THEME.text.tertiary, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 8 }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: "bold",
+              color: THEME.text.tertiary,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              marginTop: 8,
+            }}
+          >
             Other
           </div>
           <button onClick={handleTestLevelUp} style={devBtnStyle}>
@@ -1671,7 +1862,10 @@ export default function App() {
           <button onClick={() => setScreen("event_tester")} style={devBtnStyle}>
             Event Tester
           </button>
-          <button onClick={() => setScreen("sandbox_config")} style={devBtnStyle}>
+          <button
+            onClick={() => setScreen("sandbox_config")}
+            style={devBtnStyle}
+          >
             Sandbox
           </button>
           <button
@@ -2081,7 +2275,6 @@ export default function App() {
       </Suspense>
     );
   }
-
 
   if (screen === "ghost_revive" && runState) {
     return (

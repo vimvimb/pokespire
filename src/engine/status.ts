@@ -380,15 +380,24 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
       }
     }
 
-    // Block half-decay: all combatants retain floor(block * 0.5)
+    // Block reset: resets to 0 each round; Pressure Hull retains floor(block * 0.5)
     if (c.block > 0) {
-      const retained = Math.floor(c.block * 0.5);
-      logs.push({
-        round: state.round,
-        combatantId: c.id,
-        message: `${c.name}'s Block (${c.block}) decays to ${retained}.`,
-      });
-      c.block = retained;
+      if (c.passiveIds.includes('pressure_hull')) {
+        const retained = Math.floor(c.block * 0.5);
+        logs.push({
+          round: state.round,
+          combatantId: c.id,
+          message: `${c.name}'s Block (${c.block}) decays to ${retained} (Pressure Hull).`,
+        });
+        c.block = retained;
+      } else {
+        logs.push({
+          round: state.round,
+          combatantId: c.id,
+          message: `${c.name}'s Block (${c.block}) resets to 0.`,
+        });
+        c.block = 0;
+      }
     }
   }
 
