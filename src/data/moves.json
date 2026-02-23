@@ -58,21 +58,48 @@
   },
   "quick-attack": {
     "name": "Quick Attack",
-    "cost": 1,
+    "cost": 0,
     "type": "normal",
     "range": "front_enemy",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 2
+      },
+      {
+        "type": "draw_cards",
+        "count": 1
       }
     ],
     "rarity": "basic",
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. (Front row).",
+    "description": "Deal 2 damage. Draw 1. (Front row). Vanish.",
+    "contact": true
+  },
+  "extreme-speed": {
+    "name": "Extreme Speed",
+    "cost": 0,
+    "type": "normal",
+    "range": "front_enemy",
+    "vanish": true,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 6
+      },
+      {
+        "type": "draw_cards",
+        "count": 1
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "normal"
+    ],
+    "description": "Deal 6 damage. Draw 1. (Front row). Vanish.",
     "contact": true
   },
   "double-slap": {
@@ -1662,6 +1689,25 @@
       "dark"
     ],
     "description": "Deal 8 damage. (Front row).",
+    "contact": true
+  },
+  "crunch": {
+    "name": "Crunch",
+    "cost": 2,
+    "type": "dark",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 18
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "dark"
+    ],
+    "description": "Deal 18 damage. (Front row).",
     "contact": true
   },
   "dragon-rage": {
@@ -3512,6 +3558,25 @@
     "description": "Deal 22 damage.",
     "contact": false
   },
+  "psystrike": {
+    "name": "Psystrike",
+    "cost": 2,
+    "type": "psychic",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 24
+      }
+    ],
+    "rarity": "rare",
+    "pools": [
+      "psychic"
+    ],
+    "description": "Deal 24 damage.",
+    "contact": false
+  },
   "dream-eater": {
     "name": "Dream Eater",
     "cost": 2,
@@ -3977,21 +4042,25 @@
   },
   "aqua-jet": {
     "name": "Aqua Jet",
-    "cost": 1,
+    "cost": 0,
     "type": "water",
     "range": "front_enemy",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       {
         "type": "damage",
-        "value": 6
+        "value": 2
+      },
+      {
+        "type": "draw_cards",
+        "count": 1
       }
     ],
     "rarity": "basic",
     "pools": [
       "water"
     ],
-    "description": "Deal 6 damage. (Front only, contact).",
+    "description": "Deal 2 damage. Draw 1. (Front only, contact). Vanish.",
     "contact": true
   },
   "razor-shell": {
@@ -4378,7 +4447,7 @@
   },
   "fake-out": {
     "name": "Fake Out",
-    "cost": 1,
+    "cost": 0,
     "type": "normal",
     "range": "front_enemy",
     "vanish": true,
@@ -4390,14 +4459,18 @@
       {
         "type": "apply_status",
         "status": "slow",
-        "stacks": 3
+        "stacks": 1
+      },
+      {
+        "type": "draw_cards",
+        "count": 1
       }
     ],
     "rarity": "common",
     "pools": [
       "normal"
     ],
-    "description": "Deal 2 damage. Apply Slow 3. (Front row). Vanish.",
+    "description": "Deal 2 damage. Apply Slow 1. Draw 1. (Front row). Vanish.",
     "contact": true
   },
   "sludge-bomb": {

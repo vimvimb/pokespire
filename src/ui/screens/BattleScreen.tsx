@@ -1140,7 +1140,7 @@ export function BattleScreen({
     if (prev.size > 0) {
       const BUFF_STATUSES = new Set(["strength", "haste", "evasion"]);
       const STATUS_CONDITION_TYPES = new Set(["burn", "poison", "paralysis", "sleep", "leech"]);
-      const STAT_LOWER_TYPES = new Set(["enfeeble", "slow", "taunt"]);
+      const STAT_LOWER_TYPES = new Set(["enfeeble", "slow", "taunt", "provoke"]);
       let statusSoundPlayed = false;
       for (const c of state.combatants) {
         const prevStatuses = prev.get(c.id);
@@ -1616,7 +1616,7 @@ export function BattleScreen({
           top: 20,
           left: 260,
           right: 0,
-          bottom: 150,
+          bottom: 190,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",

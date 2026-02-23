@@ -406,7 +406,7 @@ export function useBattle(): BattleHook {
     if (blastoiseCombatant) {
       blastoiseCombatant.passiveIds = [
         'baby_shell',        // +3 Block at turn start
-        'pressure_hull',     // Retain 50% Block at round end
+        'pressure_hull',     // Retain 100% Block at round end
         'torrent_shield',    // Water attacks grant Block = 100% damage dealt
         'fortified_cannons', // Water attacks deal +25% of current Block as bonus
       ];

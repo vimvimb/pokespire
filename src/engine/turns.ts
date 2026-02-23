@@ -300,7 +300,18 @@ function executeSwitchPosition(
     }
 
   } else {
-    // Move to empty cell
+    // Move to empty cell (no alive occupant).
+    // A dead combatant may still hold this position — relocate it to the
+    // vacated cell so positions stay unique after syncBattleResults.
+    const deadOccupant = state.combatants.find(
+      c => c.side === combatant.side &&
+           !c.alive &&
+           c.position.row === targetPos.row &&
+           c.position.column === targetPos.column
+    );
+    if (deadOccupant) {
+      deadOccupant.position = oldPos;
+    }
     combatant.position = targetPos;
     logs.push({
       round: state.round,

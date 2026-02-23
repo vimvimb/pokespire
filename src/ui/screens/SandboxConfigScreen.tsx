@@ -16,10 +16,12 @@ import { ScreenShell } from '../components/ScreenShell';
 import { THEME } from '../theme';
 import { getSpriteUrl } from '../utils/sprites';
 import { ITEM_DEFS, RARITY_COLORS } from '../../data/items';
+import { POKEDEX_NUMBERS } from '../../data/heights';
 
 // ── Constants ──────────────────────────────────────────────────────
 
-const AVAILABLE_POKEMON = Object.keys(PROGRESSION_TREES);
+const AVAILABLE_POKEMON = Object.keys(PROGRESSION_TREES)
+  .sort((a, b) => (POKEDEX_NUMBERS[a] ?? 9999) - (POKEDEX_NUMBERS[b] ?? 9999));
 
 const ALL_TYPES: MoveType[] = [
   'normal', 'fire', 'water', 'grass', 'electric', 'poison',

@@ -326,6 +326,48 @@ export function CardDraftScreen({
         })}
       </div>
 
+      {/* ── Rarity Key ── */}
+      <div
+        className="draft-rarity-key"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 16,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {([
+          ["Common", "#9ca3af"],
+          ["Uncommon", "#4ade80"],
+          ["Rare", "#60a5fa"],
+          ["Epic", "#a855f7"],
+          ["Legendary", "#fbbf24"],
+        ] as const).map(([label, color]) => (
+          <div
+            key={label}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              fontSize: 11,
+              color: THEME.text.tertiary,
+              letterSpacing: "0.04em",
+            }}
+          >
+            <svg width={10} height={10} viewBox="0 0 10 10">
+              <polygon
+                points="5,1 9,9 1,9"
+                fill={color + "55"}
+                stroke={color}
+                strokeWidth="1.2"
+              />
+            </svg>
+            <span style={{ color }}>{label}</span>
+          </div>
+        ))}
+      </div>
+
       {/* ── Skip Button ── */}
       <button
         className="draft-skip-btn"
@@ -376,6 +418,10 @@ export function CardDraftScreen({
         }
         .draft-card-option {
           animation: draftCardIn 0.35s ease-out forwards;
+          opacity: 0;
+        }
+        .draft-rarity-key {
+          animation: draftFadeIn 0.3s ease-out 0.35s forwards;
           opacity: 0;
         }
         .draft-skip-btn {

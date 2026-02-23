@@ -127,6 +127,7 @@ export function applyStatus(
     case 'taunt':
     case 'fatigue':
     case 'thorns':
+    case 'regen':
       // Additive stacking for all standard statuses
       if (existing) {
         existing.stacks += stacks;
@@ -323,6 +324,27 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
         }
       }
 
+      // Regen: heal equal to stacks, then decay by 1
+      if (status.type === 'regen') {
+        const healed = applyHeal(c, status.stacks);
+        if (healed > 0) {
+          logs.push({
+            round: state.round,
+            combatantId: c.id,
+            message: `Regen heals ${c.name} for ${healed} HP. (${status.stacks} → ${status.stacks - 1} stacks)`,
+          });
+        }
+        status.stacks -= 1;
+        if (status.stacks <= 0) {
+          removeStatus(c, 'regen');
+          logs.push({
+            round: state.round,
+            combatantId: c.id,
+            message: `Regen on ${c.name} expired.`,
+          });
+        }
+      }
+
       // All statuses: decay by 1 per round
       if (status.type === 'paralysis' || status.type === 'slow' ||
           status.type === 'enfeeble' || status.type === 'strength' ||
@@ -380,14 +402,14 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
       }
     }
 
-    // Block reset: resets to 0 each round; Pressure Hull retains floor(block * 0.5)
+    // Block reset: resets to 0 each round; Pressure Hull retains 100% of block
     if (c.block > 0) {
       if (c.passiveIds.includes('pressure_hull')) {
-        const retained = Math.floor(c.block * 0.5);
+        const retained = c.block;
         logs.push({
           round: state.round,
           combatantId: c.id,
-          message: `${c.name}'s Block (${c.block}) decays to ${retained} (Pressure Hull).`,
+          message: `${c.name}'s Block (${c.block}) retained (Pressure Hull).`,
         });
         c.block = retained;
       } else {

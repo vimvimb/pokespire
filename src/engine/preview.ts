@@ -20,6 +20,9 @@ import {
   checkRudeAwakening,
   checkBlindAggression, checkDrySkin,
   checkConsumingFlame,
+  checkVerdantWrath,
+  checkMaul,
+  checkTorrentStrike,
 } from './passives';
 import {
   getItemDamageBonus, getItemDamageReduction, getItemDamageBonusSourceOnly,
@@ -150,6 +153,8 @@ export function calculateDamagePreview(
   const voltFuryBonus = checkVoltFury(source, target);
   const sharpBeakBonus = checkSharpBeak(source, card);
   const nightAssassinBonus = checkNightAssassin(source, card);
+  const verdantWrathBonus = checkVerdantWrath(source, card);
+  const maulBonus = checkMaul(source, card);
   const maliceBonus = checkMalice(source, target);
   const hustleMultiplier = checkHustleMultiplier(source);
   const relentlessBonus = checkRelentless(source);
@@ -157,9 +162,10 @@ export function calculateDamagePreview(
   // Multipliers (dryRun=true to avoid side effects during preview)
   const { shouldApply: isBlazeStrike } = checkBlazeStrike(state, source, card, true);
   const { shouldApply: isSwarmStrike } = checkSwarmStrike(state, source, card, true);
+  const { shouldApply: isTorrentStrike } = checkTorrentStrike(state, source, card, true);
   // Finisher: approximate using base cost >= 3 for preview
   const { shouldApply: isFinisherActive } = checkFinisher(state, source, card, card.cost, true);
-  const blazeStrikeMultiplier = isBlazeStrike ? 1.3 : isSwarmStrike ? 2 : isFinisherActive ? 2 : 1;
+  const blazeStrikeMultiplier = isBlazeStrike ? 1.3 : isSwarmStrike ? 2 : isTorrentStrike ? 1.3 : isFinisherActive ? 2 : 1;
   const angerPointMultiplier = checkAngerPoint(source);
   const sheerForceMultiplier = checkSheerForce(source);
   const recklessMultiplier = checkReckless(source, card);
@@ -195,6 +201,7 @@ export function calculateDamagePreview(
     keenEyeBonus + predatorsPatienceBonus + proletariatBonus +
     scrappyBonus + blindAggressionBonus + poisonBarbBonus + adaptabilityBonus + relentlessBonus +
     searingFuryBonus + voltFuryBonus + sharpBeakBonus + nightAssassinBonus +
+    verdantWrathBonus + maulBonus +
     maliceBonus + itemDamageBonus - enfeeble;
   rawDamage = Math.max(rawDamage, 1);
 
@@ -300,23 +307,31 @@ export function calculateHandPreview(
   if (nightAssassinBonus > 0) tags.push(`+${nightAssassinBonus} Night Assassin`);
   if (relentlessBonus > 0) tags.push(`+${relentlessBonus} Relentless`);
 
+  const verdantWrathBonus = checkVerdantWrath(source, card);
+  const maulBonus = checkMaul(source, card);
+  if (verdantWrathBonus > 0) tags.push(`+${verdantWrathBonus} Verdant Wrath`);
+  if (maulBonus > 0) tags.push(`+${maulBonus} Maul`);
+
   // Item damage bonus (source-only, no target info)
   const itemBonus = getItemDamageBonusSourceOnly(source, card);
   if (itemBonus > 0) tags.push(`+${itemBonus} Item`);
 
   const additive = strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus +
     proletariatBonus + scrappyBonus + poisonBarbBonus + adaptabilityBonus +
-    sharpBeakBonus + nightAssassinBonus + relentlessBonus + itemBonus - enfeeble;
+    sharpBeakBonus + nightAssassinBonus + relentlessBonus + verdantWrathBonus + maulBonus +
+    itemBonus - enfeeble;
 
   // Multipliers (source-only, inlined where CombatState was only used for logs)
   const blazeStrikeActive = source.passiveIds.includes('blaze_strike') &&
     card.type === 'fire' && !source.turnFlags.blazeStrikeUsedThisTurn;
   const swarmStrikeActive = source.passiveIds.includes('swarm_strike') &&
     card.type === 'bug' && !source.turnFlags.swarmStrikeUsedThisTurn;
+  const torrentStrikeActive = source.passiveIds.includes('torrent_strike') &&
+    card.type === 'water' && !source.turnFlags.torrentStrikeUsedThisTurn;
   const finisherActive = source.passiveIds.includes('finisher') &&
     !source.turnFlags.finisherUsedThisTurn &&
     isAttackCard(card) && card.cost >= 3;
-  const blazeSwarmMult = blazeStrikeActive ? 1.3 : swarmStrikeActive ? 2 : finisherActive ? 2 : 1;
+  const blazeSwarmMult = blazeStrikeActive ? 1.3 : swarmStrikeActive ? 2 : torrentStrikeActive ? 1.3 : finisherActive ? 2 : 1;
 
   const angerPointMult = checkAngerPoint(source);
   const sheerForceMult = checkSheerForce(source);
@@ -326,6 +341,7 @@ export function calculateHandPreview(
 
   if (blazeStrikeActive) tags.push('x1.3 Blaze');
   if (swarmStrikeActive) tags.push('x2 Swarm');
+  if (torrentStrikeActive) tags.push('x1.3 Torrent');
   if (finisherActive) tags.push('x2 Finisher');
   if (angerPointMult > 1) tags.push(`x${angerPointMult} Anger Pt`);
   if (sheerForceMult > 1) tags.push(`x${sheerForceMult} Sheer Force`);

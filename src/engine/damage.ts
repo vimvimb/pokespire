@@ -43,6 +43,9 @@ export interface DamageResult {
   familyFuryBonus: number;        // Bonus from Family Fury (+2 per damaged ally)
   poisonBarbBonus: number;        // Bonus from Poison Barb (+2 for Poison attacks)
   adaptabilityBonus: number;      // Bonus from Adaptability (+2 extra STAB)
+  verdantWrathBonus: number;      // Bonus from Verdant Wrath (Regen stacks, max 20)
+  maulBonus: number;              // Bonus from Maul (+2 for front-row attacks)
+  torrentStrikeMultiplier: number; // Multiplier from Torrent Strike (1.3x first Water)
   maliceBonus: number;            // Bonus from Malice (target's Burn + Enfeeble stacks)
   itemDamageBonus: number;        // Bonus from held item effects
   itemDamageReduction: number;    // Reduction from held item defense effects
@@ -89,6 +92,9 @@ export interface DamageModifiers {
   poisonBarbBonus?: number;
   adaptabilityBonus?: number;
   nightAssassinBonus?: number;
+  verdantWrathBonus?: number;
+  maulBonus?: number;
+  isTorrentStrike?: boolean;
   maliceBonus?: number;
   itemDamageBonus?: number;        // Flat bonus from held item effects
   itemDamageReduction?: number;    // Flat reduction from held item defense effects
@@ -127,17 +133,20 @@ export function applyCardDamage(
   const poisonBarbBonus = mods.poisonBarbBonus ?? 0;
   const adaptabilityBonus = mods.adaptabilityBonus ?? 0;
   const nightAssassinBonus = mods.nightAssassinBonus ?? 0;
+  const verdantWrathBonus = mods.verdantWrathBonus ?? 0;
+  const maulBonus = mods.maulBonus ?? 0;
   const maliceBonus = mods.maliceBonus ?? 0;
   const itemDamageBonus = mods.itemDamageBonus ?? 0;
 
-  let rawDamage = baseDamage + strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + counterBonus + keenEyeBonus + predatorsPatienceBonus + searingFuryBonus + voltFuryBonus + sharpBeakBonus + proletariatBonus + familyFuryBonus + poisonBarbBonus + adaptabilityBonus + nightAssassinBonus + maliceBonus + itemDamageBonus - enfeeble;
+  let rawDamage = baseDamage + strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + counterBonus + keenEyeBonus + predatorsPatienceBonus + searingFuryBonus + voltFuryBonus + sharpBeakBonus + proletariatBonus + familyFuryBonus + poisonBarbBonus + adaptabilityBonus + nightAssassinBonus + verdantWrathBonus + maulBonus + maliceBonus + itemDamageBonus - enfeeble;
   rawDamage = Math.max(rawDamage, 1); // floor at 1
 
-  // Step 1.5: Apply strike multipliers (Blaze Strike / Swarm Strike / Finisher — mutually exclusive)
+  // Step 1.5: Apply strike multipliers (Blaze Strike / Swarm Strike / Torrent Strike / Finisher — mutually exclusive)
   const blazeStrikeMultiplier = mods.isBlazeStrike ? 1.3 : 1;
   const swarmStrikeMultiplier = mods.isSwarmStrike ? 2 : 1;
+  const torrentStrikeMultiplier = mods.isTorrentStrike ? 1.3 : 1;
   const finisherMultiplier = mods.isFinisher ? 2 : 1;
-  rawDamage = rawDamage * Math.max(blazeStrikeMultiplier, swarmStrikeMultiplier, finisherMultiplier);
+  rawDamage = rawDamage * Math.max(blazeStrikeMultiplier, swarmStrikeMultiplier, torrentStrikeMultiplier, finisherMultiplier);
 
   // Step 1.6: Apply Raging Bull multiplier (Normal attacks +50% below 50% HP)
   const ragingBullMultiplier = mods.ragingBullMultiplier ?? 1.0;
@@ -256,6 +265,9 @@ export function applyCardDamage(
     lifeOrbMultiplier,
     familyFuryBonus,
     nightAssassinBonus,
+    verdantWrathBonus,
+    maulBonus,
+    torrentStrikeMultiplier,
     poisonBarbBonus,
     adaptabilityBonus,
     maliceBonus,

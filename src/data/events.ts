@@ -158,8 +158,8 @@ const ACT1_EVENTS: EventDefinition[] = [
       {
         id: 'haggle',
         label: 'Demand Gold',
-        flavorText: 'Intimidate for 30 gold',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 30 }], description: 'The Meowth nervously hands over some gold.' },
+        flavorText: 'Intimidate for 60 gold',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 60 }], description: 'The Meowth nervously hands over some gold.' },
       },
     ],
   },
@@ -180,11 +180,11 @@ const ACT1_EVENTS: EventDefinition[] = [
       {
         id: 'rush',
         label: 'Sprint Through',
-        flavorText: '50/50: 40 gold OR 10 damage to all',
+        flavorText: '50/50: 80 gold OR 10 damage to all',
         outcome: {
           type: 'random',
           branches: [
-            { weight: 50, effects: [{ type: 'gold', amount: 40 }], description: 'You dash through unscathed and find gold on the other side!' },
+            { weight: 50, effects: [{ type: 'gold', amount: 80 }], description: 'You dash through unscathed and find gold on the other side!' },
             { weight: 50, effects: [{ type: 'damage', target: 'all', amount: 10 }], description: 'Traps everywhere! Your party takes heavy damage.' },
           ],
         },
@@ -202,8 +202,8 @@ const ACT1_EVENTS: EventDefinition[] = [
       {
         id: 'sneak',
         label: 'Sneak Gold',
-        flavorText: 'Gain 25 gold',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 25 }], description: 'You carefully pocket some coins without waking them.' },
+        flavorText: 'Gain 50 gold',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 50 }], description: 'You carefully pocket some coins without waking them.' },
       },
       {
         id: 'kick',
@@ -251,8 +251,8 @@ const ACT1_EVENTS: EventDefinition[] = [
       {
         id: 'help',
         label: 'Help Them Up',
-        flavorText: 'Gain 20 gold (they reward your kindness)',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 20 }], description: 'The trainer thanks you and shares some gold.' },
+        flavorText: 'Gain 40 gold (they reward your kindness)',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 40 }], description: 'The trainer thanks you and shares some gold.' },
       },
     ],
   },
@@ -363,8 +363,8 @@ const ACT2_EVENTS: EventDefinition[] = [
       {
         id: 'gold',
         label: 'Take the Gold',
-        flavorText: 'Gain 40 gold',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 40 }], description: 'The scientist hands over a pouch of gold.' },
+        flavorText: 'Gain 80 gold',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 80 }], description: 'The scientist hands over a pouch of gold.' },
       },
     ],
   },
@@ -413,8 +413,8 @@ const ACT2_EVENTS: EventDefinition[] = [
       {
         id: 'loot',
         label: 'Loot the Machines',
-        flavorText: 'Gain 35 gold',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 35 }], description: 'You crack open the machines and pocket the coins.' },
+        flavorText: 'Gain 70 gold',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 70 }], description: 'You crack open the machines and pocket the coins.' },
       },
     ],
   },
@@ -469,8 +469,8 @@ const ACT2_EVENTS: EventDefinition[] = [
       {
         id: 'gold_bag',
         label: 'Take the Gold',
-        flavorText: 'Gain 50 gold',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 50 }], description: 'A heavy bag of coins. Nice.' },
+        flavorText: 'Gain 100 gold',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 100 }], description: 'A heavy bag of coins. Nice.' },
       },
     ],
   },
@@ -491,8 +491,8 @@ const ACT2_EVENTS: EventDefinition[] = [
       {
         id: 'sell',
         label: 'Pawn It',
-        flavorText: 'Gain 45 gold',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 45 }], description: 'You grab some items to sell later.' },
+        flavorText: 'Gain 90 gold',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 90 }], description: 'You grab some items to sell later.' },
       },
     ],
   },
@@ -513,8 +513,8 @@ const ACT2_EVENTS: EventDefinition[] = [
       {
         id: 'hack',
         label: 'Hack Finances',
-        flavorText: 'Gain 60 gold',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 60 }], description: 'You transfer funds from Rocket accounts. Cha-ching!' },
+        flavorText: 'Gain 120 gold',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 120 }], description: 'You transfer funds from Rocket accounts. Cha-ching!' },
       },
     ],
   },
@@ -558,8 +558,8 @@ const ACT2_EVENTS: EventDefinition[] = [
       {
         id: 'decline',
         label: 'No Room',
-        flavorText: 'Gain 20 gold instead',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 20 }], description: 'You wave goodbye and pocket some loose coins.' },
+        flavorText: 'Gain 40 gold instead',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 40 }], description: 'You wave goodbye and pocket some loose coins.' },
       },
     ],
   },
@@ -615,8 +615,8 @@ const ACT3_EVENTS: EventDefinition[] = [
       {
         id: 'take_offering',
         label: 'Take the Offerings',
-        flavorText: 'Gain 75 gold',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 75 }], description: 'You pocket the ancient coins. Mew probably doesn\'t mind... right?' },
+        flavorText: 'Gain 150 gold',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 150 }], description: 'You pocket the ancient coins. Mew probably doesn\'t mind... right?' },
       },
     ],
   },
@@ -702,8 +702,8 @@ const ACT3_EVENTS: EventDefinition[] = [
       {
         id: 'harvest',
         label: 'Harvest for Gold',
-        flavorText: 'Gain 55 gold',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 55 }], description: 'You carefully extract the crystals. They\'ll fetch a good price.' },
+        flavorText: 'Gain 110 gold',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 110 }], description: 'You carefully extract the crystals. They\'ll fetch a good price.' },
       },
     ],
   },
@@ -731,8 +731,8 @@ const ACT3_EVENTS: EventDefinition[] = [
       {
         id: 'fish',
         label: 'Fish for Treasure',
-        flavorText: 'Gain 65 gold',
-        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 65 }], description: 'You pull up ancient coins from the pool\'s depths.' },
+        flavorText: 'Gain 130 gold',
+        outcome: { type: 'fixed', effects: [{ type: 'gold', amount: 130 }], description: 'You pull up ancient coins from the pool\'s depths.' },
       },
     ],
   },
@@ -747,11 +747,11 @@ const ACT3_EVENTS: EventDefinition[] = [
       {
         id: 'play',
         label: 'Play the Game',
-        flavorText: '50/50: epic draft + 50 gold OR 12 damage all + 2 Dazed',
+        flavorText: '50/50: epic draft + 100 gold OR 12 damage all + 2 Dazed',
         outcome: {
           type: 'random',
           branches: [
-            { weight: 50, effects: [{ type: 'epicDraft', picks: 1 }, { type: 'gold', amount: 50 }], description: 'The Gengar cackles with delight! "You win! Here\'s your prize."' },
+            { weight: 50, effects: [{ type: 'epicDraft', picks: 1 }, { type: 'gold', amount: 100 }], description: 'The Gengar cackles with delight! "You win! Here\'s your prize."' },
             { weight: 50, effects: [{ type: 'damage', target: 'all', amount: 12 }, { type: 'addDazed', target: 'one', count: 2 }], description: 'The Gengar\'s laughter is the last thing you hear before the pain.' },
           ],
         },
@@ -897,7 +897,7 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
           type: 'random',
           branches: [
             { weight: 60, effects: [{ type: 'maxHpBoost', target: 'one', amount: 8 }], description: 'The energy pulses steadily through your hands.' },
-            { weight: 40, effects: [{ type: 'damage', target: 'one', amount: 6 }, { type: 'gold', amount: 50 }], description: 'The energy discharges unexpectedly. A coin purse falls from your bag.' },
+            { weight: 40, effects: [{ type: 'damage', target: 'one', amount: 6 }, { type: 'gold', amount: 100 }], description: 'The energy discharges unexpectedly. A coin purse falls from your bag.' },
           ],
         },
       },
@@ -906,7 +906,7 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
         label: 'Leave it where it lies',
         outcome: {
           type: 'fixed',
-          effects: [{ type: 'gold', amount: 150 }, { type: 'healPercent', target: 'all', percent: 0.15 }],
+          effects: [{ type: 'gold', amount: 300 }, { type: 'healPercent', target: 'all', percent: 0.15 }],
           description: 'The forest exhales. Nothing disturbed — the energy settles.',
         },
       },
@@ -993,7 +993,7 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
         label: 'Cover your ears and press on',
         outcome: {
           type: 'fixed',
-          effects: [{ type: 'gold', amount: 100 }, { type: 'healPercent', target: 'all', percent: 0.15 }],
+          effects: [{ type: 'gold', amount: 200 }, { type: 'healPercent', target: 'all', percent: 0.15 }],
           description: 'Staying detached costs you nothing today.',
         },
       },
@@ -1010,7 +1010,7 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
         label: 'Accept the gift graciously',
         outcome: {
           type: 'fixed',
-          effects: [{ type: 'healPercent', target: 'all', percent: 0.4 }, { type: 'gold', amount: 30 }],
+          effects: [{ type: 'healPercent', target: 'all', percent: 0.4 }, { type: 'gold', amount: 60 }],
           description: 'The Blissey watches your party recover, then wobbles back into the grass.',
         },
       },
@@ -1068,7 +1068,7 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
           type: 'random',
           branches: [
             { weight: 60, effects: [{ type: 'recruit' }], description: 'It follows you, heat steady.' },
-            { weight: 40, effects: [{ type: 'damage', target: 'random', amount: 12 }, { type: 'gold', amount: 50 }], description: 'It panics and lashes out before fleeing — but drops something useful.' },
+            { weight: 40, effects: [{ type: 'damage', target: 'random', amount: 12 }, { type: 'gold', amount: 100 }], description: 'It panics and lashes out before fleeing — but drops something useful.' },
           ],
         },
       },
@@ -1077,7 +1077,7 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
         label: 'Leave it to the ruins',
         outcome: {
           type: 'fixed',
-          effects: [{ type: 'gold', amount: 150 }, { type: 'cardClone' }],
+          effects: [{ type: 'gold', amount: 300 }, { type: 'cardClone' }],
           description: 'You find a cache of supplies from the tower workers.',
         },
       },
@@ -1146,7 +1146,7 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
         label: 'Leave it for the monks',
         outcome: {
           type: 'fixed',
-          effects: [{ type: 'maxHpBoost', target: 'all', amount: 10 }, { type: 'gold', amount: 100 }],
+          effects: [{ type: 'maxHpBoost', target: 'all', amount: 10 }, { type: 'gold', amount: 200 }],
           description: 'A monk watches you go and presses coins into your hand.',
         },
       },
@@ -1206,7 +1206,7 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
         label: 'Shield your thoughts',
         outcome: {
           type: 'fixed',
-          effects: [{ type: 'gold', amount: 150 }, { type: 'healPercent', target: 'all', percent: 0.2 }],
+          effects: [{ type: 'gold', amount: 300 }, { type: 'healPercent', target: 'all', percent: 0.2 }],
           description: 'Staying closed-off costs you nothing here. Small mercy.',
         },
       },
@@ -1233,8 +1233,8 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
         outcome: {
           type: 'random',
           branches: [
-            { weight: 65, effects: [{ type: 'gold', amount: 200 }, { type: 'maxHpBoost', target: 'one', amount: 8 }], description: 'Something preserved by the heat.' },
-            { weight: 35, effects: [{ type: 'damage', target: 'one', amount: 10 }, { type: 'gold', amount: 100 }], description: 'Disturbing sacred ground has consequences — but there was still something here.' },
+            { weight: 65, effects: [{ type: 'gold', amount: 400 }, { type: 'maxHpBoost', target: 'one', amount: 8 }], description: 'Something preserved by the heat.' },
+            { weight: 35, effects: [{ type: 'damage', target: 'one', amount: 10 }, { type: 'gold', amount: 200 }], description: 'Disturbing sacred ground has consequences — but there was still something here.' },
           ],
         },
       },
@@ -1262,7 +1262,7 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
         label: 'Hold onto it for now',
         outcome: {
           type: 'fixed',
-          effects: [{ type: 'healPercent', target: 'all', percent: 0.3 }, { type: 'gold', amount: 75 }],
+          effects: [{ type: 'healPercent', target: 'all', percent: 0.3 }, { type: 'gold', amount: 150 }],
           description: 'It dissolves in your pack eventually. But slowly.',
         },
       },
@@ -1288,7 +1288,7 @@ const CAMPAIGN2_EVENTS: EventDefinition[] = [
         label: "Turn away — don't tempt fate",
         outcome: {
           type: 'fixed',
-          effects: [{ type: 'healPercent', target: 'all', percent: 0.2 }, { type: 'gold', amount: 100 }],
+          effects: [{ type: 'healPercent', target: 'all', percent: 0.2 }, { type: 'gold', amount: 200 }],
           description: 'Wisdom is sometimes knowing when not to look.',
         },
       },

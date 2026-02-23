@@ -354,7 +354,7 @@
   "tauros": {
     "name": "Tauros",
     "types": ["normal"],
-    "maxHp": 65,
+    "maxHp": 55,
     "baseSpeed": 7,
     "energyPerTurn": 3,
     "energyCap": 10,
@@ -374,7 +374,7 @@
   "kangaskhan": {
     "name": "Kangaskhan",
     "types": ["normal"],
-    "maxHp": 65,
+    "maxHp": 50,
     "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
@@ -394,18 +394,21 @@
   "mewtwo": {
     "name": "Mewtwo",
     "types": ["psychic"],
-    "maxHp": 200,
+    "maxHp": 250,
     "baseSpeed": 10,
     "energyPerTurn": 5,
     "energyCap": 12,
     "handSize": 6,
     "deck": [
-      "confusion", "confusion",
-      "psybeam", "psybeam",
-      "psychic", "psychic",
+      "psystrike", "psystrike",
+      "body-slam",
+      "psychic",
+      "shadow-ball",
+      "thunderbolt",
+      "ice-beam",
+      "flamethrower",
       "barrier", "barrier",
-      "recover",
-      "amnesia"
+      "recover"
     ],
     "abilities": []
   },
@@ -1511,12 +1514,13 @@
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
       "vine-whip", "vine-whip",
+      "absorb", "absorb",
+      "defend", "defend",
+      "mega-drain",
       "razor-leaf",
-      "growth",
-      "leech-seed"
+      "growl",
+      "synthesis"
     ],
     "abilities": [],
     "description": "A gentle Grass-type that heals teammates and outlasts foes through attrition."
@@ -1524,36 +1528,38 @@
   "bayleef": {
     "name": "Bayleef",
     "types": ["grass"],
-    "maxHp": 46,
-    "baseSpeed": 5,
+    "maxHp": 50,
+    "baseSpeed": 4,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
       "vine-whip", "vine-whip",
+      "absorb", "absorb",
+      "defend", "defend",
+      "mega-drain",
       "razor-leaf",
-      "growth",
-      "leech-seed"
+      "growl",
+      "synthesis"
     ],
     "abilities": []
   },
   "meganium": {
     "name": "Meganium",
     "types": ["grass"],
-    "maxHp": 58,
-    "baseSpeed": 5,
+    "maxHp": 66,
+    "baseSpeed": 4,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
       "vine-whip", "vine-whip",
+      "absorb", "absorb",
+      "defend", "defend",
+      "mega-drain",
       "razor-leaf",
-      "growth",
-      "leech-seed"
+      "growl",
+      "synthesis"
     ],
     "abilities": []
   },
@@ -1561,17 +1567,18 @@
   "cyndaquil": {
     "name": "Cyndaquil",
     "types": ["fire"],
-    "maxHp": 30,
+    "maxHp": 32,
     "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch",
-      "ember", "ember", "ember",
-      "quick-attack",
-      "swift"
+      "scratch", "scratch", "scratch",
+      "defend", "defend",
+      "ember", "ember",
+      "metal-claw",
+      "smokescreen",
+      "growl"
     ],
     "abilities": [],
     "description": "A nimble Fire-type that builds momentum with quick attacks and scorching bursts."
@@ -1585,28 +1592,30 @@
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch",
-      "ember", "ember", "ember",
-      "quick-attack",
-      "swift"
+      "scratch", "scratch", "scratch",
+      "defend", "defend",
+      "ember", "ember",
+      "metal-claw",
+      "smokescreen",
+      "growl"
     ],
     "abilities": []
   },
   "typhlosion": {
     "name": "Typhlosion",
     "types": ["fire"],
-    "maxHp": 54,
+    "maxHp": 52,
     "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch",
-      "ember", "ember", "ember",
-      "quick-attack",
-      "swift"
+      "scratch", "scratch", "scratch",
+      "defend", "defend",
+      "ember", "ember",
+      "metal-claw",
+      "smokescreen",
+      "growl"
     ],
     "abilities": []
   },
@@ -1614,17 +1623,19 @@
   "totodile": {
     "name": "Totodile",
     "types": ["water"],
-    "maxHp": 40,
-    "baseSpeed": 4,
+    "maxHp": 35,
+    "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch",
       "water-gun", "water-gun",
       "bite", "bite",
-      "defend"
+      "defend", "defend",
+      "aqua-tail",
+      "crunch",
+      "rage",
+      "leer"
     ],
     "abilities": [],
     "description": "An aggressive Water-type that overwhelms foes with relentless biting attacks."
@@ -1632,34 +1643,38 @@
   "croconaw": {
     "name": "Croconaw",
     "types": ["water"],
-    "maxHp": 50,
+    "maxHp": 45,
     "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch",
       "water-gun", "water-gun",
       "bite", "bite",
-      "defend"
+      "defend", "defend",
+      "aqua-tail",
+      "crunch",
+      "rage",
+      "leer"
     ],
     "abilities": []
   },
   "feraligatr": {
     "name": "Feraligatr",
     "types": ["water"],
-    "maxHp": 62,
+    "maxHp": 55,
     "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch",
       "water-gun", "water-gun",
       "bite", "bite",
-      "defend"
+      "defend", "defend",
+      "aqua-tail",
+      "crunch",
+      "rage",
+      "leer"
     ],
     "abilities": []
   },

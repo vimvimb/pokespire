@@ -1325,7 +1325,16 @@ export function promoteFromBench(
   const benchMember = run.bench[benchIndex];
   if (!benchMember) return run;
 
-  const promoted: RunPokemon = { ...benchMember, position };
+  // If the requested position is already occupied, find the first empty one
+  const occupied = new Set(run.party.map(p => `${p.position.row}-${p.position.column}`));
+  let finalPosition = position;
+  if (occupied.has(`${position.row}-${position.column}`)) {
+    const empty = findEmptyPosition(run.party);
+    if (!empty) return run; // Grid full
+    finalPosition = empty;
+  }
+
+  const promoted: RunPokemon = { ...benchMember, position: finalPosition };
   const newParty = [...run.party, promoted];
   const newBench = run.bench.filter((_, i) => i !== benchIndex);
 

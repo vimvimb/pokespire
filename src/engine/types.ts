@@ -268,7 +268,8 @@ export type StatusType =
   | 'taunt'
   | 'provoke'
   | 'fatigue'
-  | 'thorns';
+  | 'thorns'
+  | 'regen';
 
 export interface StatusInstance {
   type: StatusType;
@@ -301,6 +302,10 @@ export interface CombatantTurnFlags {
   finisherUsedThisTurn: boolean;  // First 3+ cost attack deals double, clears Strength (Machamp line)
   overclockReduction: number;  // Accumulated cost reduction from Overclock swaps (Porygon-Z)
   quickClawBonusTurn: boolean;  // Quick Claw: gets a bonus turn at battle start
+  regenerativeStrikeUsedThisTurn: boolean;  // Regenerative Strike: first Grass attack applies Regen to self
+  overgrowGraceUsedThisTurn: boolean;       // Overgrow Grace: first Grass attack heals all allies
+  torrentStrikeUsedThisTurn: boolean;       // Torrent Strike: first Water attack deals 1.3x damage
+  bloodFrenzyTriggered: boolean;            // Blood Frenzy: once per battle, gain Strength from low-HP hit
 }
 
 export interface Combatant {
@@ -413,4 +418,5 @@ export interface PokemonData {
   description?: string;  // playstyle hint shown on hover in party select
   energyModifier?: number;  // Permanent energy per turn modifier from events
   drawModifier?: number;    // Permanent hand size modifier from events
+  pokedexNumber?: number;   // National Pokedex number for sorting
 }

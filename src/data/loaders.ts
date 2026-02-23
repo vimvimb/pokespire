@@ -2,6 +2,7 @@ import type { MoveDefinition, PokemonData, MoveType, MoveRange, CardEffect } fro
 import movesData from './moves.json';
 import pokemonData from './pokemon.json';
 import enemyDecksData from './enemy-decks.json';
+import { POKEDEX_NUMBERS } from './heights';
 
 // ============================================================
 // Data Loaders — Load JSON data and export typed objects
@@ -79,6 +80,7 @@ export const POKEMON: Record<string, PokemonData> = Object.fromEntries(
       deck: poke.deck,
       abilities: poke.abilities,
       description: poke.description,
+      pokedexNumber: POKEDEX_NUMBERS[id],
     },
   ])
 );

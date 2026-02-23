@@ -1,4 +1,167 @@
 /**
+ * National Pokedex numbers for all Pokemon in the game.
+ * Used for sorting Pokemon in the PokeDex and Sandbox screens.
+ */
+export const POKEDEX_NUMBERS: Record<string, number> = {
+  bulbasaur: 1,
+  ivysaur: 2,
+  venusaur: 3,
+  charmander: 4,
+  charmeleon: 5,
+  charizard: 6,
+  squirtle: 7,
+  wartortle: 8,
+  blastoise: 9,
+  caterpie: 10,
+  butterfree: 12,
+  weedle: 13,
+  beedrill: 15,
+  pidgey: 16,
+  pidgeotto: 17,
+  pidgeot: 18,
+  rattata: 19,
+  raticate: 20,
+  spearow: 21,
+  fearow: 22,
+  ekans: 23,
+  arbok: 24,
+  pikachu: 25,
+  raichu: 26,
+  sandshrew: 27,
+  sandslash: 28,
+  'nidoran-f': 29,
+  nidorina: 30,
+  nidoqueen: 31,
+  'nidoran-m': 32,
+  nidorino: 33,
+  nidoking: 34,
+  clefairy: 35,
+  clefable: 36,
+  vulpix: 37,
+  ninetales: 38,
+  jigglypuff: 39,
+  wigglytuff: 40,
+  zubat: 41,
+  golbat: 42,
+  oddish: 43,
+  gloom: 44,
+  vileplume: 45,
+  paras: 46,
+  parasect: 47,
+  venonat: 48,
+  venomoth: 49,
+  meowth: 52,
+  persian: 53,
+  growlithe: 58,
+  arcanine: 59,
+  machop: 66,
+  machoke: 67,
+  machamp: 68,
+  gastly: 92,
+  haunter: 93,
+  gengar: 94,
+  drowzee: 96,
+  hypno: 97,
+  voltorb: 100,
+  electrode: 101,
+  rhyhorn: 111,
+  rhydon: 112,
+  kangaskhan: 115,
+  electabuzz: 125,
+  magmar: 126,
+  tauros: 128,
+  magikarp: 129,
+  gyarados: 130,
+  lapras: 131,
+  porygon: 137,
+  snorlax: 143,
+  dratini: 147,
+  dragonair: 148,
+  dragonite: 149,
+  mewtwo: 150,
+  chikorita: 152,
+  bayleef: 153,
+  meganium: 154,
+  cyndaquil: 155,
+  quilava: 156,
+  typhlosion: 157,
+  totodile: 158,
+  croconaw: 159,
+  feraligatr: 160,
+  sentret: 161,
+  furret: 162,
+  hoothoot: 163,
+  noctowl: 164,
+  ledyba: 165,
+  ledian: 166,
+  spinarak: 167,
+  ariados: 168,
+  crobat: 169,
+  chinchou: 170,
+  lanturn: 171,
+  togetic: 176,
+  flaaffy: 180,
+  ampharos: 181,
+  marill: 183,
+  azumarill: 184,
+  sudowoodo: 185,
+  politoed: 186,
+  hoppip: 187,
+  skiploom: 188,
+  jumpluff: 189,
+  aipom: 190,
+  sunkern: 191,
+  sunflora: 192,
+  yanma: 193,
+  wooper: 194,
+  quagsire: 195,
+  espeon: 196,
+  umbreon: 197,
+  murkrow: 198,
+  slowking: 199,
+  misdreavus: 200,
+  wobbuffet: 202,
+  girafarig: 203,
+  pineco: 204,
+  forretress: 205,
+  dunsparce: 206,
+  steelix: 208,
+  qwilfish: 211,
+  scizor: 212,
+  heracross: 214,
+  sneasel: 215,
+  teddiursa: 216,
+  ursaring: 217,
+  slugma: 218,
+  magcargo: 219,
+  corsola: 222,
+  mantine: 226,
+  skarmory: 227,
+  houndour: 228,
+  houndoom: 229,
+  kingdra: 230,
+  phanpy: 231,
+  donphan: 232,
+  porygon2: 233,
+  stantler: 234,
+  miltank: 241,
+  blissey: 242,
+  raikou: 243,
+  entei: 244,
+  suicune: 245,
+  larvitar: 246,
+  pupitar: 247,
+  tyranitar: 248,
+  lugia: 249,
+  'ho-oh': 250,
+  celebi: 251,
+  // Cross-gen evolutions (Gen 4 National Dex numbers)
+  electivire: 466,
+  magmortar: 467,
+  'porygon-z': 474,
+};
+
+/**
  * Pokemon weights in kg.
  * Used to scale sprites proportionally in battle.
  * Weight works better than height since "height" for snake-like Pokemon is actually length.
@@ -240,6 +403,19 @@ const BASE_SPRITE_SIZE = 80; // Pikachu's sprite size in pixels
  *  ALL sprites are scaled down proportionally to preserve size ratios. */
 export const MAX_BATTLE_SPRITE_SIZE = 200;
 
+/** Boss Pokemon that should appear much larger in battle.
+ *  Multiplier is applied to the individual boss sprite size. */
+const BOSS_SPRITE_MULTIPLIER: Record<string, number> = {
+  lugia: 3.0,
+  'ho-oh': 1.5,
+};
+
+/** Per-boss pixel offsets to fine-tune positioning (x = right, y = up). */
+const BOSS_SPRITE_OFFSET: Record<string, { x: number; y: number }> = {
+  lugia: { x: 120, y: -180 },
+  'ho-oh': { x: 60, y: -80 },
+};
+
 /**
  * Calculate sprite size for a Pokemon based on its weight.
  * Uses cube root scaling since weight scales with volume (length^3).
@@ -264,4 +440,16 @@ export function getBattleSpriteScale(pokemonIds: string[]): number {
   if (pokemonIds.length === 0) return 1;
   const maxNatural = Math.max(...pokemonIds.map(id => getSpriteSize(id)));
   return MAX_BATTLE_SPRITE_SIZE / maxNatural;
+}
+
+/** Get per-Pokemon boss sprite multiplier.
+ *  Returns > 1 for boss Pokemon so they render larger than the normal cap. */
+export function getBossSpriteMultiplier(pokemonId: string): number {
+  return BOSS_SPRITE_MULTIPLIER[pokemonId] ?? 1;
+}
+
+/** Get per-Pokemon boss sprite pixel offset { x, y } for positioning.
+ *  x = shift right (px), y = shift up (negative = up). */
+export function getBossSpriteOffset(pokemonId: string): { x: number; y: number } {
+  return BOSS_SPRITE_OFFSET[pokemonId] ?? { x: 0, y: 0 };
 }

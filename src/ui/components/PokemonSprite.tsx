@@ -5,7 +5,7 @@ import { HealthBar } from './HealthBar';
 import { EnergyPips } from './EnergyPips';
 import { THEME } from '../theme';
 import { StatusIcons } from './StatusIcons';
-import { getSpriteSize } from '../../data/heights';
+import { getSpriteSize, getBossSpriteMultiplier, getBossSpriteOffset } from '../../data/heights';
 import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
@@ -65,7 +65,10 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
   }
 
   // Scale sprite based on Pokemon weight, with global battle scale applied
-  const spriteSize = Math.round(getSpriteSize(combatant.pokemonId) * spriteScale);
+  // Boss Pokemon get an additional multiplier so they appear massive
+  const bossMultiplier = getBossSpriteMultiplier(combatant.pokemonId);
+  const bossOffset = getBossSpriteOffset(combatant.pokemonId);
+  const spriteSize = Math.round(getSpriteSize(combatant.pokemonId) * spriteScale * bossMultiplier);
 
   // Handle click: target if targetable, otherwise inspect if available
   const handleClick = () => {
@@ -138,6 +141,9 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
         borderRadius: 8,
         background: isDragHovered ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
         border: isDragHovered ? '2px dashed #ef4444' : '2px solid transparent',
+        ...(bossOffset.x !== 0 || bossOffset.y !== 0 ? {
+          transform: `translate(${bossOffset.x}px, ${bossOffset.y}px)`,
+        } : {}),
       }}
     >
       {/* Current turn / targetable indicator - subtle glow instead of box */}

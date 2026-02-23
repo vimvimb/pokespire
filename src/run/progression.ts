@@ -169,7 +169,16 @@ export type PassiveId =
   | 'download'
   | 'data_transfer'
   | 'overclock'
-  | 'upload';
+  | 'upload'
+  // Chikorita line
+  | 'gentle_bloom'
+  | 'regenerative_strike'
+  | 'overgrow_grace'
+  | 'verdant_wrath'
+  // Totodile line
+  | 'maul'
+  | 'blood_frenzy'
+  | 'torrent_strike';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -216,7 +225,7 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   },
   pressure_hull: {
     name: 'Pressure Hull',
-    description: 'At the end of your turn, retain 50% of your Block.',
+    description: 'At the end of your turn, retain all of your Block.',
   },
   torrent_shield: {
     name: 'Torrent Shield',
@@ -693,6 +702,36 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
     name: 'Upload',
     description: 'Swapping also grants the ally 1 energy.',
   },
+  // Chikorita line
+  gentle_bloom: {
+    name: 'Gentle Bloom',
+    description: 'At the end of your turn, heal all allies for 2 HP.',
+  },
+  regenerative_strike: {
+    name: 'Regenerative Strike',
+    description: 'Your first Grass attack each turn applies Regen to yourself equal to half the damage dealt.',
+  },
+  overgrow_grace: {
+    name: 'Overgrow Grace',
+    description: 'Your first Grass attack each turn heals all allies for half the damage dealt.',
+  },
+  verdant_wrath: {
+    name: 'Verdant Wrath',
+    description: 'Your Grass attacks deal bonus damage equal to your current Regen stacks (max 20).',
+  },
+  // Totodile line
+  maul: {
+    name: 'Maul',
+    description: 'Your front-row attacks deal +2 damage.',
+  },
+  blood_frenzy: {
+    name: 'Blood Frenzy',
+    description: 'The first time each battle you damage an enemy below 50% HP, gain 5 Strength.',
+  },
+  torrent_strike: {
+    name: 'Torrent Strike',
+    description: 'The first Water attack you play each turn deals 1.3x damage.',
+  },
 };
 
 // Charmander progression tree
@@ -1072,18 +1111,18 @@ export const KANGASKHAN_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Kangaskhan',
-      description: 'Gain Parental Bond.',
-      passiveId: 'parental_bond',
-      hpBoost: 5,
-      cardsToAdd: [],
-    },
-    {
-      level: 3,
-      name: 'Kangaskhan',
       description: 'Add Body Slam. Gain Protective Instinct.',
       passiveId: 'protective_instinct',
       hpBoost: 5,
       cardsToAdd: ['body-slam'],
+    },
+    {
+      level: 3,
+      name: 'Kangaskhan',
+      description: 'Gain Parental Bond.',
+      passiveId: 'parental_bond',
+      hpBoost: 5,
+      cardsToAdd: [],
     },
     {
       level: 4,
@@ -1273,27 +1312,27 @@ export const GROWLITHE_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Arcanine',
-      description: 'Evolve to Arcanine (+30 HP). Add Morning Sun. Gain Intimidate.',
+      description: 'Evolve to Arcanine (+30 HP). Gain Intimidate.',
       evolvesTo: 'arcanine',
       passiveId: 'intimidate',
       hpBoost: 0,
-      cardsToAdd: ['morning-sun'],
+      cardsToAdd: [],
     },
     {
       level: 3,
       name: 'Arcanine',
-      description: 'Add Flare Blitz. Gain Impact Guard.',
+      description: 'Add Extreme Speed. Gain Impact Guard.',
       passiveId: 'impact_guard',
       hpBoost: 0,
-      cardsToAdd: ['flare-blitz'],
+      cardsToAdd: ['extreme-speed'],
     },
     {
       level: 4,
       name: 'Arcanine (Mastered)',
-      description: 'Gain Rock Head.',
+      description: 'Add Flare Blitz. Gain Rock Head.',
       passiveId: 'rock_head',
       hpBoost: 0,
-      cardsToAdd: [],
+      cardsToAdd: ['flare-blitz'],
     },
   ],
 };
@@ -1632,19 +1671,19 @@ export const DRATINI_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Dratini',
-      description: 'Gain Inner Focus.',
+      description: 'Add Extreme Speed. Gain Inner Focus.',
       passiveId: 'inner_focus',
       hpBoost: 0,
-      cardsToAdd: [],
+      cardsToAdd: ['extreme-speed'],
     },
     {
       level: 3,
       name: 'Dragonair',
-      description: 'Evolve to Dragonair. Add Dragon Dance. Gain Multiscale.',
+      description: 'Evolve to Dragonair. Gain Multiscale.',
       evolvesTo: 'dragonair',
       passiveId: 'multiscale',
       hpBoost: 0,
-      cardsToAdd: ['dragon-dance'],
+      cardsToAdd: [],
     },
     {
       level: 4,
@@ -2154,34 +2193,34 @@ export const CHIKORITA_PROGRESSION: ProgressionTree = {
     {
       level: 1,
       name: 'Chikorita',
-      description: 'Starting form.',
-      passiveId: 'none',
+      description: 'Gentle Bloom: At the end of your turn, heal all allies for 2 HP.',
+      passiveId: 'gentle_bloom',
       hpBoost: 0,
       cardsToAdd: [],
     },
     {
       level: 2,
       name: 'Bayleef',
-      description: 'Evolve to Bayleef. Add Razor Leaf.',
+      description: 'Evolve to Bayleef. Regenerative Strike: First Grass attack each turn applies Regen. Add Razor Leaf.',
       evolvesTo: 'bayleef',
-      passiveId: 'none',
+      passiveId: 'regenerative_strike',
       hpBoost: 0,
       cardsToAdd: ['razor-leaf'],
     },
     {
       level: 3,
       name: 'Meganium',
-      description: 'Evolve to Meganium. Add Body Slam.',
+      description: 'Evolve to Meganium. Overgrow Grace: First Grass attack each turn heals all allies. Add Body Slam.',
       evolvesTo: 'meganium',
-      passiveId: 'none',
+      passiveId: 'overgrow_grace',
       hpBoost: 0,
       cardsToAdd: ['body-slam'],
     },
     {
       level: 4,
       name: 'Meganium (Mastered)',
-      description: 'Add Growth.',
-      passiveId: 'none',
+      description: 'Verdant Wrath: Grass attacks deal bonus damage equal to Regen stacks (max 20). Add Growth.',
+      passiveId: 'verdant_wrath',
       hpBoost: 0,
       cardsToAdd: ['growth'],
     },
@@ -2195,36 +2234,36 @@ export const CYNDAQUIL_PROGRESSION: ProgressionTree = {
     {
       level: 1,
       name: 'Cyndaquil',
-      description: 'Starting form.',
-      passiveId: 'none',
+      description: 'Kindling: Fire attacks apply 1 Burn to the target.',
+      passiveId: 'kindling',
       hpBoost: 0,
       cardsToAdd: [],
     },
     {
       level: 2,
       name: 'Quilava',
-      description: 'Evolve to Quilava. Add Flamethrower.',
+      description: 'Evolve to Quilava. Spreading Flames: When you apply Burn, all enemies gain 1 Burn. Add Flamethrower.',
       evolvesTo: 'quilava',
-      passiveId: 'none',
+      passiveId: 'spreading_flames',
       hpBoost: 0,
       cardsToAdd: ['flamethrower'],
     },
     {
       level: 3,
       name: 'Typhlosion',
-      description: 'Evolve to Typhlosion. Add Swift.',
+      description: 'Evolve to Typhlosion. Blaze Strike: First Fire attack each turn deals 1.3x damage. Add Eruption.',
       evolvesTo: 'typhlosion',
-      passiveId: 'none',
+      passiveId: 'blaze_strike',
       hpBoost: 0,
-      cardsToAdd: ['swift'],
+      cardsToAdd: ['eruption'],
     },
     {
       level: 4,
       name: 'Typhlosion (Mastered)',
-      description: 'Add Slash.',
-      passiveId: 'none',
+      description: 'Inferno Momentum: First Fire attack each turn costs 1 less. Add Flamethrower.',
+      passiveId: 'inferno_momentum',
       hpBoost: 0,
-      cardsToAdd: ['slash'],
+      cardsToAdd: ['flamethrower'],
     },
   ],
 };
@@ -2236,36 +2275,36 @@ export const TOTODILE_PROGRESSION: ProgressionTree = {
     {
       level: 1,
       name: 'Totodile',
-      description: 'Starting form.',
-      passiveId: 'none',
+      description: 'Maul: Front-row attacks deal +2 damage.',
+      passiveId: 'maul',
       hpBoost: 0,
       cardsToAdd: [],
     },
     {
       level: 2,
       name: 'Croconaw',
-      description: 'Evolve to Croconaw. Add Slash.',
+      description: 'Evolve to Croconaw. Blood Frenzy: First time you damage an enemy below 50% HP, gain 5 Strength. Add Slash.',
       evolvesTo: 'croconaw',
-      passiveId: 'none',
+      passiveId: 'blood_frenzy',
       hpBoost: 0,
       cardsToAdd: ['slash'],
     },
     {
       level: 3,
       name: 'Feraligatr',
-      description: 'Evolve to Feraligatr. Add Surf.',
+      description: 'Evolve to Feraligatr. Torrent Strike: First Water attack each turn deals 1.3x damage. Add Hydro Pump.',
       evolvesTo: 'feraligatr',
-      passiveId: 'none',
+      passiveId: 'torrent_strike',
       hpBoost: 0,
-      cardsToAdd: ['surf'],
+      cardsToAdd: ['hydro-pump'],
     },
     {
       level: 4,
       name: 'Feraligatr (Mastered)',
-      description: 'Add Slam.',
-      passiveId: 'none',
+      description: 'Sheer Force: Attacks deal 1.3x damage but status effects from moves are blocked. Add Surf.',
+      passiveId: 'sheer_force',
       hpBoost: 0,
-      cardsToAdd: ['slam'],
+      cardsToAdd: ['surf'],
     },
   ],
 };

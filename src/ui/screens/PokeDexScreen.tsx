@@ -13,6 +13,7 @@ import {
   type ProgressionTree,
   type ProgressionRung,
 } from '../../run/progression';
+import { getUnlockedPokemonIds } from '../../run/playerProfile';
 
 // ── Region classification ────────────────────────────────────────────
 // Johto base-form IDs (Gen 2). Everything else is Kanto (Gen 1).
@@ -46,45 +47,17 @@ import { getSpriteUrl } from '../utils/sprites';
 
 interface Props {
   onBack: () => void;
+  showAll?: boolean;
 }
 
 // Boss / special forms that shouldn't appear in the PokeDex
 const EXCLUDED_IDS = new Set(['mewtwo']);
 
-// Build ordered list: group by evolution line, base form first then evos in tree order
+// Build ordered list: all non-excluded Pokemon sorted by National Pokedex number
 function buildOrderedPokemonList(): PokemonData[] {
-  const baseFormIds = Object.keys(STARTER_POKEMON);
-  const result: PokemonData[] = [];
-  const added = new Set<string>();
-
-  for (const baseId of baseFormIds) {
-    // Add the base form
-    if (POKEMON[baseId] && !EXCLUDED_IDS.has(baseId)) {
-      result.push(POKEMON[baseId]);
-      added.add(baseId);
-    }
-
-    // Add evolved forms by walking the progression tree
-    const tree = PROGRESSION_TREES[baseId];
-    if (tree) {
-      for (const rung of tree.rungs) {
-        if (rung.evolvesTo && POKEMON[rung.evolvesTo] && !added.has(rung.evolvesTo)) {
-          result.push(POKEMON[rung.evolvesTo]);
-          added.add(rung.evolvesTo);
-        }
-      }
-    }
-  }
-
-  // Add any remaining Pokemon not yet included (catches stragglers)
-  for (const [id, data] of Object.entries(POKEMON)) {
-    if (!added.has(id) && !EXCLUDED_IDS.has(id)) {
-      result.push(data);
-      added.add(id);
-    }
-  }
-
-  return result;
+  return Object.values(POKEMON)
+    .filter(p => !EXCLUDED_IDS.has(p.id))
+    .sort((a, b) => (a.pokedexNumber ?? 9999) - (b.pokedexNumber ?? 9999));
 }
 
 const allPokemon = buildOrderedPokemonList();
@@ -111,10 +84,22 @@ const BASE_FORM_IDS = new Set(Object.keys(STARTER_POKEMON));
 
 // ── Main Screen ─────────────────────────────────────────────────────
 
-export function PokeDexScreen({ onBack }: Props) {
+export function PokeDexScreen({ onBack, showAll }: Props) {
   const [selectedPokemon, setSelectedPokemon] = useState<PokemonData | null>(null);
   const [typeFilter, setTypeFilter] = useState<MoveType | null>(null);
   const [regionFilter, setRegionFilter] = useState<Region | null>(null);
+
+  // Compute the set of unlocked Pokemon IDs (base forms expanded to include evolutions)
+  const unlockedIds = useMemo(() => {
+    if (showAll) return null; // null = show everything
+    const baseIds = new Set(getUnlockedPokemonIds());
+    const expanded = new Set<string>();
+    for (const p of allPokemon) {
+      const base = getBaseFormId(p.id);
+      if (baseIds.has(base)) expanded.add(p.id);
+    }
+    return expanded;
+  }, [showAll]);
 
   const filteredPokemon = useMemo(() => {
     return allPokemon.filter(p => {
@@ -196,6 +181,7 @@ export function PokeDexScreen({ onBack }: Props) {
                 <TypeFilterButton
                   label="All Regions"
                   count={allPokemon.length}
+                  unlockedCount={unlockedIds ? allPokemon.filter(p => unlockedIds.has(p.id)).length : undefined}
                   color={THEME.text.secondary}
                   isActive={regionFilter === null}
                   onClick={() => setRegionFilter(null)}
@@ -203,6 +189,7 @@ export function PokeDexScreen({ onBack }: Props) {
                 <TypeFilterButton
                   label="Kanto"
                   count={regionCounts.kanto}
+                  unlockedCount={unlockedIds ? allPokemon.filter(p => getRegion(p.id) === 'kanto' && unlockedIds.has(p.id)).length : undefined}
                   color="#f97316"
                   isActive={regionFilter === 'kanto'}
                   onClick={() => setRegionFilter(regionFilter === 'kanto' ? null : 'kanto')}
@@ -210,6 +197,7 @@ export function PokeDexScreen({ onBack }: Props) {
                 <TypeFilterButton
                   label="Johto"
                   count={regionCounts.johto}
+                  unlockedCount={unlockedIds ? allPokemon.filter(p => getRegion(p.id) === 'johto' && unlockedIds.has(p.id)).length : undefined}
                   color="#34d399"
                   isActive={regionFilter === 'johto'}
                   onClick={() => setRegionFilter(regionFilter === 'johto' ? null : 'johto')}
@@ -240,6 +228,7 @@ export function PokeDexScreen({ onBack }: Props) {
                 <TypeFilterButton
                   label="All"
                   count={regionFilter ? filteredPokemon.length : allPokemon.length}
+                  unlockedCount={unlockedIds ? (regionFilter ? filteredPokemon : allPokemon).filter(p => unlockedIds.has(p.id)).length : undefined}
                   color={THEME.text.secondary}
                   isActive={typeFilter === null}
                   onClick={() => setTypeFilter(null)}
@@ -250,6 +239,7 @@ export function PokeDexScreen({ onBack }: Props) {
                     key={type}
                     label={type}
                     count={typeCounts[type] || 0}
+                    unlockedCount={unlockedIds ? allPokemon.filter(p => p.types.includes(type) && unlockedIds.has(p.id)).length : undefined}
                     color={TYPE_COLORS[type]}
                     isActive={typeFilter === type}
                     onClick={() => setTypeFilter(typeFilter === type ? null : type)}
@@ -277,7 +267,17 @@ export function PokeDexScreen({ onBack }: Props) {
                   const parts: string[] = [];
                   if (regionFilter) parts.push(regionFilter === 'kanto' ? 'Kanto' : 'Johto');
                   if (typeFilter) parts.push(`${typeFilter}-type`);
-                  if (parts.length > 0) return `${filteredPokemon.length} ${parts.join(' ')} Pokémon`;
+                  if (parts.length > 0) {
+                    if (unlockedIds) {
+                      const unlocked = filteredPokemon.filter(p => unlockedIds.has(p.id)).length;
+                      return `${unlocked}/${filteredPokemon.length} ${parts.join(' ')} Pokémon discovered`;
+                    }
+                    return `${filteredPokemon.length} ${parts.join(' ')} Pokémon`;
+                  }
+                  if (unlockedIds) {
+                    const unlocked = allPokemon.filter(p => unlockedIds.has(p.id)).length;
+                    return `${unlocked}/${allPokemon.length} Pokémon discovered`;
+                  }
                   return 'Choose a Pokemon to inspect';
                 })()}
               </div>
@@ -289,24 +289,85 @@ export function PokeDexScreen({ onBack }: Props) {
                 gap: 16,
                 justifyItems: 'center',
               }}>
-                {filteredPokemon.map((pokemon, i) => (
-                  <div
-                    key={pokemon.id}
-                    className="pdex-tile"
-                    style={{ animationDelay: `${i * 20}ms` }}
-                  >
-                    <PokemonTile
-                      name={pokemon.name}
-                      spriteUrl={getSpriteUrl(pokemon.id)}
-                      primaryType={pokemon.types[0]}
-                      secondaryType={pokemon.types[1]}
-                      size="large"
-                      isSelected={false}
-                      onClick={() => setSelectedPokemon(pokemon)}
-                      stats={`HP: ${pokemon.maxHp} | SPD: ${pokemon.baseSpeed}`}
-                    />
-                  </div>
-                ))}
+                {filteredPokemon.map((pokemon, i) => {
+                  const isLocked = unlockedIds !== null && !unlockedIds.has(pokemon.id);
+                  if (isLocked) {
+                    return (
+                      <div
+                        key={pokemon.id}
+                        className="pdex-tile"
+                        style={{ animationDelay: `${i * 20}ms` }}
+                      >
+                        <div style={{
+                          width: 150,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: 4,
+                          padding: 14,
+                          borderRadius: 8,
+                          border: `1.5px solid ${THEME.border.medium}`,
+                          background: 'rgba(30, 30, 46, 0.3)',
+                          cursor: 'default',
+                          position: 'relative',
+                          overflow: 'hidden',
+                        }}>
+                          {/* Motif placeholder (same height as PokemonTile motif) */}
+                          <div style={{ height: 30 }} />
+                          {/* ? icon in place of sprite */}
+                          <div style={{
+                            width: 80,
+                            height: 80,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 36,
+                            fontWeight: 'bold',
+                            color: THEME.text.tertiary,
+                            opacity: 0.3,
+                            ...THEME.heading,
+                          }}>
+                            ?
+                          </div>
+                          {/* Dex number in place of name */}
+                          <div style={{
+                            fontSize: 13,
+                            fontWeight: 'bold',
+                            color: THEME.text.tertiary,
+                            opacity: 0.4,
+                            ...THEME.heading,
+                            letterSpacing: '0.1em',
+                            marginTop: 2,
+                          }}>
+                            #{String(pokemon.pokedexNumber ?? 0).padStart(3, '0')}
+                          </div>
+                          {/* Stats placeholder */}
+                          <div style={{ height: 13 }} />
+                          {/* Type badge placeholder */}
+                          <div style={{ height: 14 }} />
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div
+                      key={pokemon.id}
+                      className="pdex-tile"
+                      style={{ animationDelay: `${i * 20}ms` }}
+                    >
+                      <PokemonTile
+                        name={pokemon.name}
+                        spriteUrl={getSpriteUrl(pokemon.id)}
+                        primaryType={pokemon.types[0]}
+                        secondaryType={pokemon.types[1]}
+                        size="large"
+                        isSelected={false}
+                        onClick={() => setSelectedPokemon(pokemon)}
+                        stats={`HP: ${pokemon.maxHp} | SPD: ${pokemon.baseSpeed}`}
+                      />
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Empty state */}
@@ -366,12 +427,13 @@ export function PokeDexScreen({ onBack }: Props) {
 interface TypeFilterButtonProps {
   label: string;
   count: number;
+  unlockedCount?: number;
   color: string;
   isActive: boolean;
   onClick: () => void;
 }
 
-function TypeFilterButton({ label, count, color, isActive, onClick }: TypeFilterButtonProps) {
+function TypeFilterButton({ label, count, unlockedCount, color, isActive, onClick }: TypeFilterButtonProps) {
   return (
     <button
       className="pdex-type-btn"
@@ -416,7 +478,7 @@ function TypeFilterButton({ label, count, color, isActive, onClick }: TypeFilter
         color: isActive ? color : THEME.text.tertiary,
         opacity: isActive ? 0.8 : 0.4,
       }}>
-        {count}
+        {unlockedCount !== undefined ? `${unlockedCount}/${count}` : count}
       </span>
     </button>
   );

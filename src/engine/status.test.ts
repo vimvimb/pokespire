@@ -292,22 +292,22 @@ describe('Status Effects', () => {
         expect(combatant.block).toBe(0);
       });
 
-      it('Pressure Hull retains 50% block', () => {
+      it('Pressure Hull retains 100% block', () => {
         const combatant = createTestCombatant({ block: 20, passiveIds: ['pressure_hull'] });
         const state = createTestCombatState([combatant]);
 
         processRoundBoundary(state);
 
-        expect(combatant.block).toBe(10); // 50% of 20
+        expect(combatant.block).toBe(20); // 100% retained
       });
 
-      it('Pressure Hull rounds down', () => {
+      it('Pressure Hull retains odd block values', () => {
         const combatant = createTestCombatant({ block: 15, passiveIds: ['pressure_hull'] });
         const state = createTestCombatState([combatant]);
 
         processRoundBoundary(state);
 
-        expect(combatant.block).toBe(7); // floor(15 * 0.5)
+        expect(combatant.block).toBe(15); // 100% retained
       });
     });
 

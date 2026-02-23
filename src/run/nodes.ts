@@ -772,10 +772,10 @@ export const ACT2_NODES: MapNode[] = [
  * Structure (~20 nodes, diamond branching pattern):
  * - Stage 0: Spawn
  * - Stage 1: First split (2 battles, evolved Pokemon)
- * - Stage 2: 2 battles + 1 rest
+ * - Stage 2: 1 battle + 1 event + 1 rest
  * - Stage 3: 3 battles (3-4 enemies, 1.15x HP)
- * - Stage 4: 2 battles + 1 train event (3-4 enemies, 1.2x HP)
- * - Stage 5: 3 battles + 1 rest (3-4 enemies, 1.25x HP)
+ * - Stage 4: 2 battles + 1 event (3-4 enemies, 1.2x HP)
+ * - Stage 5: 2 battles + 1 event + 1 rest (3-4 enemies, 1.25x HP)
  * - Stage 6: Mewtwo Final Boss
  */
 
@@ -825,20 +825,15 @@ export const ACT3_NODES: MapNode[] = [
   },
 
   // ============================================
-  // Stage 2: Mid-early (2 battles + 1 rest)
+  // Stage 2: Mid-early (1 battle + 1 event + 1 rest)
   // ============================================
   {
     id: '3d',
-    type: 'battle',
+    type: 'event',
     stage: 2,
     connectsTo: ['3g', '3h'],
     completed: false,
-    enemies: ['rhydon', 'electrode', 'hypno'],
-    enemyPositions: [
-      { row: 'front', column: 0 },
-      { row: 'front', column: 1 },
-      { row: 'front', column: 2 },
-    ],
+    eventId: '',
     x: 0.30, y: 0.24,
   },
   {
@@ -915,7 +910,7 @@ export const ACT3_NODES: MapNode[] = [
   },
 
   // ============================================
-  // Stage 4: Harder (2 battles + 1 train event, 1.2x HP)
+  // Stage 4: Harder (2 battles + 1 event, 1.2x HP)
   // ============================================
   {
     id: '3j',
@@ -959,7 +954,7 @@ export const ACT3_NODES: MapNode[] = [
   },
 
   // ============================================
-  // Stage 5: Pre-Boss (3 battles + 1 rest, 1.25x HP)
+  // Stage 5: Pre-Boss (2 battles + 1 event + 1 rest, 1.25x HP)
   // ============================================
   {
     id: '3m',
@@ -994,17 +989,11 @@ export const ACT3_NODES: MapNode[] = [
   },
   {
     id: '3o',
-    type: 'battle',
+    type: 'event',
     stage: 5,
     connectsTo: ['3q'],
     completed: false,
-    enemies: ['gyarados', 'dragonite', 'lapras'],
-    enemyPositions: [
-      { row: 'front', column: 0 },
-      { row: 'front', column: 1 },
-      { row: 'front', column: 2 },
-    ],
-    enemyHpMultiplier: 1.25,
+    eventId: '',
     x: 0.68, y: 0.62,
   },
   {
@@ -1027,7 +1016,6 @@ export const ACT3_NODES: MapNode[] = [
     completed: false,
     enemies: ['mewtwo'],
     enemyPositions: [{ row: 'front', column: 1 }],
-    enemyHpMultiplier: 2.0,
     x: 0.88, y: 0.44,
     size: 'large',
   },

@@ -1642,6 +1642,28 @@ export default function App() {
     );
   }
 
+  if (screen === "debug_pokedex") {
+    return (
+      <Suspense
+        fallback={
+          <div
+            style={{
+              height: "100dvh",
+              background: THEME.bg.base,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            Loading...
+          </div>
+        }
+      >
+        <PokeDexScreen showAll onBack={() => setScreen("debugging")} />
+      </Suspense>
+    );
+  }
+
   if (screen === "debugging") {
     const devBtnStyle = {
       padding: "12px 20px",
@@ -1858,6 +1880,12 @@ export default function App() {
           </button>
           <button onClick={handleTestEvolutionLargeParty} style={devBtnStyle}>
             Test Evolution (Large Party)
+          </button>
+          <button
+            onClick={() => setScreen("debug_pokedex")}
+            style={devBtnStyle}
+          >
+            Full PokeDex
           </button>
           <button onClick={() => setScreen("event_tester")} style={devBtnStyle}>
             Event Tester

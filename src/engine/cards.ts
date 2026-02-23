@@ -38,6 +38,9 @@ import {
   checkConsumingFlame,
   shouldConsumingFlameVanish,
   checkImpactGuard,
+  checkVerdantWrath,
+  checkMaul,
+  checkTorrentStrike,
   checkItemDamageBonus,
   checkItemDamageReduction
 } from './passives';
@@ -523,6 +526,10 @@ function buildDamageModifiers(
   const { shouldApply: isSwarmStrike, logs: swarmLogs } = checkSwarmStrike(state, source, card);
   logs.push(...swarmLogs);
 
+  // Check for Torrent Strike
+  const { shouldApply: isTorrentStrike, logs: torrentStrikeLogs } = checkTorrentStrike(state, source, card);
+  logs.push(...torrentStrikeLogs);
+
   // Check for Fortified Cannons / Fortified Spines (block-based bonus damage)
   const { bonusDamage: fortifiedCannonsBonus, logs: fortifiedCannonsLogs } = checkFortifiedCannons(state, source, card);
   logs.push(...fortifiedCannonsLogs);
@@ -737,6 +744,26 @@ function buildDamageModifiers(
     });
   }
 
+  // Verdant Wrath: Grass attacks deal bonus damage equal to Regen stacks (max 20)
+  const verdantWrathBonus = checkVerdantWrath(source, card);
+  if (verdantWrathBonus > 0) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Verdant Wrath: +${verdantWrathBonus} damage (${verdantWrathBonus} Regen stacks)!`,
+    });
+  }
+
+  // Maul: Front-row attacks deal +2 damage
+  const maulBonus = checkMaul(source, card);
+  if (maulBonus > 0) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Maul: +${maulBonus} damage (front-row attack)!`,
+    });
+  }
+
   // Malice: Attacks deal bonus damage equal to target's Burn + Enfeeble stacks
   const maliceBonus = checkMalice(source, target);
   if (maliceBonus > 0) {
@@ -880,6 +907,7 @@ function buildDamageModifiers(
   return {
     isBlazeStrike,
     isSwarmStrike,
+    isTorrentStrike,
     isFinisher,
     fortifiedCannonsBonus: fortifiedCannonsBonus,
     fortifiedSpinesBonus: fortifiedSpinesBonus,
@@ -904,6 +932,8 @@ function buildDamageModifiers(
     lifeOrbMultiplier,  // 1.3x for Life Orb
     familyFuryBonus: scrappyBonus + relentlessBonus + blindAggressionBonus,  // Combine flat bonuses
     nightAssassinBonus,
+    verdantWrathBonus,
+    maulBonus,
     maliceBonus,
     poisonBarbBonus,
     adaptabilityBonus,
@@ -931,6 +961,8 @@ function buildDamageBreakdown(r: ReturnType<typeof applyCardDamage>): string {
   if (r.voltFuryBonus > 0) parts.push(`+${r.voltFuryBonus} Volt`);
   if (r.sharpBeakBonus > 0) parts.push(`+${r.sharpBeakBonus} Sharp Beak`);
   if (r.nightAssassinBonus > 0) parts.push(`+${r.nightAssassinBonus} Assassin`);
+  if (r.verdantWrathBonus > 0) parts.push(`+${r.verdantWrathBonus} Verdant`);
+  if (r.maulBonus > 0) parts.push(`+${r.maulBonus} Maul`);
   if (r.maliceBonus > 0) parts.push(`+${r.maliceBonus} Malice`);
   if (r.proletariatBonus > 0) parts.push(`+${r.proletariatBonus} Proletariat`);
   if (r.familyFuryBonus > 0) parts.push(`+${r.familyFuryBonus} Fury`);
@@ -938,6 +970,7 @@ function buildDamageBreakdown(r: ReturnType<typeof applyCardDamage>): string {
   if (r.enfeeble > 0) parts.push(`-${r.enfeeble} Enfeeble`);
   if (r.blazeStrikeMultiplier > 1) parts.push(`x${r.blazeStrikeMultiplier} Blaze`);
   if (r.swarmStrikeMultiplier > 1) parts.push(`x${r.swarmStrikeMultiplier} Swarm`);
+  if (r.torrentStrikeMultiplier > 1) parts.push(`x${r.torrentStrikeMultiplier} Torrent`);
   if (r.finisherMultiplier > 1) parts.push(`x${r.finisherMultiplier} Finisher`);
   if (r.poisonBarbBonus > 0) parts.push(`+${r.poisonBarbBonus} Barb`);
   if (r.adaptabilityBonus > 0) parts.push(`+${r.adaptabilityBonus} Adapt`);

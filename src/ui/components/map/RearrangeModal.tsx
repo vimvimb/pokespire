@@ -45,16 +45,42 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
     originalIndex: number;
   };
 
-  // Initialize grid from party positions
+  // Initialize grid from party positions.
+  // If two members share a position (data corruption), place the collision
+  // in the first empty slot so no Pokemon is silently lost.
   const initGrid = () => {
     const grid = new Map<SlotKey, PokemonEntry>();
+    const overflow: PokemonEntry[] = [];
     party.forEach((p, i) => {
-      grid.set(slotKey(p.position.row, p.position.column), {
+      const key = slotKey(p.position.row, p.position.column);
+      const entry: PokemonEntry = {
         pokemon: p,
         originalSource: 'party',
         originalIndex: i,
-      });
+      };
+      if (grid.has(key)) {
+        overflow.push(entry);
+      } else {
+        grid.set(key, entry);
+      }
     });
+    // Place colliding Pokemon in the first available empty slots
+    const rows: Row[] = ['front', 'back'];
+    const cols: Column[] = [0, 1, 2];
+    for (const entry of overflow) {
+      let placed = false;
+      for (const row of rows) {
+        for (const col of cols) {
+          const key = slotKey(row, col);
+          if (!grid.has(key)) {
+            grid.set(key, entry);
+            placed = true;
+            break;
+          }
+        }
+        if (placed) break;
+      }
+    }
     return grid;
   };
 

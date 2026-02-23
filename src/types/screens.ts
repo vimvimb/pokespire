@@ -24,4 +24,5 @@ export type Screen =
   | "campaign_select"
   | "starter_items"
   | "item_dex"
-  | "item_reward";
+  | "item_reward"
+  | "debug_pokedex";

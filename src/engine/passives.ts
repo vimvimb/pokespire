@@ -235,6 +235,9 @@ export function onTurnStart(
   combatant.turnFlags.switchesThisTurn = 0;
   combatant.turnFlags.overclockReduction = 0;
   combatant.turnFlags.quickClawBonusTurn = false;
+  combatant.turnFlags.regenerativeStrikeUsedThisTurn = false;
+  combatant.turnFlags.overgrowGraceUsedThisTurn = false;
+  combatant.turnFlags.torrentStrikeUsedThisTurn = false;
   combatant.itemState['guerillaFront'] = 0;
 
   // Inferno Momentum: Reduce highest-cost FIRE card's cost by 3
@@ -447,6 +450,43 @@ export function onDamageDealt(
     }
   }
 
+  // Regenerative Strike: First Grass attack each turn applies Regen to self (floor(damage * 0.5))
+  if (attacker.passiveIds.includes('regenerative_strike') && card.type === 'grass' && damageDealt > 0) {
+    if (!attacker.turnFlags.regenerativeStrikeUsedThisTurn) {
+      attacker.turnFlags.regenerativeStrikeUsedThisTurn = true;
+      const regenStacks = Math.floor(damageDealt * 0.5);
+      if (regenStacks > 0) {
+        applyStatus(state, attacker, 'regen', regenStacks, attacker.id);
+        logs.push({
+          round: state.round,
+          combatantId: attacker.id,
+          message: `Regenerative Strike: ${attacker.name} gains Regen ${regenStacks}!`,
+        });
+      }
+    }
+  }
+
+  // Overgrow Grace: First Grass attack each turn heals all allies for floor(damage * 0.5)
+  if (attacker.passiveIds.includes('overgrow_grace') && card.type === 'grass' && damageDealt > 0) {
+    if (!attacker.turnFlags.overgrowGraceUsedThisTurn) {
+      attacker.turnFlags.overgrowGraceUsedThisTurn = true;
+      const healAmount = Math.floor(damageDealt * 0.5);
+      if (healAmount > 0) {
+        const allies = state.combatants.filter(a => a.alive && a.side === attacker.side);
+        for (const ally of allies) {
+          const healed = applyHeal(ally, healAmount);
+          if (healed > 0) {
+            logs.push({
+              round: state.round,
+              combatantId: attacker.id,
+              message: `Overgrow Grace: ${ally.name} heals ${healed} HP!`,
+            });
+          }
+        }
+      }
+    }
+  }
+
   // Baby Vines: Unblocked Grass attacks apply Leech
   if (attacker.passiveIds.includes('baby_vines') && card.type === 'grass' && damageDealt > 0) {
     applyStatus(state, target, 'leech', 1, attacker.id);
@@ -473,6 +513,19 @@ export function onDamageDealt(
     // Trigger Drowsy Aura if attacker has it
     const auraLogs = onStatusApplied(state, attacker, target, 'sleep', 1);
     logs.push(...auraLogs);
+  }
+
+  // Blood Frenzy: First time each battle you damage an enemy below 50% HP, gain 5 Strength
+  if (attacker.passiveIds.includes('blood_frenzy') && damageDealt > 0 && !attacker.turnFlags.bloodFrenzyTriggered) {
+    if (target.alive && target.hp < target.maxHp * 0.5) {
+      attacker.turnFlags.bloodFrenzyTriggered = true;
+      applyStatus(state, attacker, 'strength', 5, attacker.id);
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `Blood Frenzy: ${attacker.name} gains 5 Strength! (${target.name} below 50% HP)`,
+      });
+    }
   }
 
   // Moxie: Kill-triggered — handled in onKill() instead
@@ -798,6 +851,21 @@ export function onTurnEnd(
             message: `${type} on ${combatant.name} expired.`,
           });
         }
+      }
+    }
+  }
+
+  // Gentle Bloom: Heal all allies for 2 HP at end of turn
+  if (combatant.passiveIds.includes('gentle_bloom') && combatant.alive) {
+    const allies = state.combatants.filter(a => a.alive && a.side === combatant.side);
+    for (const ally of allies) {
+      const healed = applyHeal(ally, 2);
+      if (healed > 0) {
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Gentle Bloom: ${ally.name} heals ${healed} HP! (HP: ${ally.hp}/${ally.maxHp})`,
+        });
       }
     }
   }
@@ -1971,10 +2039,69 @@ export function getTotalDebuffStacks(combatant: Combatant): number {
  * Used by Burning Jealousy for scaling damage against buffed targets.
  */
 export function getTotalBuffStacks(combatant: Combatant): number {
-  const buffTypes = ['strength', 'evasion', 'haste', 'thorns'];
+  const buffTypes = ['strength', 'evasion', 'haste', 'thorns', 'regen'];
   return combatant.statuses
     .filter(s => buffTypes.includes(s.type))
     .reduce((total, s) => total + s.stacks, 0);
+}
+
+/**
+ * Check Verdant Wrath bonus damage.
+ * Verdant Wrath: Grass attacks deal bonus damage equal to current Regen stacks (max 20).
+ */
+export function checkVerdantWrath(
+  attacker: Combatant,
+  card: MoveDefinition
+): number {
+  if (!attacker.passiveIds.includes('verdant_wrath')) return 0;
+  if (card.type !== 'grass') return 0;
+  const regenStacks = getStatusStacks(attacker, 'regen');
+  return Math.min(regenStacks, 20);
+}
+
+/**
+ * Check Maul bonus damage.
+ * Maul: Front-row attacks deal +2 damage.
+ */
+export function checkMaul(
+  attacker: Combatant,
+  card: MoveDefinition
+): number {
+  if (!attacker.passiveIds.includes('maul')) return 0;
+  if (card.range !== 'front_enemy') return 0;
+  return 2;
+}
+
+/**
+ * Check Torrent Strike effect.
+ * Torrent Strike: First Water attack each turn deals 1.3x damage.
+ * Mirrors Blaze Strike pattern.
+ */
+export function checkTorrentStrike(
+  state: CombatState,
+  attacker: Combatant,
+  card: MoveDefinition,
+  dryRun: boolean = false
+): { shouldApply: boolean; logs: LogEntry[] } {
+  const logs: LogEntry[] = [];
+
+  const hasTorrent = attacker.passiveIds.includes('torrent_strike');
+  const isWater = card.type === 'water';
+  const notUsed = !attacker.turnFlags.torrentStrikeUsedThisTurn;
+
+  if (hasTorrent && isWater && notUsed) {
+    if (!dryRun) {
+      attacker.turnFlags.torrentStrikeUsedThisTurn = true;
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `Torrent Strike: ${card.name} deals 1.3x damage!`,
+      });
+    }
+    return { shouldApply: true, logs };
+  }
+
+  return { shouldApply: false, logs };
 }
 
 // ============================================================

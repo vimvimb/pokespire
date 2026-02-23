@@ -160,6 +160,18 @@ function ThornsIcon({ color }: { color: string }) {
   );
 }
 
+function RegenIcon({ color }: { color: string }) {
+  return (
+    <svg width={16} height={16} viewBox="0 0 12 12" fill="none">
+      {/* Heart with plus — healing over time */}
+      <path d="M6 10 C4 8 1.5 6 1.5 4 C1.5 2.5 2.5 1.5 4 1.5 C5 1.5 5.5 2 6 2.5 C6.5 2 7 1.5 8 1.5 C9.5 1.5 10.5 2.5 10.5 4 C10.5 6 8 8 6 10Z" stroke={color} strokeWidth="0.9" strokeLinejoin="round" fill={color + '25'} />
+      {/* Plus sign in center */}
+      <line x1="6" y1="4" x2="6" y2="7" stroke={color} strokeWidth="1" strokeLinecap="round" />
+      <line x1="4.5" y1="5.5" x2="7.5" y2="5.5" stroke={color} strokeWidth="1" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function ProvokeIcon({ color }: { color: string }) {
   return (
     <svg width={16} height={16} viewBox="0 0 12 12" fill="none">
@@ -232,6 +244,10 @@ const STATUS_INFO: Record<string, {
   thorns: {
     Icon: ThornsIcon, color: '#94a3b8', label: 'Thorns',
     describe: (s) => `When hit by an attack, deals ${s} bypass damage back to the attacker. Permanent.`,
+  },
+  regen: {
+    Icon: RegenIcon, color: '#4ade80', label: 'Regen',
+    describe: (s) => `Heals ${s} HP at end of round. Decays by 1 each round.`,
   },
   provoke: {
     Icon: ProvokeIcon, color: '#e040a0', label: 'Provoke',
