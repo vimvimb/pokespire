@@ -83,7 +83,7 @@ export function OfflineCacheModal({ onClose }: Props) {
             ...THEME.heading,
           }}
         >
-          {phase === "done" ? "✓ Offline Ready" : "↓ Enable Offline Play"}
+          {phase === "done" ? "✓ Audio Cached" : "↓ Cache Audio for Offline"}
         </div>
 
         {/* Body text */}
@@ -109,9 +109,15 @@ export function OfflineCacheModal({ onClose }: Props) {
               lineHeight: 1.6,
             }}
           >
-            Music and sound effects are only cached as they're played. Download
-            all {total} audio files now (~17 MB) so the game works fully offline
-            from the start.
+            The game already works offline — sprites, UI, and all game data are
+            cached automatically after your first visit.
+            <span
+              style={{ display: "block", marginTop: 8 }}
+            >
+              Music and sound effects are only cached as they're played.
+              Download all {total} audio files now (~17 MB) so music and SFX
+              work offline too.
+            </span>
             {cached > 0 && (
               <span
                 style={{
@@ -135,8 +141,8 @@ export function OfflineCacheModal({ onClose }: Props) {
               lineHeight: 1.6,
             }}
           >
-            All {total} audio files are cached. The game is fully playable
-            offline.
+            All {total} audio files are cached. Music and sound effects will
+            work fully offline.
           </p>
         )}
 
@@ -176,8 +182,8 @@ export function OfflineCacheModal({ onClose }: Props) {
               lineHeight: 1.6,
             }}
           >
-            All {total} audio files are now cached. The game is fully playable
-            offline.
+            All {total} audio files are now cached. Music and sound effects will
+            work fully offline.
           </p>
         )}
 

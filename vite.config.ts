@@ -9,7 +9,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icon-192.png', 'icon-512.png', 'assets/**/*'],
+      // Do not set includeAssets — workbox.globPatterns already captures all necessary files
+      // (sprites, fonts, JS, CSS, icons). Using includeAssets alongside globPatterns causes
+      // duplicate precache entries, doubling the sw.js size for no benefit.
       manifest: {
         name: 'Pokespire',
         short_name: 'Pokespire',
@@ -28,6 +30,11 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024, // 8 MiB
         // mp3 excluded from precache — handled by runtimeCaching with range request support below
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,ttf,gif,jpg,jpeg}'],
+        // Exclude the public/ copies of Kreon fonts. Vite processes the font referenced in
+        // index.html and emits a content-hashed version (e.g. Kreon-VariableFont_wght-HASH.ttf)
+        // at the root of assets/ — that hashed copy IS precached. The public/ copies in
+        // assets/Fonts/** are dead duplicates (wrong path, wrong filename) that waste cache space.
+        globIgnores: ['assets/Fonts/**'],
         // Explicitly set navigation fallback for SPA offline support
         navigateFallback: 'index.html',
         // Cache audio files at runtime with range request support.
