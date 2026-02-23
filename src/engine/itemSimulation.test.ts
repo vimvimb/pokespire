@@ -44,6 +44,8 @@ interface BattleConfig {
   players: BattleFighter[];
   enemies: BattleFighter[];
   maxTurns?: number;
+  /** Move specific card IDs to the front of player draw piles (drawn first). */
+  prioritizeCards?: string[];
 }
 
 interface BattleResult {
@@ -137,6 +139,22 @@ function runItemBattle(config: BattleConfig): BattleResult {
     playerPositions, enemyPositions,
     playerSlotIndices,
   );
+
+  // Move priority cards to end of draw pile (drawn first via pop)
+  if (config.prioritizeCards) {
+    for (const pc of state.combatants.filter(c => c.side === 'player')) {
+      const priority: string[] = [];
+      const rest: string[] = [];
+      for (const cardId of pc.drawPile) {
+        if (config.prioritizeCards.includes(cardId) && priority.length < pc.handSize) {
+          priority.push(cardId);
+        } else {
+          rest.push(cardId);
+        }
+      }
+      pc.drawPile = [...rest, ...priority];
+    }
+  }
 
   // Assign items and custom passives to player combatants
   const playerCombatants = state.combatants.filter(c => c.side === 'player');
@@ -1878,6 +1896,7 @@ describe('Item Battle Simulations', () => {
       const result = runItemBattle({
         players: [{ pokemonId: 'charmander', position: F1, itemId: 'fuchsia_shuriken' }],
         enemies: [{ pokemonId: 'snorlax', position: F1 }],
+        prioritizeCards: ['ember'],
       });
       expect(result.error).toBeUndefined();
       const burnLogs = result.log.filter(l => l.includes('burn') && l.includes('applied'));
