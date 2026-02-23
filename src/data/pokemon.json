@@ -1944,14 +1944,15 @@
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
+      "scratch", "scratch",
       "swift", "swift",
-      "slam", "slam",
-      "fury-swipes", "fury-swipes",
-      "quick-attack"
+      "quick-attack", "quick-attack",
+      "supersonic", "supersonic",
+      "screech",
+      "smokescreen"
     ],
     "abilities": [],
-    "description": "An acrobatic Normal-type with a dexterous tail — quick, slippery, and relentless."
+    "description": "A mischievous utility pick — disrupts enemy hands, draws cards, and debuffs to support the team."
   },
 
   "yanma": {

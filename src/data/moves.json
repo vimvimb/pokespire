@@ -723,7 +723,7 @@
     "cost": 2,
     "type": "normal",
     "range": "front_enemy",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       {
         "type": "damage",
@@ -984,7 +984,7 @@
     "cost": 1,
     "type": "normal",
     "range": "any_enemy",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       {
         "type": "discard_intent"
@@ -2409,7 +2409,7 @@
     "cost": 1,
     "type": "ghost",
     "range": "any_enemy",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       {
         "type": "discard_intent"
@@ -4129,7 +4129,7 @@
     "cost": 2,
     "type": "water",
     "range": "any_enemy",
-    "vanish": false,
+    "vanish": true,
     "effects": [
       {
         "type": "damage",
@@ -5396,7 +5396,7 @@
     "cost": 2,
     "type": "fairy",
     "range": "any_enemy",
-    "vanish": false,
+    "vanish": true,
     "rarity": "uncommon",
     "pools": [
       "fairy"
