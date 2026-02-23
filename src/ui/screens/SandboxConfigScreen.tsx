@@ -54,7 +54,6 @@ const STATUS_COLORS: Record<StatusType, string> = {
   fatigue: '#78716c',
   thorns: '#84cc16',
   regen: '#34d399',
-  thorns: '#84cc16',
 };
 
 
