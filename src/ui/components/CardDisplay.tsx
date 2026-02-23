@@ -36,6 +36,7 @@ const EFFECT_COLORS: Record<string, string> = {
   gain_energy: '#fbbf24',
   apply_status_self: '#4ade80',
   cleanse: '#67e8f9',
+  discard_intent: '#f97316',
 };
 
 export const MOVE_TYPE_COLORS: Record<MoveType, string> = {
@@ -315,6 +316,13 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
         parts.push(
           <span key={parts.length} style={{ color: '#c084fc' }}>
             Copy Echo of target's top card.
+          </span>
+        );
+        break;
+      case 'discard_intent':
+        parts.push(
+          <span key={parts.length} style={{ color: '#f97316' }}>
+            Discard enemy's best card.
           </span>
         );
         break;

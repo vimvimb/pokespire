@@ -198,6 +198,14 @@ function scoreDebuffs(
     : 5;
 
   for (const e of card.effects) {
+    // Discard Intent: score ~4 if target has cards in hand
+    if (e.type === 'discard_intent') {
+      if (target.hand.length > 0) {
+        score += 4;
+      }
+      continue;
+    }
+
     if (e.type !== 'apply_status') continue;
     if (!(DEBUFF_STATUSES as readonly string[]).includes(e.status)) continue;
 
@@ -480,35 +488,27 @@ function scoreEnemyPlay(
 }
 
 // ============================================================
-// 8. Main AI Entry Point
+// 8. Shared Hand Scoring
 // ============================================================
 
 /**
- * Choose an action for the current enemy combatant.
- * Smart score-based AI: considers type effectiveness, exact AoE targets,
- * context-sensitive debuffs, and ally targeting.
+ * Score all playable cards in a combatant's hand.
+ * Shared by chooseEnemyAction (AI turn) and findIntendedCardIndex (discard_intent).
+ * When ignoreEnergy is true, all cards are scored regardless of current energy
+ * (used by discard_intent to evaluate what the enemy WANTS to play, not what they
+ * can currently afford — since they'll receive energy on their turn).
  */
-export function chooseEnemyAction(
-  state: CombatState,
-  _cardsPlayedThisTurn: number,
-): BattleAction {
-  const combatant = getCurrentCombatant(state);
-
-  // Primed self-KO: end turn immediately (deferred turn handles detonation)
-  if (combatant.primedSelfKo) {
-    return { type: 'end_turn' };
-  }
-
+function scoreHandPlays(state: CombatState, combatant: Combatant, ignoreEnergy = false): ScoredPlay[] {
   const hand = combatant.hand;
-
   const plays: ScoredPlay[] = [];
+
   for (let i = 0; i < hand.length; i++) {
     const cardId = hand[i];
     const card = getMove(cardId);
     const cost = getEffectiveCost(combatant, i);
 
-    // Can't afford
-    if (cost > combatant.energy) continue;
+    // Can't afford (skip check when scoring for intent)
+    if (!ignoreEnergy && cost > combatant.energy) continue;
 
     // --- Self-targeting cards ---
     if (card.range === 'self') {
@@ -537,7 +537,6 @@ export function chooseEnemyAction(
     if (provokeStatus?.sourceId) {
       const provokeSource = validTargets.find(t => t.id === provokeStatus.sourceId);
       if (provokeSource && provokeSource.alive) {
-        // Resolve exact targets through this provoke target
         const targets = resolveAoETargets(state, combatant, card, provokeSource.id);
         const score = scoreEnemyPlay(state, combatant, card, targets);
         if (score > 0) {
@@ -555,14 +554,12 @@ export function chooseEnemyAction(
     const isAoE = ['all_enemies', 'front_row', 'back_row'].includes(card.range);
 
     if (isAoE) {
-      // AoE: resolve exact targets, score the whole group
       const targets = resolveAoETargets(state, combatant, card, effectiveTargets[0].id);
       const score = scoreEnemyPlay(state, combatant, card, targets);
       if (score > 0) {
         plays.push({ cardId, handIndex: i, card, score, targetId: effectiveTargets[0].id });
       }
     } else if (card.range === 'any_row') {
-      // any_row: score each row separately, pick the best
       const rowGroups = groupByRow(effectiveTargets);
       for (const [_row, rowTargets] of rowGroups) {
         const representative = rowTargets[0];
@@ -573,7 +570,6 @@ export function chooseEnemyAction(
         }
       }
     } else if (card.range === 'column') {
-      // column: score each column, pick best
       const colGroups = groupByColumn(effectiveTargets);
       for (const [_col, colTargets] of colGroups) {
         const representative = colTargets[0];
@@ -584,7 +580,6 @@ export function chooseEnemyAction(
         }
       }
     } else {
-      // Single-target: score against every valid target, keep best
       for (const target of effectiveTargets) {
         const score = scoreEnemyPlay(state, combatant, card, [target]);
         if (score > 0) {
@@ -593,6 +588,31 @@ export function chooseEnemyAction(
       }
     }
   }
+
+  return plays;
+}
+
+// ============================================================
+// 9. Main AI Entry Point
+// ============================================================
+
+/**
+ * Choose an action for the current enemy combatant.
+ * Smart score-based AI: considers type effectiveness, exact AoE targets,
+ * context-sensitive debuffs, and ally targeting.
+ */
+export function chooseEnemyAction(
+  state: CombatState,
+  _cardsPlayedThisTurn: number,
+): BattleAction {
+  const combatant = getCurrentCombatant(state);
+
+  // Primed self-KO: end turn immediately (deferred turn handles detonation)
+  if (combatant.primedSelfKo) {
+    return { type: 'end_turn' };
+  }
+
+  const plays = scoreHandPlays(state, combatant);
 
   if (plays.length === 0) {
     return { type: 'end_turn' };
@@ -613,6 +633,45 @@ export function chooseEnemyAction(
     cardInstanceId: best.cardId,
     targetId: best.targetId,
   };
+}
+
+// ============================================================
+// 10. Discard Intent — Find the card a combatant would play next
+// ============================================================
+
+/**
+ * Find the hand index of the card a combatant would most want to play.
+ * Used by discard_intent to target the enemy's intended action.
+ * Falls back to highest-cost card if no scoreable plays exist.
+ * Returns -1 only if hand is empty.
+ */
+export function findIntendedCardIndex(
+  state: CombatState,
+  combatant: Combatant,
+): number {
+  if (combatant.hand.length === 0) return -1;
+
+  // Score all cards ignoring energy — the enemy will get energy on their turn,
+  // so we want to know what they'd MOST WANT to play, not what they can afford now.
+  const plays = scoreHandPlays(state, combatant, true);
+
+  if (plays.length > 0) {
+    // Sort by score descending (no 0-cost priority — we're evaluating intent, not turn order)
+    plays.sort((a, b) => b.score - a.score);
+    return plays[0].handIndex;
+  }
+
+  // Fallback: no playable cards scored — pick highest cost (tiebreak: later position)
+  let bestIdx = 0;
+  let bestCost = -1;
+  for (let i = 0; i < combatant.hand.length; i++) {
+    const c = getMove(combatant.hand[i]);
+    if (c.cost >= bestCost) {
+      bestCost = c.cost;
+      bestIdx = i;
+    }
+  }
+  return bestIdx;
 }
 
 // ============================================================

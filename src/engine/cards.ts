@@ -49,6 +49,7 @@ import { processItemPostCard, getItemDamageMultiplier, checkItemPlayRestriction,
 import { POKEMON_WEIGHTS } from '../data/heights';
 import { getTypeEffectiveness, getEffectivenessLabel } from './typeChart';
 import { applySlipstream } from './turns';
+import { findIntendedCardIndex } from './ai';
 
 // ============================================================
 // Card Play & Effect Resolution — Section 6
@@ -1617,6 +1618,31 @@ function resolveEffects(
             message: `${card.name}: ${target.name}'s hand is empty — nothing to copy!`,
           });
         }
+        break;
+      }
+
+      case 'discard_intent': {
+        // Discard the card the target would most want to play (AI scoring)
+        if (target.hand.length === 0) {
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${card.name}: ${target.name}'s hand is empty — nothing to discard!`,
+          });
+          break;
+        }
+
+        const intendedIdx = findIntendedCardIndex(state, target);
+        const discardedCardId = target.hand[intendedIdx];
+        const discardedCard = getMove(discardedCardId);
+        target.hand.splice(intendedIdx, 1);
+        target.discardPile.push(discardedCardId);
+
+        logs.push({
+          round: state.round,
+          combatantId: target.id,
+          message: `${card.name}: ${target.name}'s ${discardedCard.name} was discarded!`,
+        });
         break;
       }
 

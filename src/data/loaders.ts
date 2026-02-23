@@ -147,7 +147,7 @@ export function getMove(id: string): MoveDefinition {
     // Create a modified copy with 0 cost, vanish, and halved damage
     // Strip self-targeting effects (echoes are pure bonus hits, not full re-plays)
     const echoEffects = baseMove.effects
-      .filter(effect => effect.type !== 'add_echo_to_hand' && effect.type !== 'apply_status_self' && effect.type !== 'copy_enemy_card')
+      .filter(effect => effect.type !== 'add_echo_to_hand' && effect.type !== 'apply_status_self' && effect.type !== 'copy_enemy_card' && effect.type !== 'discard_intent')
       .map(effect => {
         // Halve all damage-dealing effects
         switch (effect.type) {

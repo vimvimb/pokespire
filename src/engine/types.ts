@@ -56,7 +56,8 @@ export type CardEffectType =
   | 'cleanse'
   | 'remove_type'
   | 'add_echo_to_hand'
-  | 'copy_enemy_card';
+  | 'copy_enemy_card'
+  | 'discard_intent';
 
 export interface DamageEffect {
   type: 'damage';
@@ -173,6 +174,11 @@ export interface CopyEnemyCardEffect {
   count: number;  // number of cards to copy (from top of target's hand)
 }
 
+/** Discard the highest-cost card from the target's hand (e.g. Confuse Ray, Supersonic) */
+export interface DiscardIntentEffect {
+  type: 'discard_intent';
+}
+
 export type CardEffect =
   | DamageEffect
   | BlockEffect
@@ -191,7 +197,8 @@ export type CardEffect =
   | CleanseEffect
   | RemoveTypeEffect
   | AddEchoToHandEffect
-  | CopyEnemyCardEffect;
+  | CopyEnemyCardEffect
+  | DiscardIntentEffect;
 
 // --- Move Types (elemental) ---
 

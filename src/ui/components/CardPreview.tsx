@@ -29,6 +29,7 @@ const EFFECT_COLORS: Record<string, string> = {
   remove_type: '#f87171',
   add_echo_to_hand: '#c084fc',
   copy_enemy_card: '#c084fc',
+  discard_intent: '#f97316',
 };
 
 const MOVE_TYPE_COLORS: Record<MoveType, string> = {
@@ -216,6 +217,13 @@ function buildDescription(card: MoveDefinition): React.ReactNode {
         parts.push(
           <span key={parts.length} style={{ color: '#c084fc' }}>
             Copy Echo of target's top card.
+          </span>
+        );
+        break;
+      case 'discard_intent':
+        parts.push(
+          <span key={parts.length} style={{ color: '#f97316' }}>
+            Discard enemy's best card.
           </span>
         );
         break;

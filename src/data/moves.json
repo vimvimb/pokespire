@@ -727,19 +727,17 @@
     "effects": [
       {
         "type": "damage",
-        "value": 16
+        "value": 12
       },
       {
-        "type": "apply_status",
-        "status": "enfeeble",
-        "stacks": 2
+        "type": "discard_intent"
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "normal"
     ],
-    "description": "Deal 16 damage. Apply Enfeeble 2. (Front row).",
+    "description": "Deal 12 damage. Discard enemy's best card. (Front row).",
     "contact": true
   },
   "razor-wind": {
@@ -989,16 +987,14 @@
     "vanish": false,
     "effects": [
       {
-        "type": "apply_status",
-        "status": "slow",
-        "stacks": 2
+        "type": "discard_intent"
       }
     ],
     "rarity": "basic",
     "pools": [
       "normal"
     ],
-    "description": "Apply Slow 2.",
+    "description": "Discard enemy's best card.",
     "contact": false
   },
   "sonic-boom": {
@@ -2416,21 +2412,14 @@
     "vanish": false,
     "effects": [
       {
-        "type": "apply_status",
-        "status": "enfeeble",
-        "stacks": 2
-      },
-      {
-        "type": "apply_status",
-        "status": "slow",
-        "stacks": 2
+        "type": "discard_intent"
       }
     ],
     "rarity": "common",
     "pools": [
       "ghost"
     ],
-    "description": "Apply Enfeeble 2. Apply Slow 2.",
+    "description": "Discard enemy's best card.",
     "contact": false
   },
   "hex": {
@@ -4137,21 +4126,24 @@
   },
   "water-pulse": {
     "name": "Water Pulse",
-    "cost": 1,
+    "cost": 2,
     "type": "water",
     "range": "any_enemy",
     "vanish": false,
     "effects": [
       {
         "type": "damage",
-        "value": 9
+        "value": 12
+      },
+      {
+        "type": "discard_intent"
       }
     ],
     "rarity": "uncommon",
     "pools": [
       "water"
     ],
-    "description": "Deal 9 damage.",
+    "description": "Deal 12 damage. Discard enemy's best card.",
     "contact": false
   },
   "scald": {
@@ -5403,7 +5395,7 @@
     "name": "Sweet Kiss",
     "cost": 2,
     "type": "fairy",
-    "range": "front_enemy",
+    "range": "any_enemy",
     "vanish": false,
     "rarity": "uncommon",
     "pools": [
@@ -5411,17 +5403,10 @@
     ],
     "effects": [
       {
-        "type": "apply_status",
-        "status": "provoke",
-        "stacks": 2
-      },
-      {
-        "type": "apply_status",
-        "status": "enfeeble",
-        "stacks": 1
+        "type": "discard_intent"
       }
     ],
-    "description": "A sweet kiss applies Provoke 2 and Enfeeble 1 to an enemy.",
+    "description": "Discard enemy's best card.",
     "contact": false
   },
   "dazzling-gleam": {
