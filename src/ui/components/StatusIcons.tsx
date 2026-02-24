@@ -172,6 +172,40 @@ function RegenIcon({ color }: { color: string }) {
   );
 }
 
+function MobileIcon({ color }: { color: string }) {
+  return (
+    <svg width={16} height={16} viewBox="0 0 12 12" fill="none">
+      {/* Arrow pointing right — movement/mobility */}
+      <path d="M2 6 L8 6 L6 3.5" stroke={color} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M8 6 L6 8.5" stroke={color} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      {/* Speed lines */}
+      <line x1="1" y1="4" x2="3.5" y2="4" stroke={color + '55'} strokeWidth="0.8" strokeLinecap="round" />
+      <line x1="1" y1="8" x2="3.5" y2="8" stroke={color + '55'} strokeWidth="0.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function EnergizeIcon({ color }: { color: string }) {
+  return (
+    <svg width={16} height={16} viewBox="0 0 12 12" fill="none">
+      {/* Battery with lightning bolt */}
+      <rect x="2" y="3" width="8" height="6" rx="1" stroke={color} strokeWidth="1" fill={color + '20'} />
+      <rect x="10" y="5" width="1" height="2" rx="0.3" fill={color} />
+      <path d="M6.5 4 L5 6.5 L7 6.5 L5.5 9" stroke={color} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </svg>
+  );
+}
+
+function LuckIcon({ color }: { color: string }) {
+  return (
+    <svg width={16} height={16} viewBox="0 0 12 12" fill="none">
+      {/* Four-pointed star */}
+      <path d="M6 1 L7 4.5 L10.5 6 L7 7.5 L6 11 L5 7.5 L1.5 6 L5 4.5 Z" stroke={color} strokeWidth="0.9" strokeLinejoin="round" fill={color + '25'} />
+      <circle cx="6" cy="6" r="1" fill={color + '55'} />
+    </svg>
+  );
+}
+
 function ProvokeIcon({ color }: { color: string }) {
   return (
     <svg width={16} height={16} viewBox="0 0 12 12" fill="none">
@@ -195,47 +229,47 @@ const STATUS_INFO: Record<string, {
 }> = {
   burn: {
     Icon: BurnIcon, color: '#ef4444', label: 'Burn',
-    describe: (s) => `Deals ${s} damage at start of turn (bypasses Block). Loses 1 stack each turn.`,
+    describe: (s) => `Deals ${s} damage at end of turn (bypasses Block). Loses 1 stack at end of turn.`,
   },
   poison: {
     Icon: PoisonIcon, color: '#a855f7', label: 'Poison',
-    describe: (s) => `Deals ${s} damage at end of turn (bypasses Block). Gains 1 stack each turn. Never expires.`,
+    describe: (s) => `Deals ${s} damage at end of turn (bypasses Block). Gains 1 stack at end of turn. Never expires.`,
   },
   paralysis: {
     Icon: ParalysisIcon, color: '#facc15', label: 'Paralysis',
-    describe: (s) => `Reduces speed by ${s}. Loses 1 stack each turn.`,
+    describe: (s) => `Reduces speed by ${s}. Loses 1 stack at start of turn.`,
   },
   slow: {
     Icon: SlowIcon, color: '#6b7280', label: 'Slow',
-    describe: (s, d) => `Reduces speed by ${s}. ${d} round${d !== 1 ? 's' : ''} remaining.`,
+    describe: (s) => `Reduces speed by ${s}. Loses 1 stack at start of turn.`,
   },
   enfeeble: {
     Icon: EnfeebleIcon, color: '#f97316', label: 'Enfeeble',
-    describe: (s) => `This unit deals ${s} less damage (min 1). Removed at end of round.`,
+    describe: (s) => `This unit deals ${s} less damage (min 1). Loses 1 stack at start of turn.`,
   },
   sleep: {
     Icon: SleepIcon, color: '#818cf8', label: 'Sleep',
-    describe: (s) => `Drowsy: loses 1 energy per turn. ${s} turn${s !== 1 ? 's' : ''} remaining.`,
+    describe: (s) => `Drowsy: loses 1 energy per turn. Loses 1 stack at start of turn. ${s} turn${s !== 1 ? 's' : ''} remaining.`,
   },
   leech: {
     Icon: LeechIcon, color: '#22c55e', label: 'Leech',
-    describe: (s) => `Takes ${s} damage at start of source's turn (bypasses Block). Heals source. Loses 2 stacks each turn.`,
+    describe: (s) => `Takes ${s} damage at end of turn (bypasses Block). Heals source. Loses 1 stack at end of turn.`,
   },
   evasion: {
     Icon: EvasionIcon, color: '#67e8f9', label: 'Evasion',
-    describe: (s) => `Reduces incoming damage by ${s} (before Block). Permanent.`,
+    describe: (s) => `Reduces incoming damage by ${s} (before Block). Loses 1 stack at start of turn and when hit.`,
   },
   strength: {
     Icon: StrengthIcon, color: '#ef4444', label: 'Strength',
-    describe: (s) => `Increases damage dealt by ${s}. Loses 1 stack each turn.`,
+    describe: (s) => `Increases damage dealt by ${s}. Loses 1 stack at start of turn.`,
   },
   haste: {
     Icon: HasteIcon, color: '#22d3ee', label: 'Haste',
-    describe: (s) => `Increases speed by ${s}. Loses 1 stack each turn.`,
+    describe: (s) => `Increases speed by ${s}. Loses 1 stack at start of turn.`,
   },
   taunt: {
     Icon: TauntIcon, color: '#dc2626', label: 'Taunt',
-    describe: (s) => `Forces enemies to target this unit when possible. ${s} round${s !== 1 ? 's' : ''} remaining.`,
+    describe: (s) => `Forces enemies to target this unit when possible. Loses 1 stack at start of turn. ${s} turn${s !== 1 ? 's' : ''} remaining.`,
   },
   fatigue: {
     Icon: FatigueIcon, color: '#94a3b8', label: 'Fatigue',
@@ -243,11 +277,23 @@ const STATUS_INFO: Record<string, {
   },
   thorns: {
     Icon: ThornsIcon, color: '#94a3b8', label: 'Thorns',
-    describe: (s) => `When hit by an attack, deals ${s} bypass damage back to the attacker. Permanent.`,
+    describe: (s) => `When hit by an attack, deals ${s} bypass damage back to the attacker. Loses 1 stack at start of turn.`,
   },
   regen: {
     Icon: RegenIcon, color: '#4ade80', label: 'Regen',
-    describe: (s) => `Heals ${s} HP at end of round. Decays by 1 each round.`,
+    describe: (s) => `Heals ${s} HP at end of turn. Loses 1 stack at end of turn.`,
+  },
+  mobile: {
+    Icon: MobileIcon, color: '#38bdf8', label: 'Mobile',
+    describe: () => `Switching costs 0 energy. Consumed when you switch positions.`,
+  },
+  energize: {
+    Icon: EnergizeIcon, color: '#fbbf24', label: 'Energize',
+    describe: (s) => `Gain ${s} extra energy at start of next turn. All stacks consumed at once.`,
+  },
+  luck: {
+    Icon: LuckIcon, color: '#a78bfa', label: 'Luck',
+    describe: (s) => `Draw ${s} extra card${s !== 1 ? 's' : ''} at start of next turn. All stacks consumed at once.`,
   },
   provoke: {
     Icon: ProvokeIcon, color: '#e040a0', label: 'Provoke',
@@ -256,7 +302,7 @@ const STATUS_INFO: Record<string, {
         ? combatants.find(c => c.id === status.sourceId)
         : undefined;
       const name = source?.name ?? 'the source';
-      return `Forced to target ${name}. ${s} round${s !== 1 ? 's' : ''} remaining.`;
+      return `Forced to target ${name}. Loses 1 stack at end of turn. ${s} turn${s !== 1 ? 's' : ''} remaining.`;
     },
   },
 };

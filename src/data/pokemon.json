@@ -2500,6 +2500,25 @@
     "description": "An ironclad Steel/Ground-type — compressed by the earth into something nearly indestructible."
   },
 
+  "scyther": {
+    "name": "Scyther",
+    "types": ["bug"],
+    "maxHp": 40,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "fury-cutter", "fury-cutter",
+      "quick-attack", "quick-attack",
+      "slash"
+    ],
+    "abilities": [],
+    "description": "A lightning-fast Bug-type — its scythe-like forearms cut through enemies before they can react."
+  },
+
   "scizor": {
     "name": "Scizor",
     "types": ["bug", "steel"],
@@ -2796,10 +2815,50 @@
     "description": "A spiky Water/Poison-type that inflates with water and fires poisoned needles — fast and venomous."
   },
 
+  "horsea": {
+    "name": "Horsea",
+    "types": ["water"],
+    "maxHp": 34,
+    "baseSpeed": 5,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "water-gun", "water-gun",
+      "bubble-beam",
+      "smokescreen",
+      "leer"
+    ],
+    "abilities": [],
+    "description": "A tiny Water-type seahorse — it spits ink to blind foes and jets away on currents."
+  },
+
+  "seadra": {
+    "name": "Seadra",
+    "types": ["water"],
+    "maxHp": 48,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle", "tackle", "tackle",
+      "defend", "defend",
+      "water-gun", "water-gun",
+      "bubble-beam",
+      "smokescreen",
+      "leer"
+    ],
+    "abilities": [],
+    "description": "A spiny Water-type — its toxic barbs and precise strikes make it a feared predator of the deep."
+  },
+
   "kingdra": {
     "name": "Kingdra",
     "types": ["water", "dragon"],
-    "maxHp": 52,
+    "maxHp": 64,
     "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,

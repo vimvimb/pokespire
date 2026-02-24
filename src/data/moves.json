@@ -1563,6 +1563,25 @@
     "description": "Deal 7 damage. Apply Enfeeble 1. (Front row).",
     "contact": true
   },
+  "bullet-punch": {
+    "name": "Bullet Punch",
+    "cost": 1,
+    "type": "steel",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 7
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "steel"
+    ],
+    "description": "Deal 7 damage. (Front row).",
+    "contact": true
+  },
   "hiss": {
     "name": "Hiss",
     "cost": 0,
@@ -5744,6 +5763,25 @@
     ],
     "description": "Deal 1 damage. Apply Slow 2.",
     "contact": true
+  },
+  "dragon-pulse": {
+    "name": "Dragon Pulse",
+    "cost": 2,
+    "type": "dragon",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 18
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "dragon"
+    ],
+    "description": "Deal 18 damage. (Any enemy).",
+    "contact": false
   },
   "dragon-claw": {
     "name": "Dragon Claw",

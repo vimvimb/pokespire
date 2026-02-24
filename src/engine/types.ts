@@ -284,7 +284,10 @@ export type StatusType =
   | 'provoke'
   | 'fatigue'
   | 'thorns'
-  | 'regen';
+  | 'regen'
+  | 'mobile'
+  | 'energize'
+  | 'luck';
 
 export interface StatusInstance {
   type: StatusType;
@@ -323,6 +326,10 @@ export interface CombatantTurnFlags {
   swarmSpeedUsedThisTurn: boolean;          // Swarm Speed: first Bug card grants Haste equal to cost
   bloodFrenzyTriggered: boolean;            // Blood Frenzy: once per battle, gain Strength from low-HP hit
   freeSwitchThisTurn: boolean;              // Volt Switch: next switch this turn costs 0 energy
+  lastAttackType?: MoveType;                // Twin Current: type of last attack played this turn
+  twinCurrentReducedIndex: number | null;   // Twin Current: index of card with cost reduced
+  playedWaterAttack: boolean;               // Perfect Cycle: played a Water attack this turn
+  playedDragonAttack: boolean;              // Perfect Cycle: played a Dragon attack this turn
 }
 
 export interface Combatant {

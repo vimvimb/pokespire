@@ -22,7 +22,7 @@ export interface StatusAppliedEvent {
   timestamp: number;
 }
 
-const BUFF_STATUSES = new Set(['strength', 'haste', 'evasion']);
+const BUFF_STATUSES = new Set(['strength', 'haste', 'evasion', 'mobile', 'energize', 'luck']);
 
 const STATUS_DISPLAY: Record<string, { icon: string; color: string }> = {
   burn: { icon: '🔥', color: '#ef4444' },
@@ -37,6 +37,9 @@ const STATUS_DISPLAY: Record<string, { icon: string; color: string }> = {
   haste: { icon: '💨', color: '#22d3ee' },
   taunt: { icon: '☝️', color: '#dc2626' },
   fatigue: { icon: '😵', color: '#94a3b8' },
+  mobile: { icon: '🏃', color: '#38bdf8' },
+  energize: { icon: '🔋', color: '#fbbf24' },
+  luck: { icon: '⭐', color: '#a78bfa' },
 };
 
 // Card fly animation event

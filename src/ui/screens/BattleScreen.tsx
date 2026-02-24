@@ -1138,7 +1138,7 @@ export function BattleScreen({
     const prev = prevStatusRef.current;
     // Only diff if we have a previous snapshot (skip initial render)
     if (prev.size > 0) {
-      const BUFF_STATUSES = new Set(["strength", "haste", "evasion"]);
+      const BUFF_STATUSES = new Set(["strength", "haste", "evasion", "mobile", "energize", "luck"]);
       const STATUS_CONDITION_TYPES = new Set(["burn", "poison", "paralysis", "sleep", "leech"]);
       const STAT_LOWER_TYPES = new Set(["enfeeble", "slow", "taunt", "provoke"]);
       let statusSoundPlayed = false;

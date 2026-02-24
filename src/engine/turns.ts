@@ -94,6 +94,23 @@ export function startTurn(state: CombatState): { logs: LogEntry[]; skipped: bool
         combatantId: combatant.id,
         message: `${combatant.name} is drowsy! Gains ${energyGain} energy (${combatant.energyPerTurn} - 1 Sleep). (Energy: ${combatant.energy})`,
       });
+
+      // Sleep: decay by 1 after reducing energy
+      sleep!.stacks -= 1;
+      if (sleep!.stacks <= 0) {
+        combatant.statuses = combatant.statuses.filter(s => s.type !== 'sleep');
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Sleep on ${combatant.name} expired.`,
+        });
+      } else {
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Sleep on ${combatant.name} fades. (${sleep!.stacks + 1} → ${sleep!.stacks} stacks)`,
+        });
+      }
     } else if (fatigueStacks === 0) {
       logs.push({
         round: state.round,
@@ -104,6 +121,37 @@ export function startTurn(state: CombatState): { logs: LogEntry[]; skipped: bool
   }
 
   // Step 4: Hand is already pre-drawn from end of previous turn (or initializeBattle)
+
+  // Energize: Gain bonus energy, then clear all stacks
+  const energizeStatus = getStatus(combatant, 'energize');
+  if (energizeStatus && energizeStatus.stacks > 0) {
+    const bonus = Math.min(energizeStatus.stacks, combatant.energyCap - combatant.energy);
+    if (bonus > 0) {
+      combatant.energy += bonus;
+    }
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Energize: ${combatant.name} gains ${energizeStatus.stacks} bonus energy! (Energy: ${combatant.energy})`,
+    });
+    combatant.statuses = combatant.statuses.filter(s => s.type !== 'energize');
+  }
+
+  // Luck: Draw bonus cards, then clear all stacks
+  const luckStatus = getStatus(combatant, 'luck');
+  if (luckStatus && luckStatus.stacks > 0) {
+    const bonusDraws = luckStatus.stacks;
+    // Draw extra cards from draw pile into hand
+    for (let i = 0; i < bonusDraws && combatant.drawPile.length > 0; i++) {
+      combatant.hand.push(combatant.drawPile.pop()!);
+    }
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Luck: ${combatant.name} draws ${bonusDraws} extra card${bonusDraws !== 1 ? 's' : ''}!`,
+    });
+    combatant.statuses = combatant.statuses.filter(s => s.type !== 'luck');
+  }
 
   // Step 4.5: Trigger passive abilities (after drawing)
   const passiveLogs = onTurnStart(state, combatant, getMove);
@@ -167,6 +215,9 @@ export function getMaxSwitches(combatant: Combatant): number {
  */
 export function getSwitchCost(combatant: Combatant): number {
   if (combatant.turnFlags.freeSwitchThisTurn) return 0;
+  // Mobile status: switching costs 0 energy
+  const hasMobile = combatant.statuses.some(s => s.type === 'mobile' && s.stacks > 0);
+  if (hasMobile) return 0;
   return BASE_SWITCH_COST;
 }
 
@@ -330,6 +381,27 @@ function executeSwitchPosition(
   // --- Item effects that trigger on any switch (swap or move to empty) ---
   logs.push(...processItemOnSwitch(state, combatant, oldPos));
 
+  // Consume Mobile status after switching
+  const mobileStatus = combatant.statuses.find(s => s.type === 'mobile');
+  if (mobileStatus) {
+    combatant.statuses = combatant.statuses.filter(s => s.type !== 'mobile');
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Mobile consumed by switch!`,
+    });
+  }
+
+  // Frontline Momentum: When switching to front row, gain 4 Strength
+  if (combatant.passiveIds.includes('frontline_momentum') && combatant.position.row === 'front') {
+    applyStatus(state, combatant, 'strength', 4, combatant.id);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Frontline Momentum: ${combatant.name} gains 4 Strength!`,
+    });
+  }
+
   return logs;
 }
 
@@ -351,7 +423,7 @@ export function endTurn(state: CombatState): LogEntry[] {
   }
 
   // Step 7: End-of-turn status ticks
-  const endLogs = processEndOfTurnStatuses(combatant, state.round);
+  const endLogs = processEndOfTurnStatuses(state, combatant);
   logs.push(...endLogs);
 
   // Step 7.5: Trigger end-of-turn passive abilities

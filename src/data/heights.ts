@@ -128,7 +128,10 @@ export const POKEDEX_NUMBERS: Record<string, number> = {
   dunsparce: 206,
   steelix: 208,
   qwilfish: 211,
+  scyther: 123,
   scizor: 212,
+  horsea: 116,
+  seadra: 117,
   heracross: 214,
   sneasel: 215,
   teddiursa: 216,
@@ -272,8 +275,8 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
 
   // Machop line
   machop: 10,     // Real: 19.5kg, reduced for sprite scaling
-  machoke: 22,    // Real: 70.5kg, reduced for sprite scaling
-  machamp: 35,    // Real: 130kg, reduced for sprite scaling
+  machoke: 33.5,  // Real: 70.5kg, adjusted +15% sprite size
+  machamp: 53,    // Real: 130kg, adjusted +15% sprite size
 
   // Vulpix line
   vulpix: 10,     // Real: 9.9kg
@@ -368,6 +371,7 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   pineco:      7,     // Real 7.2kg → 81px ✓
   forretress:  42,    // Real 125.8kg → 150px (adjusted -67%; compact armored ball)
   steelix:     75,    // Real 400–740kg → 183px (adjusted; long snake, weight misleading)
+  scyther:     40,    // Real 56kg → 145px (adjusted -28%; lean mantis)
   scizor:      48,    // Real 118–125kg → 156px (adjusted -60%)
   dunsparce:   14,    // Real 14kg → 100px ✓
   girafarig:   30,    // Real 41.5kg → 132px (adjusted -28%)
@@ -388,6 +392,8 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   lanturn:     19,    // Real 22.5kg → 117px (adjusted -16%)
   politoed:    22,    // Real 33.9kg → 120px (adjusted -35%)
   qwilfish:    7,     // Real 3.9kg → 81px (increased for visibility)
+  horsea:      3.4,   // Real 8kg → 63px (adjusted -25% sprite size)
+  seadra:      10.5,  // Real 25kg → 94px (adjusted -25% sprite size)
   kingdra:     62,    // Real 152kg → 172px (adjusted -59%)
   lugia:       110,   // Real 216kg → 179px (adjusted; large legendary)
 

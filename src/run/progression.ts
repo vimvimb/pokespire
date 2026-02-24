@@ -183,7 +183,14 @@ export type PassiveId =
   | 'torrent_strike'
   // Aipom/Ambipom line
   | 'lucky'
-  | 'skill_link';
+  | 'skill_link'
+  // Scyther/Scizor line
+  | 'frontline_momentum'
+  | 'light_metal'
+  // Horsea/Seadra/Kingdra line
+  | 'poison_touch'
+  | 'twin_current'
+  | 'perfect_cycle';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -381,7 +388,7 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   },
   technician: {
     name: 'Technician',
-    description: 'Your 1-cost cards deal 30% more damage.',
+    description: 'Your 0- and 1-cost cards deal 30% more damage.',
   },
   aristocrat: {
     name: 'Aristocrat',
@@ -749,6 +756,28 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   skill_link: {
     name: 'Skill Link',
     description: 'Multi-hit moves hit 1 additional time.',
+  },
+  // Scyther/Scizor line
+  frontline_momentum: {
+    name: 'Frontline Momentum',
+    description: 'When you switch to the front row, gain 4 Strength.',
+  },
+  light_metal: {
+    name: 'Light Metal',
+    description: 'At the start of your turn, gain Mobile (switch costs 0 energy).',
+  },
+  // Horsea/Seadra/Kingdra line
+  poison_touch: {
+    name: 'Poison Touch',
+    description: 'Unblocked attacks apply Poison 1 to the target.',
+  },
+  twin_current: {
+    name: 'Twin Current',
+    description: 'When you play a Water attack, reduce the highest-cost Dragon card in hand by 1 (and vice versa).',
+  },
+  perfect_cycle: {
+    name: 'Perfect Cycle',
+    description: 'At end of turn, if you played both a Water and Dragon attack, gain Energize 1 and Luck 1.',
   },
 };
 
@@ -2736,13 +2765,13 @@ export const STEELIX_PROGRESSION: ProgressionTree = {
   ],
 };
 
-export const SCIZOR_PROGRESSION: ProgressionTree = {
-  baseFormId: 'scizor',
+export const SCYTHER_PROGRESSION: ProgressionTree = {
+  baseFormId: 'scyther',
   rungs: [
-    { level: 1, name: 'Scizor', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
-    { level: 2, name: 'Scizor', description: 'Add Slash.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slash'] },
-    { level: 3, name: 'Scizor', description: 'Add Fury Swipes.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['fury-swipes'] },
-    { level: 4, name: 'Scizor (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+    { level: 1, name: 'Scyther', description: 'Frontline Momentum: Gain 4 Strength when switching to front row.', passiveId: 'frontline_momentum', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Scyther', description: 'Technician: 0- and 1-cost cards deal 30% more damage. Add Fury Cutter.', passiveId: 'technician', hpBoost: 0, cardsToAdd: ['fury-cutter'] },
+    { level: 3, name: 'Scizor', description: 'Evolve to Scizor. Swarm Strike: First Bug attack each turn deals 1.3x damage. Add Bullet Punch.', evolvesTo: 'scizor', passiveId: 'swarm_strike', hpBoost: 0, cardsToAdd: ['bullet-punch'] },
+    { level: 4, name: 'Scizor (Mastered)', description: 'Light Metal: Gain Mobile at start of turn (switch costs 0).', passiveId: 'light_metal', hpBoost: 0, cardsToAdd: [] },
   ],
 };
 
@@ -2874,13 +2903,13 @@ export const QWILFISH_PROGRESSION: ProgressionTree = {
   ],
 };
 
-export const KINGDRA_PROGRESSION: ProgressionTree = {
-  baseFormId: 'kingdra',
+export const HORSEA_PROGRESSION: ProgressionTree = {
+  baseFormId: 'horsea',
   rungs: [
-    { level: 1, name: 'Kingdra', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
-    { level: 2, name: 'Kingdra', description: 'Add Hydro Pump.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['hydro-pump'] },
-    { level: 3, name: 'Kingdra', description: 'Add Ice Beam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['ice-beam'] },
-    { level: 4, name: 'Kingdra (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+    { level: 1, name: 'Horsea', description: 'Poison Touch: Unblocked attacks apply Poison 1.', passiveId: 'poison_touch', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Seadra', description: 'Evolve to Seadra. Sniper: First attack each turn ignores evasion and block. Add Hydro Pump.', evolvesTo: 'seadra', passiveId: 'sniper', hpBoost: 0, cardsToAdd: ['hydro-pump'] },
+    { level: 3, name: 'Kingdra', description: 'Evolve to Kingdra. Twin Current: Water attacks discount Dragon cards, and vice versa. Add Dragon Pulse.', evolvesTo: 'kingdra', passiveId: 'twin_current', hpBoost: 0, cardsToAdd: ['dragon-pulse'] },
+    { level: 4, name: 'Kingdra (Mastered)', description: 'Perfect Cycle: Playing both Water and Dragon attacks grants Energize 1 + Luck 1.', passiveId: 'perfect_cycle', hpBoost: 0, cardsToAdd: [] },
   ],
 };
 
@@ -3001,7 +3030,7 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   blissey: BLISSEY_PROGRESSION,
   pineco: PINECO_PROGRESSION,
   steelix: STEELIX_PROGRESSION,
-  scizor: SCIZOR_PROGRESSION,
+  scyther: SCYTHER_PROGRESSION,
   dunsparce: DUNSPARCE_PROGRESSION,
   girafarig: GIRAFARIG_PROGRESSION,
   // Gen 2 — Batch 3 (Tin Tower)
@@ -3016,7 +3045,7 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   chinchou: CHINCHOU_PROGRESSION,
   politoed: POLITOED_PROGRESSION,
   qwilfish: QWILFISH_PROGRESSION,
-  kingdra: KINGDRA_PROGRESSION,
+  horsea: HORSEA_PROGRESSION,
   lugia: LUGIA_PROGRESSION,
   // Gen 2 — Batch 5 (Legendary Beasts)
   raikou: RAIKOU_PROGRESSION,
@@ -3162,6 +3191,8 @@ export function getProgressionTree(pokemonId: string): ProgressionTree | null {
   if (pokemonId === 'magcargo') return SLUGMA_PROGRESSION;
   if (pokemonId === 'donphan') return PHANPY_PROGRESSION;
   if (pokemonId === 'lanturn') return CHINCHOU_PROGRESSION;
+  if (pokemonId === 'scizor') return SCYTHER_PROGRESSION;
+  if (pokemonId === 'seadra' || pokemonId === 'kingdra') return HORSEA_PROGRESSION;
   return null;
 }
 
@@ -3297,6 +3328,8 @@ export function getBaseFormId(pokemonId: string): string {
   if (pokemonId === 'magcargo') return 'slugma';
   if (pokemonId === 'donphan') return 'phanpy';
   if (pokemonId === 'lanturn') return 'chinchou';
+  if (pokemonId === 'scizor') return 'scyther';
+  if (pokemonId === 'seadra' || pokemonId === 'kingdra') return 'horsea';
   return pokemonId;
 }
 

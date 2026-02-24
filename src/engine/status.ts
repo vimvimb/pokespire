@@ -128,6 +128,9 @@ export function applyStatus(
     case 'fatigue':
     case 'thorns':
     case 'regen':
+    case 'mobile':
+    case 'energize':
+    case 'luck':
       // Additive stacking for all standard statuses
       if (existing) {
         existing.stacks += stacks;
@@ -185,191 +188,213 @@ export function getEffectiveSpeed(combatant: Combatant): number {
 }
 
 /**
- * Process start-of-turn status ticks (Step 1).
- * All status effects and decay now happen at end of round.
- * This function is kept for compatibility but does nothing.
+ * Process start-of-turn status decay (Step 1).
+ * Decays by 1: strength, evasion, haste, thorns, taunt, enfeeble, slow, paralysis.
  */
 export function processStartOfTurnStatuses(
-  _state: CombatState,
-  _combatant: Combatant,
+  state: CombatState,
+  combatant: Combatant,
 ): LogEntry[] {
-  // All status processing moved to processRoundBoundary
-  return [];
+  const logs: LogEntry[] = [];
+  const decayTypes: StatusType[] = [
+    'strength', 'evasion', 'haste', 'thorns',
+    'taunt', 'enfeeble', 'slow', 'paralysis',
+  ];
+
+  for (const type of decayTypes) {
+    const status = getStatus(combatant, type);
+    if (!status) continue;
+
+    const statusName = type.charAt(0).toUpperCase() + type.slice(1);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `${statusName} on ${combatant.name} fades. (${status.stacks} → ${status.stacks - 1} stacks)`,
+    });
+    status.stacks -= 1;
+    if (status.stacks <= 0) {
+      removeStatus(combatant, type);
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `${statusName} on ${combatant.name} expired.`,
+      });
+    }
+  }
+
+  return logs;
 }
 
 /**
  * Process end-of-turn status ticks (Step 7).
- * All status effects and decay now happen at end of round.
- * This function is kept for compatibility but does nothing.
+ * Burn: damage + decay. Poison: damage + escalate. Leech: damage + heal source + decay.
+ * Regen: heal + decay. Provoke: decay.
  */
 export function processEndOfTurnStatuses(
-  _combatant: Combatant,
-  _round: number,
+  state: CombatState,
+  combatant: Combatant,
 ): LogEntry[] {
-  // All status processing moved to processRoundBoundary
-  return [];
+  const logs: LogEntry[] = [];
+
+  // Process statuses in appliedOrder (oldest first)
+  const sorted = [...combatant.statuses].sort((a, b) => a.appliedOrder - b.appliedOrder);
+
+  for (const status of sorted) {
+    if (!combatant.alive) break;
+
+    // Burn: deal damage equal to stacks, then decay by 1
+    if (status.type === 'burn') {
+      if (combatant.passiveIds.includes('magic_guard')) {
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Magic Guard: ${combatant.name} takes no Burn damage! (${status.stacks} → ${status.stacks - 1} stacks)`,
+        });
+      } else {
+        const dmg = applyBypassDamage(combatant, status.stacks);
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Burn deals ${dmg} damage to ${combatant.name}. (${status.stacks} → ${status.stacks - 1} stacks)`,
+        });
+      }
+      status.stacks -= 1;
+      if (status.stacks <= 0) {
+        removeStatus(combatant, 'burn');
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Burn on ${combatant.name} expired.`,
+        });
+      }
+    }
+
+    // Poison: deal damage equal to stacks, then escalate by 1
+    if (status.type === 'poison') {
+      if (combatant.passiveIds.includes('magic_guard')) {
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Magic Guard: ${combatant.name} takes no Poison damage! (${status.stacks} → ${status.stacks + 1} stacks)`,
+        });
+      } else {
+        const hasPotentVenomApplied = status.sourceId
+          ? state.combatants.find(comb => comb.id === status.sourceId)?.passiveIds.includes('potent_venom')
+          : false;
+        const poisonDamage = hasPotentVenomApplied ? status.stacks * 2 : status.stacks;
+        const dmg = applyBypassDamage(combatant, poisonDamage);
+        const potentNote = hasPotentVenomApplied ? ' (Potent Venom!)' : '';
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Poison deals ${dmg} damage to ${combatant.name}${potentNote}. (${status.stacks} → ${status.stacks + 1} stacks)`,
+        });
+      }
+      status.stacks += 1; // Poison escalates!
+    }
+
+    // Leech: deal damage, heal source, decay by 1
+    if (status.type === 'leech') {
+      if (combatant.passiveIds.includes('magic_guard')) {
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Magic Guard: ${combatant.name} takes no Leech damage! (${status.stacks} → ${status.stacks - 1} stacks)`,
+        });
+      } else {
+        const dmg = applyBypassDamage(combatant, status.stacks);
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Leech deals ${dmg} damage to ${combatant.name}. (${status.stacks} → ${status.stacks - 1} stacks)`,
+        });
+
+        // Heal the source
+        if (status.sourceId) {
+          const source = getCombatant(state, status.sourceId);
+          if (source?.alive) {
+            const healed = applyHeal(source, status.stacks);
+            if (healed > 0) {
+              logs.push({
+                round: state.round,
+                combatantId: source.id,
+                message: `${source.name} heals ${healed} HP from Leech.`,
+              });
+            }
+          }
+        }
+      }
+
+      status.stacks -= 1;
+      if (status.stacks <= 0) {
+        removeStatus(combatant, 'leech');
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Leech on ${combatant.name} expired.`,
+        });
+      }
+    }
+
+    // Regen: heal equal to stacks, then decay by 1
+    if (status.type === 'regen') {
+      const healed = applyHeal(combatant, status.stacks);
+      if (healed > 0) {
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Regen heals ${combatant.name} for ${healed} HP. (${status.stacks} → ${status.stacks - 1} stacks)`,
+        });
+      }
+      status.stacks -= 1;
+      if (status.stacks <= 0) {
+        removeStatus(combatant, 'regen');
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Regen on ${combatant.name} expired.`,
+        });
+      }
+    }
+
+    // Provoke: decay by 1
+    if (status.type === 'provoke') {
+      const statusName = 'Provoke';
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `${statusName} on ${combatant.name} fades. (${status.stacks} → ${status.stacks - 1} stacks)`,
+      });
+      status.stacks -= 1;
+      if (status.stacks <= 0) {
+        removeStatus(combatant, 'provoke');
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `${statusName} on ${combatant.name} expired.`,
+        });
+      }
+    }
+  }
+
+  return logs;
 }
 
 /**
  * Round boundary cleanup — Section 7.2.
  * Called after the last combatant's turn ends.
- * ALL status effects tick and decay here.
+ * Status ticks have moved to per-turn functions. This handles only:
+ * - Fortifying Aria passive
+ * - Luna passive
+ * - Block decay (50% retention, Pressure Hull 100%)
  */
 export function processRoundBoundary(state: CombatState): LogEntry[] {
   const logs: LogEntry[] = [];
 
-  // Process all status effects for each combatant
   for (const c of state.combatants) {
     if (!c.alive) continue;
 
-    // Process statuses in appliedOrder (oldest first)
-    const sorted = [...c.statuses].sort((a, b) => a.appliedOrder - b.appliedOrder);
-
-    for (const status of sorted) {
-      if (!c.alive) break;
-
-      // Burn: deal damage equal to stacks, then decay by 1
-      if (status.type === 'burn') {
-        if (c.passiveIds.includes('magic_guard')) {
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `Magic Guard: ${c.name} takes no Burn damage! (${status.stacks} → ${status.stacks - 1} stacks)`,
-          });
-        } else {
-          const dmg = applyBypassDamage(c, status.stacks);
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `Burn deals ${dmg} damage to ${c.name}. (${status.stacks} → ${status.stacks - 1} stacks)`,
-          });
-        }
-        status.stacks -= 1;
-        if (status.stacks <= 0) {
-          removeStatus(c, 'burn');
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `Burn on ${c.name} expired.`,
-          });
-        }
-      }
-
-      // Poison: deal damage equal to stacks, then escalate by 1
-      // Potent Venom: Poison deals double damage
-      if (status.type === 'poison') {
-        if (c.passiveIds.includes('magic_guard')) {
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `Magic Guard: ${c.name} takes no Poison damage! (${status.stacks} → ${status.stacks + 1} stacks)`,
-          });
-        } else {
-          // Check if any enemy has Potent Venom (to double our poison damage)
-          const hasPotentVenomApplied = status.sourceId
-            ? state.combatants.find(comb => comb.id === status.sourceId)?.passiveIds.includes('potent_venom')
-            : false;
-          const poisonDamage = hasPotentVenomApplied ? status.stacks * 2 : status.stacks;
-          const dmg = applyBypassDamage(c, poisonDamage);
-          const potentNote = hasPotentVenomApplied ? ' (Potent Venom!)' : '';
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `Poison deals ${dmg} damage to ${c.name}${potentNote}. (${status.stacks} → ${status.stacks + 1} stacks)`,
-          });
-        }
-        status.stacks += 1; // Poison escalates!
-      }
-
-      // Leech: deal damage, heal source, decay by 1
-      if (status.type === 'leech') {
-        if (c.passiveIds.includes('magic_guard')) {
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `Magic Guard: ${c.name} takes no Leech damage! (${status.stacks} → ${status.stacks - 1} stacks)`,
-          });
-        } else {
-          const dmg = applyBypassDamage(c, status.stacks);
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `Leech deals ${dmg} damage to ${c.name}. (${status.stacks} → ${status.stacks - 1} stacks)`,
-          });
-
-          // Heal the source
-          if (status.sourceId) {
-            const source = getCombatant(state, status.sourceId);
-            if (source?.alive) {
-              const healed = applyHeal(source, status.stacks);
-              if (healed > 0) {
-                logs.push({
-                  round: state.round,
-                  combatantId: source.id,
-                  message: `${source.name} heals ${healed} HP from Leech.`,
-                });
-              }
-            }
-          }
-        }
-
-        status.stacks -= 1;
-        if (status.stacks <= 0) {
-          removeStatus(c, 'leech');
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `Leech on ${c.name} expired.`,
-          });
-        }
-      }
-
-      // Regen: heal equal to stacks, then decay by 1
-      if (status.type === 'regen') {
-        const healed = applyHeal(c, status.stacks);
-        if (healed > 0) {
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `Regen heals ${c.name} for ${healed} HP. (${status.stacks} → ${status.stacks - 1} stacks)`,
-          });
-        }
-        status.stacks -= 1;
-        if (status.stacks <= 0) {
-          removeStatus(c, 'regen');
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `Regen on ${c.name} expired.`,
-          });
-        }
-      }
-
-      // All statuses: decay by 1 per round
-      if (status.type === 'paralysis' || status.type === 'slow' ||
-          status.type === 'enfeeble' || status.type === 'strength' ||
-          status.type === 'evasion' || status.type === 'sleep' ||
-          status.type === 'haste' || status.type === 'taunt' ||
-          status.type === 'provoke') {
-        const statusName = status.type.charAt(0).toUpperCase() + status.type.slice(1);
-        logs.push({
-          round: state.round,
-          combatantId: c.id,
-          message: `${statusName} on ${c.name} fades. (${status.stacks} → ${status.stacks - 1} stacks)`,
-        });
-        status.stacks -= 1;
-        if (status.stacks <= 0) {
-          removeStatus(c, status.type);
-          logs.push({
-            round: state.round,
-            combatantId: c.id,
-            message: `${statusName} on ${c.name} expired.`,
-          });
-        }
-      }
-    }
-
-    // Fortifying Aria: Heal allies for half of current Block (before block resets)
+    // Fortifying Aria: Heal allies for half of current Block (before block decays)
     if (c.passiveIds.includes('fortifying_aria') && c.block > 0 && c.alive) {
       const healAmount = Math.floor(c.block / 2);
       if (healAmount > 0) {
@@ -402,23 +427,22 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
       }
     }
 
-    // Block reset: resets to 0 each round; Pressure Hull retains 100% of block
+    // Block decay: 50% retention (floor); Pressure Hull retains 100%
     if (c.block > 0) {
       if (c.passiveIds.includes('pressure_hull')) {
-        const retained = c.block;
         logs.push({
           round: state.round,
           combatantId: c.id,
           message: `${c.name}'s Block (${c.block}) retained (Pressure Hull).`,
         });
-        c.block = retained;
       } else {
+        const newBlock = Math.floor(c.block / 2);
         logs.push({
           round: state.round,
           combatantId: c.id,
-          message: `${c.name}'s Block (${c.block}) resets to 0.`,
+          message: `${c.name}'s Block (${c.block}) decays to ${newBlock}.`,
         });
-        c.block = 0;
+        c.block = newBlock;
       }
     }
   }

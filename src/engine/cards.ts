@@ -165,6 +165,16 @@ export function playCard(
     }
   }
 
+  // Update Twin Current tracking when a card is removed
+  const twinReducedIdx = combatant.turnFlags.twinCurrentReducedIndex;
+  if (twinReducedIdx !== null) {
+    if (handIndex === twinReducedIdx) {
+      combatant.turnFlags.twinCurrentReducedIndex = null;
+    } else if (handIndex < twinReducedIdx) {
+      combatant.turnFlags.twinCurrentReducedIndex = twinReducedIdx - 1;
+    }
+  }
+
   // Update Rapid Strike hand size tracking when a card from the original hand is removed
   const rapidStrikeHandSize = combatant.costModifiers['rapidStrikeHandSize'] ?? 0;
   if (rapidStrikeHandSize > 0 && handIndex < rapidStrikeHandSize) {
@@ -346,6 +356,39 @@ export function playCard(
       combatantId: combatant.id,
       message: `Swarm Speed: ${combatant.name} gains ${card.cost} Haste from ${card.name}!`,
     });
+  }
+
+  // Track attack type for Twin Current and Perfect Cycle
+  if (isAttackCard(card)) {
+    combatant.turnFlags.lastAttackType = card.type;
+    if (card.type === 'water') combatant.turnFlags.playedWaterAttack = true;
+    if (card.type === 'dragon') combatant.turnFlags.playedDragonAttack = true;
+
+    // Twin Current: After playing a Water/Dragon attack, reduce highest-cost opposite-type card by 1
+    if (combatant.passiveIds.includes('twin_current') && (card.type === 'water' || card.type === 'dragon')) {
+      const targetType = card.type === 'water' ? 'dragon' : 'water';
+      let highestIdx = -1;
+      let highestCost = -1;
+      for (let i = 0; i < combatant.hand.length; i++) {
+        const m = getMove(combatant.hand[i]);
+        if (m.type !== targetType) continue;
+        if (m.cost > highestCost) {
+          highestCost = m.cost;
+          highestIdx = i;
+        }
+      }
+      if (highestIdx !== -1 && highestCost > 0) {
+        combatant.turnFlags.twinCurrentReducedIndex = highestIdx;
+        const m = getMove(combatant.hand[highestIdx]);
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Twin Current: ${m.name} cost reduced by 1!`,
+        });
+      } else {
+        combatant.turnFlags.twinCurrentReducedIndex = null;
+      }
+    }
   }
 
   // Vanish or discard
@@ -1826,6 +1869,10 @@ export function getEffectiveCost(combatant: Combatant, handIndex: number): numbe
 
   // Spore Mastery: Spore costs 0
   cost -= checkSporeMastery(combatant, card);
+
+  // Twin Current: -1 cost for highest-cost opposite-type card
+  const hasTwinReduction = combatant.turnFlags.twinCurrentReducedIndex === handIndex;
+  if (hasTwinReduction) cost -= 1;
 
   // Overclock: reduce highest-cost card by accumulated swap count
   if (combatant.turnFlags.overclockReduction > 0) {

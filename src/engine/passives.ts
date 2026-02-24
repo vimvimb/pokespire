@@ -253,6 +253,10 @@ export function onTurnStart(
   combatant.turnFlags.torrentStrikeUsedThisTurn = false;
   combatant.turnFlags.swarmSpeedUsedThisTurn = false;
   combatant.turnFlags.freeSwitchThisTurn = false;
+  combatant.turnFlags.lastAttackType = undefined;
+  combatant.turnFlags.twinCurrentReducedIndex = null;
+  combatant.turnFlags.playedWaterAttack = false;
+  combatant.turnFlags.playedDragonAttack = false;
   combatant.itemState['guerillaFront'] = 0;
 
   // Inferno Momentum: Reduce highest-cost FIRE card's cost by 3
@@ -353,6 +357,19 @@ export function onTurnStart(
     }
   }
 
+  // Light Metal: Gain Mobile at start of turn (if not already present)
+  if (combatant.passiveIds.includes('light_metal')) {
+    const hasMobile = combatant.statuses.some(s => s.type === 'mobile' && s.stacks > 0);
+    if (!hasMobile) {
+      applyStatus(state, combatant, 'mobile', 1, combatant.id);
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `Light Metal: ${combatant.name} gains Mobile! (Switch costs 0)`,
+      });
+    }
+  }
+
   // Reset Finisher flag at turn start
   combatant.turnFlags.finisherUsedThisTurn = false;
 
@@ -419,6 +436,21 @@ export function onDamageDealt(
   damageDealt: number // Damage that actually got through (after block)
 ): LogEntry[] {
   const logs: LogEntry[] = [];
+
+  // Poison Touch: Unblocked attacks apply +1 Poison
+  if (attacker.passiveIds.includes('poison_touch') && damageDealt > 0 && target.alive) {
+    const poisonResult = applyStatus(state, target, 'poison', 1, attacker.id);
+    if (poisonResult.applied) {
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `Poison Touch: +1 Poison applied to ${target.name}!`,
+      });
+
+      const spreadLogs = onStatusApplied(state, attacker, target, 'poison', 1);
+      logs.push(...spreadLogs);
+    }
+  }
 
   // Kindling: Unblocked Fire attacks apply +1 Burn
   if (attacker.passiveIds.includes('kindling') && card.type === 'fire' && damageDealt > 0) {
@@ -882,6 +914,19 @@ export function onTurnEnd(
           message: `Gentle Bloom: ${ally.name} heals ${healed} HP! (HP: ${ally.hp}/${ally.maxHp})`,
         });
       }
+    }
+  }
+
+  // Perfect Cycle: If both Water and Dragon attacks were played, gain Energize 1 + Luck 1
+  if (combatant.passiveIds.includes('perfect_cycle') && combatant.alive) {
+    if (combatant.turnFlags.playedWaterAttack && combatant.turnFlags.playedDragonAttack) {
+      applyStatus(state, combatant, 'energize', 1, combatant.id);
+      applyStatus(state, combatant, 'luck', 1, combatant.id);
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `Perfect Cycle: ${combatant.name} gains Energize 1 and Luck 1!`,
+      });
     }
   }
 
@@ -1915,12 +1960,12 @@ export function checkHexMastery(
 
 /**
  * Check Technician damage multiplier.
- * Technician: Your 1-cost cards deal 30% more damage.
+ * Technician: Your 0- and 1-cost cards deal 30% more damage.
  * Uses base cost (card.cost), not effective cost.
  * Returns 1.3 if active, 1.0 otherwise.
  */
 export function checkTechnician(attacker: Combatant, card: MoveDefinition): number {
-  if (attacker.passiveIds.includes('technician') && card.cost === 1) {
+  if (attacker.passiveIds.includes('technician') && card.cost <= 1) {
     return 1.3;
   }
   return 1.0;
@@ -2054,7 +2099,7 @@ export function getTotalDebuffStacks(combatant: Combatant): number {
  * Used by Burning Jealousy for scaling damage against buffed targets.
  */
 export function getTotalBuffStacks(combatant: Combatant): number {
-  const buffTypes = ['strength', 'evasion', 'haste', 'thorns', 'regen'];
+  const buffTypes = ['strength', 'evasion', 'haste', 'thorns', 'regen', 'mobile', 'energize', 'luck'];
   return combatant.statuses
     .filter(s => buffTypes.includes(s.type))
     .reduce((total, s) => total + s.stacks, 0);
