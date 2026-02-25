@@ -4338,6 +4338,25 @@
     "description": "Deal 12 damage to entire front row.",
     "contact": false
   },
+  "stone-edge": {
+    "name": "Stone Edge",
+    "cost": 3,
+    "type": "rock",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 39
+      }
+    ],
+    "rarity": "epic",
+    "pools": [
+      "rock"
+    ],
+    "description": "Deal 39 damage.",
+    "contact": true
+  },
   "water-gun": {
     "name": "Water Gun",
     "cost": 1,
@@ -5674,7 +5693,7 @@
   },
   "dragon-dance": {
     "name": "Dragon Dance",
-    "cost": 1,
+    "cost": 0,
     "type": "dragon",
     "range": "self",
     "vanish": true,
@@ -6696,7 +6715,7 @@
   },
   "quiver-dance": {
     "name": "Quiver Dance",
-    "cost": 2,
+    "cost": 0,
     "type": "bug",
     "range": "self",
     "vanish": true,

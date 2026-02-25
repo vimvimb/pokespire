@@ -427,6 +427,22 @@ export function processRoundBoundary(state: CombatState): LogEntry[] {
       }
     }
 
+    // Sand Stream: Deal damage equal to Strength stacks to all enemies
+    if (c.passiveIds.includes('sand_stream') && c.alive) {
+      const strengthStacks = getStatusStacks(c, 'strength');
+      if (strengthStacks > 0) {
+        const enemies = state.combatants.filter(e => e.alive && e.side !== c.side);
+        for (const enemy of enemies) {
+          const dealt = applyBypassDamage(enemy, strengthStacks);
+          logs.push({
+            round: state.round,
+            combatantId: c.id,
+            message: `Sand Stream: ${c.name}'s sandstorm deals ${dealt} damage to ${enemy.name}!`,
+          });
+        }
+      }
+    }
+
     // Block decay: 50% retention (floor); Pressure Hull retains 100%
     if (c.block > 0) {
       if (c.passiveIds.includes('pressure_hull')) {

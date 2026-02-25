@@ -330,6 +330,7 @@ export interface CombatantTurnFlags {
   twinCurrentReducedIndex: number | null;   // Twin Current: index of card with cost reduced
   playedWaterAttack: boolean;               // Perfect Cycle: played a Water attack this turn
   playedDragonAttack: boolean;              // Perfect Cycle: played a Dragon attack this turn
+  tyrantsTantrumUsedThisTurn: boolean;      // Tyrant's Tantrum: first attack per turn only
 }
 
 export interface Combatant {

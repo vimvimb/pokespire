@@ -257,6 +257,7 @@ export function onTurnStart(
   combatant.turnFlags.twinCurrentReducedIndex = null;
   combatant.turnFlags.playedWaterAttack = false;
   combatant.turnFlags.playedDragonAttack = false;
+  combatant.turnFlags.tyrantsTantrumUsedThisTurn = false;
   combatant.itemState['guerillaFront'] = 0;
 
   // Inferno Momentum: Reduce highest-cost FIRE card's cost by 3

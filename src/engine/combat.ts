@@ -81,6 +81,7 @@ function createCombatant(
       twinCurrentReducedIndex: null,
       playedWaterAttack: false,
       playedDragonAttack: false,
+      tyrantsTantrumUsedThisTurn: false,
     },
     costModifiers: {},
     itemState: {},

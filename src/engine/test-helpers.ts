@@ -75,6 +75,7 @@ export function createTestCombatant(options: TestCombatantOptions = {}): Combata
       twinCurrentReducedIndex: null,
       playedWaterAttack: false,
       playedDragonAttack: false,
+      tyrantsTantrumUsedThisTurn: false,
     },
     costModifiers: {},
     itemState: {},

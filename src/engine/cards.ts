@@ -327,8 +327,9 @@ export function playCard(
     });
   }
 
-  // Tyrant's Tantrum: When you play an attack, gain Strength equal to its cost
-  if (isAttackCard(card) && combatant.passiveIds.includes('tyrants_tantrum') && effectiveCost > 0) {
+  // Tyrant's Tantrum: First attack each turn, gain Strength equal to its cost
+  if (isAttackCard(card) && combatant.passiveIds.includes('tyrants_tantrum') && effectiveCost > 0 && !combatant.turnFlags.tyrantsTantrumUsedThisTurn) {
+    combatant.turnFlags.tyrantsTantrumUsedThisTurn = true;
     applyStatus(state, combatant, 'strength', effectiveCost, combatant.id);
     logs.push({
       round: state.round,
