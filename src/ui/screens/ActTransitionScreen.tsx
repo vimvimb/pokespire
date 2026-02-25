@@ -167,6 +167,7 @@ export function ActTransitionScreen({ run, onContinue, onRestart }: Props) {
 
       {/* Continue Button */}
       <button
+        data-testid="act-transition-continue"
         onClick={onContinue}
         style={{
           padding: '16px 48px',

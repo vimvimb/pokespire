@@ -7448,5 +7448,20 @@
     "pools": ["psychic"],
     "description": "Deal 22 damage.",
     "contact": false
+  },
+  "gods-wrath": {
+    "name": "God's Wrath",
+    "cost": 0,
+    "type": "normal",
+    "range": "all_enemies",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 999 }
+    ],
+    "rarity": "basic",
+    "pools": [],
+    "description": "Deal 999 damage to all enemies.",
+    "uncollectible": true,
+    "testOnly": true
   }
 }

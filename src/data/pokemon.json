@@ -2950,5 +2950,18 @@
     ],
     "abilities": [],
     "description": "The legendary beast of the north wind — purifies any water it touches and cannot be outrun."
+  },
+  "arceus": {
+    "name": "Arceus",
+    "types": ["normal"],
+    "maxHp": 999,
+    "baseSpeed": 999,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": ["gods-wrath", "gods-wrath", "gods-wrath"],
+    "abilities": [],
+    "description": "The Alpha Pokémon.",
+    "testOnly": true
   }
 }

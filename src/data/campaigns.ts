@@ -15,7 +15,10 @@ import c2Act1CombatBg from "../../assets/backgrounds/campaign_2_act_1_combat_bac
 import c2Act2CombatBg from "../../assets/backgrounds/campaign_2_act_2_combat_background.png";
 import c2Act3ACombatBg from "../../assets/backgrounds/campaign_2_act_3a_combat_background.png";
 import c2Act3BCombatBg from "../../assets/backgrounds/campaign_2_act_3b_combat_background.png";
-import { isCampaignComplete, getCampaignCompletion } from "../run/playerProfile";
+import {
+  isCampaignComplete,
+  getCampaignCompletion,
+} from "../run/playerProfile";
 import { ACT1_NODES, ACT2_NODES, ACT3_NODES } from "../run/nodes";
 import { CAMPAIGN2_ACT1_NODES } from "../run/nodesCampaign2Act1";
 import { CAMPAIGN2_ACT2_NODES } from "../run/nodesCampaign2Act2";
@@ -320,7 +323,7 @@ export const CAMPAIGNS: CampaignDefinition[] = [
           bossNodeId: "c2-a2-boss-gold",
           bossName: "Gold",
           bossByNodeId: {
-            "c2-a2-boss-gold":   "Gold",
+            "c2-a2-boss-gold": "Gold",
             "c2-a2-boss-silver": "Silver",
           },
         },
@@ -442,39 +445,41 @@ type ActTransitionContent = {
  * without any Pokemon being knocked out.
  */
 export function getDynamicActTransitionContent(
-  run: RunState
+  run: RunState,
 ): ActTransitionContent | null {
   // Only applies during Campaign 2 Act 2
-  if (run.campaignId !== 'campaign_2' || run.currentAct !== 2) return null;
+  if (run.campaignId !== "campaign_2" || run.currentAct !== 2) return null;
 
   // moveToNode() advances currentNodeId to the act_transition node before the
   // act_transition screen renders, so currentNodeId reliably identifies the path.
-  const isGoldPath   = run.currentNodeId === 'c2-a2-transition-tin-tower';
-  const isSilverPath = run.currentNodeId === 'c2-a2-transition-brass-tower';
+  const isGoldPath = run.currentNodeId === "c2-a2-transition-tin-tower";
+  const isSilverPath = run.currentNodeId === "c2-a2-transition-brass-tower";
 
   if (isGoldPath) {
     return {
-      heading: 'Act 2 Complete!',
-      story: "Gold steadies his breathing. Despite everything, he\u2019s grinning. \u201cYou\u2019re incredible. I\u2019ve never been beaten that cleanly.\u201d He glances toward the tower rising in the distance. \u201cWhoever trained you to fight like that\u2026\u201d He trails off, already walking away. \u201cI\u2019m going to get there too.\u201d",
-      buttonLabel: 'Climb the Tin Tower',
-      accentColor: '#f97316',
+      heading: "Act 2 Complete!",
+      story:
+        "Gold steadies his breathing. Despite everything, he\u2019s grinning. \u201cYou\u2019re incredible. I\u2019ve never been beaten that cleanly.\u201d He glances toward the tower rising in the distance. \u201cWhoever trained you to fight like that\u2026\u201d He trails off, already walking away. \u201cI\u2019m going to get there too.\u201d",
+      buttonLabel: "Climb the Tin Tower",
+      accentColor: "#f97316",
     };
   }
 
   if (isSilverPath) {
     // Check if the player completed Campaign 1 without losing any Pokemon
-    const c1 = getCampaignCompletion('rocket_tower');
-    const c1Flawless = c1 !== null && (c1.metadata.graveyardCount as number) === 0;
+    const c1 = getCampaignCompletion("rocket_tower");
+    const c1Flawless =
+      c1 !== null && (c1.metadata.graveyardCount as number) === 0;
 
     const story = c1Flawless
       ? "Silver watches you leave in silence. Then, just before you\u2019re out of earshot: \u201cYou fight like someone I\u2019ve heard about. Someone who dismantled my father\u2019s organization \u2014 without a single casualty.\u201d A pause. \u201cYou\u2019re too young. It can\u2019t be you.\u201d He doesn\u2019t finish the thought."
       : "Silver doesn\u2019t speak. He watches you leave with an expression you can\u2019t read. Behind you, the smoldering silhouette of the Brass Tower darkens the sky.";
 
     return {
-      heading: 'Act 2 Complete!',
+      heading: "Act 2 Complete!",
       story,
-      buttonLabel: 'Enter the Brass Tower',
-      accentColor: '#818cf8',
+      buttonLabel: "Enter the Brass Tower",
+      accentColor: "#818cf8",
     };
   }
 

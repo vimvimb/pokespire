@@ -151,6 +151,7 @@ function FormationSlot({
     <div
       role="button"
       tabIndex={0}
+      data-testid={`formation-slot-${slotKey}`}
       draggable={!!pokemon}
       onDragStart={pokemon ? onDragStart : undefined}
       onDragEnd={onDragEnd}
@@ -662,7 +663,7 @@ export function PartySelectScreen({ onStart, onRestart, preSelected }: Props) {
                 if (!pokemon) return null;
                 const isClickSelected = selectedSource === 'unplaced' && selectedPokemonId === id;
                 return (
-                  <div key={id} onClick={(e) => { e.stopPropagation(); handleUnplacedTileClick(id); }} style={{ cursor: 'pointer' }}>
+                  <div key={id} data-testid={`unplaced-pokemon-${id}`} onClick={(e) => { e.stopPropagation(); handleUnplacedTileClick(id); }} style={{ cursor: 'pointer' }}>
                     <PokemonTile
                       name={pokemon.name}
                       spriteUrl={getSpriteUrl(pokemon.id)}

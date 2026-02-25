@@ -21,6 +21,7 @@ import { POKEDEX_NUMBERS } from '../../data/heights';
 // ── Constants ──────────────────────────────────────────────────────
 
 const AVAILABLE_POKEMON = Object.keys(PROGRESSION_TREES)
+  .filter(id => !getPokemon(id).testOnly)
   .sort((a, b) => (POKEDEX_NUMBERS[a] ?? 9999) - (POKEDEX_NUMBERS[b] ?? 9999));
 
 const ALL_TYPES: MoveType[] = [

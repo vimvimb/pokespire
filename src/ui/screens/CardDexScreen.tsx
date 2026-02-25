@@ -91,6 +91,7 @@ export function CardDexScreen({ onBack }: Props) {
     return allCardIds
       .map(id => getMove(id))
       .filter(card => {
+        if (card.testOnly) return false;
         if (!showUncollectible && card.uncollectible) return false;
         if (selectedType !== 'all' && card.type !== selectedType) return false;
         if (selectedRarity !== 'all' && card.rarity !== selectedRarity) return false;

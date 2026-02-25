@@ -5,6 +5,7 @@ import { EventIcon } from '../EventIcon';
 export type NodeState = 'current' | 'visited' | 'available' | 'locked';
 
 interface Props {
+  nodeId: string;
   nodeType: 'spawn' | 'battle' | 'rest' | 'card_removal' | 'act_transition' | 'event' | 'recruit';
   position: { x: number; y: number };
   state: NodeState;
@@ -31,6 +32,7 @@ const STATE_COLORS: Record<NodeState, string> = {
  * with an irregular hand-drawn outer ring and subtle notch marks.
  */
 function MapNodeInner({
+  nodeId,
   nodeType,
   position,
   state,
@@ -64,6 +66,7 @@ function MapNodeInner({
 
   return (
     <div
+      data-testid={`map-node-${nodeId}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={onClick}

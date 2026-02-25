@@ -2990,6 +2990,19 @@ export const SUICUNE_PROGRESSION: ProgressionTree = {
 };
 
 
+// ── Test-only ─────────────────────────────────────────────────────────────────
+// ARCEUS is a test fixture used by Playwright e2e tests. It must never appear in
+// normal gameplay (no campaigns, no draft pools, no Pokedex).
+const ARCEUS_PROGRESSION: ProgressionTree = {
+  baseFormId: 'arceus',
+  rungs: [
+    { level: 1, name: 'Arceus', description: 'The Alpha Pokémon.', hpBoost: 0, passiveId: 'none', cardsToAdd: [] },
+    { level: 2, name: 'Arceus', description: 'The Alpha Pokémon.', hpBoost: 0, passiveId: 'none', cardsToAdd: [] },
+    { level: 3, name: 'Arceus', description: 'The Alpha Pokémon.', hpBoost: 0, passiveId: 'none', cardsToAdd: [] },
+    { level: 4, name: 'Arceus', description: 'The Alpha Pokémon.', hpBoost: 0, passiveId: 'none', cardsToAdd: [] },
+  ],
+};
+
 // All progression trees indexed by base form ID
 export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   charmander: CHARMANDER_PROGRESSION,
@@ -3083,6 +3096,8 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   raikou: RAIKOU_PROGRESSION,
   entei: ENTEI_PROGRESSION,
   suicune: SUICUNE_PROGRESSION,
+  // Test-only (e2e)
+  arceus: ARCEUS_PROGRESSION,
 };
 
 /**
