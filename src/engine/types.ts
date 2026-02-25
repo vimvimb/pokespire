@@ -419,7 +419,7 @@ export interface CombatState {
     queuedRound: number;
     damage: number;
   }>;
-  roundEndSnapshots?: Record<string, CombatantSnapshot>;
+  roundStartSnapshots?: Record<string, CombatantSnapshot>;
 }
 
 export interface LogEntry {

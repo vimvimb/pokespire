@@ -76,6 +76,7 @@ export interface BattleNode extends BaseNode {
   enemyPositions: Position[];
   enemyHpMultiplier?: number; // Optional HP multiplier for boss fights
   enemyDeckTiers?: number[];  // 1-4 per enemy (indexes match enemies[]), from encounter generator
+  enemyDecks?: string[][];    // Direct deck overrides per enemy (boss-specific, bypasses tier lookup)
   enemyPassiveIds?: string[][]; // Passive IDs per enemy (indexes match enemies[]), overrides auto-assign
 }
 

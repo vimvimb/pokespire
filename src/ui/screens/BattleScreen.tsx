@@ -564,31 +564,40 @@ export function BattleScreen({
     [state.combatants],
   );
 
-  // Future Sight column markers: check both pending queue AND injected phantom turns
-  // pendingFutureSights = queued but not yet injected (same round as cast)
-  // turnOrder futureSight entries = injected but not yet resolved (next round)
-  const futureSightColumns = useMemo(() => {
-    const cols = new Set<Column>();
+  // Future Sight column markers: split by which side gets targeted.
+  // Player-sourced Future Sight hits enemies → marker on enemy grid.
+  // Enemy-sourced Future Sight hits players → marker on player grid.
+  const { playerFutureSightCols, enemyFutureSightCols } = useMemo(() => {
+    const playerCols = new Set<Column>();  // markers shown on player grid (enemy sources)
+    const enemyCols = new Set<Column>();   // markers shown on enemy grid (player sources)
+
+    const addSource = (sourceId: string) => {
+      const source = state.combatants.find(c => c.id === sourceId && c.alive);
+      if (!source) return;
+      if (source.side === 'player') {
+        enemyCols.add(source.position.column);
+      } else {
+        playerCols.add(source.position.column);
+      }
+    };
+
     // Queued entries (not yet injected into turn order)
-    const pending = state.pendingFutureSights;
-    if (pending) {
-      for (const entry of pending) {
-        const source = state.combatants.find(
-          (c) => c.id === entry.sourceId && c.alive,
-        );
-        if (source) cols.add(source.position.column);
+    if (state.pendingFutureSights) {
+      for (const entry of state.pendingFutureSights) {
+        addSource(entry.sourceId);
       }
     }
     // Injected phantom turns that haven't resolved yet
     for (const entry of state.turnOrder) {
       if (entry.futureSight && !entry.hasActed) {
-        const source = state.combatants.find(
-          (c) => c.id === entry.combatantId && c.alive,
-        );
-        if (source) cols.add(source.position.column);
+        addSource(entry.combatantId);
       }
     }
-    return cols.size > 0 ? cols : undefined;
+
+    return {
+      playerFutureSightCols: playerCols.size > 0 ? playerCols : undefined,
+      enemyFutureSightCols: enemyCols.size > 0 ? enemyCols : undefined,
+    };
   }, [state.pendingFutureSights, state.combatants, state.turnOrder]);
 
   // Simulate enemy intents during player turn for the preview display
@@ -1390,12 +1399,8 @@ export function BattleScreen({
       // Parse Rewind: "Rewind: X reverts to their previous state!"
       const rewindMatch = log.message.match(/^Rewind: (.+?) reverts/i);
       if (rewindMatch) {
-        // Find the ally who was reverted by name
-        const allyName = rewindMatch[1];
-        const ally = state.combatants.find((c) => c.name === allyName);
-        if (ally) {
-          triggerRewind(ally.id);
-        }
+        // combatantId is the rewound ally (not the switcher)
+        triggerRewind(log.combatantId);
       }
 
       // Parse Sand Stream: "Sand Stream: X's sandstorm deals N damage to Y!"
@@ -2004,6 +2009,7 @@ export function BattleScreen({
                 switchMode ? switchTargetPositions : undefined
               }
               onSwitchSelect={switchMode ? handleSwitchSelect : undefined}
+              futureSightColumns={playerFutureSightCols}
             />
           </div>
 
@@ -2027,7 +2033,7 @@ export function BattleScreen({
               damagePreviews={visibleDamagePreviews}
               onMouseEnterSprite={handleEnemySpriteEnter}
               onMouseLeaveSprite={handleEnemySpriteLeave}
-              futureSightColumns={futureSightColumns}
+              futureSightColumns={enemyFutureSightCols}
             />
           </div>
         </div>

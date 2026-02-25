@@ -336,6 +336,163 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
   );
 }
 
+function SwitchIntentChip({
+  intent,
+  combatantMap,
+}: {
+  intent: EnemyIntent;
+  combatantMap: Map<string, Combatant>;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const [popoverReady, setPopoverReady] = useState(false);
+
+  useEffect(() => {
+    if (!hovered) {
+      setPopoverReady(false);
+      return;
+    }
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setPopoverReady(true));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [hovered]);
+
+  const source = combatantMap.get(intent.sourceId);
+  const switchTarget = intent.switchTargetId
+    ? combatantMap.get(intent.switchTargetId)
+    : undefined;
+
+  return (
+    <div
+      title={!hovered ? 'Switch' : undefined}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        padding: '1px 4px',
+        borderRadius: 3,
+        background: 'rgba(168, 85, 247, 0.12)',
+        borderLeft: '2px solid #a855f7',
+        position: 'relative',
+        cursor: 'default',
+      }}
+    >
+      <span style={{
+        fontSize: 8, fontWeight: 700,
+        color: '#a855f7', lineHeight: 1,
+        minWidth: 8, textAlign: 'center',
+      }}>
+        {intent.sequenceNumber}
+      </span>
+      <span style={{ fontSize: 10, color: '#a855f7', lineHeight: 1 }}>⇄</span>
+      {switchTarget && (
+        <img
+          src={getSpriteUrl(switchTarget.pokemonId, 'front')}
+          alt={switchTarget.name}
+          style={{
+            width: 16, height: 16,
+            imageRendering: 'pixelated',
+            objectFit: 'contain',
+          }}
+        />
+      )}
+
+      {/* Hover popover — switch preview */}
+      {hovered && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: '50%',
+          transform: `translateX(-50%) scaleY(${popoverReady ? 1 : 0})`,
+          transformOrigin: 'top center',
+          transition: 'transform 150ms ease-out, opacity 150ms ease-out',
+          opacity: popoverReady ? 1 : 0,
+          zIndex: 100,
+          marginTop: 4,
+          pointerEvents: 'none',
+        }}>
+          <div style={{
+            width: 120,
+            background: `linear-gradient(to bottom, rgba(168, 85, 247, 0.08), ${THEME.bg.panel})`,
+            border: `1px solid ${THEME.border.medium}`,
+            borderRadius: 6,
+            padding: 6,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 4,
+            boxShadow: `inset 0 0 6px rgba(168, 85, 247, 0.12), 0 4px 12px rgba(0,0,0,0.6)`,
+          }}>
+            {/* Title */}
+            <div style={{
+              fontSize: 12,
+              fontWeight: 'bold',
+              color: '#a855f7',
+              textAlign: 'center',
+            }}>
+              Switch
+            </div>
+
+            {/* Separator */}
+            <div style={{
+              fontSize: 8,
+              color: THEME.text.tertiary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 3,
+              width: '100%',
+              justifyContent: 'center',
+            }}>
+              <span style={{ flex: 1, height: 1, background: THEME.border.subtle, maxWidth: 14 }} />
+              Swap
+              <span style={{ flex: 1, height: 1, background: THEME.border.subtle, maxWidth: 14 }} />
+            </div>
+
+            {/* Source ⇄ Target */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+              padding: '2px 0',
+            }}>
+              {source && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                  <img
+                    src={getSpriteUrl(source.pokemonId, 'front')}
+                    alt={source.name}
+                    style={{ width: 28, height: 28, imageRendering: 'pixelated', objectFit: 'contain' }}
+                  />
+                  <span style={{ fontSize: 9, color: THEME.text.secondary, maxWidth: 40, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                    {source.name}
+                  </span>
+                </div>
+              )}
+              <span style={{ fontSize: 14, color: '#a855f7', lineHeight: 1 }}>⇄</span>
+              {switchTarget && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                  <img
+                    src={getSpriteUrl(switchTarget.pokemonId, 'front')}
+                    alt={switchTarget.name}
+                    style={{ width: 28, height: 28, imageRendering: 'pixelated', objectFit: 'contain' }}
+                  />
+                  <span style={{ fontSize: 9, color: THEME.text.secondary, maxWidth: 40, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                    {switchTarget.name}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function IntentChip({
   intent,
   combatantMap,
@@ -343,6 +500,13 @@ function IntentChip({
   intent: EnemyIntent;
   combatantMap: Map<string, Combatant>;
 }) {
+  // Switch intent — distinct purple chip with swap arrows + hover popover
+  if (intent.isSwitchAction) {
+    return (
+      <SwitchIntentChip intent={intent} combatantMap={combatantMap} />
+    );
+  }
+
   const typeColor = MOVE_TYPE_COLORS[intent.moveType] || MOVE_TYPE_COLORS.normal;
   const [hovered, setHovered] = useState(false);
   const [popoverReady, setPopoverReady] = useState(false);

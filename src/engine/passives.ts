@@ -1070,32 +1070,38 @@ export function resolveFutureSight(
 
 /**
  * Called at the END of each round (after all combatants have acted).
- * Used for: Resetting round-based flags, capturing Rewind snapshots
+ * Used for: Resetting round-based flags.
  */
 export function onRoundEnd(state: CombatState): void {
   // Reset allies damaged this round for all combatants
   for (const c of state.combatants) {
     c.turnFlags.alliesDamagedThisRound = new Set();
   }
+}
 
-  // Rewind: If any alive combatant has 'rewind', snapshot all alive combatants
+/**
+ * Capture Rewind snapshots at the START of each round (before any turns).
+ * Rewind reverts an ally to their start-of-current-round state when swapped.
+ * Called at round start (both round 1 init and subsequent rounds).
+ */
+export function captureRoundStartSnapshots(state: CombatState): void {
   const hasRewind = state.combatants.some(c => c.alive && c.passiveIds.includes('rewind'));
-  if (hasRewind) {
-    const snapshots: Record<string, import('./types').CombatantSnapshot> = {};
-    for (const c of state.combatants) {
-      if (!c.alive) continue;
-      snapshots[c.id] = {
-        hp: c.hp,
-        block: c.block,
-        statuses: c.statuses.map(s => ({ ...s })),
-        drawPile: [...c.drawPile],
-        discardPile: [...c.discardPile],
-        hand: [...c.hand],
-        vanishedPile: [...c.vanishedPile],
-      };
-    }
-    state.roundEndSnapshots = snapshots;
+  if (!hasRewind) return;
+
+  const snapshots: Record<string, import('./types').CombatantSnapshot> = {};
+  for (const c of state.combatants) {
+    if (!c.alive) continue;
+    snapshots[c.id] = {
+      hp: c.hp,
+      block: c.block,
+      statuses: c.statuses.map(s => ({ ...s })),
+      drawPile: [...c.drawPile],
+      discardPile: [...c.discardPile],
+      hand: [...c.hand],
+      vanishedPile: [...c.vanishedPile],
+    };
   }
+  state.roundStartSnapshots = snapshots;
 }
 
 /**

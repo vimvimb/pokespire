@@ -373,9 +373,9 @@ function executeSwitchPosition(
       }
     }
 
-    // Rewind: Revert the swapped ally to its end-of-previous-round snapshot
-    if (combatant.passiveIds.includes('rewind') && state.roundEndSnapshots) {
-      const snapshot = state.roundEndSnapshots[occupant.id];
+    // Rewind: Revert the swapped ally to its start-of-round snapshot
+    if (combatant.passiveIds.includes('rewind') && state.roundStartSnapshots) {
+      const snapshot = state.roundStartSnapshots[occupant.id];
       if (snapshot) {
         occupant.hp = Math.min(snapshot.hp, occupant.maxHp);
         occupant.block = snapshot.block;
@@ -386,7 +386,7 @@ function executeSwitchPosition(
         occupant.vanishedPile = [...snapshot.vanishedPile];
         logs.push({
           round: state.round,
-          combatantId: combatant.id,
+          combatantId: occupant.id,
           message: `Rewind: ${occupant.name} reverts to their previous state!`,
         });
       }

@@ -157,16 +157,35 @@ export const CAMPAIGN2_ACT1_NODES: MapNode[] = [
     x: 0.76, y: 0.7,
   },
 
-  // Stage 6: Boss — Celebi
+  // Stage 6: Boss — Celebi + 2 Ursaring allies (Rewind synergy)
+  // Celebi is passive/supportive: block, leech, weak sustain. Switches to heal Ursarings via Rewind.
+  // Ursarings are the offensive threat with basic attacks + block to survive long enough for Rewind.
   {
     id: 'c2-a1-s6-boss-celebi',
     type: 'battle',
     stage: 6,
     connectsTo: ['c2-a1-s7-transition'],
     completed: false,
-    enemies: ['celebi'],
-    enemyPositions: [{ row: 'front', column: 1 }],
-    enemyHpMultiplier: 1.8,
+    enemies: ['celebi', 'ursaring', 'ursaring'],
+    enemyPositions: [
+      { row: 'front', column: 1 },  // Celebi: center
+      { row: 'front', column: 0 },  // Ursaring 1: left
+      { row: 'front', column: 2 },  // Ursaring 2: right
+    ],
+    enemyHpMultiplier: 1.5,
+    enemyDecks: [
+      // Celebi (C2A1 boss): passive healer — block, leech, weak sustain
+      ['defend', 'defend', 'defend', 'leech-seed', 'leech-seed', 'absorb', 'absorb', 'recover', 'vine-whip', 'magical-leaf'],
+      // Ursaring 1 (C2A1 boss): basic offense + block for survivability
+      ['scratch', 'scratch', 'scratch', 'tackle', 'tackle', 'slam', 'lick', 'defend', 'defend', 'defend'],
+      // Ursaring 2 (C2A1 boss): same deck
+      ['scratch', 'scratch', 'scratch', 'tackle', 'tackle', 'slam', 'lick', 'defend', 'defend', 'defend'],
+    ],
+    enemyPassiveIds: [
+      ['natural_cure', 'future_sight', 'rewind', 'forewarn'],
+      [],
+      [],
+    ],
     size: 'large',
     x: 0.87, y: 0.5,
   },

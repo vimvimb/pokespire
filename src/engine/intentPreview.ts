@@ -30,6 +30,9 @@ export interface EnemyIntent {
   wouldKO: Record<string, boolean>;
   damageByTarget: Record<string, IntentDamagePreview>;
   cardCost: number;
+  // Switch fields
+  isSwitchAction?: boolean;
+  switchTargetId?: string;
 }
 
 const MAX_ACTIONS_PER_ENEMY = 20;
@@ -161,6 +164,45 @@ export function simulateEnemyIntents(
       while (actionsPlayed < MAX_ACTIONS_PER_ENEMY && clone.phase === 'ongoing') {
         const action = chooseEnemyAction(clone, actionsPlayed);
         if (action.type === 'end_turn') break;
+
+        if (action.type === 'switch_position') {
+          // Find the ally at the target position
+          const switchTarget = clone.combatants.find(
+            c => c.side === combatant.side &&
+                 c.alive &&
+                 c.id !== combatant.id &&
+                 c.position.row === action.targetPosition.row &&
+                 c.position.column === action.targetPosition.column
+          );
+
+          intents.push({
+            sequenceNumber: sequenceNumber++,
+            sourceId: combatant.id,
+            cardId: '',
+            cardName: 'Switch',
+            moveType: 'normal',
+            range: 'self',
+            isSelfTarget: false,
+            isAoE: false,
+            targetIds: switchTarget ? [switchTarget.id] : [],
+            wouldKO: {},
+            damageByTarget: {},
+            cardCost: 0,
+            isSwitchAction: true,
+            switchTargetId: switchTarget?.id,
+          });
+
+          // Process the switch on the clone so subsequent actions use updated positions
+          try {
+            processAction(clone, action);
+          } catch {
+            break;
+          }
+          actionsPlayed++;
+          if (clone.phase !== 'ongoing') break;
+          continue;
+        }
+
         if (action.type !== 'play_card') break;
 
         // Look up card definition

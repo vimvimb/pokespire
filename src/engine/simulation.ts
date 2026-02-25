@@ -526,8 +526,10 @@ function simulateSingleRun(
           const pokemon = getPokemon(id);
           let enemy = { ...pokemon };
 
-          // Override deck with tiered enemy deck
-          if (battleNode.enemyDeckTiers?.[i]) {
+          // Override deck: direct boss decks first, then tiered enemy decks
+          if (battleNode.enemyDecks?.[i]) {
+            enemy = { ...enemy, deck: [...battleNode.enemyDecks[i]] };
+          } else if (battleNode.enemyDeckTiers?.[i]) {
             enemy = { ...enemy, deck: getEnemyDeck(id, battleNode.enemyDeckTiers[i]) };
           }
 

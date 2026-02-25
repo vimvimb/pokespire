@@ -17,6 +17,7 @@ import {
   getTotalBuffStacks,
 } from './passives';
 import { calculateHandPreview } from './preview';
+import { getBossAiAction } from './bossAi';
 import { getTypeEffectiveness } from './typeChart';
 import { POKEMON_WEIGHTS } from '../data/heights';
 
@@ -603,7 +604,7 @@ function scoreHandPlays(state: CombatState, combatant: Combatant, ignoreEnergy =
  */
 export function chooseEnemyAction(
   state: CombatState,
-  _cardsPlayedThisTurn: number,
+  cardsPlayedThisTurn: number,
 ): BattleAction {
   const combatant = getCurrentCombatant(state);
 
@@ -617,6 +618,10 @@ export function chooseEnemyAction(
   if (currentEntry?.futureSight) {
     return { type: 'end_turn' };
   }
+
+  // Boss AI: per-boss decision logic (switching, repositioning) before normal scoring
+  const bossAction = getBossAiAction(state, combatant, cardsPlayedThisTurn);
+  if (bossAction) return bossAction;
 
   const plays = scoreHandPlays(state, combatant);
 

@@ -5,7 +5,7 @@ import type {
 import { shuffle } from './deck';
 import { getEffectiveSpeed, processRoundBoundary } from './status';
 import { assignPartyPositions } from './position';
-import { onRoundEnd, processRoundStartPassives } from './passives';
+import { onRoundEnd, processRoundStartPassives, captureRoundStartSnapshots } from './passives';
 import { processItemBattleEnd } from './itemEffects';
 import { getProgressionTree, getRungForLevel } from '../run/progression';
 
@@ -459,6 +459,9 @@ export function advanceRound(state: CombatState): LogEntry[] {
   // Round-start passives (Vanguard block, etc.)
   const roundStartLogs = processRoundStartPassives(state);
   logs.push(...roundStartLogs);
+
+  // Rewind: capture start-of-round snapshots (before any turns)
+  captureRoundStartSnapshots(state);
 
   // Log position changes caused by speed modifiers
   const newOrder = state.turnOrder.map(e => e.combatantId);

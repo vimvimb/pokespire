@@ -478,5 +478,16 @@
     "L2": ["defend", "defend", "tackle", "wrap", "thunder-wave", "twister", "slam", "wing-attack", "swift", "agility"],
     "L3": ["defend", "defend", "twister", "thunder-wave", "fly", "ice-beam", "thunderbolt", "slam", "agility", "take-down"],
     "L4": ["defend", "substitute", "twister", "dragon-dance", "fly", "ice-beam", "thunderbolt", "fire-blast", "hyper-beam", "agility"]
+  },
+  "ursaring": {
+    "L1": ["tackle", "tackle", "tackle", "scratch", "scratch", "slam", "slam", "body-slam", "body-slam", "defend"],
+    "L2": ["tackle", "tackle", "scratch", "slam", "slam", "body-slam", "body-slam", "counter", "counter", "defend"],
+    "L3": ["tackle", "slash", "slam", "body-slam", "body-slam", "counter", "counter", "swords-dance", "defend", "defend"]
+  },
+  "celebi": {
+    "L1": ["leech-seed", "leech-seed", "ancient-power", "ancient-power", "recover", "recover", "vine-whip", "vine-whip", "magical-leaf", "magical-leaf"],
+    "L2": ["leech-seed", "leech-seed", "ancient-power", "ancient-power", "recover", "vine-whip", "vine-whip", "magical-leaf", "magical-leaf", "defend"],
+    "L3": ["leech-seed", "ancient-power", "ancient-power", "recover", "recover", "vine-whip", "magical-leaf", "magical-leaf", "giga-drain", "defend"],
+    "L4": ["leech-seed", "ancient-power", "recover", "recover", "magical-leaf", "magical-leaf", "giga-drain", "solar-beam", "sleep-powder", "defend"]
   }
 }

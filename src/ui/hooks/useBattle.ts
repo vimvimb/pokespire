@@ -13,7 +13,7 @@ import { chooseEnemyAction } from '../../engine/ai';
 import type { RunState, BattleNode as MapBattleNode } from '../../run/types';
 import { getRunPokemonData } from '../../run/state';
 import { getPokemon, getEnemyDeck } from '../../data/loaders';
-import { onBattleStart, processRoundStartPassives } from '../../engine/passives';
+import { onBattleStart, processRoundStartPassives, captureRoundStartSnapshots } from '../../engine/passives';
 
 export type BattlePhase = 'selecting' | 'player_turn' | 'enemy_turn' | 'animating' | 'victory' | 'defeat';
 
@@ -240,6 +240,9 @@ export function useBattle(): BattleHook {
       if (c.alive) drawCards(c);
     }
 
+    // Rewind: capture round 1 start-of-round snapshots (before any turns)
+    captureRoundStartSnapshots(s);
+
     setLogs(initialLogs);
     setPhase('selecting');
 
@@ -296,8 +299,10 @@ export function useBattle(): BattleHook {
       const basePokemon = getPokemon(id);
       let enemy = { ...basePokemon };
 
-      // Override deck with tiered enemy deck from enemy-decks.json
-      if (node.enemyDeckTiers?.[i]) {
+      // Override deck: direct boss decks first, then tiered enemy decks
+      if (node.enemyDecks?.[i]) {
+        enemy = { ...enemy, deck: [...node.enemyDecks[i]] };
+      } else if (node.enemyDeckTiers?.[i]) {
         enemy = { ...enemy, deck: getEnemyDeck(id, node.enemyDeckTiers[i]) };
       }
 
