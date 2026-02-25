@@ -2063,7 +2063,7 @@
     "name": "Celebi",
     "types": ["grass", "psychic"],
     "maxHp": 70,
-    "baseSpeed": 5,
+    "baseSpeed": 3,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,

@@ -7,7 +7,7 @@ import { processStartOfTurnStatuses, processEndOfTurnStatuses, applyStatus } fro
 import { drawCards, discardHand } from './deck';
 import { playCard, resolvePrimedDetonation } from './cards';
 import { getStatus } from './status';
-import { onTurnStart, onTurnEnd } from './passives';
+import { onTurnStart, onTurnEnd, resolveFutureSight } from './passives';
 import { getMove } from '../data/loaders';
 import { getValidSwitchTargets } from './position';
 import { processItemOnSwitch, getItemMaxSwitches } from './itemEffects';
@@ -35,6 +35,22 @@ export function startTurn(state: CombatState): { logs: LogEntry[]; skipped: bool
   if (combatant.primedSelfKo) {
     const detLogs = resolvePrimedDetonation(state, combatant);
     logs.push(...detLogs);
+    removeDeadFromTurnOrder(state);
+    checkBattleEnd(state);
+    return { logs, skipped: true };
+  }
+
+  // Future Sight phantom turn: resolve damage, then skip
+  if (state.turnOrder[state.currentTurnIndex]?.futureSight) {
+    // Find pending entry for this source to get damage value
+    const pending = state.pendingFutureSights?.find(p => p.sourceId === combatant.id);
+    const damage = pending?.damage ?? 15;
+    const fsLogs = resolveFutureSight(state, combatant, damage);
+    logs.push(...fsLogs);
+    // Remove the pending entry
+    if (state.pendingFutureSights) {
+      state.pendingFutureSights = state.pendingFutureSights.filter(p => p.sourceId !== combatant.id);
+    }
     removeDeadFromTurnOrder(state);
     checkBattleEnd(state);
     return { logs, skipped: true };
@@ -353,6 +369,25 @@ function executeSwitchPosition(
           round: state.round,
           combatantId: combatant.id,
           message: `Upload: ${occupant.name} gains 1 energy!`,
+        });
+      }
+    }
+
+    // Rewind: Revert the swapped ally to its end-of-previous-round snapshot
+    if (combatant.passiveIds.includes('rewind') && state.roundEndSnapshots) {
+      const snapshot = state.roundEndSnapshots[occupant.id];
+      if (snapshot) {
+        occupant.hp = Math.min(snapshot.hp, occupant.maxHp);
+        occupant.block = snapshot.block;
+        occupant.statuses = snapshot.statuses.map(s => ({ ...s }));
+        occupant.drawPile = [...snapshot.drawPile];
+        occupant.discardPile = [...snapshot.discardPile];
+        occupant.hand = [...snapshot.hand];
+        occupant.vanishedPile = [...snapshot.vanishedPile];
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Rewind: ${occupant.name} reverts to their previous state!`,
         });
       }
     }

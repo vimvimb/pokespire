@@ -425,6 +425,30 @@ export function advanceRound(state: CombatState): LogEntry[] {
   state.turnOrder = buildTurnOrder(state);
   state.currentTurnIndex = 0;
 
+  // Future Sight: inject phantom turns for entries queued last round
+  if (state.pendingFutureSights && state.pendingFutureSights.length > 0) {
+    const toInject = state.pendingFutureSights.filter(p => p.queuedRound === state.round - 1);
+    const remaining = state.pendingFutureSights.filter(p => p.queuedRound !== state.round - 1);
+
+    for (const entry of toInject) {
+      // Only inject if source is still alive
+      const source = state.combatants.find(c => c.id === entry.sourceId && c.alive);
+      if (source) {
+        state.turnOrder.push({
+          entryId: nextEntryId(),
+          combatantId: entry.sourceId,
+          hasActed: false,
+          futureSight: true,
+        });
+      }
+    }
+
+    // Clean up: remove injected entries and entries for dead sources
+    state.pendingFutureSights = remaining.filter(p =>
+      state.combatants.some(c => c.id === p.sourceId && c.alive)
+    );
+  }
+
   logs.push({
     round: state.round,
     combatantId: '',

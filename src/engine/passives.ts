@@ -933,6 +933,71 @@ export function onTurnEnd(
   // --- Item turn-end effects ---
   logs.push(...processItemTurnEnd(state, combatant));
 
+  // Natural Cure: Remove 1 stack of each debuff from self (identical pattern to Shed Skin)
+  if (combatant.passiveIds.includes('natural_cure') && combatant.alive) {
+    const debuffTypes = ['burn', 'poison', 'paralysis', 'slow', 'enfeeble', 'sleep', 'leech', 'taunt', 'provoke', 'fatigue'];
+    const debuffs = combatant.statuses.filter(s => debuffTypes.includes(s.type));
+    if (debuffs.length > 0) {
+      const expiredTypes: string[] = [];
+      for (const debuff of debuffs) {
+        debuff.stacks -= 1;
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Natural Cure: 1 ${debuff.type} stack removed!`,
+        });
+        if (debuff.stacks <= 0) {
+          expiredTypes.push(debuff.type);
+        }
+      }
+      if (expiredTypes.length > 0) {
+        combatant.statuses = combatant.statuses.filter(s => !expiredTypes.includes(s.type));
+        for (const type of expiredTypes) {
+          logs.push({
+            round: state.round,
+            combatantId: combatant.id,
+            message: `${type} on ${combatant.name} expired.`,
+          });
+        }
+      }
+    }
+  }
+
+  // Future Sight: Queue phantom turn at end of NEXT round
+  if (combatant.passiveIds.includes('future_sight') && combatant.alive) {
+    if (!state.pendingFutureSights) {
+      state.pendingFutureSights = [];
+    }
+    state.pendingFutureSights.push({
+      sourceId: combatant.id,
+      queuedRound: state.round,
+      damage: 15,
+    });
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Future Sight: ${combatant.name} foresaw an attack! It will strike next round.`,
+    });
+  }
+
+  // Forewarn: Grant 5 Evasion to all allies in same row (not self)
+  if (combatant.passiveIds.includes('forewarn') && combatant.alive) {
+    const rowAllies = state.combatants.filter(c =>
+      c.alive &&
+      c.side === combatant.side &&
+      c.id !== combatant.id &&
+      c.position.row === combatant.position.row
+    );
+    for (const ally of rowAllies) {
+      applyStatus(state, ally, 'evasion', 5, combatant.id);
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `Forewarn: ${ally.name} gains 5 Evasion!`,
+      });
+    }
+  }
+
   // Stench: Enemy directly facing this combatant gains 2 Poison
   if (combatant.passiveIds.includes('stench') && combatant.alive) {
     // Only applies if this combatant is in the effective front row
@@ -959,13 +1024,76 @@ export function onTurnEnd(
 }
 
 /**
+ * Resolve a Future Sight phantom turn.
+ * Deals bypass damage to alive enemies in the source's column (column at resolution time).
+ */
+export function resolveFutureSight(
+  state: CombatState,
+  source: Combatant,
+  damage: number
+): LogEntry[] {
+  const logs: LogEntry[] = [];
+
+  if (!source.alive) return logs;
+
+  const enemies = state.combatants.filter(c =>
+    c.alive &&
+    c.side !== source.side &&
+    c.position.column === source.position.column
+  );
+
+  logs.push({
+    round: state.round,
+    combatantId: source.id,
+    message: `Future Sight: ${source.name}'s foreseen attack strikes!`,
+  });
+
+  for (const enemy of enemies) {
+    applyBypassDamage(enemy, damage);
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Future Sight: ${enemy.name} takes ${damage} damage!`,
+    });
+    if (!enemy.alive) {
+      logs.push({
+        round: state.round,
+        combatantId: enemy.id,
+        message: `${enemy.name} was KO'd by Future Sight!`,
+      });
+    }
+  }
+
+  return logs;
+}
+
+/**
  * Called at the END of each round (after all combatants have acted).
- * Used for: Resetting round-based flags
+ * Used for: Resetting round-based flags, capturing Rewind snapshots
  */
 export function onRoundEnd(state: CombatState): void {
   // Reset allies damaged this round for all combatants
   for (const c of state.combatants) {
     c.turnFlags.alliesDamagedThisRound = new Set();
+  }
+
+  // Rewind: If any alive combatant has 'rewind', snapshot all alive combatants
+  const hasRewind = state.combatants.some(c => c.alive && c.passiveIds.includes('rewind'));
+  if (hasRewind) {
+    const snapshots: Record<string, import('./types').CombatantSnapshot> = {};
+    for (const c of state.combatants) {
+      if (!c.alive) continue;
+      snapshots[c.id] = {
+        hp: c.hp,
+        block: c.block,
+        statuses: c.statuses.map(s => ({ ...s })),
+        drawPile: [...c.drawPile],
+        discardPile: [...c.discardPile],
+        hand: [...c.hand],
+        vanishedPile: [...c.vanishedPile],
+      };
+    }
+    state.roundEndSnapshots = snapshots;
   }
 }
 

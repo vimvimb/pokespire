@@ -5,6 +5,7 @@ import type {
   Combatant,
   Column,
   MoveRange,
+  MoveType,
   Position,
   MoveDefinition,
 } from "../../engine/types";
@@ -124,6 +125,7 @@ function BattleGrid({
   onMouseLeaveSprite,
   switchTargetPositions,
   onSwitchSelect,
+  futureSightColumns,
 }: {
   combatants: Combatant[];
   allCombatants: Combatant[];
@@ -142,6 +144,7 @@ function BattleGrid({
   onMouseLeaveSprite?: () => void;
   switchTargetPositions?: Position[];
   onSwitchSelect?: (position: Position) => void;
+  futureSightColumns?: Set<Column>;
 }) {
   // Position fingerprint so useMemo recomputes after swaps (positions are mutated in place)
   const posKey = combatants.map(c => `${c.id}:${c.position.row}:${c.position.column}`).join(',');
@@ -367,6 +370,148 @@ function BattleGrid({
           ];
         })}
       </div>
+
+      {/* Future Sight column markers — pulsing psychic overlays on targeted columns */}
+      {futureSightColumns && futureSightColumns.size > 0 &&
+        ([0, 1, 2] as Column[])
+          .filter((col) => futureSightColumns.has(col))
+          .map((col) => {
+            const tiltX = col * TILT_PX;
+            // Each column spans both depth columns (front + back) across one row slot
+            const topY = col * (CELL_H + SLOT_GAP);
+            return (
+              <div
+                key={`fs-col-${col}`}
+                className="future-sight-marker"
+                style={{
+                  position: "absolute",
+                  top: topY,
+                  left: tiltX,
+                  width: 2 * CELL_W + ROW_GAP,
+                  height: CELL_H,
+                  pointerEvents: "none",
+                  zIndex: 3,
+                }}
+              >
+                {/* Psychic shimmer overlay */}
+                <svg
+                  width="100%"
+                  height="100%"
+                  viewBox={`0 0 ${2 * CELL_W + ROW_GAP} ${CELL_H}`}
+                  style={{ position: "absolute", inset: 0 }}
+                >
+                  <defs>
+                    <radialGradient id={`fs-glow-${col}`} cx="50%" cy="50%" r="60%">
+                      <stop offset="0%" stopColor="#f85888" stopOpacity="0.18">
+                        <animate
+                          attributeName="stopOpacity"
+                          values="0.18;0.28;0.18"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </stop>
+                      <stop offset="70%" stopColor="#a855f7" stopOpacity="0.08">
+                        <animate
+                          attributeName="stopOpacity"
+                          values="0.08;0.15;0.08"
+                          dur="2s"
+                          repeatCount="indefinite"
+                        />
+                      </stop>
+                      <stop offset="100%" stopColor="#7038f8" stopOpacity="0" />
+                    </radialGradient>
+                  </defs>
+
+                  {/* Background glow */}
+                  <rect
+                    width="100%"
+                    height="100%"
+                    fill={`url(#fs-glow-${col})`}
+                    rx="12"
+                  />
+
+                  {/* Concentric rings — pulsing outward */}
+                  {[0.25, 0.45, 0.65].map((r, i) => (
+                    <ellipse
+                      key={i}
+                      cx={(2 * CELL_W + ROW_GAP) / 2}
+                      cy={CELL_H / 2}
+                      rx={r * (2 * CELL_W + ROW_GAP) / 2}
+                      ry={r * CELL_H / 2}
+                      fill="none"
+                      stroke="#f85888"
+                      strokeWidth="1.2"
+                      opacity="0.3"
+                    >
+                      <animate
+                        attributeName="rx"
+                        values={`${r * (2 * CELL_W + ROW_GAP) / 2};${(r + 0.08) * (2 * CELL_W + ROW_GAP) / 2};${r * (2 * CELL_W + ROW_GAP) / 2}`}
+                        dur={`${2.2 + i * 0.4}s`}
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="ry"
+                        values={`${r * CELL_H / 2};${(r + 0.08) * CELL_H / 2};${r * CELL_H / 2}`}
+                        dur={`${2.2 + i * 0.4}s`}
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="opacity"
+                        values="0.3;0.5;0.3"
+                        dur={`${2.2 + i * 0.4}s`}
+                        repeatCount="indefinite"
+                      />
+                    </ellipse>
+                  ))}
+
+                  {/* Small floating particles */}
+                  {[0.2, 0.5, 0.8].map((frac, i) => (
+                    <circle
+                      key={`p${i}`}
+                      cx={frac * (2 * CELL_W + ROW_GAP)}
+                      cy={CELL_H / 2}
+                      r="2.5"
+                      fill="#f85888"
+                      opacity="0.4"
+                    >
+                      <animate
+                        attributeName="cy"
+                        values={`${CELL_H / 2 + 20};${CELL_H / 2 - 20};${CELL_H / 2 + 20}`}
+                        dur={`${2 + i * 0.7}s`}
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="opacity"
+                        values="0.4;0.7;0.4"
+                        dur={`${2 + i * 0.7}s`}
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                  ))}
+                </svg>
+
+                {/* Bottom label */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 8,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "#f85888",
+                    textShadow: "0 0 8px #f85888, 0 0 16px #a855f7",
+                    letterSpacing: 1.5,
+                    textTransform: "uppercase",
+                    opacity: 0.8,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Future Sight
+                </div>
+              </div>
+            );
+          })}
     </div>
   );
 }
@@ -399,6 +544,29 @@ export function BattleScreen({
     () => state.combatants.filter((c) => c.side === "enemy"),
     [state.combatants],
   );
+
+  // Future Sight column markers: check both pending queue AND injected phantom turns
+  // pendingFutureSights = queued but not yet injected (same round as cast)
+  // turnOrder futureSight entries = injected but not yet resolved (next round)
+  const futureSightColumns = useMemo(() => {
+    const cols = new Set<Column>();
+    // Queued entries (not yet injected into turn order)
+    const pending = state.pendingFutureSights;
+    if (pending) {
+      for (const entry of pending) {
+        const source = state.combatants.find(c => c.id === entry.sourceId && c.alive);
+        if (source) cols.add(source.position.column);
+      }
+    }
+    // Injected phantom turns that haven't resolved yet
+    for (const entry of state.turnOrder) {
+      if (entry.futureSight && !entry.hasActed) {
+        const source = state.combatants.find(c => c.id === entry.combatantId && c.alive);
+        if (source) cols.add(source.position.column);
+      }
+    }
+    return cols.size > 0 ? cols : undefined;
+  }, [state.pendingFutureSights, state.combatants, state.turnOrder]);
 
   // Simulate enemy intents during player turn for the preview display
   const enemyIntents = useMemo(() => {
@@ -597,7 +765,7 @@ export function BattleScreen({
   // Destructure stable callbacks for use in effect dependency arrays.
   // Using the whole `battleEffects` object as a dep causes effects to re-run every
   // render because the object contains state arrays that change on each animation event.
-  const { addEvent, showCardPlayed, triggerCardFly, triggerStatusApplied } = battleEffects;
+  const { addEvent, showCardPlayed, triggerCardFly, triggerStatusApplied, triggerRewind } = battleEffects;
   const processedLogsRef = useRef<number>(0);
 
   // Status diff tracking: detect new/increased statuses by comparing snapshots
@@ -1121,8 +1289,69 @@ export function BattleScreen({
           playSoundOnce("raise_stat");
         }
       }
+
+      // Parse Future Sight resolution: "Future Sight: X's foreseen attack strikes!"
+      const fsStrikeMatch = log.message.match(
+        /^Future Sight: (.+?)'s foreseen attack strikes!$/i,
+      );
+      if (fsStrikeMatch) {
+        const sourceName = fsStrikeMatch[1];
+        const source = state.combatants.find(
+          (c) => c.name === sourceName,
+        );
+        if (source) {
+          const sourcePos = getPositionForCombatant(source.id);
+          if (sourcePos) {
+            // Scan ahead for "Future Sight: Y takes Z damage!" to find targets
+            const targetIds = new Set<string>();
+            for (let j = i + 1; j < newLogs.length; j++) {
+              const futureLog = newLogs[j];
+              const fsDmg = futureLog.message.match(
+                /^Future Sight: (.+?) takes \d+ damage!$/i,
+              );
+              if (fsDmg) {
+                const targetName = fsDmg[1];
+                const target = state.combatants.find(
+                  (c) => c.name === targetName,
+                );
+                if (target) targetIds.add(target.id);
+              } else if (!futureLog.message.startsWith("Future Sight:") && !futureLog.message.match(/was KO'd by Future Sight/)) {
+                break; // End of Future Sight log cluster
+              }
+            }
+
+            const targetPositions = [...targetIds]
+              .map((id) => getPositionForCombatant(id))
+              .filter((p): p is { x: number; y: number } => p !== null);
+
+            if (targetPositions.length > 0) {
+              showCardPlayed(sourceName, "Future Sight", "STRIKES!");
+              triggerCardFly({
+                cardName: "Future Sight",
+                cardType: "psychic" as MoveType,
+                startPos: sourcePos,
+                targetPositions,
+                isBlockCard: false,
+              });
+            }
+          }
+        }
+      }
+
+      // Parse Rewind: "Rewind: X reverts to their previous state!"
+      const rewindMatch = log.message.match(/^Rewind: (.+?) reverts/i);
+      if (rewindMatch) {
+        // Find the ally who was reverted by name
+        const allyName = rewindMatch[1];
+        const ally = state.combatants.find(
+          (c) => c.name === allyName,
+        );
+        if (ally) {
+          triggerRewind(ally.id);
+        }
+      }
     }
-  }, [logs, state.combatants, addEvent, showCardPlayed, triggerCardFly, getPositionForCombatant]);
+  }, [logs, state.combatants, addEvent, showCardPlayed, triggerCardFly, triggerRewind, getPositionForCombatant]);
 
   // Detect status changes via state diffing (handles ALL sources: moves, passives, etc.)
   useEffect(() => {
@@ -1680,6 +1909,7 @@ export function BattleScreen({
               damagePreviews={visibleDamagePreviews}
               onMouseEnterSprite={handleEnemySpriteEnter}
               onMouseLeaveSprite={handleEnemySpriteLeave}
+              futureSightColumns={futureSightColumns}
             />
           </div>
         </div>
@@ -1707,11 +1937,13 @@ export function BattleScreen({
         cardBanner={battleEffects.cardBanner}
         cardFlyEvents={battleEffects.cardFlyEvents}
         statusAppliedEvents={battleEffects.statusAppliedEvents}
+        rewindEvents={battleEffects.rewindEvents}
         getPositionForCombatant={getPositionForCombatant}
         onEventComplete={battleEffects.removeEvent}
         onBannerComplete={battleEffects.clearCardBanner}
         onCardFlyComplete={battleEffects.removeCardFlyEvent}
         onStatusAppliedComplete={battleEffects.removeStatusAppliedEvent}
+        onRewindComplete={battleEffects.removeRewindEvent}
       />
 
       {/* Battle log - left side column */}

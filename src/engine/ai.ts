@@ -612,6 +612,12 @@ export function chooseEnemyAction(
     return { type: 'end_turn' };
   }
 
+  // Future Sight phantom turn: no actions, just resolve (handled in startTurn)
+  const currentEntry = state.turnOrder[state.currentTurnIndex];
+  if (currentEntry?.futureSight) {
+    return { type: 'end_turn' };
+  }
+
   const plays = scoreHandPlays(state, combatant);
 
   if (plays.length === 0) {

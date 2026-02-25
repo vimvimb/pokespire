@@ -190,7 +190,12 @@ export type PassiveId =
   // Horsea/Seadra/Kingdra line
   | 'poison_touch'
   | 'twin_current'
-  | 'perfect_cycle';
+  | 'perfect_cycle'
+  // Celebi (Act 1 boss, Campaign 2)
+  | 'natural_cure'
+  | 'future_sight'
+  | 'rewind'
+  | 'forewarn';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -778,6 +783,23 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   perfect_cycle: {
     name: 'Perfect Cycle',
     description: 'At end of turn, if you played both a Water and Dragon attack, gain Energize 1 and Luck 1.',
+  },
+  // Celebi (Act 1 boss, Campaign 2)
+  natural_cure: {
+    name: 'Natural Cure',
+    description: 'At end of turn, remove 1 stack of each debuff from self.',
+  },
+  future_sight: {
+    name: 'Future Sight',
+    description: 'At end of turn, queue a phantom turn for the end of the next round that deals 15 bypass damage to enemies in your column.',
+  },
+  rewind: {
+    name: 'Rewind',
+    description: 'When you swap with an ally, revert that ally to its end-of-previous-round snapshot (HP, block, statuses, deck).',
+  },
+  forewarn: {
+    name: 'Forewarn',
+    description: 'At end of turn, grant 5 Evasion to all allies in your row (not self).',
   },
 };
 
@@ -2594,10 +2616,10 @@ export const WOOPER_PROGRESSION: ProgressionTree = {
 export const CELEBI_PROGRESSION: ProgressionTree = {
   baseFormId: 'celebi',
   rungs: [
-    { level: 1, name: 'Celebi', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
-    { level: 2, name: 'Celebi', description: 'Add Magical Leaf.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['magical-leaf'] },
-    { level: 3, name: 'Celebi', description: 'Add Ancient Power.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['ancient-power'] },
-    { level: 4, name: 'Celebi (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+    { level: 1, name: 'Celebi', description: 'Natural Cure: remove 1 stack of each debuff at end of turn.', passiveId: 'natural_cure', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Celebi', description: 'Future Sight: queue phantom damage next round. Add Magical Leaf.', passiveId: 'future_sight', hpBoost: 0, cardsToAdd: ['magical-leaf'] },
+    { level: 3, name: 'Celebi', description: 'Rewind: swap ally reverts to previous-round snapshot. Add Ancient Power.', passiveId: 'rewind', hpBoost: 0, cardsToAdd: ['ancient-power'] },
+    { level: 4, name: 'Celebi (Mastered)', description: 'Forewarn: grant 5 Evasion to row allies at end of turn. +10 max HP.', passiveId: 'forewarn', hpBoost: 10, cardsToAdd: [] },
   ],
 };
 

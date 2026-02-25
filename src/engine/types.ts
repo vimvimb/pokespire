@@ -380,6 +380,18 @@ export interface Combatant {
   };
 }
 
+// --- Combatant Snapshot (for Rewind passive) ---
+
+export interface CombatantSnapshot {
+  hp: number;
+  block: number;
+  statuses: StatusInstance[];
+  drawPile: string[];
+  discardPile: string[];
+  hand: string[];
+  vanishedPile: string[];
+}
+
 // --- Combat State ---
 
 export interface TurnQueueEntry {
@@ -387,6 +399,7 @@ export interface TurnQueueEntry {
   combatantId: string;
   hasActed: boolean;
   bonusTurn?: boolean;
+  futureSight?: boolean; // Phantom turn: resolves Future Sight damage, no cards/actions
 }
 
 export interface CombatState {
@@ -399,6 +412,12 @@ export interface CombatState {
   statusApplyCounter: number;  // monotonic counter for appliedOrder
   slipstreamProtectedIds: string[];  // combatants protected from speed reordering this round
   goldEarned: number;  // gold earned during combat (from Pay Day, etc.)
+  pendingFutureSights?: Array<{
+    sourceId: string;
+    queuedRound: number;
+    damage: number;
+  }>;
+  roundEndSnapshots?: Record<string, CombatantSnapshot>;
 }
 
 export interface LogEntry {

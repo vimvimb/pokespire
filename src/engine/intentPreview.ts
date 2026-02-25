@@ -76,6 +76,9 @@ export function simulateEnemyIntents(
     if (entry.hasActed) continue;
     if (clone.phase !== 'ongoing') break;
 
+    // Future Sight phantom entries have no card intents — skip
+    if (entry.futureSight) continue;
+
     let combatant: Combatant;
     try {
       combatant = getCombatant(clone, id);

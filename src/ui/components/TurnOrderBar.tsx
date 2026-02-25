@@ -221,10 +221,11 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
         const c = getCombatant(state, entry.combatantId);
         const isCurrent = idx === state.currentTurnIndex;
         const hasActed = entry.hasActed;
+        const isPhantom = entry.futureSight === true;
         const intents = enemyIntents?.get(entry.combatantId);
         // Show intents for enemies that haven't acted yet; when hidden (enemy turn),
         // still render for layout stability since we're using cached intents
-        const hasIntents = intents && intents.length > 0 && c.side === 'enemy' &&
+        const hasIntents = !isPhantom && intents && intents.length > 0 && c.side === 'enemy' &&
           (intentsVisible ? !hasActed : true);
 
         return (
@@ -246,30 +247,44 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
                 borderRadius: 6,
                 fontSize: 14,
                 fontWeight: isCurrent ? 'bold' : 'normal',
-                background: isCurrent
-                  ? THEME.accent + '22'
-                  : hasActed
-                    ? THEME.bg.panelDark
-                    : c.side === 'player'
-                      ? THEME.side.player
-                      : THEME.side.enemy,
-                color: isCurrent ? THEME.accent : hasActed ? THEME.text.tertiary : THEME.text.primary,
+                background: isPhantom
+                  ? 'rgba(128, 0, 255, 0.15)'
+                  : isCurrent
+                    ? THEME.accent + '22'
+                    : hasActed
+                      ? THEME.bg.panelDark
+                      : c.side === 'player'
+                        ? THEME.side.player
+                        : THEME.side.enemy,
+                color: isPhantom
+                  ? '#c084fc'
+                  : isCurrent ? THEME.accent : hasActed ? THEME.text.tertiary : THEME.text.primary,
                 opacity: hasActed ? 0.5 : 1,
-                border: isCurrent
-                  ? `1px solid ${THEME.accent}`
-                  : hasActed
-                    ? '1px solid transparent'
-                    : c.side === 'player'
-                      ? '1px solid rgba(42,74,110,0.6)'
-                      : '1px solid rgba(110,42,42,0.6)',
-                boxShadow: isCurrent
-                  ? 'inset 0 0 8px rgba(250,204,21,0.15)'
-                  : 'inset 0 0 4px rgba(0,0,0,0.2)',
+                border: isPhantom
+                  ? '1px solid rgba(128, 0, 255, 0.4)'
+                  : isCurrent
+                    ? `1px solid ${THEME.accent}`
+                    : hasActed
+                      ? '1px solid transparent'
+                      : c.side === 'player'
+                        ? '1px solid rgba(42,74,110,0.6)'
+                        : '1px solid rgba(110,42,42,0.6)',
+                boxShadow: isPhantom
+                  ? 'inset 0 0 8px rgba(128, 0, 255, 0.2)'
+                  : isCurrent
+                    ? 'inset 0 0 8px rgba(250,204,21,0.15)'
+                    : 'inset 0 0 4px rgba(0,0,0,0.2)',
                 whiteSpace: 'nowrap',
               }}
             >
-              <span style={{ fontSize: 12, color: THEME.text.tertiary, opacity: 0.7 }}>{getEffectiveSpeed(c)}</span>
-              {' '}{c.name}
+              {isPhantom ? (
+                <span>Future Sight</span>
+              ) : (
+                <>
+                  <span style={{ fontSize: 12, color: THEME.text.tertiary, opacity: 0.7 }}>{getEffectiveSpeed(c)}</span>
+                  {' '}{c.name}
+                </>
+              )}
             </div>
 
             {/* Intent bracket — height:0 + overflow:visible means it reserves WIDTH

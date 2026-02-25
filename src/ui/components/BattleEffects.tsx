@@ -730,6 +730,184 @@ function StatusAppliedAnimation({ event, position, onComplete }: StatusAppliedAn
   );
 }
 
+// Rewind clock animation event (Celebi passive)
+export interface RewindEvent {
+  id: string;
+  targetId: string;
+  timestamp: number;
+}
+
+interface RewindAnimationProps {
+  event: RewindEvent;
+  position: { x: number; y: number };
+  onComplete: () => void;
+}
+
+// SVG clock face that spins counter-clockwise with a green Celebi glow
+function RewindAnimation({ event: _event, position, onComplete }: RewindAnimationProps) {
+  const [progress, setProgress] = useState(0);
+
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  useEffect(() => {
+    const startTime = Date.now();
+    const duration = 900;
+    let frameId: number;
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const p = Math.min(elapsed / duration, 1);
+      setProgress(p);
+
+      if (p < 1) {
+        frameId = requestAnimationFrame(animate);
+      } else {
+        onCompleteRef.current();
+      }
+    };
+
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Easing: fast start, smooth settle
+  const ease = 1 - Math.pow(1 - progress, 3);
+
+  // Clock hands rotate counter-clockwise (negative): minute hand 2 full turns, hour hand 1
+  const minuteAngle = -ease * 720;
+  const hourAngle = -ease * 360;
+
+  // Scale: pop in then settle
+  const scale = progress < 0.15
+    ? (progress / 0.15) * 1.2
+    : progress < 0.3
+      ? 1.2 - (progress - 0.15) / 0.15 * 0.2
+      : 1.0;
+
+  // Opacity: hold then fade
+  const opacity = progress < 0.65 ? 1 : 1 - (progress - 0.65) / 0.35;
+
+  const green = '#4ade80';
+  const greenDark = '#22c55e';
+  const size = 72;
+
+  return (
+    <>
+      {/* Green radial pulse behind */}
+      {progress < 0.5 && (
+        <div
+          style={{
+            position: 'absolute',
+            left: position.x,
+            top: position.y,
+            transform: 'translate(-50%, -50%)',
+            width: size + progress * 80,
+            height: size + progress * 80,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${green}33 0%, ${green}00 70%)`,
+            opacity: 1 - progress / 0.5,
+            pointerEvents: 'none',
+            zIndex: 155,
+          }}
+        />
+      )}
+
+      {/* SVG clock face */}
+      <div
+        style={{
+          position: 'absolute',
+          left: position.x,
+          top: position.y,
+          transform: `translate(-50%, -50%) scale(${scale})`,
+          opacity,
+          pointerEvents: 'none',
+          zIndex: 170,
+          filter: `drop-shadow(0 0 8px ${green}) drop-shadow(0 0 16px ${green}88)`,
+        }}
+      >
+        <svg width={size} height={size} viewBox="0 0 100 100" fill="none">
+          {/* Outer ring */}
+          <circle
+            cx="50" cy="50" r="46"
+            stroke={green}
+            strokeWidth="3"
+            fill="rgba(15, 15, 23, 0.85)"
+          />
+          {/* Inner glow ring */}
+          <circle
+            cx="50" cy="50" r="42"
+            stroke={green}
+            strokeWidth="1"
+            strokeOpacity="0.3"
+            fill="none"
+          />
+
+          {/* Hour tick marks */}
+          {Array.from({ length: 12 }).map((_, i) => {
+            const angle = (i * 30 - 90) * Math.PI / 180;
+            const isCardinal = i % 3 === 0;
+            const r1 = isCardinal ? 36 : 38;
+            const r2 = 42;
+            return (
+              <line
+                key={i}
+                x1={50 + r1 * Math.cos(angle)}
+                y1={50 + r1 * Math.sin(angle)}
+                x2={50 + r2 * Math.cos(angle)}
+                y2={50 + r2 * Math.sin(angle)}
+                stroke={green}
+                strokeWidth={isCardinal ? 2.5 : 1.5}
+                strokeLinecap="round"
+                strokeOpacity={isCardinal ? 1 : 0.5}
+              />
+            );
+          })}
+
+          {/* Hour hand (short, thick) */}
+          <line
+            x1="50" y1="50"
+            x2="50" y2="26"
+            stroke={green}
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            transform={`rotate(${hourAngle} 50 50)`}
+          />
+
+          {/* Minute hand (long, thinner) */}
+          <line
+            x1="50" y1="50"
+            x2="50" y2="16"
+            stroke={greenDark}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            transform={`rotate(${minuteAngle} 50 50)`}
+          />
+
+          {/* Center dot */}
+          <circle cx="50" cy="50" r="3" fill={green} />
+
+          {/* Counter-clockwise arrow arc (decorative, at bottom) */}
+          <path
+            d={`M 68 78 A 24 24 0 0 0 32 78`}
+            stroke={green}
+            strokeWidth="2"
+            fill="none"
+            strokeOpacity={0.6}
+            strokeLinecap="round"
+          />
+          {/* Arrowhead pointing counter-clockwise (left side) */}
+          <polygon
+            points="32,78 36,73 37,80"
+            fill={green}
+            fillOpacity={0.6}
+          />
+        </svg>
+      </div>
+    </>
+  );
+}
+
 // Hook to manage battle effects
 export function useBattleEffects() {
   const [events, setEvents] = useState<BattleEvent[]>([]);
@@ -786,11 +964,27 @@ export function useBattleEffects() {
     setStatusAppliedEvents(prev => prev.filter(e => e.id !== id));
   }, []);
 
+  const [rewindEvents, setRewindEvents] = useState<RewindEvent[]>([]);
+
+  const triggerRewind = useCallback((targetId: string) => {
+    const newEvent: RewindEvent = {
+      id: `rewind-${Date.now()}-${Math.random()}`,
+      targetId,
+      timestamp: Date.now(),
+    };
+    setRewindEvents(prev => [...prev, newEvent]);
+  }, []);
+
+  const removeRewindEvent = useCallback((id: string) => {
+    setRewindEvents(prev => prev.filter(e => e.id !== id));
+  }, []);
+
   return {
     events,
     cardBanner,
     cardFlyEvents,
     statusAppliedEvents,
+    rewindEvents,
     addEvent,
     showCardPlayed,
     removeEvent,
@@ -799,6 +993,8 @@ export function useBattleEffects() {
     removeCardFlyEvent,
     triggerStatusApplied,
     removeStatusAppliedEvent,
+    triggerRewind,
+    removeRewindEvent,
   };
 }
 
@@ -807,11 +1003,13 @@ interface BattleEffectsLayerProps {
   cardBanner: { sourceName: string; cardName: string; subtitle?: string; id: string } | null;
   cardFlyEvents: CardFlyEvent[];
   statusAppliedEvents: StatusAppliedEvent[];
+  rewindEvents: RewindEvent[];
   getPositionForCombatant: (combatantId: string) => { x: number; y: number } | null;
   onEventComplete: (id: string) => void;
   onBannerComplete: () => void;
   onCardFlyComplete: (id: string) => void;
   onStatusAppliedComplete: (id: string) => void;
+  onRewindComplete: (id: string) => void;
 }
 
 // The visual layer that renders all effects
@@ -820,11 +1018,13 @@ export function BattleEffectsLayer({
   cardBanner,
   cardFlyEvents,
   statusAppliedEvents,
+  rewindEvents,
   getPositionForCombatant,
   onEventComplete,
   onBannerComplete,
   onCardFlyComplete,
   onStatusAppliedComplete,
+  onRewindComplete,
 }: BattleEffectsLayerProps) {
   return (
     <>
@@ -847,6 +1047,20 @@ export function BattleEffectsLayer({
             event={event}
             position={position}
             onComplete={() => onStatusAppliedComplete(event.id)}
+          />
+        );
+      })}
+
+      {/* Rewind clock animations */}
+      {rewindEvents.map(event => {
+        const position = getPositionForCombatant(event.targetId);
+        if (!position) return null;
+        return (
+          <RewindAnimation
+            key={event.id}
+            event={event}
+            position={position}
+            onComplete={() => onRewindComplete(event.id)}
           />
         );
       })}
