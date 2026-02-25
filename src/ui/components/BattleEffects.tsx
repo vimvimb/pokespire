@@ -730,6 +730,408 @@ function StatusAppliedAnimation({ event, position, onComplete }: StatusAppliedAn
   );
 }
 
+// Sand Stream animation event (Tyranitar passive)
+export interface SandStreamEvent {
+  id: string;
+  sourceId: string;
+  targetIds: string[];
+  damage: number;
+  timestamp: number;
+}
+
+interface SandStreamAnimationProps {
+  event: SandStreamEvent;
+  sourcePosition: { x: number; y: number };
+  targetPositions: { x: number; y: number }[];
+  onComplete: () => void;
+}
+
+// Sandstorm vortex that swirls around the source, then blasts outward to all targets
+function SandStreamAnimation({ event: _event, sourcePosition, targetPositions, onComplete }: SandStreamAnimationProps) {
+  const [progress, setProgress] = useState(0);
+
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  // Stable random offsets for scatter particles (generated once)
+  const scatterRef = useRef<Array<{ angle: number; speed: number; size: number; color: number }>>([]);
+  if (scatterRef.current.length === 0) {
+    for (let i = 0; i < 40; i++) {
+      scatterRef.current.push({
+        angle: Math.random() * Math.PI * 2,
+        speed: 0.5 + Math.random() * 1.5,
+        size: 2 + Math.random() * 4,
+        color: Math.floor(Math.random() * 3),
+      });
+    }
+  }
+
+  useEffect(() => {
+    const startTime = Date.now();
+    const duration = 1500;
+    let frameId: number;
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const p = Math.min(elapsed / duration, 1);
+      setProgress(p);
+
+      if (p < 1) {
+        frameId = requestAnimationFrame(animate);
+      } else {
+        onCompleteRef.current();
+      }
+    };
+
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const ease = 1 - Math.pow(1 - progress, 3);
+
+  const sand = '#e0c068';
+  const sandLight = '#f0d888';
+  const sandBright = '#f8e8a0';
+  const sandDark = '#c8a848';
+  const sandDeep = '#a08030';
+  const sandColors = [sandBright, sandLight, sand, sandDark, sandDeep];
+
+  // Phase 1: Vortex builds (0 – 0.45)
+  // Phase 2: Sandstorm wave blasts to targets (0.35 – 0.75) — overlaps vortex for seamless transition
+  // Phase 3: Impact explosions on targets (0.7 – 1.0)
+  const vortexProgress = Math.min(progress / 0.45, 1);
+  const vortexEase = 1 - Math.pow(1 - vortexProgress, 2);
+
+  const blastStart = 0.35;
+  const blastEnd = 0.75;
+  const blastProgress = progress < blastStart ? 0 : progress > blastEnd ? 1 : (progress - blastStart) / (blastEnd - blastStart);
+  const blastEase = 1 - Math.pow(1 - blastProgress, 2);
+
+  const impactStart = 0.7;
+  const impactProgress = progress < impactStart ? 0 : (progress - impactStart) / (1 - impactStart);
+
+  // Vortex opacity: fade in fast, start fading once blast is underway
+  const vortexOpacity = progress < 0.1
+    ? progress / 0.1
+    : progress < 0.45
+      ? 1
+      : progress < 0.65
+        ? 1 - (progress - 0.45) / 0.2
+        : 0;
+
+  // Vortex scale: pop in, hold, then expand outward as it dissipates
+  const vortexScale = vortexProgress < 0.15
+    ? (vortexProgress / 0.15) * 1.2
+    : vortexProgress < 0.3
+      ? 1.2 - (vortexProgress - 0.15) / 0.15 * 0.2
+      : progress < 0.45
+        ? 1.0
+        : 1.0 + (progress - 0.45) * 1.5;
+
+  const svgSize = 180;
+
+  // Generate vortex particles — 5 concentric rings, many more particles
+  const vortexParticles: Array<{ cx: number; cy: number; r: number; opacity: number; colorIdx: number }> = [];
+  const numRings = 5;
+  const particlesPerRing = 10;
+  for (let ring = 0; ring < numRings; ring++) {
+    const baseRadius = 12 + ring * 12;
+    const radius = baseRadius * vortexEase;
+    const speed = (numRings - ring) * 1.4;
+    for (let p = 0; p < particlesPerRing; p++) {
+      const angle = (p / particlesPerRing) * Math.PI * 2 + ease * speed * Math.PI * 2 + ring * 0.5;
+      const wobble = Math.sin(ease * 10 + p * 1.3 + ring) * 4;
+      const cx = Math.cos(angle) * (radius + wobble);
+      const cy = Math.sin(angle) * (radius + wobble) * 0.55;
+      const size = 2 + ring * 0.7 + Math.sin(ease * 8 + p + ring) * 1;
+      const particleOpacity = vortexOpacity * (0.4 + ring * 0.12);
+      vortexParticles.push({ cx, cy, r: size, opacity: particleOpacity, colorIdx: (p + ring) % 5 });
+    }
+  }
+
+  return (
+    <>
+      {/* Full-screen sand haze overlay — tints the whole battlefield */}
+      {progress > 0.05 && progress < 0.85 && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: `linear-gradient(180deg, ${sand}00 0%, ${sandDark}18 40%, ${sand}22 60%, ${sand}00 100%)`,
+            opacity: progress < 0.15 ? (progress - 0.05) / 0.1 : progress > 0.7 ? (0.85 - progress) / 0.15 : 1,
+            pointerEvents: 'none',
+            zIndex: 150,
+          }}
+        />
+      )}
+
+      {/* Large sandy glow pulse behind source */}
+      {vortexOpacity > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            left: sourcePosition.x,
+            top: sourcePosition.y,
+            transform: 'translate(-50%, -50%)',
+            width: 160 + vortexEase * 80,
+            height: 160 + vortexEase * 80,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${sand}55 0%, ${sandDark}33 30%, ${sand}11 60%, transparent 80%)`,
+            opacity: vortexOpacity,
+            pointerEvents: 'none',
+            zIndex: 155,
+          }}
+        />
+      )}
+
+      {/* SVG vortex — large spinning sandstorm */}
+      {vortexOpacity > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            left: sourcePosition.x,
+            top: sourcePosition.y,
+            transform: `translate(-50%, -50%) scale(${vortexScale})`,
+            opacity: vortexOpacity,
+            pointerEvents: 'none',
+            zIndex: 170,
+            filter: `drop-shadow(0 0 10px ${sand}) drop-shadow(0 0 24px ${sand}88) drop-shadow(0 0 40px ${sandDark}44)`,
+          }}
+        >
+          <svg width={svgSize} height={svgSize} viewBox="-90 -90 180 180" fill="none">
+            {/* Thick swirl arcs — multiple per ring for a denser look */}
+            {[0, 1, 2, 3, 4].map(ring => {
+              const r = (12 + ring * 12) * vortexEase;
+              const speed = (5 - ring) * 1.4;
+              // Two arcs per ring, offset 180°
+              return [0, 180].map(offset => {
+                const startAngle = ease * speed * 360 + offset + ring * 30;
+                const sweep = 100 + ring * 15;
+                const a1 = (startAngle * Math.PI) / 180;
+                const a2 = ((startAngle + sweep) * Math.PI) / 180;
+                const ySquash = 0.55;
+                const x1 = Math.cos(a1) * r;
+                const y1 = Math.sin(a1) * r * ySquash;
+                const x2 = Math.cos(a2) * r;
+                const y2 = Math.sin(a2) * r * ySquash;
+                return (
+                  <path
+                    key={`${ring}-${offset}`}
+                    d={`M ${x1} ${y1} A ${r} ${r * ySquash} 0 0 1 ${x2} ${y2}`}
+                    stroke={sandColors[ring]}
+                    strokeWidth={3 - ring * 0.3}
+                    strokeOpacity={0.25 + (ring < 3 ? 0.15 : 0)}
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                );
+              });
+            })}
+
+            {/* Sand particles orbiting in the vortex */}
+            {vortexParticles.map((p, i) => (
+              <circle
+                key={i}
+                cx={p.cx}
+                cy={p.cy}
+                r={p.r}
+                fill={sandColors[p.colorIdx]}
+                opacity={p.opacity}
+              />
+            ))}
+          </svg>
+        </div>
+      )}
+
+      {/* Blast phase: wide sand wave from source to each target — 3 parallel streams per target */}
+      {blastProgress > 0 && blastProgress < 1 && targetPositions.map((targetPos, ti) => {
+        const dx = targetPos.x - sourcePosition.x;
+        const dy = targetPos.y - sourcePosition.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        // Perpendicular offset direction
+        const perpX = -dy / dist;
+        const perpY = dx / dist;
+
+        const stagger = ti * 0.06;
+        const thisProgress = Math.max(0, Math.min((blastEase - stagger) / (1 - stagger * targetPositions.length), 1));
+
+        // 3 parallel streams: center + two flanking
+        const streams = [0, -14, 14];
+
+        return (
+          <div key={`blast-${ti}`}>
+            {streams.map((offsetPx, si) => {
+              const ox = perpX * offsetPx;
+              const oy = perpY * offsetPx;
+              const px = sourcePosition.x + dx * thisProgress + ox;
+              const py = sourcePosition.y + dy * thisProgress + oy;
+              const isCenterStream = si === 0;
+              const streamWidth = isCenterStream ? 18 : 12;
+              const streamHeight = isCenterStream ? 10 : 7;
+
+              return (
+                <div key={si}>
+                  {/* Leading sand chunk */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: px,
+                      top: py,
+                      width: streamWidth,
+                      height: streamHeight,
+                      borderRadius: '50%',
+                      background: `radial-gradient(ellipse, ${isCenterStream ? sandBright : sandLight} 0%, ${sand} 50%, transparent 100%)`,
+                      transform: `translate(-50%, -50%) rotate(${angle}deg)`,
+                      opacity: (isCenterStream ? 0.95 : 0.7) * (1 - thisProgress * 0.2),
+                      pointerEvents: 'none',
+                      zIndex: 160,
+                      filter: isCenterStream ? `drop-shadow(0 0 6px ${sand}) drop-shadow(0 0 12px ${sandDark}88)` : `drop-shadow(0 0 4px ${sandDark})`,
+                    }}
+                  />
+                  {/* Trailing sand particles — 5 per stream */}
+                  {[0.04, 0.09, 0.15, 0.22, 0.30].map((offset, j) => {
+                    const tp = Math.max(0, thisProgress - offset);
+                    const tx = sourcePosition.x + dx * tp + ox * (1 - j * 0.15);
+                    const ty = sourcePosition.y + dy * tp + oy * (1 - j * 0.15);
+                    const jitter = Math.sin(j * 3.7 + si * 2 + ti) * 3;
+                    return (
+                      <div
+                        key={j}
+                        style={{
+                          position: 'absolute',
+                          left: tx + jitter,
+                          top: ty + jitter * 0.5,
+                          width: (isCenterStream ? 10 : 7) - j * 1.2,
+                          height: (isCenterStream ? 6 : 4) - j * 0.6,
+                          borderRadius: '50%',
+                          background: sandColors[(j + si + ti) % 5],
+                          transform: `translate(-50%, -50%) rotate(${angle + jitter * 3}deg)`,
+                          opacity: (0.6 - j * 0.1) * (1 - thisProgress * 0.4),
+                          pointerEvents: 'none',
+                          zIndex: 159,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+
+      {/* Impact explosions on targets — large burst + scatter particles + expanding rings */}
+      {impactProgress > 0 && targetPositions.map((targetPos, ti) => {
+        const impactEase = 1 - Math.pow(1 - impactProgress, 2);
+        const burstScale = 1 + impactEase * 3;
+        const burstOpacity = 1 - impactEase;
+        const scatter = scatterRef.current;
+
+        return (
+          <div key={`impact-${ti}`}>
+            {/* Bright central flash */}
+            <div
+              style={{
+                position: 'absolute',
+                left: targetPos.x,
+                top: targetPos.y,
+                width: 24,
+                height: 24,
+                borderRadius: '50%',
+                background: sandBright,
+                transform: `translate(-50%, -50%) scale(${1 + impactEase * 0.5})`,
+                opacity: impactProgress < 0.3 ? 1 : Math.max(0, 1 - (impactProgress - 0.3) / 0.3),
+                pointerEvents: 'none',
+                zIndex: 172,
+                filter: `drop-shadow(0 0 8px ${sandLight}) drop-shadow(0 0 16px ${sand})`,
+              }}
+            />
+
+            {/* Large radial burst */}
+            <div
+              style={{
+                position: 'absolute',
+                left: targetPos.x,
+                top: targetPos.y,
+                width: 70,
+                height: 70,
+                borderRadius: '50%',
+                background: `radial-gradient(circle, ${sandLight}aa 0%, ${sand}66 30%, ${sandDark}33 60%, transparent 80%)`,
+                transform: `translate(-50%, -50%) scale(${burstScale})`,
+                opacity: burstOpacity,
+                pointerEvents: 'none',
+                zIndex: 166,
+              }}
+            />
+
+            {/* Expanding ring 1 */}
+            <div
+              style={{
+                position: 'absolute',
+                left: targetPos.x,
+                top: targetPos.y,
+                width: 50,
+                height: 50,
+                borderRadius: '50%',
+                border: `3px solid ${sandLight}`,
+                transform: `translate(-50%, -50%) scale(${burstScale * 1.2})`,
+                opacity: burstOpacity * 0.7,
+                pointerEvents: 'none',
+                zIndex: 167,
+              }}
+            />
+
+            {/* Expanding ring 2 (delayed) */}
+            {impactProgress > 0.15 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: targetPos.x,
+                  top: targetPos.y,
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  border: `2px solid ${sand}`,
+                  transform: `translate(-50%, -50%) scale(${1 + (impactEase - 0.15) * 4})`,
+                  opacity: Math.max(0, burstOpacity - 0.2) * 0.5,
+                  pointerEvents: 'none',
+                  zIndex: 167,
+                }}
+              />
+            )}
+
+            {/* Scatter particles — sand debris flying outward from impact */}
+            {scatter.slice(ti * 10, ti * 10 + 10).concat(scatter.slice(0, Math.max(0, 10 - (scatter.length - ti * 10)))).map((s, j) => {
+              const scatterDist = 20 + s.speed * impactEase * 50;
+              const sx = targetPos.x + Math.cos(s.angle + ti) * scatterDist;
+              const sy = targetPos.y + Math.sin(s.angle + ti) * scatterDist;
+              return (
+                <div
+                  key={`scatter-${ti}-${j}`}
+                  style={{
+                    position: 'absolute',
+                    left: sx,
+                    top: sy,
+                    width: s.size * (1 - impactEase * 0.5),
+                    height: s.size * 0.6 * (1 - impactEase * 0.5),
+                    borderRadius: '50%',
+                    background: sandColors[s.color],
+                    transform: 'translate(-50%, -50%)',
+                    opacity: burstOpacity * 0.8,
+                    pointerEvents: 'none',
+                    zIndex: 168,
+                  }}
+                />
+              );
+            })}
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 // Rewind clock animation event (Celebi passive)
 export interface RewindEvent {
   id: string;
@@ -979,12 +1381,30 @@ export function useBattleEffects() {
     setRewindEvents(prev => prev.filter(e => e.id !== id));
   }, []);
 
+  const [sandStreamEvents, setSandStreamEvents] = useState<SandStreamEvent[]>([]);
+
+  const triggerSandStream = useCallback((sourceId: string, targetIds: string[], damage: number) => {
+    const newEvent: SandStreamEvent = {
+      id: `sandstream-${Date.now()}-${Math.random()}`,
+      sourceId,
+      targetIds,
+      damage,
+      timestamp: Date.now(),
+    };
+    setSandStreamEvents(prev => [...prev, newEvent]);
+  }, []);
+
+  const removeSandStreamEvent = useCallback((id: string) => {
+    setSandStreamEvents(prev => prev.filter(e => e.id !== id));
+  }, []);
+
   return {
     events,
     cardBanner,
     cardFlyEvents,
     statusAppliedEvents,
     rewindEvents,
+    sandStreamEvents,
     addEvent,
     showCardPlayed,
     removeEvent,
@@ -995,6 +1415,8 @@ export function useBattleEffects() {
     removeStatusAppliedEvent,
     triggerRewind,
     removeRewindEvent,
+    triggerSandStream,
+    removeSandStreamEvent,
   };
 }
 
@@ -1004,12 +1426,14 @@ interface BattleEffectsLayerProps {
   cardFlyEvents: CardFlyEvent[];
   statusAppliedEvents: StatusAppliedEvent[];
   rewindEvents: RewindEvent[];
+  sandStreamEvents: SandStreamEvent[];
   getPositionForCombatant: (combatantId: string) => { x: number; y: number } | null;
   onEventComplete: (id: string) => void;
   onBannerComplete: () => void;
   onCardFlyComplete: (id: string) => void;
   onStatusAppliedComplete: (id: string) => void;
   onRewindComplete: (id: string) => void;
+  onSandStreamComplete: (id: string) => void;
 }
 
 // The visual layer that renders all effects
@@ -1019,15 +1443,36 @@ export function BattleEffectsLayer({
   cardFlyEvents,
   statusAppliedEvents,
   rewindEvents,
+  sandStreamEvents,
   getPositionForCombatant,
   onEventComplete,
   onBannerComplete,
   onCardFlyComplete,
   onStatusAppliedComplete,
   onRewindComplete,
+  onSandStreamComplete,
 }: BattleEffectsLayerProps) {
   return (
     <>
+      {/* Sand Stream animations */}
+      {sandStreamEvents.map(event => {
+        const sourcePos = getPositionForCombatant(event.sourceId);
+        if (!sourcePos) return null;
+        const targetPositions = event.targetIds
+          .map(id => getPositionForCombatant(id))
+          .filter((p): p is { x: number; y: number } => p !== null);
+        if (targetPositions.length === 0) return null;
+        return (
+          <SandStreamAnimation
+            key={event.id}
+            event={event}
+            sourcePosition={sourcePos}
+            targetPositions={targetPositions}
+            onComplete={() => onSandStreamComplete(event.id)}
+          />
+        );
+      })}
+
       {/* Card fly animations */}
       {cardFlyEvents.map(event => (
         <CardFlyAnimation

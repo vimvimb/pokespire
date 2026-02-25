@@ -195,7 +195,9 @@ export type PassiveId =
   | 'natural_cure'
   | 'future_sight'
   | 'rewind'
-  | 'forewarn';
+  | 'forewarn'
+  // Larvitar/Pupitar/Tyranitar line
+  | 'sand_stream';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -525,7 +527,7 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   },
   tyrants_tantrum: {
     name: "Tyrant's Tantrum",
-    description: 'When you play an attack, gain Strength equal to its cost.',
+    description: 'Your first attack each turn grants Strength equal to its cost.',
   },
   // Lapras
   water_absorb: {
@@ -800,6 +802,11 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   forewarn: {
     name: 'Forewarn',
     description: 'At end of turn, grant 5 Evasion to all allies in your row (not self).',
+  },
+  // Larvitar/Pupitar/Tyranitar line
+  sand_stream: {
+    name: 'Sand Stream',
+    description: 'At round end, deal damage equal to your Strength to all enemies.',
   },
 };
 
@@ -2727,13 +2734,16 @@ export const TEDDIURSA_PROGRESSION: ProgressionTree = {
   ],
 };
 
+// Larvitar progression tree — Sandstorm Tyrant
+// L1 Guts: enemy debuffs give you Strength. L2 Shed Skin: cleanse debuffs.
+// L3 Tyrant's Tantrum: first attack each turn grants Strength = cost. L4 Sand Stream: round-end AoE = Strength.
 export const LARVITAR_PROGRESSION: ProgressionTree = {
   baseFormId: 'larvitar',
   rungs: [
-    { level: 1, name: 'Larvitar', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
-    { level: 2, name: 'Pupitar', description: 'Evolve to Pupitar. Add Bite.', evolvesTo: 'pupitar', passiveId: 'none', hpBoost: 0, cardsToAdd: ['bite'] },
-    { level: 3, name: 'Tyranitar', description: 'Evolve to Tyranitar. Add Rock Throw.', evolvesTo: 'tyranitar', passiveId: 'none', hpBoost: 0, cardsToAdd: ['rock-throw'] },
-    { level: 4, name: 'Tyranitar (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+    { level: 1, name: 'Larvitar', description: 'Starting form with Guts passive.', passiveId: 'guts', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Pupitar', description: 'Evolve to Pupitar. Gain Shed Skin.', evolvesTo: 'pupitar', passiveId: 'shed_skin', hpBoost: 0, cardsToAdd: [] },
+    { level: 3, name: 'Pupitar', description: "Gain Tyrant's Tantrum. Add Earthquake.", passiveId: 'tyrants_tantrum', hpBoost: 0, cardsToAdd: ['earthquake'] },
+    { level: 4, name: 'Tyranitar', description: 'Evolve to Tyranitar. Gain Sand Stream. Add Dragon Dance.', evolvesTo: 'tyranitar', passiveId: 'sand_stream', hpBoost: 0, cardsToAdd: ['dragon-dance'] },
   ],
 };
 

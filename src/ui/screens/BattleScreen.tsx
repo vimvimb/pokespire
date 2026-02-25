@@ -765,7 +765,7 @@ export function BattleScreen({
   // Destructure stable callbacks for use in effect dependency arrays.
   // Using the whole `battleEffects` object as a dep causes effects to re-run every
   // render because the object contains state arrays that change on each animation event.
-  const { addEvent, showCardPlayed, triggerCardFly, triggerStatusApplied, triggerRewind } = battleEffects;
+  const { addEvent, showCardPlayed, triggerCardFly, triggerStatusApplied, triggerRewind, triggerSandStream } = battleEffects;
   const processedLogsRef = useRef<number>(0);
 
   // Status diff tracking: detect new/increased statuses by comparing snapshots
@@ -1100,6 +1100,9 @@ export function BattleScreen({
       }
     };
 
+    // Deduplicate Sand Stream animations — one per source per batch
+    const sandStreamTriggered = new Set<string>();
+
     for (let i = 0; i < newLogs.length; i++) {
       const log = newLogs[i];
 
@@ -1350,8 +1353,38 @@ export function BattleScreen({
           triggerRewind(ally.id);
         }
       }
+
+      // Parse Sand Stream: "Sand Stream: X's sandstorm deals N damage to Y!"
+      // Only trigger the animation on the FIRST log for each source (scan ahead collects all targets)
+      const sandStreamMatch = log.message.match(/^Sand Stream: (.+?)'s sandstorm deals (\d+) damage to (.+?)!$/i);
+      if (sandStreamMatch && !sandStreamTriggered.has(sandStreamMatch[1])) {
+        const sourceName = sandStreamMatch[1];
+        sandStreamTriggered.add(sourceName);
+        const damage = parseInt(sandStreamMatch[2], 10);
+        const source = state.combatants.find((c) => c.name === sourceName);
+        if (source) {
+          // Collect all Sand Stream damage targets from this batch of logs
+          const targetIds = new Set<string>();
+          const targetName = sandStreamMatch[3];
+          const target = state.combatants.find((c) => c.name === targetName);
+          if (target) targetIds.add(target.id);
+
+          // Scan ahead for more Sand Stream hits from the same source
+          for (let j = i + 1; j < newLogs.length; j++) {
+            const nextSsMatch = newLogs[j].message.match(/^Sand Stream: (.+?)'s sandstorm deals \d+ damage to (.+?)!$/i);
+            if (nextSsMatch && nextSsMatch[1] === sourceName) {
+              const nextTarget = state.combatants.find((c) => c.name === nextSsMatch[2]);
+              if (nextTarget) targetIds.add(nextTarget.id);
+            } else if (!newLogs[j].message.startsWith('Sand Stream:')) {
+              break;
+            }
+          }
+
+          triggerSandStream(source.id, [...targetIds], damage);
+        }
+      }
     }
-  }, [logs, state.combatants, addEvent, showCardPlayed, triggerCardFly, triggerRewind, getPositionForCombatant]);
+  }, [logs, state.combatants, addEvent, showCardPlayed, triggerCardFly, triggerRewind, triggerSandStream, getPositionForCombatant]);
 
   // Detect status changes via state diffing (handles ALL sources: moves, passives, etc.)
   useEffect(() => {
@@ -1938,12 +1971,14 @@ export function BattleScreen({
         cardFlyEvents={battleEffects.cardFlyEvents}
         statusAppliedEvents={battleEffects.statusAppliedEvents}
         rewindEvents={battleEffects.rewindEvents}
+        sandStreamEvents={battleEffects.sandStreamEvents}
         getPositionForCombatant={getPositionForCombatant}
         onEventComplete={battleEffects.removeEvent}
         onBannerComplete={battleEffects.clearCardBanner}
         onCardFlyComplete={battleEffects.removeCardFlyEvent}
         onStatusAppliedComplete={battleEffects.removeStatusAppliedEvent}
         onRewindComplete={battleEffects.removeRewindEvent}
+        onSandStreamComplete={battleEffects.removeSandStreamEvent}
       />
 
       {/* Battle log - left side column */}
