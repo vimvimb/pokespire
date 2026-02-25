@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "paths": {}
+  },
+  "include": ["e2e/**/*.ts", "src/run/nodes.ts", "src/run/types.ts"]
+}

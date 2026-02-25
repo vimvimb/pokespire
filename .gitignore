@@ -26,3 +26,7 @@ dist-ssr
 
 # Build
 pokespire/**
+
+# Playwright
+test-results/**
+playwright-report/**

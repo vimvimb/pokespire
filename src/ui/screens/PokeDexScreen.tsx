@@ -50,8 +50,8 @@ interface Props {
   showAll?: boolean;
 }
 
-// Boss / special forms that shouldn't appear in the PokeDex
-const EXCLUDED_IDS = new Set(['mewtwo']);
+// Boss / special forms and test-only fixtures that shouldn't appear in the PokeDex
+const EXCLUDED_IDS = new Set(['mewtwo', 'arceus']);
 
 // Build ordered list: all non-excluded Pokemon sorted by National Pokedex number
 function buildOrderedPokemonList(): PokemonData[] {

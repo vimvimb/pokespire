@@ -225,6 +225,7 @@ export function MapScreen({ run, onSelectNode, onLevelUp, onSwap, onPromote, onR
             return (
               <MapNodeComponent
                 key={node.id}
+                nodeId={node.id}
                 nodeType={node.type}
                 position={pos}
                 state={nState}

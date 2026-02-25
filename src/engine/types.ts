@@ -265,6 +265,7 @@ export interface MoveDefinition {
   uncollectible?: boolean; // true = cannot appear in drafts, hidden in Card Dex by default
   goldOnHit?: boolean; // true = gain gold equal to damage dealt (Pay Day)
   contact?: boolean;   // true = physical contact move, false/undefined = special/ranged
+  testOnly?: boolean;  // true = excluded from all normal gameplay (test fixture only)
 }
 
 // --- Status Effects ---
@@ -463,4 +464,5 @@ export interface PokemonData {
   energyModifier?: number;  // Permanent energy per turn modifier from events
   drawModifier?: number;    // Permanent hand size modifier from events
   pokedexNumber?: number;   // National Pokedex number for sorting
+  testOnly?: boolean;       // true = excluded from all normal gameplay (test fixture only)
 }
