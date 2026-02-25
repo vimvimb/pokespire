@@ -82,7 +82,7 @@ interface Props {
     playerPassives: Map<number, string[]>,
     enemyPassives: Map<number, string[]>,
     hpOverrides: Map<string, { maxHp?: number; startPercent?: number }>,
-    playerItems?: Map<number, string>
+    playerItems?: Map<number, string[]>
   ) => void;
   onBack: () => void;
   initialPlayerTeam?: SandboxPokemon[];
@@ -1071,9 +1071,9 @@ export function SandboxConfigScreen({
       }
     });
 
-    const playerItems = new Map<number, string>();
+    const playerItems = new Map<number, string[]>();
     playerTeam.forEach((p, i) => {
-      if (p.heldItemIds[0]) playerItems.set(i, p.heldItemIds[0]);
+      if (p.heldItemIds.length > 0) playerItems.set(i, [...p.heldItemIds]);
     });
 
     onStartBattle(players, enemies, playerPositions, enemyPositions, playerPassives, enemyPassives, hpOverrides,

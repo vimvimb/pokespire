@@ -849,6 +849,12 @@ export default function App() {
             { maxHp: p.maxHp, startPercent: p.currentHp / p.maxHp },
           ]),
         );
+        // Build item assignments from run state
+        const partyItems = new Map<number, string[]>();
+        runState.party.forEach((p, i) => {
+          if (p.heldItemIds.length > 0) partyItems.set(i, [...p.heldItemIds]);
+        });
+
         battle.startConfiguredBattle(
           partyData,
           [enemyWithHp],
@@ -857,6 +863,7 @@ export default function App() {
           partyPassives,
           new Map([[0, recruitMon.passiveIds]]),
           hpOverrides,
+          partyItems.size > 0 ? partyItems : undefined,
         );
         setIsRecruitBattle(true);
         setRecruitFighterIndex(null); // null = full party battle
@@ -866,25 +873,31 @@ export default function App() {
         return;
       }
 
-      // Normal 1v1 recruit fight
+      // Normal 1v1 recruit fight — use partyIndex as slotIndex so
+      // syncBattleResults maps back to the correct party member
       const fighter = runState.party[partyIndex];
       const fighterData = getRunPokemonData(fighter);
+      const fighterItems = fighter.heldItemIds.length > 0
+        ? new Map([[partyIndex, [...fighter.heldItemIds]]])
+        : undefined;
       battle.startConfiguredBattle(
         [fighterData],
         [enemyWithHp],
         [fighter.position],
         [{ row: "front", column: 1 }],
-        new Map([[0, fighter.passiveIds]]),
+        new Map([[partyIndex, fighter.passiveIds]]),
         new Map([[0, recruitMon.passiveIds]]),
         new Map([
           [
-            "player-0",
+            `player-${partyIndex}`,
             {
               maxHp: fighter.maxHp,
               startPercent: fighter.currentHp / fighter.maxHp,
             },
           ],
         ]),
+        fighterItems,
+        [partyIndex],
       );
 
       setIsRecruitBattle(true);
@@ -1171,7 +1184,7 @@ export default function App() {
       playerPassives: Map<number, string[]>,
       enemyPassives: Map<number, string[]>,
       hpOverrides: Map<string, { maxHp?: number; startPercent?: number }>,
-      playerItems?: Map<number, string>,
+      playerItems?: Map<number, string[]>,
     ) => {
       battle.startConfiguredBattle(
         players,

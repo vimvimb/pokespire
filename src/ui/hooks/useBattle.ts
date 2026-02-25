@@ -32,7 +32,8 @@ export interface BattleHook {
     playerPassives: Map<number, string[]>,
     enemyPassives: Map<number, string[]>,
     hpOverrides?: Map<string, { maxHp?: number; startPercent?: number }>,
-    playerItems?: Map<number, string>
+    playerItems?: Map<number, string[]>,
+    playerSlotIndices?: number[],
   ) => void;
   startTutorialBattle: (
     players: PokemonData[],
@@ -424,10 +425,11 @@ export function useBattle(): BattleHook {
     playerPassives: Map<number, string[]>,
     enemyPassives: Map<number, string[]>,
     hpOverrides?: Map<string, { maxHp?: number; startPercent?: number }>,
-    playerItems?: Map<number, string>
+    playerItems?: Map<number, string[]>,
+    playerSlotIndices?: number[],
   ) => {
     // Create combat state
-    const s = createCombatState(players, enemies, playerPositions, enemyPositions);
+    const s = createCombatState(players, enemies, playerPositions, enemyPositions, playerSlotIndices);
 
     // Apply player passive overrides
     const playerCombatants = s.combatants.filter(c => c.side === 'player');
@@ -469,10 +471,10 @@ export function useBattle(): BattleHook {
 
     // Apply held item assignments
     if (playerItems) {
-      playerItems.forEach((itemId, slotIndex) => {
+      playerItems.forEach((itemIds, slotIndex) => {
         const combatant = playerCombatants.find(c => c.slotIndex === slotIndex);
         if (combatant) {
-          combatant.heldItemIds = [itemId];
+          combatant.heldItemIds = [...itemIds];
         }
       });
     }
