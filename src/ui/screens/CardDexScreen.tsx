@@ -42,6 +42,9 @@ const STATUS_COLORS: Record<StatusType, string> = {
   fatigue: '#78716c',
   thorns: '#84cc16',
   regen: '#34d399',
+  mobile: '#38bdf8',
+  energize: '#fbbf24',
+  luck: '#a78bfa',
 };
 
 const TYPE_COLORS: Record<MoveType, string> = {
