@@ -10,6 +10,8 @@ import {
   applyStatus,
   getEffectiveSpeed,
   processRoundBoundary,
+  processStartOfTurnStatuses,
+  processEndOfTurnStatuses,
   checkStatusImmunity,
 } from './status';
 import { startTurn } from './turns';
@@ -140,24 +142,130 @@ describe('Status Effects', () => {
     });
   });
 
-  describe('processRoundBoundary', () => {
+  describe('processStartOfTurnStatuses', () => {
+    describe('Status Decay', () => {
+      it('paralysis decays by 1', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'paralysis', 3);
+        const state = createTestCombatState([combatant]);
+
+        processStartOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'paralysis')).toBe(2);
+      });
+
+      it('strength decays by 1', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'strength', 5);
+        const state = createTestCombatState([combatant]);
+
+        processStartOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'strength')).toBe(4);
+      });
+
+      it('haste decays by 1', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'haste', 2);
+        const state = createTestCombatState([combatant]);
+
+        processStartOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'haste')).toBe(1);
+      });
+
+      it('evasion decays by 1', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'evasion', 3);
+        const state = createTestCombatState([combatant]);
+
+        processStartOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'evasion')).toBe(2);
+      });
+
+      it('thorns decays by 1', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'thorns', 4);
+        const state = createTestCombatState([combatant]);
+
+        processStartOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'thorns')).toBe(3);
+      });
+
+      it('thorns expires when stacks reach 0', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'thorns', 1);
+        const state = createTestCombatState([combatant]);
+
+        processStartOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'thorns')).toBe(0);
+        expect(combatant.statuses.find(s => s.type === 'thorns')).toBeUndefined();
+      });
+
+      it('taunt decays by 1', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'taunt', 2);
+        const state = createTestCombatState([combatant]);
+
+        processStartOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'taunt')).toBe(1);
+      });
+
+      it('enfeeble decays by 1', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'enfeeble', 3);
+        const state = createTestCombatState([combatant]);
+
+        processStartOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'enfeeble')).toBe(2);
+      });
+
+      it('slow decays by 1', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'slow', 2);
+        const state = createTestCombatState([combatant]);
+
+        processStartOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'slow')).toBe(1);
+      });
+
+      it('removes status when stacks reach 0', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'paralysis', 1);
+        const state = createTestCombatState([combatant]);
+
+        processStartOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'paralysis')).toBe(0);
+        expect(combatant.statuses.find(s => s.type === 'paralysis')).toBeUndefined();
+      });
+    });
+  });
+
+  describe('processEndOfTurnStatuses', () => {
     describe('Burn', () => {
       it('deals damage equal to stacks', () => {
         const combatant = createTestCombatant({ hp: 50 });
         addStatus(combatant, 'burn', 3);
         const state = createTestCombatState([combatant]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, combatant);
 
         expect(combatant.hp).toBe(47); // 50 - 3
       });
 
-      it('decays by 1 each round', () => {
+      it('decays by 1 each turn', () => {
         const combatant = createTestCombatant({ hp: 100 });
         addStatus(combatant, 'burn', 3);
         const state = createTestCombatState([combatant]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, combatant);
 
         expect(getStatusStacks(combatant, 'burn')).toBe(2);
       });
@@ -167,7 +275,7 @@ describe('Status Effects', () => {
         addStatus(combatant, 'burn', 1);
         const state = createTestCombatState([combatant]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, combatant);
 
         expect(getStatusStacks(combatant, 'burn')).toBe(0);
         expect(combatant.statuses.find(s => s.type === 'burn')).toBeUndefined();
@@ -178,7 +286,7 @@ describe('Status Effects', () => {
         addStatus(combatant, 'burn', 5);
         const state = createTestCombatState([combatant]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, combatant);
 
         expect(combatant.hp).toBe(0);
         expect(combatant.alive).toBe(false);
@@ -191,38 +299,38 @@ describe('Status Effects', () => {
         addStatus(combatant, 'poison', 2);
         const state = createTestCombatState([combatant]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, combatant);
 
         expect(combatant.hp).toBe(48); // 50 - 2
       });
 
-      it('escalates by 1 each round (does not decay)', () => {
+      it('escalates by 1 each turn (does not decay)', () => {
         const combatant = createTestCombatant({ hp: 100 });
         addStatus(combatant, 'poison', 2);
         const state = createTestCombatState([combatant]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, combatant);
 
         expect(getStatusStacks(combatant, 'poison')).toBe(3); // Escalated!
       });
 
-      it('escalates and deals increasing damage over rounds', () => {
+      it('escalates and deals increasing damage over turns', () => {
         const combatant = createTestCombatant({ hp: 100 });
         addStatus(combatant, 'poison', 1);
         const state = createTestCombatState([combatant]);
 
-        // Round 1: 1 damage, escalate to 2
-        processRoundBoundary(state);
+        // Turn 1: 1 damage, escalate to 2
+        processEndOfTurnStatuses(state, combatant);
         expect(combatant.hp).toBe(99);
         expect(getStatusStacks(combatant, 'poison')).toBe(2);
 
-        // Round 2: 2 damage, escalate to 3
-        processRoundBoundary(state);
+        // Turn 2: 2 damage, escalate to 3
+        processEndOfTurnStatuses(state, combatant);
         expect(combatant.hp).toBe(97);
         expect(getStatusStacks(combatant, 'poison')).toBe(3);
 
-        // Round 3: 3 damage, escalate to 4
-        processRoundBoundary(state);
+        // Turn 3: 3 damage, escalate to 4
+        processEndOfTurnStatuses(state, combatant);
         expect(combatant.hp).toBe(94);
         expect(getStatusStacks(combatant, 'poison')).toBe(4);
       });
@@ -234,7 +342,7 @@ describe('Status Effects', () => {
         addStatus(target, 'leech', 4);
         const state = createTestCombatState([target]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, target);
 
         expect(target.hp).toBe(46); // 50 - 4
       });
@@ -245,17 +353,17 @@ describe('Status Effects', () => {
         addStatus(target, 'leech', 4, 'source');
         const state = createTestCombatState([source, target]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, target);
 
         expect(source.hp).toBe(54); // 50 + 4
       });
 
-      it('decays by 1 each round', () => {
+      it('decays by 1 each turn', () => {
         const target = createTestCombatant({ hp: 100 });
         addStatus(target, 'leech', 3);
         const state = createTestCombatState([target]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, target);
 
         expect(getStatusStacks(target, 'leech')).toBe(2);
       });
@@ -265,7 +373,7 @@ describe('Status Effects', () => {
         addStatus(target, 'leech', 1);
         const state = createTestCombatState([target]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, target);
 
         expect(getStatusStacks(target, 'leech')).toBe(0);
       });
@@ -276,20 +384,54 @@ describe('Status Effects', () => {
         addStatus(target, 'leech', 10, 'source');
         const state = createTestCombatState([source, target]);
 
-        processRoundBoundary(state);
+        processEndOfTurnStatuses(state, target);
 
         expect(source.hp).toBe(100); // Capped at maxHp
       });
     });
 
-    describe('Block Reset', () => {
-      it('resets block to 0 at end of round', () => {
+    describe('Provoke', () => {
+      it('decays by 1 each turn', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'provoke', 3);
+        const state = createTestCombatState([combatant]);
+
+        processEndOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'provoke')).toBe(2);
+      });
+
+      it('removes provoke when stacks reach 0', () => {
+        const combatant = createTestCombatant();
+        addStatus(combatant, 'provoke', 1);
+        const state = createTestCombatState([combatant]);
+
+        processEndOfTurnStatuses(state, combatant);
+
+        expect(getStatusStacks(combatant, 'provoke')).toBe(0);
+        expect(combatant.statuses.find(s => s.type === 'provoke')).toBeUndefined();
+      });
+    });
+  });
+
+  describe('processRoundBoundary', () => {
+    describe('Block Decay', () => {
+      it('decays block to 50% (floor) at end of round', () => {
         const combatant = createTestCombatant({ block: 15 });
         const state = createTestCombatState([combatant]);
 
         processRoundBoundary(state);
 
-        expect(combatant.block).toBe(0);
+        expect(combatant.block).toBe(7); // floor(15/2)
+      });
+
+      it('decays even block to exactly half', () => {
+        const combatant = createTestCombatant({ block: 20 });
+        const state = createTestCombatState([combatant]);
+
+        processRoundBoundary(state);
+
+        expect(combatant.block).toBe(10); // 20/2
       });
 
       it('Pressure Hull retains 100% block', () => {
@@ -310,74 +452,9 @@ describe('Status Effects', () => {
         expect(combatant.block).toBe(15); // 100% retained
       });
     });
-
-    describe('Sleep Decay', () => {
-      it('sleep decays by 1 each round', () => {
-        const combatant = createTestCombatant();
-        addStatus(combatant, 'sleep', 3);
-        const state = createTestCombatState([combatant]);
-
-        processRoundBoundary(state);
-
-        expect(getStatusStacks(combatant, 'sleep')).toBe(2);
-      });
-
-      it('removes sleep when stacks reach 0', () => {
-        const combatant = createTestCombatant();
-        addStatus(combatant, 'sleep', 1);
-        const state = createTestCombatState([combatant]);
-
-        processRoundBoundary(state);
-
-        expect(getStatusStacks(combatant, 'sleep')).toBe(0);
-        expect(combatant.statuses.find(s => s.type === 'sleep')).toBeUndefined();
-      });
-
-      it('sleep stacks additively (extends duration)', () => {
-        const combatant = createTestCombatant();
-        const state = createTestCombatState([combatant]);
-
-        applyStatus(state, combatant, 'sleep', 2);
-        applyStatus(state, combatant, 'sleep', 3);
-
-        expect(getStatusStacks(combatant, 'sleep')).toBe(5);
-      });
-    });
-
-    describe('Status Decay', () => {
-      it('paralysis decays by 1', () => {
-        const combatant = createTestCombatant();
-        addStatus(combatant, 'paralysis', 3);
-        const state = createTestCombatState([combatant]);
-
-        processRoundBoundary(state);
-
-        expect(getStatusStacks(combatant, 'paralysis')).toBe(2);
-      });
-
-      it('strength decays by 1', () => {
-        const combatant = createTestCombatant();
-        addStatus(combatant, 'strength', 5);
-        const state = createTestCombatState([combatant]);
-
-        processRoundBoundary(state);
-
-        expect(getStatusStacks(combatant, 'strength')).toBe(4);
-      });
-
-      it('haste decays by 1', () => {
-        const combatant = createTestCombatant();
-        addStatus(combatant, 'haste', 2);
-        const state = createTestCombatState([combatant]);
-
-        processRoundBoundary(state);
-
-        expect(getStatusStacks(combatant, 'haste')).toBe(1);
-      });
-    });
   });
 
-  describe('Sleep Energy Reduction (via startTurn)', () => {
+  describe('Sleep (via startTurn)', () => {
     it('reduces energy gain by 1 when sleeping', () => {
       const combatant = createTestCombatant();
       combatant.energy = 0;
@@ -428,6 +505,31 @@ describe('Status Effects', () => {
       expect(combatant.energy).toBe(0);
     });
 
+    it('sleep decays by 1 each turn via startTurn', () => {
+      const combatant = createTestCombatant();
+      combatant.energy = 0;
+      combatant.energyPerTurn = 3;
+      addStatus(combatant, 'sleep', 3);
+      const state = createTestCombatState([combatant]);
+
+      startTurn(state);
+
+      expect(getStatusStacks(combatant, 'sleep')).toBe(2);
+    });
+
+    it('sleep expires when stacks reach 0 via startTurn', () => {
+      const combatant = createTestCombatant();
+      combatant.energy = 0;
+      combatant.energyPerTurn = 3;
+      addStatus(combatant, 'sleep', 1);
+      const state = createTestCombatState([combatant]);
+
+      startTurn(state);
+
+      expect(getStatusStacks(combatant, 'sleep')).toBe(0);
+      expect(combatant.statuses.find(s => s.type === 'sleep')).toBeUndefined();
+    });
+
     it('sleep lasts for stacks turns then expires', () => {
       const combatant = createTestCombatant();
       combatant.energy = 0;
@@ -435,23 +537,17 @@ describe('Status Effects', () => {
       addStatus(combatant, 'sleep', 2);
       const state = createTestCombatState([combatant]);
 
-      // Turn 1: sleeping (2 stacks), gain 2 energy
+      // Turn 1: sleeping (2 stacks), gain 2 energy, sleep decays to 1
       startTurn(state);
       expect(combatant.energy).toBe(2);
-
-      // Round boundary: sleep decays 2 -> 1
-      processRoundBoundary(state);
       expect(getStatusStacks(combatant, 'sleep')).toBe(1);
 
-      // Turn 2: still sleeping (1 stack), gain 2 energy
+      // Turn 2: still sleeping (1 stack), gain 2 energy, sleep expires
       combatant.energy = 0;
       state.currentTurnIndex = 0;
       state.turnOrder[0].hasActed = false;
       startTurn(state);
       expect(combatant.energy).toBe(2);
-
-      // Round boundary: sleep decays 1 -> 0, expires
-      processRoundBoundary(state);
       expect(getStatusStacks(combatant, 'sleep')).toBe(0);
 
       // Turn 3: no longer sleeping, gain full 3 energy
@@ -460,6 +556,16 @@ describe('Status Effects', () => {
       state.turnOrder[0].hasActed = false;
       startTurn(state);
       expect(combatant.energy).toBe(3);
+    });
+
+    it('sleep stacks additively (extends duration)', () => {
+      const combatant = createTestCombatant();
+      const state = createTestCombatState([combatant]);
+
+      applyStatus(state, combatant, 'sleep', 2);
+      applyStatus(state, combatant, 'sleep', 3);
+
+      expect(getStatusStacks(combatant, 'sleep')).toBe(5);
     });
   });
 });

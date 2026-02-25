@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { PokemonData } from "../../engine/types";
 import { getPokemon } from "../../data/loaders";
 import { POKEMON_COSTS, STARTING_GOLD } from "../../data/shop";
@@ -195,49 +195,24 @@ export function CampaignDraftScreen({ onComplete, onBack, campaignId = "rocket_t
   // ── Story Intro ─────────────────────────────────────────────────
 
   if (phase === "story_intro") {
+    const isTypewriter = campaignId !== "campaign_2";
     return (
       <ScreenShell
         header={header}
         bodyStyle={{ padding: "24px 16px 48px" }}
         ambient
       >
-        <div
-          style={{
-            maxWidth: 500,
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 24,
-            paddingTop: 40,
-          }}
-        >
-          <div
-            style={{
-              padding: "28px 32px",
-              borderRadius: 12,
-              background: THEME.bg.panelDark,
-              border: `1px solid ${THEME.border.subtle}`,
-              color: THEME.text.secondary,
-              fontSize: 15,
-              lineHeight: 1.8,
-              textAlign: "center",
-              fontStyle: "italic",
-            }}
-          >
-            {campaign.narrativeTexts.draftIntro}
-          </div>
-          <button
-            onClick={() => setPhase("starter_pick")}
-            style={{
-              padding: "14px 48px",
-              ...THEME.button.primary,
-              fontSize: 16,
-            }}
-          >
-            Continue
-          </button>
-        </div>
+        {isTypewriter ? (
+          <TypewriterIntro
+            text={campaign.narrativeTexts.draftIntro}
+            onContinue={() => setPhase("starter_pick")}
+          />
+        ) : (
+          <FadeInIntro
+            text={campaign.narrativeTexts.draftIntro}
+            onContinue={() => setPhase("starter_pick")}
+          />
+        )}
       </ScreenShell>
     );
   }
@@ -515,5 +490,109 @@ export function CampaignDraftScreen({ onComplete, onBack, campaignId = "rocket_t
         </button>
       </div>
     </ScreenShell>
+  );
+}
+
+// ── Story Intro Variants ─────────────────────────────────────────────────────
+
+const introContainerStyle: React.CSSProperties = {
+  maxWidth: 500,
+  margin: "0 auto",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: 24,
+  paddingTop: 40,
+};
+
+const introTextStyle: React.CSSProperties = {
+  padding: "28px 32px",
+  borderRadius: 12,
+  background: THEME.bg.panelDark,
+  border: `1px solid ${THEME.border.subtle}`,
+  color: THEME.text.secondary,
+  fontSize: 15,
+  lineHeight: 1.8,
+  textAlign: "center",
+  fontStyle: "italic",
+};
+
+/** Dead Signal: characters appear one at a time with a blinking cursor. */
+function TypewriterIntro({ text, onContinue }: { text: string; onContinue: () => void }) {
+  const [charCount, setCharCount] = useState(0);
+  const done = charCount >= text.length;
+
+  useEffect(() => {
+    if (done) return;
+    const id = setInterval(() => {
+      setCharCount((c) => Math.min(c + 1, text.length));
+    }, 30);
+    return () => clearInterval(id);
+  }, [done, text.length]);
+
+  return (
+    <div style={introContainerStyle}>
+      <div style={introTextStyle}>
+        {text.slice(0, charCount)}
+        {!done && <span style={{ animation: "cursorBlink 530ms steps(1) infinite" }}>|</span>}
+      </div>
+      <button
+        onClick={onContinue}
+        style={{
+          padding: "14px 48px",
+          ...THEME.button.primary,
+          fontSize: 16,
+          opacity: done ? 1 : 0,
+          transition: "opacity 0.4s ease",
+          pointerEvents: done ? "auto" : "none",
+        }}
+      >
+        Continue
+      </button>
+      <style>{`
+        @keyframes cursorBlink {
+          0%, 49% { opacity: 1; }
+          50%, 100% { opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+/** Threads of Time: text and button fade in together with a green glow. */
+function FadeInIntro({ text, onContinue }: { text: string; onContinue: () => void }) {
+  return (
+    <div style={{ ...introContainerStyle, animation: "storyFadeIn 600ms ease both" }}>
+      <div
+        style={{
+          ...introTextStyle,
+          boxShadow: "0 0 30px rgba(74,222,128,0.15), 0 0 60px rgba(74,222,128,0.06)",
+          borderColor: "rgba(74,222,128,0.25)",
+          animation: "greenGlow 600ms ease both",
+        }}
+      >
+        {text}
+      </div>
+      <button
+        onClick={onContinue}
+        style={{
+          padding: "14px 48px",
+          ...THEME.button.primary,
+          fontSize: 16,
+        }}
+      >
+        Continue
+      </button>
+      <style>{`
+        @keyframes storyFadeIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes greenGlow {
+          from { box-shadow: 0 0 40px rgba(74,222,128,0.3), 0 0 80px rgba(74,222,128,0.12); }
+          to   { box-shadow: 0 0 30px rgba(74,222,128,0.15), 0 0 60px rgba(74,222,128,0.06); }
+        }
+      `}</style>
+    </div>
   );
 }

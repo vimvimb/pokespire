@@ -155,10 +155,10 @@ export const CAMPAIGN1_RECRUIT_POOL = [
 export const CAMPAIGNS: CampaignDefinition[] = [
   {
     id: "rocket_tower",
-    name: "Rocket Tower",
-    subtitle: "The Original Campaign",
+    name: "Dead Signal",
+    subtitle: "An Adventure in Kanto",
     description:
-      "Fight through Team Rocket's tower. Prepare to face an abomination.",
+      "An old Team Rocket facility. The upper floors are abandoned. The lower floors are not.",
     starterIds: ["bulbasaur", "charmander", "squirtle", "pikachu"],
     draftPool: null, // uses player unlock system
     recruitPool: CAMPAIGN1_RECRUIT_POOL,
@@ -169,20 +169,20 @@ export const CAMPAIGNS: CampaignDefinition[] = [
         1: {
           heading: "Act 1 Complete!",
           story:
-            "Ariana has been defeated, but she was only a diversion. Giovanni himself waits on the floor below...",
-          buttonLabel: "Continue to Act 2",
+            'Ariana catches her breath. "You came all this way for me?" She almost laughs. "Giovanni took the service elevator down two days ago. Said the readings from the lower levels were spiking." She glances toward the elevator doors. "He hasn\'t come back up."',
+          buttonLabel: "Take the Elevator Down",
           accentColor: "#60a5fa",
         },
         2: {
           heading: "Act 2 Complete!",
           story:
-            'Giovanni has fallen. His final words: "You\'re too late — Mewtwo has escaped into the caverns below."',
-          buttonLabel: "Descend to Act 3",
+            "Giovanni says nothing for a long time. He's not looking at you \u2014 he's looking past you, at the crater. A ragged wound in the floor, concrete and steel bent downward, edges fused smooth by something impossibly hot. \"The containment breach was six days ago. It didn't escape laterally \u2014 it went straight down.\" He looks at the crater, then at you. \"If you're going after it, I won't stop you. I'm done going down.\"",
+          buttonLabel: "Descend into the Crater",
           accentColor: "#a855f7",
         },
       },
       victorySubtitle:
-        "Mewtwo has been subdued. Team Rocket's ambitions lie in ruins.\nYour team emerges from the caverns, triumphant.",
+        "The lowest level is still. Your team stands in the wreckage, catching their breath.\nThen \u2014 slowly \u2014 you begin the long climb back up. Past the crater. Past the empty labs.\nThe elevator groans to life one last time. The doors open to daylight.",
     },
     acts: [
       {

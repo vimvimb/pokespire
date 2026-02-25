@@ -22,6 +22,7 @@ export function StarterItemScreen({ run, onComplete, onBack }: Props) {
   // Map: partyIndex → itemId
   const [assignments, setAssignments] = useState<Record<number, string>>({});
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [draggingItemId, setDraggingItemId] = useState<string | null>(null);
 
   const assignedItemIds = useMemo(
     () => new Set(Object.values(assignments)),
@@ -35,19 +36,23 @@ export function StarterItemScreen({ run, onComplete, onBack }: Props) {
     setSelectedItemId(prev => (prev === itemId ? null : itemId));
   }, []);
 
-  const handlePokemonClick = useCallback((index: number) => {
-    if (!selectedItemId) return;
+  const assignItem = useCallback((index: number, itemId: string) => {
     setAssignments(prev => {
       const next = { ...prev };
       // Remove any previous assignment of this item
       for (const [k, v] of Object.entries(next)) {
-        if (v === selectedItemId) delete next[Number(k)];
+        if (v === itemId) delete next[Number(k)];
       }
-      next[index] = selectedItemId;
+      next[index] = itemId;
       return next;
     });
     setSelectedItemId(null);
-  }, [selectedItemId]);
+  }, []);
+
+  const handlePokemonClick = useCallback((index: number) => {
+    if (!selectedItemId) return;
+    assignItem(index, selectedItemId);
+  }, [selectedItemId, assignItem]);
 
   const handleUnassign = useCallback((index: number) => {
     setAssignments(prev => {
@@ -130,6 +135,13 @@ export function StarterItemScreen({ run, onComplete, onBack }: Props) {
               <button
                 key={itemId}
                 onClick={() => !isDisabled && handleItemClick(itemId)}
+                draggable={!isDisabled}
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('text/plain', itemId);
+                  e.dataTransfer.effectAllowed = 'move';
+                  setDraggingItemId(itemId);
+                }}
+                onDragEnd={() => setDraggingItemId(null)}
                 className="si-card"
                 style={{
                   display: 'flex',
@@ -218,10 +230,12 @@ export function StarterItemScreen({ run, onComplete, onBack }: Props) {
           party={run.party}
           assignments={assignments}
           selectedItemId={selectedItemId}
+          draggingItemId={draggingItemId}
           onSlotClick={(index) => {
             if (selectedItemId) handlePokemonClick(index);
             else if (assignments[index]) handleUnassign(index);
           }}
+          onDrop={(index, itemId) => assignItem(index, itemId)}
         />
       </div>
 
@@ -246,10 +260,12 @@ interface FormationGridProps {
   party: RunPokemon[];
   assignments: Record<number, string>;
   selectedItemId: string | null;
+  draggingItemId: string | null;
   onSlotClick: (partyIndex: number) => void;
+  onDrop: (partyIndex: number, itemId: string) => void;
 }
 
-function FormationGrid({ party, assignments, selectedItemId, onSlotClick }: FormationGridProps) {
+function FormationGrid({ party, assignments, selectedItemId, draggingItemId, onSlotClick, onDrop }: FormationGridProps) {
   // Build a lookup: "row-col" → { pokemon, partyIndex }
   const slotMap = useMemo(() => {
     const map: Record<string, { pokemon: RunPokemon; index: number }> = {};
@@ -260,6 +276,9 @@ function FormationGrid({ party, assignments, selectedItemId, onSlotClick }: Form
   }, [party]);
 
   const isTarget = selectedItemId !== null;
+  const isDragging = draggingItemId !== null;
+  const isHighlighted = isTarget || isDragging;
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -290,35 +309,58 @@ function FormationGrid({ party, assignments, selectedItemId, onSlotClick }: Form
             const item = itemId ? ITEM_DEFS[itemId] : undefined;
             const catColor = item ? RARITY_COLORS[item.rarity] : undefined;
             const hasAction = isTarget || !!item;
+            const isDragOver = dragOverIndex === index;
+            const slotHighlighted = isHighlighted || isDragOver;
 
             return (
               <button
                 key={`${row}-${col}`}
                 onClick={() => hasAction && onSlotClick(index)}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                }}
+                onDragEnter={(e) => {
+                  e.preventDefault();
+                  setDragOverIndex(index);
+                }}
+                onDragLeave={() => setDragOverIndex(null)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setDragOverIndex(null);
+                  const droppedItemId = e.dataTransfer.getData('text/plain');
+                  if (droppedItemId) onDrop(index, droppedItemId);
+                }}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   gap: 4,
                   padding: '10px 6px 10px',
-                  background: isTarget
-                    ? `linear-gradient(180deg, ${THEME.accent}08, transparent)`
-                    : item
-                      ? `linear-gradient(180deg, ${catColor}08, transparent)`
-                      : THEME.bg.panelDark,
-                  border: isTarget
-                    ? `1.5px solid ${THEME.accent}50`
-                    : item
-                      ? `1.5px solid ${catColor}30`
-                      : `1.5px solid ${THEME.border.subtle}`,
+                  background: isDragOver
+                    ? `linear-gradient(180deg, ${THEME.accent}18, transparent)`
+                    : isHighlighted
+                      ? `linear-gradient(180deg, ${THEME.accent}08, transparent)`
+                      : item
+                        ? `linear-gradient(180deg, ${catColor}08, transparent)`
+                        : THEME.bg.panelDark,
+                  border: isDragOver
+                    ? `1.5px solid ${THEME.accent}`
+                    : isHighlighted
+                      ? `1.5px solid ${THEME.accent}50`
+                      : item
+                        ? `1.5px solid ${catColor}30`
+                        : `1.5px solid ${THEME.border.subtle}`,
                   borderRadius: 10,
                   cursor: hasAction ? 'pointer' : 'default',
                   color: THEME.text.primary,
                   textAlign: 'center',
                   transition: 'all 0.2s',
-                  boxShadow: isTarget
-                    ? `inset 0 0 20px ${THEME.accent}06`
-                    : 'none',
+                  boxShadow: isDragOver
+                    ? `inset 0 0 20px ${THEME.accent}15, 0 0 12px ${THEME.accent}20`
+                    : slotHighlighted
+                      ? `inset 0 0 20px ${THEME.accent}06`
+                      : 'none',
                 }}
               >
                 {/* Sprite */}
@@ -370,14 +412,14 @@ function FormationGrid({ party, assignments, selectedItemId, onSlotClick }: Form
                     <div style={{
                       width: 28, height: 28,
                       borderRadius: '50%',
-                      border: `1.5px dashed ${isTarget ? THEME.accent + '60' : THEME.border.medium}`,
+                      border: `1.5px dashed ${slotHighlighted ? THEME.accent + '60' : THEME.border.medium}`,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       transition: 'border-color 0.2s',
                     }}>
                       <span style={{
-                        fontSize: 14, color: isTarget ? THEME.accent + '80' : THEME.border.bright,
+                        fontSize: 14, color: slotHighlighted ? THEME.accent + '80' : THEME.border.bright,
                         transition: 'color 0.2s',
                       }}>
                         +
@@ -385,11 +427,11 @@ function FormationGrid({ party, assignments, selectedItemId, onSlotClick }: Form
                     </div>
                     <div style={{
                       fontSize: 9,
-                      color: isTarget ? THEME.accent : THEME.text.tertiary,
+                      color: slotHighlighted ? THEME.accent : THEME.text.tertiary,
                       fontStyle: 'italic',
                       transition: 'color 0.2s',
                     }}>
-                      {isTarget ? 'Tap to equip' : 'No item'}
+                      {isDragOver ? 'Drop to equip' : isTarget ? 'Tap to equip' : 'No item'}
                     </div>
                   </div>
                 )}

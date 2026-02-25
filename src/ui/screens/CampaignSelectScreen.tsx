@@ -1,8 +1,10 @@
+import { useState, useCallback } from 'react';
 import { CAMPAIGNS, getCampaign } from '../../data/campaigns';
 import type { CampaignDefinition } from '../../data/campaigns';
 import { THEME } from '../theme';
 import { AmbientBackground } from '../components/AmbientBackground';
 import { Flourish } from '../components/Flourish';
+import { CampaignTransition } from '../components/CampaignTransition';
 
 type CampaignStatus = 'locked' | 'available' | 'completed';
 
@@ -13,6 +15,14 @@ interface Props {
 }
 
 export function CampaignSelectScreen({ onSelect, onBack, getCampaignStatus }: Props) {
+  const [transitioning, setTransitioning] = useState<string | null>(null);
+
+  const handleTransitionComplete = useCallback(() => {
+    if (transitioning) {
+      onSelect(transitioning);
+    }
+  }, [transitioning, onSelect]);
+
   return (
     <div
       style={{
@@ -64,7 +74,7 @@ export function CampaignSelectScreen({ onSelect, onBack, getCampaignStatus }: Pr
             key={campaign.id}
             campaign={campaign}
             status={getCampaignStatus(campaign.id)}
-            onSelect={onSelect}
+            onSelect={setTransitioning}
             animationDelay={i * 80}
           />
         ))}
@@ -98,6 +108,13 @@ export function CampaignSelectScreen({ onSelect, onBack, getCampaignStatus }: Pr
       >
         Back
       </button>
+
+      {transitioning && (
+        <CampaignTransition
+          campaignId={transitioning}
+          onComplete={handleTransitionComplete}
+        />
+      )}
 
       <style>{`
         @keyframes campaignCardIn {
@@ -152,6 +169,7 @@ function CampaignCard({
   onSelect: (id: string) => void;
   animationDelay: number;
 }) {
+  const [pressed, setPressed] = useState(false);
   const actCount = campaign.acts.length;
   const actLabel = actCount === 1 ? '1 Act' : `${actCount} Acts`;
   const isLocked    = status === 'locked';
@@ -162,17 +180,24 @@ function CampaignCard({
     : null;
 
   // Colour tokens that shift by status
-  const accentColor   = isLocked ? THEME.border.subtle : isCompleted ? '#22c55e' : THEME.accent;
-  const borderColor   = isLocked ? `${THEME.border.subtle}55` : isCompleted ? '#22c55e33' : `${THEME.border.medium}88`;
+  const pressColor    = campaign.id === 'campaign_2' ? '#4ade80' : '#ef4444';
+  const accentColor   = pressed ? pressColor : isLocked ? THEME.border.subtle : isCompleted ? '#22c55e' : THEME.accent;
+  const borderColor   = pressed ? `${pressColor}aa` : isLocked ? `${THEME.border.subtle}55` : isCompleted ? '#22c55e33' : `${THEME.border.medium}88`;
   const hoverBorder   = isLocked ? borderColor : isCompleted ? '#22c55e77' : `${THEME.accent}88`;
   const hoverBg       = `${THEME.bg.panel}cc`;
 
+  function handleClick() {
+    if (isLocked) return;
+    setPressed(true);
+    onSelect(campaign.id);
+  }
+
   return (
     <button
-      onClick={() => !isLocked && onSelect(campaign.id)}
+      onClick={handleClick}
       disabled={isLocked}
       style={{
-        background: `${THEME.bg.elevated}ee`,
+        background: pressed ? `${pressColor}15` : `${THEME.bg.elevated}ee`,
         border: `1px solid ${borderColor}`,
         borderRadius: 14,
         padding: '22px 28px',
@@ -184,7 +209,9 @@ function CampaignCard({
         position: 'relative',
         overflow: 'hidden',
         animation: `campaignCardIn 0.35s ease-out ${animationDelay}ms both`,
-        boxShadow: isLocked ? 'none' : `0 2px 20px rgba(0,0,0,0.3)`,
+        boxShadow: pressed
+          ? `0 0 24px ${pressColor}44, 0 2px 20px rgba(0,0,0,0.3)`
+          : isLocked ? 'none' : `0 2px 20px rgba(0,0,0,0.3)`,
       }}
       onMouseEnter={(e) => {
         if (isLocked) return;
