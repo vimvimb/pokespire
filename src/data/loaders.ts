@@ -1,8 +1,14 @@
-import type { MoveDefinition, PokemonData, MoveType, MoveRange, CardEffect } from '../engine/types';
-import movesData from './moves.json';
-import pokemonData from './pokemon.json';
-import enemyDecksData from './enemy-decks.json';
-import { POKEDEX_NUMBERS } from './heights';
+import type {
+  MoveDefinition,
+  PokemonData,
+  MoveType,
+  MoveRange,
+  CardEffect,
+} from "../engine/types";
+import movesData from "./moves.json";
+import pokemonData from "./pokemon.json";
+import enemyDecksData from "./enemy-decks.json";
+import { POKEDEX_NUMBERS } from "./heights";
 
 // ============================================================
 // Data Loaders — Load JSON data and export typed objects
@@ -38,6 +44,7 @@ interface RawPokemonData {
   deck: string[];
   abilities: string[];
   description?: string;
+  testOnly?: boolean;
 }
 
 /** All move definitions, keyed by move ID */
@@ -53,7 +60,7 @@ export const MOVES: Record<string, MoveDefinition> = Object.fromEntries(
       vanish: move.vanish,
       effects: move.effects,
       description: move.description,
-      rarity: move.rarity as MoveDefinition['rarity'],
+      rarity: move.rarity as MoveDefinition["rarity"],
       pools: move.pools as MoveType[] | undefined,
       isItem: move.isItem ?? false,
       singleUse: move.singleUse ?? false,
@@ -61,28 +68,31 @@ export const MOVES: Record<string, MoveDefinition> = Object.fromEntries(
       goldOnHit: move.goldOnHit ?? false,
       contact: move.contact ?? false,
     },
-  ])
+  ]),
 );
 
 /** All Pokemon definitions, keyed by Pokemon ID */
 export const POKEMON: Record<string, PokemonData> = Object.fromEntries(
-  Object.entries(pokemonData as Record<string, RawPokemonData>).map(([id, poke]) => [
-    id,
-    {
+  Object.entries(pokemonData as Record<string, RawPokemonData>).map(
+    ([id, poke]) => [
       id,
-      name: poke.name,
-      types: poke.types as MoveType[],
-      maxHp: poke.maxHp,
-      baseSpeed: poke.baseSpeed,
-      energyPerTurn: poke.energyPerTurn,
-      energyCap: poke.energyCap,
-      handSize: poke.handSize,
-      deck: poke.deck,
-      abilities: poke.abilities,
-      description: poke.description,
-      pokedexNumber: POKEDEX_NUMBERS[id],
-    },
-  ])
+      {
+        id,
+        name: poke.name,
+        types: poke.types as MoveType[],
+        maxHp: poke.maxHp,
+        baseSpeed: poke.baseSpeed,
+        energyPerTurn: poke.energyPerTurn,
+        energyCap: poke.energyCap,
+        handSize: poke.handSize,
+        deck: poke.deck,
+        abilities: poke.abilities,
+        description: poke.description,
+        pokedexNumber: POKEDEX_NUMBERS[id],
+        testOnly: poke.testOnly ?? false,
+      },
+    ],
+  ),
 );
 
 /** Starter Pokemon (player-selectable) */
@@ -97,8 +107,8 @@ export const STARTER_POKEMON: Record<string, PokemonData> = {
   tauros: POKEMON.tauros,
   snorlax: POKEMON.snorlax,
   kangaskhan: POKEMON.kangaskhan,
-  'nidoran-m': POKEMON['nidoran-m'],
-  'nidoran-f': POKEMON['nidoran-f'],
+  "nidoran-m": POKEMON["nidoran-m"],
+  "nidoran-f": POKEMON["nidoran-f"],
   rhyhorn: POKEMON.rhyhorn,
   drowzee: POKEMON.drowzee,
   growlithe: POKEMON.growlithe,
@@ -139,27 +149,39 @@ export const ENEMY_POKEMON: Record<string, PokemonData> = {
  */
 export function getMove(id: string): MoveDefinition {
   // Check for Parental Bond copy (e.g., "tackle__parental")
-  if (id.endsWith('__parental')) {
-    const baseId = id.replace('__parental', '');
+  if (id.endsWith("__parental")) {
+    const baseId = id.replace("__parental", "");
     const baseMove = MOVES[baseId];
     if (!baseMove) throw new Error(`Move not found: ${baseId}`);
 
     // Create a modified copy with 0 cost, vanish, and halved damage
     // Strip self-targeting effects (echoes are pure bonus hits, not full re-plays)
     const echoEffects = baseMove.effects
-      .filter(effect => effect.type !== 'add_echo_to_hand' && effect.type !== 'apply_status_self' && effect.type !== 'copy_enemy_card' && effect.type !== 'discard_intent')
-      .map(effect => {
+      .filter(
+        (effect) =>
+          effect.type !== "add_echo_to_hand" &&
+          effect.type !== "apply_status_self" &&
+          effect.type !== "copy_enemy_card" &&
+          effect.type !== "discard_intent",
+      )
+      .map((effect) => {
         // Halve all damage-dealing effects
         switch (effect.type) {
-          case 'damage':
-            return { ...effect, value: Math.floor(effect.value / 2), ...(effect.bonusValue !== undefined ? { bonusValue: Math.floor(effect.bonusValue / 2) } : {}) };
-          case 'multi_hit':
+          case "damage":
+            return {
+              ...effect,
+              value: Math.floor(effect.value / 2),
+              ...(effect.bonusValue !== undefined
+                ? { bonusValue: Math.floor(effect.bonusValue / 2) }
+                : {}),
+            };
+          case "multi_hit":
             return { ...effect, value: Math.floor(effect.value / 2) };
-          case 'recoil':
+          case "recoil":
             return { ...effect, value: Math.floor(effect.value / 2) };
-          case 'heal_on_hit':
+          case "heal_on_hit":
             return { ...effect, value: Math.floor(effect.value / 2) };
-          case 'self_ko':
+          case "self_ko":
             return { ...effect, value: Math.floor(effect.value / 2) };
           default:
             return effect;
@@ -167,7 +189,7 @@ export function getMove(id: string): MoveDefinition {
       });
     return {
       ...baseMove,
-      id: id,  // Keep the __parental suffix in the ID
+      id: id, // Keep the __parental suffix in the ID
       name: `${baseMove.name} (Echo)`,
       cost: 0,
       vanish: true,
@@ -184,7 +206,7 @@ export function getMove(id: string): MoveDefinition {
  * Check if a card ID is a Parental Bond copy.
  */
 export function isParentalBondCopy(id: string): boolean {
-  return id.endsWith('__parental');
+  return id.endsWith("__parental");
 }
 
 /**
@@ -214,5 +236,5 @@ export function getEnemyDeck(pokemonId: string, tier: number): string[] {
   const entry = ENEMY_DECKS[pokemonId];
   if (!entry) return getPokemon(pokemonId).deck;
   const key = `L${tier}`;
-  return [...(entry[key] ?? entry['L1'] ?? getPokemon(pokemonId).deck)];
+  return [...(entry[key] ?? entry["L1"] ?? getPokemon(pokemonId).deck)];
 }
