@@ -38,7 +38,10 @@ import {
   BattleEffectsLayer,
 } from "../components/BattleEffects";
 import type { BattlePhase } from "../hooks/useBattle";
-import type { TutorialHighlightTarget, TutorialZone } from "../../data/tutorial";
+import type {
+  TutorialHighlightTarget,
+  TutorialZone,
+} from "../../data/tutorial";
 import type { RunState } from "../../run/types";
 import { getBattleSpriteScale } from "../../data/heights";
 import { Flourish } from "../components/Flourish";
@@ -50,6 +53,14 @@ import { checkItemPlayRestriction } from "../../engine/itemEffects";
 import battleBgAct1 from "../../../assets/backgrounds/rocket_lab_act_1_v4.png";
 import { getRunActMapConfig } from "../../data/campaigns";
 import { playSound, type SoundEffect } from "../utils/sound";
+
+/**
+ * Returns `ms` in normal play, or 0 when the Playwright test server sets
+ * VITE_E2E_FAST=1.  Keeps the call site clean while keeping the env-var
+ * check in one place.  This var is never set in production or regular dev.
+ */
+const makeDelay = (ms: number) =>
+  import.meta.env.VITE_E2E_FAST === "1" ? 0 : ms;
 
 export type BattleResult = "victory" | "defeat";
 
@@ -147,7 +158,9 @@ function BattleGrid({
   futureSightColumns?: Set<Column>;
 }) {
   // Position fingerprint so useMemo recomputes after swaps (positions are mutated in place)
-  const posKey = combatants.map(c => `${c.id}:${c.position.row}:${c.position.column}`).join(',');
+  const posKey = combatants
+    .map((c) => `${c.id}:${c.position.row}:${c.position.column}`)
+    .join(",");
   const frontRow = useMemo(
     () => combatants.filter((c) => c.position.row === "front"),
     [combatants, posKey],
@@ -372,7 +385,8 @@ function BattleGrid({
       </div>
 
       {/* Future Sight column markers — pulsing psychic overlays on targeted columns */}
-      {futureSightColumns && futureSightColumns.size > 0 &&
+      {futureSightColumns &&
+        futureSightColumns.size > 0 &&
         ([0, 1, 2] as Column[])
           .filter((col) => futureSightColumns.has(col))
           .map((col) => {
@@ -401,7 +415,12 @@ function BattleGrid({
                   style={{ position: "absolute", inset: 0 }}
                 >
                   <defs>
-                    <radialGradient id={`fs-glow-${col}`} cx="50%" cy="50%" r="60%">
+                    <radialGradient
+                      id={`fs-glow-${col}`}
+                      cx="50%"
+                      cy="50%"
+                      r="60%"
+                    >
                       <stop offset="0%" stopColor="#f85888" stopOpacity="0.18">
                         <animate
                           attributeName="stopOpacity"
@@ -436,8 +455,8 @@ function BattleGrid({
                       key={i}
                       cx={(2 * CELL_W + ROW_GAP) / 2}
                       cy={CELL_H / 2}
-                      rx={r * (2 * CELL_W + ROW_GAP) / 2}
-                      ry={r * CELL_H / 2}
+                      rx={(r * (2 * CELL_W + ROW_GAP)) / 2}
+                      ry={(r * CELL_H) / 2}
                       fill="none"
                       stroke="#f85888"
                       strokeWidth="1.2"
@@ -445,13 +464,13 @@ function BattleGrid({
                     >
                       <animate
                         attributeName="rx"
-                        values={`${r * (2 * CELL_W + ROW_GAP) / 2};${(r + 0.08) * (2 * CELL_W + ROW_GAP) / 2};${r * (2 * CELL_W + ROW_GAP) / 2}`}
+                        values={`${(r * (2 * CELL_W + ROW_GAP)) / 2};${((r + 0.08) * (2 * CELL_W + ROW_GAP)) / 2};${(r * (2 * CELL_W + ROW_GAP)) / 2}`}
                         dur={`${2.2 + i * 0.4}s`}
                         repeatCount="indefinite"
                       />
                       <animate
                         attributeName="ry"
-                        values={`${r * CELL_H / 2};${(r + 0.08) * CELL_H / 2};${r * CELL_H / 2}`}
+                        values={`${(r * CELL_H) / 2};${((r + 0.08) * CELL_H) / 2};${(r * CELL_H) / 2}`}
                         dur={`${2.2 + i * 0.4}s`}
                         repeatCount="indefinite"
                       />
@@ -554,14 +573,18 @@ export function BattleScreen({
     const pending = state.pendingFutureSights;
     if (pending) {
       for (const entry of pending) {
-        const source = state.combatants.find(c => c.id === entry.sourceId && c.alive);
+        const source = state.combatants.find(
+          (c) => c.id === entry.sourceId && c.alive,
+        );
         if (source) cols.add(source.position.column);
       }
     }
     // Injected phantom turns that haven't resolved yet
     for (const entry of state.turnOrder) {
       if (entry.futureSight && !entry.hasActed) {
-        const source = state.combatants.find(c => c.id === entry.combatantId && c.alive);
+        const source = state.combatants.find(
+          (c) => c.id === entry.combatantId && c.alive,
+        );
         if (source) cols.add(source.position.column);
       }
     }
@@ -570,7 +593,7 @@ export function BattleScreen({
 
   // Simulate enemy intents during player turn for the preview display
   const enemyIntents = useMemo(() => {
-    if (phase !== 'player_turn' || state.phase !== 'ongoing') return null;
+    if (phase !== "player_turn" || state.phase !== "ongoing") return null;
     return simulateEnemyIntents(state);
   }, [state, phase]);
 
@@ -579,11 +602,11 @@ export function BattleScreen({
   const cachedIntentsRef = useRef<Map<string, EnemyIntent[]> | null>(null);
   if (enemyIntents !== null) {
     cachedIntentsRef.current = enemyIntents;
-  } else if (state.phase !== 'ongoing') {
+  } else if (state.phase !== "ongoing") {
     cachedIntentsRef.current = null;
   }
   const intentsForLayout = enemyIntents ?? cachedIntentsRef.current;
-  const intentsVisible = phase === 'player_turn';
+  const intentsVisible = phase === "player_turn";
 
   // Compute global sprite scale: if any Pokemon exceeds the cap, ALL scale down proportionally
   const spriteScale = useMemo(
@@ -678,13 +701,25 @@ export function BattleScreen({
     [onSwitchPosition],
   );
 
-  const handleDeselectCard = useCallback(() => onSelectCard(null), [onSelectCard]);
+  const handleDeselectCard = useCallback(
+    () => onSelectCard(null),
+    [onSelectCard],
+  );
 
-  const handleCancelSwitchMode = useCallback(() => setSwitchModeCombatantId(null), []);
+  const handleCancelSwitchMode = useCallback(
+    () => setSwitchModeCombatantId(null),
+    [],
+  );
 
   const handleToggleDraw = useCallback(() => togglePile("draw"), [togglePile]);
-  const handleToggleDiscard = useCallback(() => togglePile("discard"), [togglePile]);
-  const handleToggleVanished = useCallback(() => togglePile("vanished"), [togglePile]);
+  const handleToggleDiscard = useCallback(
+    () => togglePile("discard"),
+    [togglePile],
+  );
+  const handleToggleVanished = useCallback(
+    () => togglePile("vanished"),
+    [togglePile],
+  );
 
   const handleSwitchButtonClick = useCallback(() => {
     if (switchMode) {
@@ -710,7 +745,9 @@ export function BattleScreen({
     return indices;
   }, [state, currentCombatant]);
 
-  const shouldFlashEndTurn = isPlayerTurn && !!currentCombatant &&
+  const shouldFlashEndTurn =
+    isPlayerTurn &&
+    !!currentCombatant &&
     getPlayableCards(currentCombatant).length === 0;
 
   // Cancel switch mode on Escape
@@ -765,7 +802,14 @@ export function BattleScreen({
   // Destructure stable callbacks for use in effect dependency arrays.
   // Using the whole `battleEffects` object as a dep causes effects to re-run every
   // render because the object contains state arrays that change on each animation event.
-  const { addEvent, showCardPlayed, triggerCardFly, triggerStatusApplied, triggerRewind, triggerSandStream } = battleEffects;
+  const {
+    addEvent,
+    showCardPlayed,
+    triggerCardFly,
+    triggerStatusApplied,
+    triggerRewind,
+    triggerSandStream,
+  } = battleEffects;
   const processedLogsRef = useRef<number>(0);
 
   // Status diff tracking: detect new/increased statuses by comparing snapshots
@@ -943,7 +987,8 @@ export function BattleScreen({
 
       // Trigger vanish animation — must capture ghost BEFORE state update removes the card
       const isNativeVanish = card.vanish;
-      const isConsumingFlame = !card.vanish && shouldConsumingFlameVanish(currentCombatant, card);
+      const isConsumingFlame =
+        !card.vanish && shouldConsumingFlameVanish(currentCombatant, card);
       if (isNativeVanish) {
         handDisplayRef.current?.triggerVanish(draggingCardIndex);
       } else if (isConsumingFlame) {
@@ -1186,7 +1231,7 @@ export function BattleScreen({
       if (chargingMatch) {
         const sourceName = chargingMatch[1];
         const cardName = chargingMatch[2];
-        showCardPlayed(sourceName, cardName, 'CHARGING...');
+        showCardPlayed(sourceName, cardName, "CHARGING...");
       }
 
       // Parse self-KO detonation: "X's Card Name detonates!"
@@ -1194,7 +1239,7 @@ export function BattleScreen({
       if (detonateMatch) {
         const sourceName = detonateMatch[1];
         const cardName = detonateMatch[2];
-        showCardPlayed(sourceName, cardName, 'DETONATING!');
+        showCardPlayed(sourceName, cardName, "DETONATING!");
       }
 
       // Parse damage: "X takes Y damage" (most common pattern)
@@ -1299,9 +1344,7 @@ export function BattleScreen({
       );
       if (fsStrikeMatch) {
         const sourceName = fsStrikeMatch[1];
-        const source = state.combatants.find(
-          (c) => c.name === sourceName,
-        );
+        const source = state.combatants.find((c) => c.name === sourceName);
         if (source) {
           const sourcePos = getPositionForCombatant(source.id);
           if (sourcePos) {
@@ -1318,7 +1361,10 @@ export function BattleScreen({
                   (c) => c.name === targetName,
                 );
                 if (target) targetIds.add(target.id);
-              } else if (!futureLog.message.startsWith("Future Sight:") && !futureLog.message.match(/was KO'd by Future Sight/)) {
+              } else if (
+                !futureLog.message.startsWith("Future Sight:") &&
+                !futureLog.message.match(/was KO'd by Future Sight/)
+              ) {
                 break; // End of Future Sight log cluster
               }
             }
@@ -1346,9 +1392,7 @@ export function BattleScreen({
       if (rewindMatch) {
         // Find the ally who was reverted by name
         const allyName = rewindMatch[1];
-        const ally = state.combatants.find(
-          (c) => c.name === allyName,
-        );
+        const ally = state.combatants.find((c) => c.name === allyName);
         if (ally) {
           triggerRewind(ally.id);
         }
@@ -1356,7 +1400,9 @@ export function BattleScreen({
 
       // Parse Sand Stream: "Sand Stream: X's sandstorm deals N damage to Y!"
       // Only trigger the animation on the FIRST log for each source (scan ahead collects all targets)
-      const sandStreamMatch = log.message.match(/^Sand Stream: (.+?)'s sandstorm deals (\d+) damage to (.+?)!$/i);
+      const sandStreamMatch = log.message.match(
+        /^Sand Stream: (.+?)'s sandstorm deals (\d+) damage to (.+?)!$/i,
+      );
       if (sandStreamMatch && !sandStreamTriggered.has(sandStreamMatch[1])) {
         const sourceName = sandStreamMatch[1];
         sandStreamTriggered.add(sourceName);
@@ -1371,11 +1417,15 @@ export function BattleScreen({
 
           // Scan ahead for more Sand Stream hits from the same source
           for (let j = i + 1; j < newLogs.length; j++) {
-            const nextSsMatch = newLogs[j].message.match(/^Sand Stream: (.+?)'s sandstorm deals \d+ damage to (.+?)!$/i);
+            const nextSsMatch = newLogs[j].message.match(
+              /^Sand Stream: (.+?)'s sandstorm deals \d+ damage to (.+?)!$/i,
+            );
             if (nextSsMatch && nextSsMatch[1] === sourceName) {
-              const nextTarget = state.combatants.find((c) => c.name === nextSsMatch[2]);
+              const nextTarget = state.combatants.find(
+                (c) => c.name === nextSsMatch[2],
+              );
               if (nextTarget) targetIds.add(nextTarget.id);
-            } else if (!newLogs[j].message.startsWith('Sand Stream:')) {
+            } else if (!newLogs[j].message.startsWith("Sand Stream:")) {
               break;
             }
           }
@@ -1384,7 +1434,16 @@ export function BattleScreen({
         }
       }
     }
-  }, [logs, state.combatants, addEvent, showCardPlayed, triggerCardFly, triggerRewind, triggerSandStream, getPositionForCombatant]);
+  }, [
+    logs,
+    state.combatants,
+    addEvent,
+    showCardPlayed,
+    triggerCardFly,
+    triggerRewind,
+    triggerSandStream,
+    getPositionForCombatant,
+  ]);
 
   // Detect status changes via state diffing (handles ALL sources: moves, passives, etc.)
   useEffect(() => {
@@ -1400,9 +1459,27 @@ export function BattleScreen({
     const prev = prevStatusRef.current;
     // Only diff if we have a previous snapshot (skip initial render)
     if (prev.size > 0) {
-      const BUFF_STATUSES = new Set(["strength", "haste", "evasion", "mobile", "energize", "luck"]);
-      const STATUS_CONDITION_TYPES = new Set(["burn", "poison", "paralysis", "sleep", "leech"]);
-      const STAT_LOWER_TYPES = new Set(["enfeeble", "slow", "taunt", "provoke"]);
+      const BUFF_STATUSES = new Set([
+        "strength",
+        "haste",
+        "evasion",
+        "mobile",
+        "energize",
+        "luck",
+      ]);
+      const STATUS_CONDITION_TYPES = new Set([
+        "burn",
+        "poison",
+        "paralysis",
+        "sleep",
+        "leech",
+      ]);
+      const STAT_LOWER_TYPES = new Set([
+        "enfeeble",
+        "slow",
+        "taunt",
+        "provoke",
+      ]);
       let statusSoundPlayed = false;
       for (const c of state.combatants) {
         const prevStatuses = prev.get(c.id);
@@ -1600,7 +1677,8 @@ export function BattleScreen({
 
       // Trigger vanish animation — must capture ghost BEFORE state update removes the card
       const isNativeVanish = card.vanish;
-      const isConsumingFlame = !card.vanish && shouldConsumingFlameVanish(currentCombatant, card);
+      const isConsumingFlame =
+        !card.vanish && shouldConsumingFlameVanish(currentCombatant, card);
       if (isNativeVanish && pendingCardIndex !== null) {
         handDisplayRef.current?.triggerVanish(pendingCardIndex);
       } else if (isConsumingFlame && pendingCardIndex !== null) {
@@ -1679,11 +1757,17 @@ export function BattleScreen({
   useEffect(() => {
     if (victoryStage === "celebrating") {
       playSound("win_battle");
-      const timer = setTimeout(() => setVictoryStage("draft_message"), 1000);
+      const timer = setTimeout(
+        () => setVictoryStage("draft_message"),
+        makeDelay(1000),
+      );
       return () => clearTimeout(timer);
     }
     if (victoryStage === "draft_message") {
-      const timer = setTimeout(() => setVictoryStage("transitioning"), 1200);
+      const timer = setTimeout(
+        () => setVictoryStage("transitioning"),
+        makeDelay(1200),
+      );
       return () => clearTimeout(timer);
     }
     if (
@@ -1711,13 +1795,17 @@ export function BattleScreen({
   const act = runState?.currentAct ?? 1;
   const [battleBackground, setBattleBackground] = useState<string>(() => {
     // Use campaign-specific combat background if available, otherwise default to C1 act 1
-    const campaignBg = runState ? getRunActMapConfig(runState).combatBackgroundImage : null;
+    const campaignBg = runState
+      ? getRunActMapConfig(runState).combatBackgroundImage
+      : null;
     return campaignBg ?? battleBgAct1;
   });
 
   useEffect(() => {
     // Campaign-specific combat background takes priority (variant-aware via getRunActMapConfig)
-    const campaignBg = runState ? getRunActMapConfig(runState).combatBackgroundImage : null;
+    const campaignBg = runState
+      ? getRunActMapConfig(runState).combatBackgroundImage
+      : null;
     if (campaignBg) {
       setBattleBackground(campaignBg);
       return;
@@ -1766,10 +1854,7 @@ export function BattleScreen({
           zIndex: 10,
         }}
       >
-        <div
-          style={{ flex: 1 }}
-          data-tutorial-id="turn_order"
-        >
+        <div style={{ flex: 1 }} data-tutorial-id="turn_order">
           <TurnOrderBar
             state={state}
             enemyIntents={intentsForLayout ?? undefined}
@@ -1996,7 +2081,10 @@ export function BattleScreen({
         }}
       >
         {currentCombatant && currentCombatant.heldItemIds.length > 0 && (
-          <HeldItemsSidebar itemIds={currentCombatant.heldItemIds} ownerName={currentCombatant.name} />
+          <HeldItemsSidebar
+            itemIds={currentCombatant.heldItemIds}
+            ownerName={currentCombatant.name}
+          />
         )}
         <BattleLog logs={logs} />
       </div>
@@ -2051,23 +2139,23 @@ export function BattleScreen({
 
             {/* Hand cards (center) */}
             <div data-tutorial-id="hand">
-            <HandDisplay
-              ref={handDisplayRef}
-              combatant={currentCombatant}
-              selectedIndex={pendingCardIndex}
-              onSelectCard={handleCardClick}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              draggingIndex={draggingCardIndex}
-              unplayableCardIndices={unplayableCardIndices}
-              tutorialHighlightCardType={
-                tutorialConfig?.highlightTarget === "attack_cards"
-                  ? "attack"
-                  : tutorialConfig?.highlightTarget === "defend_cards"
-                    ? "defend"
-                    : undefined
-              }
-            />
+              <HandDisplay
+                ref={handDisplayRef}
+                combatant={currentCombatant}
+                selectedIndex={pendingCardIndex}
+                onSelectCard={handleCardClick}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                draggingIndex={draggingCardIndex}
+                unplayableCardIndices={unplayableCardIndices}
+                tutorialHighlightCardType={
+                  tutorialConfig?.highlightTarget === "attack_cards"
+                    ? "attack"
+                    : tutorialConfig?.highlightTarget === "defend_cards"
+                      ? "defend"
+                      : undefined
+                }
+              />
             </div>
 
             {/* Energy vessel + Switch + End Turn (right of hand) */}
@@ -2080,11 +2168,11 @@ export function BattleScreen({
               }}
             >
               <div data-tutorial-id="energy">
-              <EnergyPips
-                energy={currentCombatant.energy}
-                energyCap={currentCombatant.energyCap}
-                variant="vessel"
-              />
+                <EnergyPips
+                  energy={currentCombatant.energy}
+                  energyCap={currentCombatant.energyCap}
+                  variant="vessel"
+                />
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 {/* Switch button — ornate with cost badge */}
@@ -2092,7 +2180,8 @@ export function BattleScreen({
                   (() => {
                     const swCost = getSwitchCost(currentCombatant);
                     const maxSw = getMaxSwitches(currentCombatant);
-                    const switchesLeft = maxSw - currentCombatant.turnFlags.switchesThisTurn;
+                    const switchesLeft =
+                      maxSw - currentCombatant.turnFlags.switchesThisTurn;
                     const canSwitch =
                       switchesLeft > 0 &&
                       currentCombatant.energy >= swCost &&

@@ -204,20 +204,13 @@ export async function completeBattle(page: Page, _expectedEnemyCount?: number): 
   // Wait for it to be the player's turn (hand is visible)
   await page.locator('[data-tutorial-id="hand"]').waitFor({ timeout: 15_000 });
 
-  // Note: expectedEnemyCount is accepted but not asserted here — the selector
-  // needed to count only enemies (vs the player) would require additional
-  // data-testid attributes on the battle grid. We validate enemies indirectly:
-  // God's Wrath hits all_enemies for 999 damage, so if any enemies are present
-  // the battle resolves to victory. If the node has no enemies, the battle
-  // would never start and the hand timeout below would fire.
-
   // Click the first available (affordable) card in hand — God's Wrath
   // CardDisplay renders a <div draggable="true" onClick={...}> when affordable
   const firstCard = page.locator('[data-tutorial-id="hand"]').locator('[draggable="true"]').first();
   await firstCard.click();
 
-  // God's Wrath (all_enemies, cost 0) plays immediately — no target selection needed.
-  // Wait for the battle screen to disappear (transition to card_draft, item_reward, etc.)
+  // Wait for the battle to resolve.  With VITE_E2E_FAST=1 both victory
+  // animation delays are 0ms so onBattleEnd fires almost immediately.
   await waitForScreenTransitionFromBattle(page);
 }
 

@@ -1903,6 +1903,10 @@ describe('Item Battle Simulations', () => {
     });
 
     it('Full battle: Fuchsia Shuriken Ember applies burn 4 (doubled)', () => {
+      // Charmander's only usable attack here is Ember (any_enemy). scratch/metal-claw
+      // are front_enemy and also blocked by Fuchsia Shuriken's restriction. Without
+      // prioritizeCards the deck shuffles randomly and Charmander may never draw Ember
+      // before dying — causing a flaky failure on CI where shuffle order differs.
       const result = runItemBattle({
         players: [{ pokemonId: 'charmander', position: F1, itemId: 'fuchsia_shuriken' }],
         enemies: [{ pokemonId: 'snorlax', position: F1 }],
@@ -1945,9 +1949,14 @@ describe('Item Battle Simulations', () => {
     });
 
     it('Full battle: Choice Specs logs "+8 damage"', () => {
+      // Choice Specs blocks front_enemy attacks, so scratch and metal-claw are unplayable.
+      // Ember (any_enemy) is Charmander's only valid attack. Without prioritizeCards the
+      // deck shuffles randomly and Charmander may draw only blocked/non-attack cards
+      // before dying — causing a flaky failure on CI where shuffle order differs.
       const result = runItemBattle({
         players: [{ pokemonId: 'charmander', position: F1, itemId: 'choice_specs' }],
         enemies: [{ pokemonId: 'snorlax', position: F1 }],
+        prioritizeCards: ['ember'],
       });
       expect(result.error).toBeUndefined();
       expect(result.log.some(l => l.includes('choice_specs') && l.includes('+8 damage'))).toBe(true);
