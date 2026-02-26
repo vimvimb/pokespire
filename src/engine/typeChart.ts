@@ -168,6 +168,7 @@ const TYPE_CHART: Record<MoveType, Partial<Record<MoveType, number>>> = {
     steel: NOT_EFFECTIVE,
     fire: NOT_EFFECTIVE,
   },
+  generic: {}, // Typeless cards, no type interactions
   item: {}, // Items don't deal damage, no type interactions
 };
 
