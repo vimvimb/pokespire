@@ -7463,5 +7463,258 @@
     "description": "Deal 999 damage to all enemies.",
     "uncollectible": true,
     "testOnly": true
+  },
+
+  "brace": {
+    "name": "Brace",
+    "cost": 1,
+    "type": "generic",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 10 }
+    ],
+    "rarity": "common",
+    "pools": ["generic"],
+    "description": "Gain 10 Block."
+  },
+  "dig-in": {
+    "name": "Dig In",
+    "cost": 2,
+    "type": "generic",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 16 },
+      { "type": "draw_cards", "count": 1 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["generic"],
+    "description": "Gain 16 Block. Draw 1 card."
+  },
+  "hold-fast": {
+    "name": "Hold Fast",
+    "cost": 1,
+    "type": "generic",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 5, "frontRowBonus": 10 }
+    ],
+    "rarity": "common",
+    "pools": ["generic"],
+    "description": "Gain 5 Block. If in front row, gain 10 instead."
+  },
+  "shell-trap": {
+    "name": "Shell Trap",
+    "cost": 1,
+    "type": "water",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 7 },
+      { "type": "block", "value": 5 }
+    ],
+    "rarity": "common",
+    "pools": ["water"],
+    "description": "Deal 7 damage. Gain 5 Block.",
+    "contact": false
+  },
+  "spiky-shield": {
+    "name": "Spiky Shield",
+    "cost": 1,
+    "type": "grass",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 8 },
+      { "type": "apply_status_self", "status": "thorns", "stacks": 1 }
+    ],
+    "rarity": "common",
+    "pools": ["grass"],
+    "description": "Gain 8 Block and 1 Thorns."
+  },
+  "magnet-rise": {
+    "name": "Magnet Rise",
+    "cost": 1,
+    "type": "electric",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 5 },
+      { "type": "block", "value": 6 }
+    ],
+    "rarity": "common",
+    "pools": ["electric"],
+    "description": "Deal 5 damage. Gain 6 Block.",
+    "contact": false
+  },
+  "psyshield-bash": {
+    "name": "Psyshield Bash",
+    "cost": 2,
+    "type": "psychic",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 10 },
+      { "type": "block", "value": 8 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["psychic"],
+    "description": "Deal 10 damage to any enemy. Gain 8 Block.",
+    "contact": true
+  },
+  "body-press": {
+    "name": "Body Press",
+    "cost": 2,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 0, "blockScaling": true },
+      { "type": "block", "value": 6 }
+    ],
+    "rarity": "rare",
+    "pools": ["fighting"],
+    "description": "Deal damage equal to your Block. Gain 6 Block.",
+    "contact": true
+  },
+  "baneful-bunker": {
+    "name": "Baneful Bunker",
+    "cost": 1,
+    "type": "poison",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 7 },
+      { "type": "guard_status", "statusType": "poison", "stacks": 1 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["poison"],
+    "description": "Gain 7 Block. Guard: if hit this turn, poison attacker."
+  },
+  "rock-tomb": {
+    "name": "Rock Tomb",
+    "cost": 1,
+    "type": "ground",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [
+      { "type": "damage", "value": 6 },
+      { "type": "block", "value": 5 }
+    ],
+    "rarity": "common",
+    "pools": ["ground"],
+    "description": "Deal 6 damage. Gain 5 Block.",
+    "contact": false
+  },
+  "wide-guard": {
+    "name": "Wide Guard",
+    "cost": 1,
+    "type": "rock",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 5 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["rock"],
+    "description": "Gain 5 Block. Row allies gain 3 Block."
+  },
+  "sky-guard": {
+    "name": "Sky Guard",
+    "cost": 1,
+    "type": "flying",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 6 },
+      { "type": "apply_status_self", "status": "evasion", "stacks": 1 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["flying"],
+    "description": "Gain 6 Block and 1 Evasion."
+  },
+  "silk-trap": {
+    "name": "Silk Trap",
+    "cost": 1,
+    "type": "bug",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 6 },
+      { "type": "guard_status", "statusType": "slow", "stacks": 1 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["bug"],
+    "description": "Gain 6 Block. Guard: if hit this turn, slow attacker."
+  },
+  "aurora-veil": {
+    "name": "Aurora Veil",
+    "cost": 2,
+    "type": "ice",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 6 }
+    ],
+    "rarity": "rare",
+    "pools": ["ice"],
+    "description": "Gain 6 Block. All allies gain 4 Block."
+  },
+  "scale-shield": {
+    "name": "Scale Shield",
+    "cost": 1,
+    "type": "dragon",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 5 },
+      { "type": "apply_status_self", "status": "strength", "stacks": 1 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["dragon"],
+    "description": "Gain 5 Block and 1 Strength."
+  },
+  "kings-shield": {
+    "name": "King's Shield",
+    "cost": 1,
+    "type": "steel",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 8 },
+      { "type": "guard_status", "statusType": "enfeeble", "stacks": 1 }
+    ],
+    "rarity": "rare",
+    "pools": ["steel"],
+    "description": "Gain 8 Block. Guard: if hit this turn, enfeeble attacker."
+  },
+  "obstruct": {
+    "name": "Obstruct",
+    "cost": 1,
+    "type": "dark",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 7 },
+      { "type": "guard_status", "statusType": "slow", "stacks": 1 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["dark"],
+    "description": "Gain 7 Block. Guard: if hit this turn, slow attacker."
+  },
+  "crafty-shield": {
+    "name": "Crafty Shield",
+    "cost": 1,
+    "type": "fairy",
+    "range": "self",
+    "vanish": false,
+    "effects": [
+      { "type": "block", "value": 6 }
+    ],
+    "rarity": "uncommon",
+    "pools": ["fairy"],
+    "description": "Gain 6 Block. Column ally gains 3 Block."
   }
 }

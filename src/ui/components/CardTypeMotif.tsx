@@ -356,6 +356,18 @@ function renderMotif(type: MoveType, main: string, faint: string, subtle: string
         </g>
       );
 
+    case 'generic':
+      // Simple flat horizontal line — minimal, denotes absence of type
+      return (
+        <g>
+          <line x1="30" y1="20" x2="100" y2="20" stroke={main} strokeWidth="1.5" />
+          <circle cx="30" cy="20" r="2" fill={faint} />
+          <circle cx="100" cy="20" r="2" fill={faint} />
+          <line x1="45" y1="16" x2="85" y2="16" stroke={subtle} strokeWidth="0.8" />
+          <line x1="45" y1="24" x2="85" y2="24" stroke={subtle} strokeWidth="0.8" />
+        </g>
+      );
+
     case 'item':
       // Potion spray bottle — rounded body with nozzle spraying mist
       return (

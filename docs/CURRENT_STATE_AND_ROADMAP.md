@@ -210,9 +210,9 @@ Each Pokemon has 4 progression levels. Passives **stack** (not replaced) as you 
 | 1     | Pikachu | **Numbing Strike** - Unblocked Electric attacks apply +1 Paralysis | -                              |
 | 2     | Pikachu | **Static Field** - Take reduced damage from slower enemies         | -                              |
 | 3     | Pikachu | **Counter-Current** - Deal bonus damage to slower enemies          | -                              |
-| 4     | Raichu  | No new passive (speed -2, +20 HP)                                  | Body Slam, Mega Punch, Thunder |
+| 4     | Raichu  | No new passive (+20 HP)                                            | Body Slam, Mega Punch, Thunder |
 
-**Unique Design:** Pikachu doesn't evolve until level 4, gaining all three speed-based passives first. Raichu evolution is a tradeoff: sacrificing speed advantage for tankiness and powerful cards.
+**Unique Design:** Pikachu doesn't evolve until level 4, gaining all three speed-based passives first. Raichu evolution trades up for tankiness (+20 HP) and powerful cards.
 
 ---
 
@@ -246,10 +246,10 @@ Single act with branching paths leading to Mewtwo as the final boss.
 
 | Pokemon    | Types        | HP  | Speed | Starter Deck                                                                       |
 | ---------- | ------------ | --- | ----- | ---------------------------------------------------------------------------------- |
-| Charmander | Fire         | 30  | 6     | Scratch x3, Defend x2, Ember x2, Metal Claw, Smokescreen, Growl                    |
-| Squirtle   | Water        | 38  | 4     | Tackle x3, Defend x2, Water Gun x2, Withdraw, Bubble, Tail Whip                    |
-| Bulbasaur  | Grass/Poison | 36  | 5     | Tackle x3, Defend x2, Vine Whip x2, Leech Seed, Growth, Poison Powder              |
-| Pikachu    | Electric     | 28  | 8     | Quick Attack x3, Defend x2, Thunder Shock x2, Thunder Wave, Double Team, Tail Whip |
+| Charmander | Fire         | 30  | 15    | Scratch x3, Defend x2, Ember x2, Metal Claw, Smokescreen, Growl                    |
+| Squirtle   | Water        | 38  | 11    | Tackle x3, Defend x2, Water Gun x2, Withdraw, Bubble, Tail Whip                    |
+| Bulbasaur  | Grass/Poison | 36  | 10    | Tackle x3, Defend x2, Vine Whip x2, Leech Seed, Growth, Poison Powder              |
+| Pikachu    | Electric     | 28  | 19    | Quick Attack x3, Defend x2, Thunder Shock x2, Thunder Wave, Double Team, Tail Whip |
 
 ### Enemy Pokemon (10+)
 
@@ -294,7 +294,7 @@ Unlike typical RPGs where abilities replace each other, Pokespire passives **sta
 
 ## Meaningful Tradeoffs
 
-Raichu's evolution exemplifies this - trading Pikachu's exceptional speed (and passive effectiveness) for raw stats and powerful cards.
+Raichu's evolution exemplifies this - trading up for raw stats (+20 HP) and powerful cards while keeping Pikachu's speed-based passives.
 
 ## Difficulty Philosophy
 

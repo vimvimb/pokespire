@@ -63,6 +63,7 @@ function filterByRarity(cards: MoveDefinition[], rarity: CardRarity): MoveDefini
 /**
  * Build the combined type pool for a Pokemon based on their types.
  * Dual-type Pokemon get cards from both type pools.
+ * Generic cards are included in ALL type pools.
  */
 export function buildTypePool(types: MoveType[]): MoveDefinition[] {
   const seen = new Set<string>();
@@ -74,6 +75,14 @@ export function buildTypePool(types: MoveType[]): MoveDefinition[] {
         seen.add(card.id);
         pool.push(card);
       }
+    }
+  }
+
+  // Generic cards appear in all type pools
+  for (const card of getCardsInPool('generic')) {
+    if (!seen.has(card.id)) {
+      seen.add(card.id);
+      pool.push(card);
     }
   }
 

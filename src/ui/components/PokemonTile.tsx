@@ -24,6 +24,7 @@ export const TYPE_COLORS: Record<MoveType, string> = {
   ground: '#e0c068',
   steel: '#b8b8d0',
   fairy: '#ee99ac',
+  generic: '#8a8a8a',
   item: '#4ade80',
 };
 

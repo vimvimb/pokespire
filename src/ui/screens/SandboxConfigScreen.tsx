@@ -27,7 +27,7 @@ const AVAILABLE_POKEMON = Object.keys(PROGRESSION_TREES)
 const ALL_TYPES: MoveType[] = [
   'normal', 'fire', 'water', 'grass', 'electric', 'poison',
   'flying', 'psychic', 'dark', 'fighting', 'ice', 'bug',
-  'dragon', 'ghost', 'rock', 'ground', 'steel', 'fairy', 'item',
+  'dragon', 'ghost', 'rock', 'ground', 'steel', 'fairy', 'generic', 'item',
 ];
 
 const ALL_RARITIES: CardRarity[] = [

@@ -1,16 +1,23 @@
 {
   "bulbasaur": {
     "name": "Bulbasaur",
-    "types": ["grass", "poison"],
+    "types": [
+      "grass",
+      "poison"
+    ],
     "maxHp": 36,
-    "baseSpeed": 4,
+    "baseSpeed": 10,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "vine-whip", "vine-whip",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "vine-whip",
+      "vine-whip",
       "leech-seed",
       "growth",
       "poison-powder"
@@ -20,16 +27,23 @@
   },
   "ivysaur": {
     "name": "Ivysaur",
-    "types": ["grass", "poison"],
+    "types": [
+      "grass",
+      "poison"
+    ],
     "maxHp": 46,
-    "baseSpeed": 5,
+    "baseSpeed": 11,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "vine-whip", "vine-whip",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "vine-whip",
+      "vine-whip",
       "leech-seed",
       "growth",
       "poison-powder"
@@ -38,16 +52,23 @@
   },
   "venusaur": {
     "name": "Venusaur",
-    "types": ["grass", "poison"],
+    "types": [
+      "grass",
+      "poison"
+    ],
     "maxHp": 56,
-    "baseSpeed": 5,
+    "baseSpeed": 12,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "vine-whip", "vine-whip",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "vine-whip",
+      "vine-whip",
       "leech-seed",
       "growth",
       "poison-powder"
@@ -56,35 +77,47 @@
   },
   "squirtle": {
     "name": "Squirtle",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 38,
-    "baseSpeed": 4,
+    "baseSpeed": 11,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "water-gun", "water-gun",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "water-gun",
+      "water-gun",
       "withdraw",
       "bubble",
-      "tail-whip"
+      "shell-trap"
     ],
     "abilities": [],
     "description": "Builds an impenetrable shell, then channels its defenses into crushing force."
   },
   "wartortle": {
     "name": "Wartortle",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 48,
-    "baseSpeed": 5,
+    "baseSpeed": 12,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "water-gun", "water-gun",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "water-gun",
+      "water-gun",
       "withdraw",
       "bubble",
       "tail-whip"
@@ -93,16 +126,22 @@
   },
   "blastoise": {
     "name": "Blastoise",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 58,
-    "baseSpeed": 5,
+    "baseSpeed": 13,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "water-gun", "water-gun",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "water-gun",
+      "water-gun",
       "withdraw",
       "bubble",
       "tail-whip"
@@ -111,16 +150,22 @@
   },
   "charmander": {
     "name": "Charmander",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 32,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
-      "defend", "defend",
-      "ember", "ember",
+      "scratch",
+      "scratch",
+      "scratch",
+      "defend",
+      "defend",
+      "ember",
+      "ember",
       "metal-claw",
       "smokescreen",
       "growl"
@@ -130,16 +175,22 @@
   },
   "charmeleon": {
     "name": "Charmeleon",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 42,
-    "baseSpeed": 6,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
-      "defend", "defend",
-      "ember", "ember",
+      "scratch",
+      "scratch",
+      "scratch",
+      "defend",
+      "defend",
+      "ember",
+      "ember",
       "metal-claw",
       "smokescreen",
       "growl"
@@ -148,16 +199,23 @@
   },
   "charizard": {
     "name": "Charizard",
-    "types": ["fire", "flying"],
+    "types": [
+      "fire",
+      "flying"
+    ],
     "maxHp": 52,
-    "baseSpeed": 6,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
-      "defend", "defend",
-      "ember", "ember",
+      "scratch",
+      "scratch",
+      "scratch",
+      "defend",
+      "defend",
+      "ember",
+      "ember",
       "metal-claw",
       "smokescreen",
       "growl"
@@ -166,16 +224,22 @@
   },
   "pikachu": {
     "name": "Pikachu",
-    "types": ["electric"],
+    "types": [
+      "electric"
+    ],
     "maxHp": 28,
-    "baseSpeed": 8,
+    "baseSpeed": 19,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "quick-attack", "quick-attack", "quick-attack",
-      "defend", "defend",
-      "thunder-shock", "thunder-shock",
+      "quick-attack",
+      "quick-attack",
+      "quick-attack",
+      "defend",
+      "defend",
+      "thunder-shock",
+      "thunder-shock",
       "thunder-wave",
       "double-team",
       "tail-whip"
@@ -185,16 +249,22 @@
   },
   "raichu": {
     "name": "Raichu",
-    "types": ["electric"],
+    "types": [
+      "electric"
+    ],
     "maxHp": 48,
-    "baseSpeed": 8,
+    "baseSpeed": 19,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "quick-attack", "quick-attack", "quick-attack",
-      "defend", "defend",
-      "thunder-shock", "thunder-shock",
+      "quick-attack",
+      "quick-attack",
+      "quick-attack",
+      "defend",
+      "defend",
+      "thunder-shock",
+      "thunder-shock",
       "thunder-wave",
       "double-team",
       "tail-whip"
@@ -203,16 +273,22 @@
   },
   "rattata": {
     "name": "Rattata",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 23,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch",
-      "bite", "bite",
+      "tackle",
+      "tackle",
+      "tackle",
+      "scratch",
+      "scratch",
+      "bite",
+      "bite",
       "tail-whip",
       "defend",
       "focus-energy"
@@ -222,37 +298,49 @@
   },
   "pidgey": {
     "name": "Pidgey",
-    "types": ["normal", "flying"],
+    "types": [
+      "normal",
+      "flying"
+    ],
     "maxHp": 22,
-    "baseSpeed": 6,
+    "baseSpeed": 18,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "peck", "peck",
-      "wing-attack", "wing-attack",
-      "gust", "gust",
+      "peck",
+      "peck",
+      "wing-attack",
+      "wing-attack",
+      "gust",
+      "gust",
       "sand-attack",
       "quick-attack",
-      "defend", "defend"
+      "defend",
+      "defend"
     ],
     "abilities": [],
     "description": "Commands winds for speed control."
   },
   "ekans": {
     "name": "Ekans",
-    "types": ["poison"],
+    "types": [
+      "poison"
+    ],
     "maxHp": 25,
-    "baseSpeed": 4,
+    "baseSpeed": 14,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "bite", "bite",
-      "poison-sting", "poison-sting",
+      "bite",
+      "bite",
+      "poison-sting",
+      "poison-sting",
       "wrap",
       "hiss",
-      "defend", "defend",
+      "defend",
+      "defend",
       "acid",
       "smog"
     ],
@@ -261,35 +349,47 @@
   },
   "snorlax": {
     "name": "Snorlax",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 100,
     "baseSpeed": 2,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "headbutt", "headbutt",
-      "body-slam", "body-slam",
+      "tackle",
+      "headbutt",
+      "headbutt",
+      "body-slam",
+      "body-slam",
       "rest",
-      "defend", "defend",
-      "sing"
+      "defend",
+      "defend",
+      "sing",
+      "brace"
     ],
     "abilities": [],
     "description": "Sleeps to heal, eats damage for breakfast. Outlasts everything."
   },
   "raticate": {
     "name": "Raticate",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 38,
-    "baseSpeed": 6,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch",
-      "bite", "bite",
+      "tackle",
+      "tackle",
+      "tackle",
+      "scratch",
+      "scratch",
+      "bite",
+      "bite",
       "tail-whip",
       "defend",
       "focus-energy"
@@ -298,18 +398,23 @@
   },
   "arbok": {
     "name": "Arbok",
-    "types": ["poison"],
+    "types": [
+      "poison"
+    ],
     "maxHp": 48,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "bite", "bite",
-      "poison-sting", "poison-sting",
+      "bite",
+      "bite",
+      "poison-sting",
+      "poison-sting",
       "wrap",
       "hiss",
-      "defend", "defend",
+      "defend",
+      "defend",
       "acid",
       "smog"
     ],
@@ -317,113 +422,146 @@
   },
   "pidgeotto": {
     "name": "Pidgeotto",
-    "types": ["normal", "flying"],
+    "types": [
+      "normal",
+      "flying"
+    ],
     "maxHp": 40,
-    "baseSpeed": 7,
+    "baseSpeed": 19,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "peck", "peck",
-      "wing-attack", "wing-attack",
-      "gust", "gust",
+      "peck",
+      "peck",
+      "wing-attack",
+      "wing-attack",
+      "gust",
+      "gust",
       "sand-attack",
       "quick-attack",
-      "defend", "defend"
+      "defend",
+      "defend"
     ],
     "abilities": []
   },
   "pidgeot": {
     "name": "Pidgeot",
-    "types": ["normal", "flying"],
+    "types": [
+      "normal",
+      "flying"
+    ],
     "maxHp": 55,
-    "baseSpeed": 8,
+    "baseSpeed": 20,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "peck", "peck",
-      "wing-attack", "wing-attack",
-      "gust", "gust",
+      "peck",
+      "peck",
+      "wing-attack",
+      "wing-attack",
+      "gust",
+      "gust",
       "sand-attack",
       "quick-attack",
-      "defend", "defend"
+      "defend",
+      "defend"
     ],
     "abilities": []
   },
   "tauros": {
     "name": "Tauros",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 55,
-    "baseSpeed": 7,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "stomp", "stomp",
+      "tackle",
+      "tackle",
+      "stomp",
+      "stomp",
       "take-down",
       "thrash",
-      "rage",
+      "brace",
       "horn-attack",
-      "defend", "defend"
+      "defend",
+      "defend"
     ],
     "abilities": [],
     "description": "Gets angrier as it bleeds. Hits harder the closer it is to falling."
   },
   "kangaskhan": {
     "name": "Kangaskhan",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 50,
-    "baseSpeed": 6,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "comet-punch", "comet-punch",
+      "comet-punch",
+      "comet-punch",
       "mega-punch",
       "dizzy-punch",
-      "bite", "bite",
+      "bite",
+      "bite",
       "counter",
-      "rage",
-      "defend", "defend"
+      "brace",
+      "defend",
+      "defend"
     ],
     "abilities": [],
     "description": "Every punch lands twice. Protects allies by absorbing hits nearby."
   },
   "mewtwo": {
     "name": "Mewtwo",
-    "types": ["psychic"],
+    "types": [
+      "psychic"
+    ],
     "maxHp": 250,
-    "baseSpeed": 10,
+    "baseSpeed": 20,
     "energyPerTurn": 5,
     "energyCap": 12,
     "handSize": 6,
     "deck": [
-      "psystrike", "psystrike",
+      "psystrike",
+      "psystrike",
       "body-slam",
       "psychic",
       "shadow-ball",
       "thunderbolt",
       "ice-beam",
       "flamethrower",
-      "barrier", "barrier",
+      "barrier",
+      "barrier",
       "recover"
     ],
     "abilities": []
   },
   "persian": {
     "name": "Persian",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 48,
-    "baseSpeed": 8,
+    "baseSpeed": 20,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch",
-      "bite", "bite",
-      "defend", "defend",
+      "scratch",
+      "scratch",
+      "bite",
+      "bite",
+      "defend",
+      "defend",
       "pay-day",
       "fake-out",
       "pay-day",
@@ -433,16 +571,21 @@
   },
   "nidoran-m": {
     "name": "Nidoran♂",
-    "types": ["poison"],
+    "types": [
+      "poison"
+    ],
     "maxHp": 30,
-    "baseSpeed": 5,
+    "baseSpeed": 13,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "peck", "peck",
-      "defend", "defend",
-      "poison-sting", "poison-sting",
+      "peck",
+      "peck",
+      "defend",
+      "defend",
+      "poison-sting",
+      "poison-sting",
       "smog",
       "horn-attack",
       "leer",
@@ -453,16 +596,21 @@
   },
   "nidorino": {
     "name": "Nidorino",
-    "types": ["poison"],
+    "types": [
+      "poison"
+    ],
     "maxHp": 40,
-    "baseSpeed": 6,
+    "baseSpeed": 14,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "peck", "peck",
-      "defend", "defend",
-      "poison-sting", "poison-sting",
+      "peck",
+      "peck",
+      "defend",
+      "defend",
+      "poison-sting",
+      "poison-sting",
       "smog",
       "horn-attack",
       "leer",
@@ -472,16 +620,22 @@
   },
   "nidoking": {
     "name": "Nidoking",
-    "types": ["poison", "ground"],
+    "types": [
+      "poison",
+      "ground"
+    ],
     "maxHp": 52,
-    "baseSpeed": 6,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "peck", "peck",
-      "defend", "defend",
-      "poison-sting", "poison-sting",
+      "peck",
+      "peck",
+      "defend",
+      "defend",
+      "poison-sting",
+      "poison-sting",
       "smog",
       "horn-attack",
       "leer",
@@ -491,17 +645,21 @@
   },
   "nidoran-f": {
     "name": "Nidoran♀",
-    "types": ["poison"],
+    "types": [
+      "poison"
+    ],
     "maxHp": 32,
-    "baseSpeed": 4,
+    "baseSpeed": 12,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
       "scratch",
       "counter",
-      "defend", "defend",
-      "poison-sting", "poison-sting",
+      "defend",
+      "defend",
+      "poison-sting",
+      "poison-sting",
       "smog",
       "bite",
       "tail-whip",
@@ -512,17 +670,21 @@
   },
   "nidorina": {
     "name": "Nidorina",
-    "types": ["poison"],
+    "types": [
+      "poison"
+    ],
     "maxHp": 42,
-    "baseSpeed": 5,
+    "baseSpeed": 13,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
       "scratch",
       "counter",
-      "defend", "defend",
-      "poison-sting", "poison-sting",
+      "defend",
+      "defend",
+      "poison-sting",
+      "poison-sting",
       "smog",
       "bite",
       "tail-whip",
@@ -532,17 +694,22 @@
   },
   "nidoqueen": {
     "name": "Nidoqueen",
-    "types": ["poison", "ground"],
+    "types": [
+      "poison",
+      "ground"
+    ],
     "maxHp": 55,
-    "baseSpeed": 5,
+    "baseSpeed": 14,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
       "scratch",
       "counter",
-      "defend", "defend",
-      "poison-sting", "poison-sting",
+      "defend",
+      "defend",
+      "poison-sting",
+      "poison-sting",
       "smog",
       "bite",
       "tail-whip",
@@ -552,18 +719,25 @@
   },
   "rhyhorn": {
     "name": "Rhyhorn",
-    "types": ["ground", "rock"],
+    "types": [
+      "ground",
+      "rock"
+    ],
     "maxHp": 40,
-    "baseSpeed": 2,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "horn-attack", "horn-attack",
-      "stomp", "stomp",
+      "horn-attack",
+      "horn-attack",
+      "stomp",
+      "stomp",
       "rock-slide",
-      "defend", "defend",
-      "tackle", "tackle",
+      "defend",
+      "defend",
+      "tackle",
+      "rock-tomb",
       "sand-attack"
     ],
     "abilities": [],
@@ -571,35 +745,46 @@
   },
   "rhydon": {
     "name": "Rhydon",
-    "types": ["ground", "rock"],
+    "types": [
+      "ground",
+      "rock"
+    ],
     "maxHp": 65,
-    "baseSpeed": 3,
+    "baseSpeed": 8,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "horn-attack", "horn-attack",
-      "stomp", "stomp",
+      "horn-attack",
+      "horn-attack",
+      "stomp",
+      "stomp",
       "rock-slide",
-      "defend", "defend",
-      "tackle", "tackle",
+      "defend",
+      "defend",
+      "tackle",
+      "tackle",
       "sand-attack"
     ],
     "abilities": []
   },
-
   "drowzee": {
     "name": "Drowzee",
-    "types": ["psychic"],
+    "types": [
+      "psychic"
+    ],
     "maxHp": 40,
-    "baseSpeed": 4,
+    "baseSpeed": 12,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "confusion", "confusion",
-      "pound", "pound",
-      "defend", "defend",
+      "confusion",
+      "confusion",
+      "pound",
+      "pound",
+      "defend",
+      "defend",
       "hypnosis",
       "barrier",
       "teleport",
@@ -610,16 +795,21 @@
   },
   "hypno": {
     "name": "Hypno",
-    "types": ["psychic"],
+    "types": [
+      "psychic"
+    ],
     "maxHp": 50,
-    "baseSpeed": 5,
+    "baseSpeed": 13,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "confusion", "confusion",
-      "pound", "pound",
-      "defend", "defend",
+      "confusion",
+      "confusion",
+      "pound",
+      "pound",
+      "defend",
+      "defend",
       "hypnosis",
       "barrier",
       "teleport",
@@ -627,20 +817,25 @@
     ],
     "abilities": []
   },
-
   "growlithe": {
     "name": "Growlithe",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 45,
-    "baseSpeed": 5,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "fire-spin", "fire-spin",
-      "flame-wheel", "flame-wheel",
-      "fire-fang", "fire-fang",
-      "defend", "defend",
+      "fire-spin",
+      "fire-spin",
+      "flame-wheel",
+      "flame-wheel",
+      "fire-fang",
+      "fire-fang",
+      "defend",
+      "defend",
       "bite",
       "roar"
     ],
@@ -649,37 +844,48 @@
   },
   "arcanine": {
     "name": "Arcanine",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 75,
-    "baseSpeed": 7,
+    "baseSpeed": 18,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "fire-spin", "fire-spin",
-      "flame-wheel", "flame-wheel",
-      "fire-fang", "fire-fang",
-      "defend", "defend",
+      "fire-spin",
+      "fire-spin",
+      "flame-wheel",
+      "flame-wheel",
+      "fire-fang",
+      "fire-fang",
+      "defend",
+      "defend",
       "bite",
       "roar"
     ],
     "abilities": []
   },
-
   "voltorb": {
     "name": "Voltorb",
-    "types": ["electric"],
+    "types": [
+      "electric"
+    ],
     "maxHp": 22,
-    "baseSpeed": 9,
+    "baseSpeed": 21,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "thunder-shock", "thunder-shock",
-      "sonic-boom", "sonic-boom",
-      "spark", "spark",
+      "thunder-shock",
+      "thunder-shock",
+      "sonic-boom",
+      "sonic-boom",
+      "spark",
+      "spark",
       "charge-beam",
-      "defend", "defend",
+      "defend",
+      "defend",
       "screech"
     ],
     "abilities": [],
@@ -687,35 +893,46 @@
   },
   "electrode": {
     "name": "Electrode",
-    "types": ["electric"],
+    "types": [
+      "electric"
+    ],
     "maxHp": 40,
-    "baseSpeed": 10,
+    "baseSpeed": 25,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "thunder-shock", "thunder-shock",
-      "sonic-boom", "sonic-boom",
-      "spark", "spark",
+      "thunder-shock",
+      "thunder-shock",
+      "sonic-boom",
+      "sonic-boom",
+      "spark",
+      "spark",
       "charge-beam",
-      "defend", "defend",
+      "defend",
+      "defend",
       "screech"
     ],
     "abilities": []
   },
-
   "caterpie": {
     "name": "Caterpie",
-    "types": ["bug"],
+    "types": [
+      "bug"
+    ],
     "maxHp": 18,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "string-shot", "string-shot",
-      "harden", "harden",
+      "tackle",
+      "tackle",
+      "tackle",
+      "string-shot",
+      "string-shot",
+      "harden",
+      "harden",
       "stun-spore",
       "poison-powder",
       "bug-bite"
@@ -725,36 +942,49 @@
   },
   "butterfree": {
     "name": "Butterfree",
-    "types": ["bug", "flying"],
+    "types": [
+      "bug",
+      "flying"
+    ],
     "maxHp": 38,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "string-shot", "string-shot",
-      "harden", "harden",
+      "tackle",
+      "tackle",
+      "tackle",
+      "string-shot",
+      "string-shot",
+      "harden",
+      "harden",
       "stun-spore",
       "poison-powder",
       "bug-bite"
     ],
     "abilities": []
   },
-
   "weedle": {
     "name": "Weedle",
-    "types": ["bug", "poison"],
+    "types": [
+      "bug",
+      "poison"
+    ],
     "maxHp": 18,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "poison-sting", "poison-sting",
-      "bug-bite", "bug-bite",
-      "tackle", "tackle",
-      "harden", "harden",
+      "poison-sting",
+      "poison-sting",
+      "bug-bite",
+      "bug-bite",
+      "tackle",
+      "tackle",
+      "harden",
+      "harden",
       "string-shot",
       "fury-attack"
     ],
@@ -763,35 +993,48 @@
   },
   "beedrill": {
     "name": "Beedrill",
-    "types": ["bug", "poison"],
+    "types": [
+      "bug",
+      "poison"
+    ],
     "maxHp": 36,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "poison-sting", "poison-sting",
-      "bug-bite", "bug-bite",
-      "tackle", "tackle",
-      "harden", "harden",
+      "poison-sting",
+      "poison-sting",
+      "bug-bite",
+      "bug-bite",
+      "tackle",
+      "tackle",
+      "harden",
+      "harden",
       "string-shot",
       "fury-attack"
     ],
     "abilities": []
   },
-
   "magikarp": {
     "name": "Magikarp",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 20,
-    "baseSpeed": 6,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "splash", "splash", "splash",
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
+      "splash",
+      "splash",
+      "splash",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
       "flail",
       "bounce"
     ],
@@ -800,16 +1043,24 @@
   },
   "gyarados": {
     "name": "Gyarados",
-    "types": ["water", "flying"],
+    "types": [
+      "water",
+      "flying"
+    ],
     "maxHp": 65,
-    "baseSpeed": 6,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "splash", "splash", "splash",
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
+      "splash",
+      "splash",
+      "splash",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
       "flail",
       "bounce"
     ],
@@ -817,17 +1068,25 @@
   },
   "lapras": {
     "name": "Lapras",
-    "types": ["water", "ice"],
+    "types": [
+      "water",
+      "ice"
+    ],
     "maxHp": 90,
-    "baseSpeed": 4,
+    "baseSpeed": 10,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "defend", "defend", "defend",
-      "water-gun", "water-gun",
-      "mist", "mist",
+      "tackle",
+      "shell-trap",
+      "defend",
+      "defend",
+      "defend",
+      "water-gun",
+      "water-gun",
+      "mist",
+      "mist",
       "sing"
     ],
     "abilities": [],
@@ -835,84 +1094,123 @@
   },
   "magmar": {
     "name": "Magmar",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 42,
-    "baseSpeed": 6,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "karate-chop", "karate-chop",
-      "ember", "ember", "ember",
-      "fire-punch", "fire-punch"
+      "defend",
+      "defend",
+      "defend",
+      "karate-chop",
+      "karate-chop",
+      "ember",
+      "ember",
+      "ember",
+      "fire-punch",
+      "fire-punch"
     ],
     "abilities": [],
     "description": "Stokes the flames. The more an enemy burns, the harder every hit lands."
   },
   "magmortar": {
     "name": "Magmortar",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 57,
-    "baseSpeed": 6,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "karate-chop", "karate-chop",
-      "ember", "ember", "ember",
-      "fire-punch", "fire-punch"
+      "defend",
+      "defend",
+      "defend",
+      "karate-chop",
+      "karate-chop",
+      "ember",
+      "ember",
+      "ember",
+      "fire-punch",
+      "fire-punch"
     ],
     "abilities": [],
     "description": "Stokes the flames. The more an enemy burns, the harder every hit lands."
   },
   "electabuzz": {
     "name": "Electabuzz",
-    "types": ["electric"],
+    "types": [
+      "electric"
+    ],
     "maxHp": 40,
-    "baseSpeed": 7,
+    "baseSpeed": 18,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "karate-chop", "karate-chop",
-      "thunder-shock", "thunder-shock", "thunder-shock",
-      "thunder-punch", "thunder-punch"
+      "defend",
+      "defend",
+      "defend",
+      "karate-chop",
+      "karate-chop",
+      "thunder-shock",
+      "thunder-shock",
+      "thunder-shock",
+      "thunder-punch",
+      "thunder-punch"
     ],
     "abilities": [],
-    "description": "Paralyzes targets, then every attack \u2014 any type \u2014 hits them harder."
+    "description": "Paralyzes targets, then every attack — any type — hits them harder."
   },
   "electivire": {
     "name": "Electivire",
-    "types": ["electric"],
+    "types": [
+      "electric"
+    ],
     "maxHp": 55,
-    "baseSpeed": 7,
+    "baseSpeed": 19,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "karate-chop", "karate-chop",
-      "thunder-shock", "thunder-shock", "thunder-shock",
-      "thunder-punch", "thunder-punch"
+      "defend",
+      "defend",
+      "defend",
+      "karate-chop",
+      "karate-chop",
+      "thunder-shock",
+      "thunder-shock",
+      "thunder-shock",
+      "thunder-punch",
+      "thunder-punch"
     ],
     "abilities": [],
-    "description": "Paralyzes targets, then every attack \u2014 any type \u2014 hits them harder."
+    "description": "Paralyzes targets, then every attack — any type — hits them harder."
   },
   "dratini": {
     "name": "Dratini",
-    "types": ["dragon"],
+    "types": [
+      "dragon"
+    ],
     "maxHp": 35,
-    "baseSpeed": 4,
+    "baseSpeed": 14,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "tackle", "tackle", "tackle",
-      "wrap", "wrap",
+      "defend",
+      "defend",
+      "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "wrap",
+      "wrap",
       "thunder-wave",
       "twister"
     ],
@@ -921,16 +1219,23 @@
   },
   "dragonair": {
     "name": "Dragonair",
-    "types": ["dragon"],
+    "types": [
+      "dragon"
+    ],
     "maxHp": 45,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "tackle", "tackle", "tackle",
-      "wrap", "wrap",
+      "defend",
+      "defend",
+      "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "wrap",
+      "wrap",
       "thunder-wave",
       "twister"
     ],
@@ -938,16 +1243,24 @@
   },
   "dragonite": {
     "name": "Dragonite",
-    "types": ["dragon", "flying"],
+    "types": [
+      "dragon",
+      "flying"
+    ],
     "maxHp": 80,
-    "baseSpeed": 5,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "tackle", "tackle", "tackle",
-      "wrap", "wrap",
+      "defend",
+      "defend",
+      "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "wrap",
+      "wrap",
       "thunder-wave",
       "twister"
     ],
@@ -955,134 +1268,200 @@
   },
   "spearow": {
     "name": "Spearow",
-    "types": ["normal", "flying"],
+    "types": [
+      "normal",
+      "flying"
+    ],
     "maxHp": 26,
-    "baseSpeed": 6,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "peck", "peck", "peck",
-      "gust", "gust",
-      "fury-attack", "fury-attack"
+      "defend",
+      "defend",
+      "defend",
+      "peck",
+      "peck",
+      "peck",
+      "gust",
+      "gust",
+      "fury-attack",
+      "fury-attack"
     ],
     "abilities": [],
     "description": "Pierces through block and evasion. Nothing hides from Fearow's beak."
   },
   "fearow": {
     "name": "Fearow",
-    "types": ["normal", "flying"],
+    "types": [
+      "normal",
+      "flying"
+    ],
     "maxHp": 42,
-    "baseSpeed": 7,
+    "baseSpeed": 19,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "peck", "peck", "peck",
-      "gust", "gust",
-      "fury-attack", "fury-attack"
+      "defend",
+      "defend",
+      "defend",
+      "peck",
+      "peck",
+      "peck",
+      "gust",
+      "gust",
+      "fury-attack",
+      "fury-attack"
     ],
     "abilities": []
   },
   "sandshrew": {
     "name": "Sandshrew",
-    "types": ["ground"],
+    "types": [
+      "ground"
+    ],
     "maxHp": 34,
-    "baseSpeed": 4,
+    "baseSpeed": 14,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "scratch", "scratch", "scratch",
-      "sand-attack", "sand-attack",
-      "bone-club", "bone-club"
+      "defend",
+      "defend",
+      "defend",
+      "scratch",
+      "scratch",
+      "scratch",
+      "sand-attack",
+      "sand-attack",
+      "bone-club",
+      "bone-club"
     ],
     "abilities": [],
     "description": "A living wall. Takes hits, grows thornier, and turns defense into offense."
   },
   "sandslash": {
     "name": "Sandslash",
-    "types": ["ground"],
+    "types": [
+      "ground"
+    ],
     "maxHp": 54,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend", "defend",
-      "scratch", "scratch", "scratch",
-      "sand-attack", "sand-attack",
-      "bone-club", "bone-club"
+      "defend",
+      "defend",
+      "defend",
+      "scratch",
+      "scratch",
+      "scratch",
+      "sand-attack",
+      "sand-attack",
+      "bone-club",
+      "bone-club"
     ],
     "abilities": []
   },
   "gastly": {
     "name": "Gastly",
-    "types": ["ghost", "poison"],
+    "types": [
+      "ghost",
+      "poison"
+    ],
     "maxHp": 22,
-    "baseSpeed": 6,
+    "baseSpeed": 18,
     "energyPerTurn": 3,
     "energyCap": 8,
     "handSize": 4,
     "deck": [
-      "lick", "lick",
-      "confuse-ray", "confuse-ray",
-      "double-team", "double-team",
-      "poison-gas", "poison-gas",
-      "shadow-punch", "shadow-punch"
+      "lick",
+      "lick",
+      "confuse-ray",
+      "confuse-ray",
+      "double-team",
+      "double-team",
+      "poison-gas",
+      "poison-gas",
+      "shadow-punch",
+      "shadow-punch"
     ],
-    "abilities": ["intangible"],
+    "abilities": [
+      "intangible"
+    ],
     "description": "Goes incorporeal to avoid damage, then attacks from the shadows."
   },
   "haunter": {
     "name": "Haunter",
-    "types": ["ghost", "poison"],
+    "types": [
+      "ghost",
+      "poison"
+    ],
     "maxHp": 35,
-    "baseSpeed": 7,
+    "baseSpeed": 18,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "lick", "lick",
-      "confuse-ray", "confuse-ray",
-      "double-team", "double-team",
-      "poison-gas", "poison-gas",
-      "shadow-punch", "shadow-punch"
+      "lick",
+      "lick",
+      "confuse-ray",
+      "confuse-ray",
+      "double-team",
+      "double-team",
+      "poison-gas",
+      "poison-gas",
+      "shadow-punch",
+      "shadow-punch"
     ],
     "abilities": []
   },
   "gengar": {
     "name": "Gengar",
-    "types": ["ghost", "poison"],
+    "types": [
+      "ghost",
+      "poison"
+    ],
     "maxHp": 48,
-    "baseSpeed": 8,
+    "baseSpeed": 20,
     "energyPerTurn": 3,
     "energyCap": 12,
     "handSize": 5,
     "deck": [
-      "lick", "lick",
-      "confuse-ray", "confuse-ray",
-      "double-team", "double-team",
-      "poison-gas", "poison-gas",
-      "shadow-punch", "shadow-punch"
+      "lick",
+      "lick",
+      "confuse-ray",
+      "confuse-ray",
+      "double-team",
+      "double-team",
+      "poison-gas",
+      "poison-gas",
+      "shadow-punch",
+      "shadow-punch"
     ],
     "abilities": []
   },
   "clefairy": {
     "name": "Clefairy",
-    "types": ["fairy"],
+    "types": [
+      "fairy"
+    ],
     "maxHp": 35,
-    "baseSpeed": 3,
+    "baseSpeed": 8,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "pound", "pound", "pound",
-      "defend", "defend",
-      "disarming-voice", "disarming-voice",
+      "pound",
+      "pound",
+      "crafty-shield",
+      "defend",
+      "defend",
+      "disarming-voice",
+      "disarming-voice",
       "fairy-wind",
       "charm",
       "moonlight"
@@ -1092,16 +1471,22 @@
   },
   "clefable": {
     "name": "Clefable",
-    "types": ["fairy"],
+    "types": [
+      "fairy"
+    ],
     "maxHp": 50,
-    "baseSpeed": 5,
+    "baseSpeed": 9,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "pound", "pound", "pound",
-      "defend", "defend",
-      "disarming-voice", "disarming-voice",
+      "pound",
+      "pound",
+      "pound",
+      "defend",
+      "defend",
+      "disarming-voice",
+      "disarming-voice",
       "fairy-wind",
       "charm",
       "moonlight"
@@ -1109,19 +1494,24 @@
     "abilities": [],
     "description": "A mystical fairy that guards allies and shrugs off harmful effects."
   },
-
   "machop": {
     "name": "Machop",
-    "types": ["fighting"],
+    "types": [
+      "fighting"
+    ],
     "maxHp": 50,
-    "baseSpeed": 3,
+    "baseSpeed": 7,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "karate-chop", "karate-chop", "karate-chop",
-      "defend", "defend",
-      "low-kick", "low-kick",
+      "karate-chop",
+      "karate-chop",
+      "karate-chop",
+      "defend",
+      "defend",
+      "low-kick",
+      "low-kick",
       "double-kick",
       "counter",
       "rolling-kick"
@@ -1131,16 +1521,22 @@
   },
   "machoke": {
     "name": "Machoke",
-    "types": ["fighting"],
+    "types": [
+      "fighting"
+    ],
     "maxHp": 55,
-    "baseSpeed": 3,
+    "baseSpeed": 8,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "karate-chop", "karate-chop", "karate-chop",
-      "defend", "defend",
-      "low-kick", "low-kick",
+      "karate-chop",
+      "karate-chop",
+      "karate-chop",
+      "defend",
+      "defend",
+      "low-kick",
+      "low-kick",
       "double-kick",
       "counter",
       "rolling-kick"
@@ -1150,16 +1546,22 @@
   },
   "machamp": {
     "name": "Machamp",
-    "types": ["fighting"],
+    "types": [
+      "fighting"
+    ],
     "maxHp": 60,
-    "baseSpeed": 3,
+    "baseSpeed": 8,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "karate-chop", "karate-chop", "karate-chop",
-      "defend", "defend",
-      "low-kick", "low-kick",
+      "karate-chop",
+      "karate-chop",
+      "karate-chop",
+      "defend",
+      "defend",
+      "low-kick",
+      "low-kick",
       "double-kick",
       "counter",
       "rolling-kick"
@@ -1169,16 +1571,21 @@
   },
   "vulpix": {
     "name": "Vulpix",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 42,
-    "baseSpeed": 5,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "fire-spin", "will-o-wisp",
-      "extrasensory", "extrasensory",
-      "defend", "defend",
+      "fire-spin",
+      "will-o-wisp",
+      "extrasensory",
+      "extrasensory",
+      "defend",
+      "defend",
       "ember",
       "confuse-ray",
       "ember",
@@ -1189,16 +1596,21 @@
   },
   "ninetales": {
     "name": "Ninetales",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 52,
-    "baseSpeed": 6,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "fire-spin", "fire-spin",
-      "extrasensory", "extrasensory",
-      "defend", "defend",
+      "fire-spin",
+      "fire-spin",
+      "extrasensory",
+      "extrasensory",
+      "defend",
+      "defend",
       "ember",
       "confuse-ray",
       "ember",
@@ -1209,16 +1621,22 @@
   },
   "oddish": {
     "name": "Oddish",
-    "types": ["grass", "poison"],
+    "types": [
+      "grass",
+      "poison"
+    ],
     "maxHp": 38,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "vine-whip", "vine-whip",
-      "absorb", "absorb",
-      "defend", "defend",
+      "vine-whip",
+      "vine-whip",
+      "absorb",
+      "absorb",
+      "defend",
+      "defend",
       "poison-powder",
       "stun-spore",
       "mega-drain",
@@ -1229,16 +1647,22 @@
   },
   "gloom": {
     "name": "Gloom",
-    "types": ["grass", "poison"],
+    "types": [
+      "grass",
+      "poison"
+    ],
     "maxHp": 45,
-    "baseSpeed": 3,
+    "baseSpeed": 7,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "vine-whip", "vine-whip",
-      "absorb", "absorb",
-      "defend", "defend",
+      "vine-whip",
+      "vine-whip",
+      "absorb",
+      "absorb",
+      "defend",
+      "defend",
       "poison-powder",
       "stun-spore",
       "mega-drain",
@@ -1249,16 +1673,22 @@
   },
   "vileplume": {
     "name": "Vileplume",
-    "types": ["grass", "poison"],
+    "types": [
+      "grass",
+      "poison"
+    ],
     "maxHp": 55,
-    "baseSpeed": 4,
+    "baseSpeed": 8,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "vine-whip", "vine-whip",
-      "absorb", "absorb",
-      "defend", "defend",
+      "vine-whip",
+      "vine-whip",
+      "absorb",
+      "absorb",
+      "defend",
+      "defend",
       "poison-powder",
       "stun-spore",
       "mega-drain",
@@ -1269,16 +1699,22 @@
   },
   "meowth": {
     "name": "Meowth",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 40,
-    "baseSpeed": 6,
+    "baseSpeed": 19,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
-      "defend", "defend",
-      "bite", "bite",
+      "scratch",
+      "scratch",
+      "scratch",
+      "defend",
+      "defend",
+      "bite",
+      "bite",
       "fake-out",
       "fury-swipes",
       "pay-day"
@@ -1288,16 +1724,23 @@
   },
   "paras": {
     "name": "Paras",
-    "types": ["bug", "grass"],
+    "types": [
+      "bug",
+      "grass"
+    ],
     "maxHp": 28,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
-      "defend", "defend",
-      "absorb", "absorb",
+      "scratch",
+      "scratch",
+      "scratch",
+      "defend",
+      "defend",
+      "absorb",
+      "absorb",
       "stun-spore",
       "leech-life",
       "bug-bite"
@@ -1307,16 +1750,23 @@
   },
   "parasect": {
     "name": "Parasect",
-    "types": ["bug", "grass"],
+    "types": [
+      "bug",
+      "grass"
+    ],
     "maxHp": 55,
-    "baseSpeed": 2,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
-      "defend", "defend",
-      "absorb", "absorb",
+      "scratch",
+      "scratch",
+      "scratch",
+      "defend",
+      "defend",
+      "absorb",
+      "absorb",
       "stun-spore",
       "leech-life",
       "bug-bite"
@@ -1325,107 +1775,150 @@
   },
   "zubat": {
     "name": "Zubat",
-    "types": ["poison", "flying"],
+    "types": [
+      "poison",
+      "flying"
+    ],
     "maxHp": 26,
-    "baseSpeed": 7,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "bite", "bite", "bite",
-      "defend", "defend",
+      "bite",
+      "bite",
+      "bite",
+      "defend",
+      "defend",
       "leech-life",
       "poison-sting",
       "gust",
-      "wing-attack", "wing-attack"
+      "wing-attack",
+      "wing-attack"
     ],
     "abilities": [],
     "description": "A swift blood-drainer that leeches life from foes in the front row."
   },
   "golbat": {
     "name": "Golbat",
-    "types": ["poison", "flying"],
+    "types": [
+      "poison",
+      "flying"
+    ],
     "maxHp": 43,
-    "baseSpeed": 8,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "bite", "bite", "bite",
-      "defend", "defend",
+      "bite",
+      "bite",
+      "bite",
+      "defend",
+      "defend",
       "leech-life",
       "poison-sting",
       "gust",
-      "wing-attack", "wing-attack"
+      "wing-attack",
+      "wing-attack"
     ],
     "abilities": []
   },
   "crobat": {
     "name": "Crobat",
-    "types": ["poison", "flying"],
+    "types": [
+      "poison",
+      "flying"
+    ],
     "maxHp": 55,
-    "baseSpeed": 10,
+    "baseSpeed": 22,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "bite", "bite", "bite",
-      "defend", "defend",
+      "bite",
+      "bite",
+      "bite",
+      "defend",
+      "defend",
       "leech-life",
       "poison-sting",
       "gust",
-      "wing-attack", "wing-attack"
+      "wing-attack",
+      "wing-attack"
     ],
     "abilities": []
   },
   "jigglypuff": {
     "name": "Jigglypuff",
-    "types": ["normal", "fairy"],
+    "types": [
+      "normal",
+      "fairy"
+    ],
     "maxHp": 34,
-    "baseSpeed": 4,
+    "baseSpeed": 10,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend",
-      "defense-curl", "defense-curl",
-      "sing", "sing",
-      "disarming-voice", "disarming-voice",
-      "pound", "pound"
+      "defend",
+      "defend",
+      "defense-curl",
+      "defense-curl",
+      "sing",
+      "sing",
+      "disarming-voice",
+      "disarming-voice",
+      "pound",
+      "pound"
     ],
     "abilities": [],
     "description": "A lullaby singer that puts foes to sleep, then punishes their slumber."
   },
   "wigglytuff": {
     "name": "Wigglytuff",
-    "types": ["normal", "fairy"],
+    "types": [
+      "normal",
+      "fairy"
+    ],
     "maxHp": 70,
-    "baseSpeed": 4,
+    "baseSpeed": 11,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "defend", "defend",
-      "defense-curl", "defense-curl",
-      "sing", "sing",
-      "disarming-voice", "disarming-voice",
-      "pound", "pound"
+      "defend",
+      "defend",
+      "defense-curl",
+      "defense-curl",
+      "sing",
+      "sing",
+      "disarming-voice",
+      "disarming-voice",
+      "brace",
+      "pound"
     ],
     "abilities": []
   },
-
   "venonat": {
     "name": "Venonat",
-    "types": ["bug", "poison"],
+    "types": [
+      "bug",
+      "poison"
+    ],
     "maxHp": 18,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "string-shot", "string-shot",
-      "harden", "harden",
+      "tackle",
+      "tackle",
+      "tackle",
+      "string-shot",
+      "string-shot",
+      "harden",
+      "harden",
       "stun-spore",
       "poison-powder",
       "bug-bite"
@@ -1435,88 +1928,119 @@
   },
   "venomoth": {
     "name": "Venomoth",
-    "types": ["bug", "poison"],
+    "types": [
+      "bug",
+      "poison"
+    ],
     "maxHp": 38,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "string-shot", "string-shot",
-      "harden", "harden",
+      "tackle",
+      "tackle",
+      "tackle",
+      "string-shot",
+      "string-shot",
+      "harden",
+      "harden",
       "stun-spore",
       "poison-powder",
       "bug-bite"
     ],
     "abilities": []
   },
-
   "porygon": {
     "name": "Porygon",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 30,
-    "baseSpeed": 7,
+    "baseSpeed": 21,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
       "psybeam",
-      "agility", "agility",
-      "charge-beam", "charge-beam"
+      "agility",
+      "agility",
+      "charge-beam",
+      "charge-beam"
     ],
     "abilities": [],
     "description": "A digital Pokemon that buffs allies by swapping positions with them."
   },
   "porygon2": {
     "name": "Porygon2",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 45,
-    "baseSpeed": 7,
+    "baseSpeed": 21,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
       "psybeam",
-      "agility", "agility",
-      "charge-beam", "charge-beam"
+      "agility",
+      "agility",
+      "charge-beam",
+      "charge-beam"
     ],
     "abilities": []
   },
   "porygon-z": {
     "name": "Porygon-Z",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 50,
-    "baseSpeed": 8,
+    "baseSpeed": 21,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
       "psybeam",
-      "agility", "agility",
-      "charge-beam", "charge-beam"
+      "agility",
+      "agility",
+      "charge-beam",
+      "charge-beam"
     ],
     "abilities": []
   },
-
   "chikorita": {
     "name": "Chikorita",
-    "types": ["grass"],
+    "types": [
+      "grass"
+    ],
     "maxHp": 36,
-    "baseSpeed": 4,
+    "baseSpeed": 11,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "vine-whip", "vine-whip",
-      "absorb", "absorb",
-      "defend", "defend",
+      "vine-whip",
+      "vine-whip",
+      "absorb",
+      "absorb",
+      "defend",
+      "defend",
       "mega-drain",
       "razor-leaf",
       "growl",
@@ -1527,16 +2051,21 @@
   },
   "bayleef": {
     "name": "Bayleef",
-    "types": ["grass"],
+    "types": [
+      "grass"
+    ],
     "maxHp": 50,
-    "baseSpeed": 4,
+    "baseSpeed": 12,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "vine-whip", "vine-whip",
-      "absorb", "absorb",
-      "defend", "defend",
+      "vine-whip",
+      "vine-whip",
+      "absorb",
+      "absorb",
+      "defend",
+      "defend",
       "mega-drain",
       "razor-leaf",
       "growl",
@@ -1546,16 +2075,21 @@
   },
   "meganium": {
     "name": "Meganium",
-    "types": ["grass"],
+    "types": [
+      "grass"
+    ],
     "maxHp": 66,
-    "baseSpeed": 4,
+    "baseSpeed": 13,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "vine-whip", "vine-whip",
-      "absorb", "absorb",
-      "defend", "defend",
+      "vine-whip",
+      "vine-whip",
+      "absorb",
+      "absorb",
+      "defend",
+      "defend",
       "mega-drain",
       "razor-leaf",
       "growl",
@@ -1563,19 +2097,24 @@
     ],
     "abilities": []
   },
-
   "cyndaquil": {
     "name": "Cyndaquil",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 32,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
-      "defend", "defend",
-      "ember", "ember",
+      "scratch",
+      "scratch",
+      "scratch",
+      "defend",
+      "defend",
+      "ember",
+      "ember",
       "metal-claw",
       "smokescreen",
       "growl"
@@ -1585,16 +2124,22 @@
   },
   "quilava": {
     "name": "Quilava",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 42,
-    "baseSpeed": 6,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
-      "defend", "defend",
-      "ember", "ember",
+      "scratch",
+      "scratch",
+      "scratch",
+      "defend",
+      "defend",
+      "ember",
+      "ember",
       "metal-claw",
       "smokescreen",
       "growl"
@@ -1603,35 +2148,45 @@
   },
   "typhlosion": {
     "name": "Typhlosion",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 52,
-    "baseSpeed": 6,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
-      "defend", "defend",
-      "ember", "ember",
+      "scratch",
+      "scratch",
+      "scratch",
+      "defend",
+      "defend",
+      "ember",
+      "ember",
       "metal-claw",
       "smokescreen",
       "growl"
     ],
     "abilities": []
   },
-
   "totodile": {
     "name": "Totodile",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 35,
-    "baseSpeed": 5,
+    "baseSpeed": 11,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "water-gun", "water-gun",
-      "bite", "bite",
-      "defend", "defend",
+      "water-gun",
+      "water-gun",
+      "bite",
+      "bite",
+      "defend",
+      "defend",
       "aqua-tail",
       "crunch",
       "rage",
@@ -1642,16 +2197,21 @@
   },
   "croconaw": {
     "name": "Croconaw",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 45,
-    "baseSpeed": 5,
+    "baseSpeed": 12,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "water-gun", "water-gun",
-      "bite", "bite",
-      "defend", "defend",
+      "water-gun",
+      "water-gun",
+      "bite",
+      "bite",
+      "defend",
+      "defend",
       "aqua-tail",
       "crunch",
       "rage",
@@ -1661,16 +2221,21 @@
   },
   "feraligatr": {
     "name": "Feraligatr",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 55,
-    "baseSpeed": 5,
+    "baseSpeed": 13,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "water-gun", "water-gun",
-      "bite", "bite",
-      "defend", "defend",
+      "water-gun",
+      "water-gun",
+      "bite",
+      "bite",
+      "defend",
+      "defend",
       "aqua-tail",
       "crunch",
       "rage",
@@ -1678,19 +2243,25 @@
     ],
     "abilities": []
   },
-
   "sentret": {
     "name": "Sentret",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 28,
-    "baseSpeed": 5,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch", "scratch",
-      "quick-attack", "quick-attack",
+      "tackle",
+      "tackle",
+      "tackle",
+      "scratch",
+      "scratch",
+      "scratch",
+      "quick-attack",
+      "quick-attack",
       "slam",
       "swift"
     ],
@@ -1699,34 +2270,47 @@
   },
   "furret": {
     "name": "Furret",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 46,
-    "baseSpeed": 6,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch", "scratch",
-      "quick-attack", "quick-attack",
+      "tackle",
+      "tackle",
+      "tackle",
+      "scratch",
+      "scratch",
+      "scratch",
+      "quick-attack",
+      "quick-attack",
       "slam",
       "swift"
     ],
     "abilities": []
   },
-
   "hoothoot": {
     "name": "Hoothoot",
-    "types": ["normal", "flying"],
+    "types": [
+      "normal",
+      "flying"
+    ],
     "maxHp": 36,
-    "baseSpeed": 3,
+    "baseSpeed": 9,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "peck", "peck",
-      "gust", "gust",
+      "tackle",
+      "tackle",
+      "tackle",
+      "peck",
+      "peck",
+      "gust",
+      "gust",
       "hypnosis",
       "swift",
       "quick-attack"
@@ -1736,36 +2320,50 @@
   },
   "noctowl": {
     "name": "Noctowl",
-    "types": ["normal", "flying"],
+    "types": [
+      "normal",
+      "flying"
+    ],
     "maxHp": 52,
-    "baseSpeed": 4,
+    "baseSpeed": 10,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "peck", "peck",
-      "gust", "gust",
+      "tackle",
+      "tackle",
+      "tackle",
+      "peck",
+      "peck",
+      "gust",
+      "gust",
       "hypnosis",
       "swift",
       "quick-attack"
     ],
     "abilities": []
   },
-
   "ledyba": {
     "name": "Ledyba",
-    "types": ["bug", "flying"],
+    "types": [
+      "bug",
+      "flying"
+    ],
     "maxHp": 28,
-    "baseSpeed": 4,
+    "baseSpeed": 12,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "swift", "swift",
-      "comet-punch", "comet-punch",
-      "peck", "peck",
+      "tackle",
+      "tackle",
+      "tackle",
+      "swift",
+      "swift",
+      "comet-punch",
+      "comet-punch",
+      "peck",
+      "peck",
       "scratch"
     ],
     "abilities": [],
@@ -1773,34 +2371,49 @@
   },
   "ledian": {
     "name": "Ledian",
-    "types": ["bug", "flying"],
+    "types": [
+      "bug",
+      "flying"
+    ],
     "maxHp": 38,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "swift", "swift",
-      "comet-punch", "comet-punch",
-      "peck", "peck",
+      "tackle",
+      "tackle",
+      "tackle",
+      "swift",
+      "swift",
+      "comet-punch",
+      "comet-punch",
+      "peck",
+      "peck",
       "scratch"
     ],
     "abilities": []
   },
-
   "spinarak": {
     "name": "Spinarak",
-    "types": ["bug", "poison"],
+    "types": [
+      "bug",
+      "poison"
+    ],
     "maxHp": 30,
-    "baseSpeed": 3,
+    "baseSpeed": 7,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "poison-sting", "poison-sting", "poison-sting",
-      "leech-life", "leech-life",
+      "tackle",
+      "tackle",
+      "tackle",
+      "poison-sting",
+      "poison-sting",
+      "poison-sting",
+      "leech-life",
+      "leech-life",
       "night-shade",
       "scratch"
     ],
@@ -1809,52 +2422,73 @@
   },
   "ariados": {
     "name": "Ariados",
-    "types": ["bug", "poison"],
+    "types": [
+      "bug",
+      "poison"
+    ],
     "maxHp": 44,
-    "baseSpeed": 4,
+    "baseSpeed": 11,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "poison-sting", "poison-sting", "poison-sting",
-      "leech-life", "leech-life",
+      "tackle",
+      "tackle",
+      "tackle",
+      "poison-sting",
+      "poison-sting",
+      "poison-sting",
+      "leech-life",
+      "leech-life",
       "night-shade",
       "scratch"
     ],
     "abilities": []
   },
-
   "murkrow": {
     "name": "Murkrow",
-    "types": ["dark", "flying"],
+    "types": [
+      "dark",
+      "flying"
+    ],
     "maxHp": 50,
-    "baseSpeed": 6,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "peck", "peck",
-      "wing-attack", "wing-attack",
-      "night-shade", "night-shade",
-      "shadow-ball", "shadow-ball",
-      "gust", "gust"
+      "peck",
+      "peck",
+      "wing-attack",
+      "wing-attack",
+      "night-shade",
+      "night-shade",
+      "shadow-ball",
+      "shadow-ball",
+      "gust",
+      "gust"
     ],
     "abilities": []
   },
-
   "hoppip": {
     "name": "Hoppip",
-    "types": ["grass", "flying"],
+    "types": [
+      "grass",
+      "flying"
+    ],
     "maxHp": 26,
-    "baseSpeed": 3,
+    "baseSpeed": 20,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "gust", "gust",
-      "vine-whip", "vine-whip",
+      "tackle",
+      "tackle",
+      "tackle",
+      "gust",
+      "gust",
+      "vine-whip",
+      "vine-whip",
       "swift",
       "growth",
       "razor-leaf"
@@ -1864,16 +2498,23 @@
   },
   "skiploom": {
     "name": "Skiploom",
-    "types": ["grass", "flying"],
+    "types": [
+      "grass",
+      "flying"
+    ],
     "maxHp": 38,
-    "baseSpeed": 4,
+    "baseSpeed": 21,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "gust", "gust",
-      "vine-whip", "vine-whip",
+      "tackle",
+      "tackle",
+      "tackle",
+      "gust",
+      "gust",
+      "vine-whip",
+      "vine-whip",
       "swift",
       "growth",
       "razor-leaf"
@@ -1882,36 +2523,49 @@
   },
   "jumpluff": {
     "name": "Jumpluff",
-    "types": ["grass", "flying"],
+    "types": [
+      "grass",
+      "flying"
+    ],
     "maxHp": 50,
-    "baseSpeed": 5,
+    "baseSpeed": 22,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "gust", "gust",
-      "vine-whip", "vine-whip",
+      "tackle",
+      "tackle",
+      "tackle",
+      "gust",
+      "gust",
+      "vine-whip",
+      "vine-whip",
       "swift",
       "growth",
       "razor-leaf"
     ],
     "abilities": []
   },
-
   "sunkern": {
     "name": "Sunkern",
-    "types": ["grass"],
+    "types": [
+      "grass"
+    ],
     "maxHp": 22,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "vine-whip", "vine-whip",
-      "growth", "growth",
-      "razor-leaf", "razor-leaf",
+      "tackle",
+      "tackle",
+      "tackle",
+      "vine-whip",
+      "vine-whip",
+      "growth",
+      "growth",
+      "razor-leaf",
+      "razor-leaf",
       "leech-seed"
     ],
     "abilities": [],
@@ -1919,46 +2573,60 @@
   },
   "sunflora": {
     "name": "Sunflora",
-    "types": ["grass"],
+    "types": [
+      "grass"
+    ],
     "maxHp": 48,
-    "baseSpeed": 4,
+    "baseSpeed": 7,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "vine-whip", "vine-whip",
-      "growth", "growth",
-      "razor-leaf", "razor-leaf",
+      "tackle",
+      "tackle",
+      "tackle",
+      "vine-whip",
+      "vine-whip",
+      "growth",
+      "growth",
+      "razor-leaf",
+      "razor-leaf",
       "leech-seed"
     ],
     "abilities": []
   },
-
   "aipom": {
     "name": "Aipom",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 38,
-    "baseSpeed": 6,
+    "baseSpeed": 19,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch",
-      "swift", "swift",
-      "fake-out", "fake-out",
+      "scratch",
+      "scratch",
+      "swift",
+      "swift",
+      "fake-out",
+      "fake-out",
       "confuse-ray",
       "follow-me",
-      "defend", "defend"
+      "defend",
+      "defend"
     ],
     "abilities": [],
     "description": "A nimble support — disrupts enemies, protects allies, and strikes fast with multi-hit attacks."
   },
   "ambipom": {
     "name": "Ambipom",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 48,
-    "baseSpeed": 7,
+    "baseSpeed": 20,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
@@ -1966,76 +2634,103 @@
     "abilities": [],
     "description": "A nimble support — disrupts enemies, protects allies, and strikes fast with multi-hit attacks."
   },
-
   "yanma": {
     "name": "Yanma",
-    "types": ["bug", "flying"],
+    "types": [
+      "bug",
+      "flying"
+    ],
     "maxHp": 44,
-    "baseSpeed": 6,
+    "baseSpeed": 24,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "wing-attack", "wing-attack",
-      "gust", "gust",
-      "swift", "swift",
+      "tackle",
+      "tackle",
+      "tackle",
+      "wing-attack",
+      "wing-attack",
+      "gust",
+      "gust",
+      "swift",
+      "swift",
       "quick-attack"
     ],
     "abilities": [],
     "description": "An extremely fast Bug/Flying-type that overwhelms foes with aerial speed and agility."
   },
-
   "misdreavus": {
     "name": "Misdreavus",
-    "types": ["ghost"],
+    "types": [
+      "ghost"
+    ],
     "maxHp": 42,
-    "baseSpeed": 5,
+    "baseSpeed": 19,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "night-shade", "night-shade", "night-shade",
-      "shadow-ball", "shadow-ball",
-      "confuse-ray", "confuse-ray",
+      "tackle",
+      "tackle",
+      "night-shade",
+      "night-shade",
+      "night-shade",
+      "shadow-ball",
+      "shadow-ball",
+      "confuse-ray",
+      "confuse-ray",
       "swift"
     ],
     "abilities": [],
     "description": "A ghostly prankster that haunts the night, draining energy and confusing foes."
   },
-
   "sudowoodo": {
     "name": "Sudowoodo",
-    "types": ["rock"],
+    "types": [
+      "rock"
+    ],
     "maxHp": 52,
-    "baseSpeed": 3,
+    "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend", "defend",
-      "slam", "slam",
-      "body-slam", "body-slam"
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "defend",
+      "slam",
+      "slam",
+      "body-slam",
+      "body-slam"
     ],
     "abilities": [],
     "description": "A stubborn Rock-type that stands its ground — slow but tanky, blocking paths like a boulder."
   },
-
   "wooper": {
     "name": "Wooper",
-    "types": ["water", "ground"],
+    "types": [
+      "water",
+      "ground"
+    ],
     "maxHp": 38,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "water-gun", "water-gun",
-      "defend", "defend",
-      "slam", "slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "defend",
+      "defend",
+      "slam",
+      "slam",
       "bite"
     ],
     "abilities": [],
@@ -2043,70 +2738,98 @@
   },
   "quagsire": {
     "name": "Quagsire",
-    "types": ["water", "ground"],
+    "types": [
+      "water",
+      "ground"
+    ],
     "maxHp": 62,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "water-gun", "water-gun",
-      "defend", "defend",
-      "slam", "slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "defend",
+      "defend",
+      "slam",
+      "slam",
       "bite"
     ],
     "abilities": []
   },
-
   "celebi": {
     "name": "Celebi",
-    "types": ["grass", "psychic"],
-    "maxHp": 70,
-    "baseSpeed": 3,
-    "energyPerTurn": 3,
-    "energyCap": 10,
-    "handSize": 5,
-    "deck": [
-      "leech-seed", "leech-seed",
-      "ancient-power", "ancient-power",
-      "recover", "recover",
-      "vine-whip", "vine-whip",
-      "magical-leaf", "magical-leaf"
+    "types": [
+      "grass",
+      "psychic"
     ],
-    "abilities": []
-  },
-
-  "stantler": {
-    "name": "Stantler",
-    "types": ["normal"],
-    "maxHp": 50,
+    "maxHp": 70,
     "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "stomp", "stomp", "stomp",
-      "body-slam", "body-slam",
-      "slam", "slam"
+      "leech-seed",
+      "leech-seed",
+      "ancient-power",
+      "ancient-power",
+      "recover",
+      "recover",
+      "vine-whip",
+      "vine-whip",
+      "magical-leaf",
+      "magical-leaf"
     ],
-    "abilities": [],
-    "description": "A proud Normal-type with hypnotic antlers — charges headlong and tramples with practiced force."
+    "abilities": []
   },
-
-  "marill": {
-    "name": "Marill",
-    "types": ["water"],
-    "maxHp": 44,
-    "baseSpeed": 4,
+  "stantler": {
+    "name": "Stantler",
+    "types": [
+      "normal"
+    ],
+    "maxHp": 50,
+    "baseSpeed": 14,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "water-gun", "water-gun", "water-gun",
-      "defend", "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "stomp",
+      "stomp",
+      "stomp",
+      "body-slam",
+      "body-slam",
+      "slam",
+      "slam"
+    ],
+    "abilities": [],
+    "description": "A proud Normal-type with hypnotic antlers — charges headlong and tramples with practiced force."
+  },
+  "marill": {
+    "name": "Marill",
+    "types": [
+      "water"
+    ],
+    "maxHp": 44,
+    "baseSpeed": 10,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle",
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "water-gun",
+      "defend",
+      "defend",
       "quick-attack",
       "body-slam"
     ],
@@ -2115,35 +2838,48 @@
   },
   "azumarill": {
     "name": "Azumarill",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 64,
-    "baseSpeed": 4,
+    "baseSpeed": 11,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "water-gun", "water-gun", "water-gun",
-      "defend", "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "water-gun",
+      "defend",
+      "defend",
       "quick-attack",
       "body-slam"
     ],
     "abilities": []
   },
-
   "flaaffy": {
     "name": "Flaaffy",
-    "types": ["electric"],
+    "types": [
+      "electric"
+    ],
     "maxHp": 46,
-    "baseSpeed": 4,
+    "baseSpeed": 12,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "thunder-shock", "thunder-shock",
-      "thunderbolt", "thunderbolt",
-      "defend", "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "thunder-shock",
+      "thunder-shock",
+      "thunderbolt",
+      "thunderbolt",
+      "defend",
+      "defend",
       "swift"
     ],
     "abilities": [],
@@ -2151,112 +2887,151 @@
   },
   "ampharos": {
     "name": "Ampharos",
-    "types": ["electric"],
+    "types": [
+      "electric"
+    ],
     "maxHp": 62,
-    "baseSpeed": 5,
+    "baseSpeed": 13,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "thunder-shock", "thunder-shock",
-      "thunderbolt", "thunderbolt",
-      "defend", "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "thunder-shock",
+      "thunder-shock",
+      "thunderbolt",
+      "thunderbolt",
+      "defend",
+      "defend",
       "swift"
     ],
     "abilities": []
   },
-
   "togetic": {
     "name": "Togetic",
-    "types": ["normal", "flying"],
+    "types": [
+      "normal",
+      "flying"
+    ],
     "maxHp": 38,
-    "baseSpeed": 4,
+    "baseSpeed": 10,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "swift", "swift",
-      "wing-attack", "wing-attack",
-      "gust", "gust",
+      "tackle",
+      "tackle",
+      "swift",
+      "swift",
+      "wing-attack",
+      "wing-attack",
+      "gust",
+      "gust",
       "pound",
       "defend"
     ],
     "abilities": [],
     "description": "A joyful Flying-type said to bring happiness — floats gracefully and supports allies from above."
   },
-
   "espeon": {
     "name": "Espeon",
-    "types": ["psychic"],
+    "types": [
+      "psychic"
+    ],
     "maxHp": 44,
-    "baseSpeed": 7,
+    "baseSpeed": 21,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "psychic", "psychic", "psychic",
-      "swift", "swift",
-      "quick-attack", "quick-attack",
-      "shadow-ball", "shadow-ball",
+      "psychic",
+      "psychic",
+      "psychic",
+      "swift",
+      "swift",
+      "quick-attack",
+      "quick-attack",
+      "shadow-ball",
+      "shadow-ball",
       "confuse-ray"
     ],
     "abilities": [],
     "description": "A prescient Psychic-type with a split tail that lets it sense the future — fast and devastatingly precise."
   },
-
   "umbreon": {
     "name": "Umbreon",
-    "types": ["dark"],
+    "types": [
+      "dark"
+    ],
     "maxHp": 66,
-    "baseSpeed": 4,
+    "baseSpeed": 12,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "bite", "bite", "bite",
-      "shadow-ball", "shadow-ball",
-      "confuse-ray", "confuse-ray",
+      "tackle",
+      "tackle",
+      "bite",
+      "bite",
+      "bite",
+      "shadow-ball",
+      "shadow-ball",
+      "confuse-ray",
+      "confuse-ray",
       "defend"
     ],
     "abilities": [],
     "description": "A patient Dark-type that lurks in the shadows — tanky, unsettling, and wearing opponents down slowly."
   },
-
   "heracross": {
     "name": "Heracross",
-    "types": ["bug", "fighting"],
+    "types": [
+      "bug",
+      "fighting"
+    ],
     "maxHp": 56,
-    "baseSpeed": 6,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "slash", "slash",
-      "body-slam", "body-slam",
-      "fury-swipes", "fury-swipes",
+      "tackle",
+      "tackle",
+      "tackle",
+      "slash",
+      "slash",
+      "body-slam",
+      "body-slam",
+      "fury-swipes",
+      "fury-swipes",
       "slam"
     ],
     "abilities": [],
     "description": "A powerful Bug/Fighting-type with a mighty horn — charges hard and presses the advantage relentlessly."
   },
-
   "houndour": {
     "name": "Houndour",
-    "types": ["dark", "fire"],
+    "types": [
+      "dark",
+      "fire"
+    ],
     "maxHp": 32,
-    "baseSpeed": 6,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "bite", "bite", "bite",
-      "ember", "ember",
-      "night-shade", "night-shade",
+      "tackle",
+      "tackle",
+      "bite",
+      "bite",
+      "bite",
+      "ember",
+      "ember",
+      "night-shade",
+      "night-shade",
       "slash"
     ],
     "abilities": [],
@@ -2264,54 +3039,75 @@
   },
   "houndoom": {
     "name": "Houndoom",
-    "types": ["dark", "fire"],
+    "types": [
+      "dark",
+      "fire"
+    ],
     "maxHp": 52,
-    "baseSpeed": 6,
+    "baseSpeed": 18,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "bite", "bite", "bite",
-      "flamethrower", "flamethrower",
-      "night-shade", "night-shade",
+      "tackle",
+      "tackle",
+      "bite",
+      "bite",
+      "bite",
+      "flamethrower",
+      "flamethrower",
+      "night-shade",
+      "night-shade",
       "slash"
     ],
     "abilities": []
   },
-
   "sneasel": {
     "name": "Sneasel",
-    "types": ["dark", "ice"],
+    "types": [
+      "dark",
+      "ice"
+    ],
     "maxHp": 38,
-    "baseSpeed": 7,
+    "baseSpeed": 24,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "scratch", "scratch", "scratch",
-      "bite", "bite",
-      "slash", "slash",
-      "ice-beam", "ice-beam",
+      "scratch",
+      "scratch",
+      "scratch",
+      "bite",
+      "bite",
+      "slash",
+      "slash",
+      "ice-beam",
+      "ice-beam",
       "quick-attack"
     ],
     "abilities": [],
     "description": "An incredibly fast Dark/Ice-type that tears through foes with sharp claws and freezing strikes."
   },
-
   "teddiursa": {
     "name": "Teddiursa",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 42,
-    "baseSpeed": 4,
+    "baseSpeed": 11,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch",
-      "slam", "slam",
-      "body-slam", "body-slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "scratch",
+      "scratch",
+      "slam",
+      "slam",
+      "body-slam",
+      "body-slam",
       "fury-swipes"
     ],
     "abilities": [],
@@ -2319,35 +3115,49 @@
   },
   "ursaring": {
     "name": "Ursaring",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 62,
-    "baseSpeed": 5,
+    "baseSpeed": 12,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "scratch", "scratch",
-      "slam", "slam",
-      "body-slam", "body-slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "scratch",
+      "scratch",
+      "slam",
+      "slam",
+      "body-slam",
+      "body-slam",
       "fury-swipes"
     ],
     "abilities": []
   },
-
   "larvitar": {
     "name": "Larvitar",
-    "types": ["rock", "ground"],
+    "types": [
+      "rock",
+      "ground"
+    ],
     "maxHp": 36,
-    "baseSpeed": 3,
+    "baseSpeed": 14,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "bite", "bite",
-      "rock-throw", "rock-throw",
-      "slam", "slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "bite",
+      "bite",
+      "rock-throw",
+      "rock-throw",
+      "slam",
+      "slam",
       "screech"
     ],
     "abilities": [],
@@ -2355,109 +3165,149 @@
   },
   "pupitar": {
     "name": "Pupitar",
-    "types": ["rock", "ground"],
+    "types": [
+      "rock",
+      "ground"
+    ],
     "maxHp": 48,
-    "baseSpeed": 3,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "bite", "bite",
-      "rock-throw", "rock-throw",
-      "slam", "slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "bite",
+      "bite",
+      "rock-throw",
+      "rock-throw",
+      "slam",
+      "slam",
       "screech"
     ],
     "abilities": []
   },
   "tyranitar": {
     "name": "Tyranitar",
-    "types": ["rock", "dark"],
+    "types": [
+      "rock",
+      "dark"
+    ],
     "maxHp": 70,
-    "baseSpeed": 5,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "bite", "bite",
-      "rock-throw", "rock-throw",
-      "slam", "slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "bite",
+      "bite",
+      "rock-throw",
+      "rock-throw",
+      "slam",
+      "slam",
       "screech"
     ],
     "abilities": []
   },
-
   "miltank": {
     "name": "Miltank",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 66,
-    "baseSpeed": 6,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "body-slam", "body-slam",
-      "stomp", "stomp",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "body-slam",
+      "body-slam",
+      "stomp",
+      "stomp",
       "slam"
     ],
     "abilities": [],
     "description": "A famously tenacious Normal-type — absurdly durable and capable of rolling right over the opposition."
   },
-
   "wobbuffet": {
     "name": "Wobbuffet",
-    "types": ["psychic"],
+    "types": [
+      "psychic"
+    ],
     "maxHp": 78,
-    "baseSpeed": 2,
+    "baseSpeed": 1,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "counter", "counter", "counter",
-      "confuse-ray", "confuse-ray",
-      "defend", "defend",
+      "tackle",
+      "tackle",
+      "counter",
+      "counter",
+      "counter",
+      "confuse-ray",
+      "confuse-ray",
+      "defend",
+      "defend",
       "slam"
     ],
     "abilities": [],
     "description": "An enigmatic Psychic-type with massive HP — it does almost nothing, and yet it always wins."
   },
-
   "blissey": {
     "name": "Blissey",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 86,
-    "baseSpeed": 4,
+    "baseSpeed": 10,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "defend", "defend", "defend",
-      "body-slam", "body-slam",
-      "slam", "slam",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "defend",
+      "body-slam",
+      "body-slam",
+      "slam",
+      "slam",
       "pound"
     ],
     "abilities": [],
     "description": "The kindest Normal-type there is — and the hardest to knock down. An egg full of love and absurd durability."
   },
-
   "pineco": {
     "name": "Pineco",
-    "types": ["bug"],
+    "types": [
+      "bug"
+    ],
     "maxHp": 36,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "screech", "screech",
-      "slam", "slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "screech",
+      "screech",
+      "slam",
+      "slam",
       "swift"
     ],
     "abilities": [],
@@ -2465,165 +3315,228 @@
   },
   "forretress": {
     "name": "Forretress",
-    "types": ["bug", "steel"],
+    "types": [
+      "bug",
+      "steel"
+    ],
     "maxHp": 52,
-    "baseSpeed": 3,
+    "baseSpeed": 9,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "screech", "screech",
-      "slam", "slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "screech",
+      "screech",
+      "slam",
+      "slam",
       "swift"
     ],
     "abilities": []
   },
-
   "steelix": {
     "name": "Steelix",
-    "types": ["steel", "ground"],
+    "types": [
+      "steel",
+      "ground"
+    ],
     "maxHp": 52,
-    "baseSpeed": 3,
+    "baseSpeed": 9,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "defend", "defend", "defend",
-      "metal-claw", "metal-claw",
-      "slam", "slam",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "defend",
+      "metal-claw",
+      "metal-claw",
+      "slam",
+      "slam",
       "screech"
     ],
     "abilities": [],
     "description": "An ironclad Steel/Ground-type — compressed by the earth into something nearly indestructible."
   },
-
   "scyther": {
     "name": "Scyther",
-    "types": ["bug"],
+    "types": [
+      "bug"
+    ],
     "maxHp": 40,
-    "baseSpeed": 7,
+    "baseSpeed": 21,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "fury-cutter", "fury-cutter",
-      "quick-attack", "quick-attack",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "fury-cutter",
+      "fury-cutter",
+      "quick-attack",
+      "quick-attack",
       "slash"
     ],
     "abilities": [],
     "description": "A lightning-fast Bug-type — its scythe-like forearms cut through enemies before they can react."
   },
-
   "scizor": {
     "name": "Scizor",
-    "types": ["bug", "steel"],
+    "types": [
+      "bug",
+      "steel"
+    ],
     "maxHp": 48,
-    "baseSpeed": 6,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "metal-claw", "metal-claw", "metal-claw",
-      "slash", "slash",
-      "fury-swipes", "fury-swipes",
-      "quick-attack", "quick-attack",
+      "metal-claw",
+      "metal-claw",
+      "metal-claw",
+      "slash",
+      "slash",
+      "fury-swipes",
+      "fury-swipes",
+      "quick-attack",
+      "quick-attack",
       "screech"
     ],
     "abilities": [],
     "description": "A swift Bug/Steel predator — its reinforced claws strike with terrifying speed and precision."
   },
-
   "dunsparce": {
     "name": "Dunsparce",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 64,
-    "baseSpeed": 3,
+    "baseSpeed": 7,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "slam", "slam",
-      "body-slam", "body-slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "slam",
+      "slam",
+      "body-slam",
+      "body-slam",
       "swift"
     ],
     "abilities": [],
     "description": "A mysterious Normal-type with surprising bulk — slow, strange, and oddly hard to finish off."
   },
-
   "girafarig": {
     "name": "Girafarig",
-    "types": ["normal", "psychic"],
+    "types": [
+      "normal",
+      "psychic"
+    ],
     "maxHp": 48,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "psychic", "psychic",
-      "swift", "swift",
-      "stomp", "stomp",
-      "confuse-ray", "confuse-ray"
+      "tackle",
+      "tackle",
+      "psychic",
+      "psychic",
+      "swift",
+      "swift",
+      "stomp",
+      "stomp",
+      "confuse-ray",
+      "confuse-ray"
     ],
     "abilities": [],
     "description": "A dual-minded Normal/Psychic-type — its tail has a mind of its own, and between them they're relentless."
   },
-
   "slugma": {
     "name": "Slugma",
-    "types": ["fire", "rock"],
+    "types": [
+      "fire",
+      "rock"
+    ],
     "maxHp": 30,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "ember", "ember", "ember",
-      "defend", "defend",
-      "slam", "slam"
+      "tackle",
+      "tackle",
+      "tackle",
+      "ember",
+      "ember",
+      "ember",
+      "defend",
+      "defend",
+      "slam",
+      "slam"
     ],
     "abilities": [],
     "description": "A sluggish Fire/Rock-type made of magma — slow but persistent, its body never cools."
   },
   "magcargo": {
     "name": "Magcargo",
-    "types": ["fire", "rock"],
+    "types": [
+      "fire",
+      "rock"
+    ],
     "maxHp": 42,
-    "baseSpeed": 3,
+    "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "ember", "ember",
-      "flamethrower", "flamethrower",
-      "defend", "defend",
-      "slam", "slam"
+      "tackle",
+      "tackle",
+      "ember",
+      "ember",
+      "flamethrower",
+      "flamethrower",
+      "defend",
+      "defend",
+      "slam",
+      "slam"
     ],
     "abilities": []
   },
-
   "phanpy": {
     "name": "Phanpy",
-    "types": ["ground"],
+    "types": [
+      "ground"
+    ],
     "maxHp": 60,
-    "baseSpeed": 4,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "slam", "slam",
-      "body-slam", "body-slam",
-      "defend", "defend",
+      "tackle",
+      "tackle",
+      "tackle",
+      "slam",
+      "slam",
+      "body-slam",
+      "body-slam",
+      "defend",
+      "defend",
       "stomp"
     ],
     "abilities": [],
@@ -2631,202 +3544,277 @@
   },
   "donphan": {
     "name": "Donphan",
-    "types": ["ground"],
+    "types": [
+      "ground"
+    ],
     "maxHp": 62,
+    "baseSpeed": 16,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle",
+      "tackle",
+      "tackle",
+      "slam",
+      "slam",
+      "body-slam",
+      "body-slam",
+      "defend",
+      "defend",
+      "stomp"
+    ],
+    "abilities": []
+  },
+  "skarmory": {
+    "name": "Skarmory",
+    "types": [
+      "steel",
+      "flying"
+    ],
+    "maxHp": 44,
+    "baseSpeed": 20,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle",
+      "tackle",
+      "wing-attack",
+      "wing-attack",
+      "metal-claw",
+      "metal-claw",
+      "gust",
+      "gust",
+      "screech",
+      "screech"
+    ],
+    "abilities": [],
+    "description": "A sleek Steel/Flying guardian that shrugs off physical attacks while shearing through foes with steel feathers."
+  },
+  "ho-oh": {
+    "name": "Ho-Oh",
+    "types": [
+      "fire",
+      "flying"
+    ],
+    "maxHp": 76,
+    "baseSpeed": 15,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "sacred-fire",
+      "sacred-fire",
+      "sacred-fire",
+      "solar-beam",
+      "solar-beam",
+      "earthquake",
+      "earthquake",
+      "recover",
+      "recover",
+      "wing-attack"
+    ],
+    "abilities": []
+  },
+  "slowking": {
+    "name": "Slowking",
+    "types": [
+      "water",
+      "psychic"
+    ],
+    "maxHp": 66,
     "baseSpeed": 5,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "slam", "slam",
-      "body-slam", "body-slam",
-      "defend", "defend",
-      "stomp"
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "psychic",
+      "psychic",
+      "confuse-ray",
+      "confuse-ray",
+      "ice-beam",
+      "ice-beam"
     ],
-    "abilities": []
+    "abilities": [],
+    "description": "A contemplative Water/Psychic-type — unhurried, unruffled, and inexplicably formidable."
   },
-
-  "skarmory": {
-    "name": "Skarmory",
-    "types": ["steel", "flying"],
-    "maxHp": 44,
+  "corsola": {
+    "name": "Corsola",
+    "types": [
+      "water",
+      "rock"
+    ],
+    "maxHp": 38,
     "baseSpeed": 6,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "wing-attack", "wing-attack",
-      "metal-claw", "metal-claw",
-      "gust", "gust",
-      "screech", "screech"
-    ],
-    "abilities": [],
-    "description": "A sleek Steel/Flying guardian that shrugs off physical attacks while shearing through foes with steel feathers."
-  },
-
-  "ho-oh": {
-    "name": "Ho-Oh",
-    "types": ["fire", "flying"],
-    "maxHp": 76,
-    "baseSpeed": 5,
-    "energyPerTurn": 3,
-    "energyCap": 10,
-    "handSize": 5,
-    "deck": [
-      "sacred-fire", "sacred-fire", "sacred-fire",
-      "solar-beam", "solar-beam",
-      "earthquake", "earthquake",
-      "recover", "recover",
-      "wing-attack"
-    ],
-    "abilities": []
-  },
-
-  "slowking": {
-    "name": "Slowking",
-    "types": ["water", "psychic"],
-    "maxHp": 66,
-    "baseSpeed": 2,
-    "energyPerTurn": 3,
-    "energyCap": 10,
-    "handSize": 5,
-    "deck": [
-      "tackle", "tackle",
-      "water-gun", "water-gun",
-      "psychic", "psychic",
-      "confuse-ray", "confuse-ray",
-      "ice-beam", "ice-beam"
-    ],
-    "abilities": [],
-    "description": "A contemplative Water/Psychic-type — unhurried, unruffled, and inexplicably formidable."
-  },
-
-  "corsola": {
-    "name": "Corsola",
-    "types": ["water", "rock"],
-    "maxHp": 38,
-    "baseSpeed": 3,
-    "energyPerTurn": 3,
-    "energyCap": 10,
-    "handSize": 5,
-    "deck": [
-      "tackle", "tackle", "tackle",
-      "water-gun", "water-gun",
-      "defend", "defend",
-      "rock-throw", "rock-throw",
+      "tackle",
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "defend",
+      "defend",
+      "rock-throw",
+      "rock-throw",
       "body-slam"
     ],
     "abilities": [],
     "description": "A living coral Water/Rock-type — fragile-looking, but its layers of reef armor run deep."
   },
-
   "mantine": {
     "name": "Mantine",
-    "types": ["water", "flying"],
+    "types": [
+      "water",
+      "flying"
+    ],
     "maxHp": 58,
-    "baseSpeed": 5,
+    "baseSpeed": 18,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "water-gun", "water-gun",
-      "wing-attack", "wing-attack",
-      "gust", "gust",
-      "swift", "swift"
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "wing-attack",
+      "wing-attack",
+      "gust",
+      "gust",
+      "swift",
+      "swift"
     ],
     "abilities": [],
     "description": "A graceful Water/Flying-type that glides through air and sea alike — elegant and surprisingly hard to hit."
   },
-
   "chinchou": {
     "name": "Chinchou",
-    "types": ["water", "electric"],
+    "types": [
+      "water",
+      "electric"
+    ],
     "maxHp": 50,
-    "baseSpeed": 4,
+    "baseSpeed": 10,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "water-gun", "water-gun",
-      "thunder-shock", "thunder-shock",
-      "thunderbolt", "thunderbolt",
-      "confuse-ray", "confuse-ray"
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "thunder-shock",
+      "thunder-shock",
+      "thunderbolt",
+      "thunderbolt",
+      "confuse-ray",
+      "confuse-ray"
     ],
     "abilities": [],
     "description": "A bioluminescent Water/Electric deep-sea type — its lure shocks prey and disorients attackers."
   },
   "lanturn": {
     "name": "Lanturn",
-    "types": ["water", "electric"],
+    "types": [
+      "water",
+      "electric"
+    ],
     "maxHp": 80,
-    "baseSpeed": 4,
+    "baseSpeed": 11,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "water-gun", "water-gun",
-      "thunder-shock", "thunder-shock",
-      "thunderbolt", "thunderbolt",
-      "confuse-ray", "confuse-ray"
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "thunder-shock",
+      "thunder-shock",
+      "thunderbolt",
+      "thunderbolt",
+      "confuse-ray",
+      "confuse-ray"
     ],
     "abilities": []
   },
-
   "politoed": {
     "name": "Politoed",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 62,
-    "baseSpeed": 5,
+    "baseSpeed": 13,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "water-gun", "water-gun", "water-gun",
-      "body-slam", "body-slam",
+      "tackle",
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "water-gun",
+      "body-slam",
+      "body-slam",
       "hypnosis",
       "swift"
     ],
     "abilities": [],
     "description": "A commanding Water-type frog whose croak controls rain — brings hypnosis and bulk to the battlefield."
   },
-
   "qwilfish": {
     "name": "Qwilfish",
-    "types": ["water", "poison"],
+    "types": [
+      "water",
+      "poison"
+    ],
     "maxHp": 44,
-    "baseSpeed": 6,
+    "baseSpeed": 14,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle",
-      "water-gun", "water-gun",
-      "poison-sting", "poison-sting", "poison-sting",
-      "swift", "swift",
+      "tackle",
+      "tackle",
+      "water-gun",
+      "water-gun",
+      "poison-sting",
+      "poison-sting",
+      "poison-sting",
+      "swift",
+      "swift",
       "slam"
     ],
     "abilities": [],
     "description": "A spiky Water/Poison-type that inflates with water and fires poisoned needles — fast and venomous."
   },
-
   "horsea": {
     "name": "Horsea",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 34,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "water-gun", "water-gun",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "water-gun",
+      "water-gun",
       "bubble-beam",
       "smokescreen",
       "leer"
@@ -2834,19 +3822,24 @@
     "abilities": [],
     "description": "A tiny Water-type seahorse — it spits ink to blind foes and jets away on currents."
   },
-
   "seadra": {
     "name": "Seadra",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 48,
-    "baseSpeed": 6,
+    "baseSpeed": 16,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle", "tackle", "tackle",
-      "defend", "defend",
-      "water-gun", "water-gun",
+      "tackle",
+      "tackle",
+      "tackle",
+      "defend",
+      "defend",
+      "water-gun",
+      "water-gun",
       "bubble-beam",
       "smokescreen",
       "leer"
@@ -2854,57 +3847,75 @@
     "abilities": [],
     "description": "A spiny Water-type — its toxic barbs and precise strikes make it a feared predator of the deep."
   },
-
   "kingdra": {
     "name": "Kingdra",
-    "types": ["water", "dragon"],
+    "types": [
+      "water",
+      "dragon"
+    ],
     "maxHp": 64,
-    "baseSpeed": 6,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "water-gun", "water-gun",
-      "hydro-pump", "hydro-pump",
-      "ice-beam", "ice-beam",
-      "swift", "swift",
+      "water-gun",
+      "water-gun",
+      "hydro-pump",
+      "hydro-pump",
+      "ice-beam",
+      "ice-beam",
+      "swift",
+      "swift",
       "body-slam",
       "slam"
     ],
     "abilities": [],
     "description": "A regal Water/Dragon-type that dwells in the deep — when it stirs, ocean currents follow."
   },
-
   "lugia": {
     "name": "Lugia",
-    "types": ["psychic", "flying"],
+    "types": [
+      "psychic",
+      "flying"
+    ],
     "maxHp": 76,
-    "baseSpeed": 5,
+    "baseSpeed": 15,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "aeroblast", "aeroblast", "aeroblast",
-      "hydro-pump", "hydro-pump",
-      "psychic", "psychic",
+      "aeroblast",
+      "aeroblast",
+      "aeroblast",
+      "hydro-pump",
+      "hydro-pump",
+      "psychic",
+      "psychic",
       "future-sight",
-      "recover", "recover"
+      "recover",
+      "recover"
     ],
     "abilities": []
   },
-
   "raikou": {
     "name": "Raikou",
-    "types": ["electric"],
+    "types": [
+      "electric"
+    ],
     "maxHp": 72,
-    "baseSpeed": 7,
+    "baseSpeed": 21,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "thunderbolt", "thunderbolt", "thunderbolt",
-      "thunder", "thunder",
-      "shadow-ball", "shadow-ball",
+      "thunderbolt",
+      "thunderbolt",
+      "thunderbolt",
+      "thunder",
+      "thunder",
+      "shadow-ball",
+      "shadow-ball",
       "quick-attack",
       "swift",
       "bite"
@@ -2912,39 +3923,51 @@
     "abilities": [],
     "description": "The legendary beast of lightning — races across the land in a blur of electric fury."
   },
-
   "entei": {
     "name": "Entei",
-    "types": ["fire"],
+    "types": [
+      "fire"
+    ],
     "maxHp": 76,
-    "baseSpeed": 6,
+    "baseSpeed": 18,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "flamethrower", "flamethrower", "flamethrower",
-      "fire-blast", "fire-blast",
-      "stomp", "stomp",
-      "body-slam", "body-slam",
+      "flamethrower",
+      "flamethrower",
+      "flamethrower",
+      "fire-blast",
+      "fire-blast",
+      "stomp",
+      "stomp",
+      "body-slam",
+      "body-slam",
       "slam"
     ],
     "abilities": [],
     "description": "The legendary beast of fire — each of its roars causes a volcano to erupt somewhere in the world."
   },
-
   "suicune": {
     "name": "Suicune",
-    "types": ["water"],
+    "types": [
+      "water"
+    ],
     "maxHp": 74,
-    "baseSpeed": 5,
+    "baseSpeed": 17,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "surf", "surf", "surf",
-      "water-gun", "water-gun",
-      "gust", "gust",
-      "psychic", "psychic",
+      "surf",
+      "surf",
+      "surf",
+      "water-gun",
+      "water-gun",
+      "gust",
+      "gust",
+      "psychic",
+      "psychic",
       "recover",
       "ice-beam"
     ],
@@ -2953,13 +3976,19 @@
   },
   "arceus": {
     "name": "Arceus",
-    "types": ["normal"],
+    "types": [
+      "normal"
+    ],
     "maxHp": 999,
     "baseSpeed": 999,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
-    "deck": ["gods-wrath", "gods-wrath", "gods-wrath"],
+    "deck": [
+      "gods-wrath",
+      "gods-wrath",
+      "gods-wrath"
+    ],
     "abilities": [],
     "description": "The Alpha Pokémon.",
     "testOnly": true

@@ -216,6 +216,19 @@ export function onBattleStart(state: CombatState): LogEntry[] {
     });
   }
 
+  // Vanguard: Start battle with 12 Block
+  for (const combatant of state.combatants) {
+    if (!combatant.alive) continue;
+    if (!combatant.passiveIds.includes('vanguard')) continue;
+
+    combatant.block += 12;
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Vanguard: ${combatant.name} starts with 12 Block!`,
+    });
+  }
+
   // --- Item onBattleStart effects ---
   for (const combatant of state.combatants) {
     logs.push(...processItemBattleStart(state, combatant));
@@ -258,6 +271,7 @@ export function onTurnStart(
   combatant.turnFlags.playedWaterAttack = false;
   combatant.turnFlags.playedDragonAttack = false;
   combatant.turnFlags.tyrantsTantrumUsedThisTurn = false;
+  combatant.turnFlags.guardStatus = undefined;
   combatant.itemState['guerillaFront'] = 0;
 
   // Inferno Momentum: Reduce highest-cost FIRE card's cost by 3
@@ -1114,6 +1128,16 @@ export function processRoundStartPassives(state: CombatState): LogEntry[] {
   for (const combatant of state.combatants) {
     if (!combatant.alive) continue;
 
+    // Bulwark: Gain 8 Block at the start of each round
+    if (combatant.passiveIds.includes('bulwark')) {
+      combatant.block += 8;
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `Bulwark: ${combatant.name} gains 8 Block!`,
+      });
+    }
+
     // Item round-start effects (Iron Plate, Assault Vest)
     logs.push(...processItemRoundStart(state, combatant));
   }
@@ -1201,6 +1225,17 @@ export function onDamageTaken(
 
   // (Spiked Hide moved to onDamageDealt — now grants Thorns instead of flat damage)
 
+  // Iron Barbs: When hit by a front-row attack, gain 2 Thorns and 3 Block
+  if (target.passiveIds.includes('iron_barbs') && target.alive && card.range === 'front_enemy') {
+    applyStatus(state, target, 'thorns', 2, target.id);
+    target.block += 3;
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Iron Barbs: ${target.name} gains 2 Thorns and 3 Block!`,
+    });
+  }
+
   // Bristling Rampart: When you take unblocked damage, gain 3 Block
   if (target.passiveIds.includes('bristling_rampart') && target.alive) {
     target.block += 3;
@@ -1209,6 +1244,18 @@ export function onDamageTaken(
       combatantId: target.id,
       message: `Bristling Rampart: ${target.name} gains 3 Block!`,
     });
+  }
+
+  // Guard Status: When hit this turn, apply status to attacker
+  if (target.turnFlags.guardStatus && target.alive && attacker.alive) {
+    const { statusType, stacks } = target.turnFlags.guardStatus;
+    applyStatus(state, attacker, statusType, stacks, target.id);
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Guard: ${attacker.name} is afflicted with ${statusType} ${stacks}!`,
+    });
+    target.turnFlags.guardStatus = undefined;  // consumed on first hit
   }
 
   // --- Item onDamageTaken effects ---
@@ -1364,7 +1411,7 @@ export function checkPredatorsPatience(
  */
 export function checkThickHide(target: Combatant): number {
   if (target.passiveIds.includes('thick_hide')) {
-    return 1;
+    return 2;
   }
   return 0;
 }

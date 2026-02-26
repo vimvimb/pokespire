@@ -301,10 +301,10 @@ describe('Item Pipeline Integration', () => {
         expect(s.source.hp).toBe(115);
       });
 
-      it('Toxic Orb: poison 1 on holder', () => {
+      it('Toxic Orb: poison 4 on holder', () => {
         const s = makeScenario({ sourceTypes: ['normal'], targetTypes: ['normal'], itemId: 'toxic_orb' });
         processItemBattleStart(s.state, s.source);
-        expect(s.source.statuses.find(st => st.type === 'poison')?.stacks).toBe(1);
+        expect(s.source.statuses.find(st => st.type === 'poison')?.stacks).toBe(4);
       });
 
       it('Pewter Stone: block = 8', () => {
@@ -539,12 +539,12 @@ describe('Item Pipeline Integration', () => {
         expect(s.source.energyPerTurn).toBe(before + 1);
       });
 
-      it('Flame Orb: +1 energyPerTurn + burn 2', () => {
+      it('Flame Orb: +1 energyPerTurn + burn 10', () => {
         const s = makeScenario({ sourceTypes: ['normal'], targetTypes: ['normal'], itemId: 'flame_orb' });
         const before = s.source.energyPerTurn;
         processItemBattleStart(s.state, s.source);
         expect(s.source.energyPerTurn).toBe(before + 1);
-        expect(s.source.statuses.find(st => st.type === 'burn')?.stacks).toBe(2);
+        expect(s.source.statuses.find(st => st.type === 'burn')?.stacks).toBe(10);
       });
     });
 

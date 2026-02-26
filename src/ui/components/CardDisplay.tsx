@@ -58,6 +58,7 @@ export const MOVE_TYPE_COLORS: Record<MoveType, string> = {
   ground: '#e0c068',
   steel: '#b8b8d0',
   fairy: '#ee99ac',
+  generic: '#8a8a8a',
   item: '#4ade80',
 };
 
@@ -349,6 +350,13 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
         parts.push(
           <span key={parts.length} style={{ color: '#fbbf24' }}>
             Next switch is free.
+          </span>
+        );
+        break;
+      case 'guard_status':
+        parts.push(
+          <span key={parts.length} style={{ color: '#a855f7' }}>
+            Guard: {effect.statusType} {effect.stacks}
           </span>
         );
         break;

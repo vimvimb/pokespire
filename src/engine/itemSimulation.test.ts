@@ -1104,14 +1104,16 @@ describe('Item Battle Simulations', () => {
       expect(pikachu.maxHp).toBe(baseMaxHp + 15);
     });
 
-    it('Toxic Orb: exactly poison 1 at battle start + +4 damage', () => {
+    it('Toxic Orb: exactly poison 4 at battle start + +1 energy/turn + +4 damage', () => {
       const c = createTestCombatant({ heldItemIds: ['toxic_orb'] });
       const enemy = createTestCombatant({ side: 'enemy' });
       const state = createTestCombatState([c, enemy]);
+      const beforeEnergy = c.energyPerTurn;
       const logs = processItemBattleStart(state, c);
       expect(logs.length).toBe(1);
       expect(logs[0].message).toContain('Toxic Orb');
-      expect(c.statuses.some(s => s.type === 'poison' && s.stacks === 1)).toBe(true);
+      expect(c.statuses.some(s => s.type === 'poison' && s.stacks === 4)).toBe(true);
+      expect(c.energyPerTurn).toBe(beforeEnergy + 1);
       // Damage bonus
       const card = getMove('tackle');
       const bonus = getItemDamageBonus(state, c, enemy, card);

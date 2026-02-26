@@ -58,7 +58,8 @@ export type CardEffectType =
   | 'add_echo_to_hand'
   | 'copy_enemy_card'
   | 'discard_intent'
-  | 'free_next_switch';
+  | 'free_next_switch'
+  | 'guard_status';
 
 export interface DamageEffect {
   type: 'damage';
@@ -69,11 +70,20 @@ export interface DamageEffect {
   weightScaling?: boolean;       // if true, multiply base damage by user's weight / target's weight (e.g. Heat Crash)
   inverseWeightScaling?: boolean; // if true, multiply base damage by target's weight / user's weight (e.g. Grass Knot)
   speedScaling?: boolean;        // if true, add max(0, attackerSpeed - targetSpeed) to damage (e.g. Electro Ball)
+  blockScaling?: boolean;        // if true, damage = source's current Block (e.g. Body Press)
 }
 
 export interface BlockEffect {
   type: 'block';
   value: number;
+  frontRowBonus?: number;  // if in front row, use this value instead (e.g. Hold Fast)
+}
+
+/** Guard: when hit this turn, apply a status to the attacker */
+export interface GuardStatusEffect {
+  type: 'guard_status';
+  statusType: StatusType;
+  stacks: number;
 }
 
 export interface HealEffect {
@@ -206,7 +216,8 @@ export type CardEffect =
   | AddEchoToHandEffect
   | CopyEnemyCardEffect
   | DiscardIntentEffect
-  | FreeNextSwitchEffect;
+  | FreeNextSwitchEffect
+  | GuardStatusEffect;
 
 // --- Move Types (elemental) ---
 
@@ -229,6 +240,7 @@ export type MoveType =
   | 'ground'
   | 'steel'
   | 'fairy'
+  | 'generic'
   | 'item';
 
 // --- Cards / Moves ---
@@ -332,6 +344,7 @@ export interface CombatantTurnFlags {
   playedWaterAttack: boolean;               // Perfect Cycle: played a Water attack this turn
   playedDragonAttack: boolean;              // Perfect Cycle: played a Dragon attack this turn
   tyrantsTantrumUsedThisTurn: boolean;      // Tyrant's Tantrum: first attack per turn only
+  guardStatus?: { statusType: StatusType; stacks: number }; // Guard: apply status to attacker when hit this turn
 }
 
 export interface Combatant {

@@ -337,7 +337,7 @@ export const ITEM_DEFS: Record<string, ItemDefinition> = {
   toxic_orb: {
     id: 'toxic_orb',
     name: 'Toxic Orb',
-    description: 'Self-poison 1 at battle start, +4 damage all attacks.',
+    description: '+1 energy/turn, self-Poison 4 at battle start.',
     rarity: 'boss',
     icon: '☠️',
   },
@@ -345,7 +345,7 @@ export const ITEM_DEFS: Record<string, ItemDefinition> = {
     id: 'expert_belt',
     name: 'Expert Belt',
     description: '+5 damage on super-effective hits.',
-    rarity: 'boss',
+    rarity: 'common',
     icon: '🥋',
   },
   choice_scarf: {
@@ -358,9 +358,39 @@ export const ITEM_DEFS: Record<string, ItemDefinition> = {
   flame_orb: {
     id: 'flame_orb',
     name: 'Flame Orb',
-    description: '+1 energy/turn, self-Burn 2 at battle start.',
+    description: '+1 energy/turn, self-Burn 10 at battle start.',
     rarity: 'boss',
     icon: '🔥',
+  },
+
+  // ── Defensive Expansion ──────────────────────────────────────────
+  armor_fossil: {
+    id: 'armor_fossil',
+    name: 'Armor Fossil',
+    description: 'Gain 14 Block at the start of round 2.',
+    rarity: 'common',
+    icon: '🦴',
+  },
+  sail_fossil: {
+    id: 'sail_fossil',
+    name: 'Sail Fossil',
+    description: 'End of your turn: if you have 0 Block, gain 6 Block.',
+    rarity: 'common',
+    icon: '⛵',
+  },
+  shuckle_shell: {
+    id: 'shuckle_shell',
+    name: 'Shuckle Shell',
+    description: 'When you take HP damage, gain 20 Block at start of next turn.',
+    rarity: 'boss',
+    icon: '🐚',
+  },
+  champions_cape: {
+    id: 'champions_cape',
+    name: "Champion's Cape",
+    description: 'Start of battle: gain Block equal to 50% of max HP.',
+    rarity: 'boss',
+    icon: '🦸',
   },
 };
 

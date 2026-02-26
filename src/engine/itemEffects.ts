@@ -57,13 +57,14 @@ export function processItemBattleStart(
     });
   }
 
-  // Toxic Orb: Self-poison 1 at battle start
+  // Toxic Orb: +1 energy per turn, self-Poison 4
   if (hasItem(combatant, 'toxic_orb')) {
-    applyStatus(state, combatant, 'poison', 1, combatant.id);
+    combatant.energyPerTurn += 1;
+    applyStatus(state, combatant, 'poison', 4, combatant.id);
     logs.push({
       round: state.round,
       combatantId: combatant.id,
-      message: `Toxic Orb: ${combatant.name} is poisoned!`,
+      message: `Toxic Orb: ${combatant.name} gains +1 energy/turn and is poisoned!`,
     });
   }
 
@@ -74,6 +75,17 @@ export function processItemBattleStart(
       round: state.round,
       combatantId: combatant.id,
       message: `Pewter Stone: ${combatant.name} starts with 8 Block!`,
+    });
+  }
+
+  // Champion's Cape: Gain Block equal to 50% of max HP at battle start
+  if (hasItem(combatant, 'champions_cape')) {
+    const blockGain = Math.floor(combatant.maxHp * 0.50);
+    combatant.block += blockGain;
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Champion's Cape: ${combatant.name} gains ${blockGain} Block!`,
     });
   }
 
@@ -107,10 +119,10 @@ export function processItemBattleStart(
     });
   }
 
-  // Flame Orb: +1 energy per turn, self-Burn 2
+  // Flame Orb: +1 energy per turn, self-Burn 10
   if (hasItem(combatant, 'flame_orb')) {
     combatant.energyPerTurn += 1;
-    applyStatus(state, combatant, 'burn', 2, combatant.id);
+    applyStatus(state, combatant, 'burn', 10, combatant.id);
     logs.push({
       round: state.round,
       combatantId: combatant.id,
@@ -158,6 +170,17 @@ export function processItemTurnStart(
 ): LogEntry[] {
   const logs: LogEntry[] = [];
   if (!combatant.alive || combatant.heldItemIds.length === 0) return logs;
+
+  // Shuckle Shell: If took HP damage last turn, gain 20 Block
+  if (hasItem(combatant, 'shuckle_shell') && combatant.itemState['shuckleShellFlag']) {
+    combatant.block += 20;
+    combatant.itemState['shuckleShellFlag'] = 0;
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Shuckle Shell: ${combatant.name} gains 20 Block!`,
+    });
+  }
 
   // Leftovers: Heal 3 HP at start of your turn
   if (hasItem(combatant, 'leftovers')) {
@@ -254,6 +277,17 @@ export function processItemRoundStart(
 ): LogEntry[] {
   const logs: LogEntry[] = [];
   if (!combatant.alive || combatant.heldItemIds.length === 0) return logs;
+
+  // Armor Fossil: Gain 14 Block at the start of round 2 (one-time)
+  if (hasItem(combatant, 'armor_fossil') && state.round === 2 && !combatant.itemState['armorFossilUsed']) {
+    combatant.itemState['armorFossilUsed'] = 1;
+    combatant.block += 14;
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Armor Fossil: ${combatant.name} gains 14 Block!`,
+    });
+  }
 
   // Iron Plate: Gain Block = (allies in same row including self) × 3
   if (hasItem(combatant, 'iron_plate')) {
@@ -434,6 +468,16 @@ export function processItemTurnEnd(
   const logs: LogEntry[] = [];
   if (!combatant.alive || combatant.heldItemIds.length === 0) return logs;
 
+  // Sail Fossil: End of your turn, if you have 0 Block, gain 6 Block
+  if (hasItem(combatant, 'sail_fossil') && combatant.block === 0) {
+    combatant.block += 6;
+    logs.push({
+      round: _state.round,
+      combatantId: combatant.id,
+      message: `Sail Fossil: ${combatant.name} gains 6 Block!`,
+    });
+  }
+
   // Slow Start Gem: If 1 or fewer cards played this turn, draw 2 extra next turn
   if (hasItem(combatant, 'slow_start_gem')) {
     const cardsPlayed = combatant.itemState['cardsPlayedThisTurn'] ?? 0;
@@ -498,6 +542,11 @@ export function processItemOnDamageTaken(
 ): LogEntry[] {
   const logs: LogEntry[] = [];
   if (target.heldItemIds.length === 0 || !target.alive || hpDamage <= 0) return logs;
+
+  // Shuckle Shell: When you take HP damage, set flag for +4 Block next turn start
+  if (hasItem(target, 'shuckle_shell')) {
+    target.itemState['shuckleShellFlag'] = 1;
+  }
 
   // Sitrus Berry: First damage taken in combat → draw 2 cards
   if (hasItem(target, 'sitrus_berry') && !target.itemState['sitrusBerryUsed']) {

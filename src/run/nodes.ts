@@ -1016,6 +1016,7 @@ export const ACT3_NODES: MapNode[] = [
     completed: false,
     enemies: ['mewtwo'],
     enemyPositions: [{ row: 'front', column: 1 }],
+    enemyHpMultiplier: 1.6,
     x: 0.88, y: 0.44,
     size: 'large',
   },

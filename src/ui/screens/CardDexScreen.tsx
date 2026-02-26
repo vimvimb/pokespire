@@ -14,7 +14,7 @@ interface Props {
 const ALL_TYPES: MoveType[] = [
   'normal', 'fire', 'water', 'grass', 'electric', 'poison',
   'flying', 'psychic', 'dark', 'fighting', 'ice', 'bug',
-  'dragon', 'ghost', 'rock', 'ground', 'steel', 'fairy', 'item',
+  'dragon', 'ghost', 'rock', 'ground', 'steel', 'fairy', 'generic', 'item',
 ];
 
 const ALL_RARITIES: CardRarity[] = [
@@ -66,6 +66,7 @@ const TYPE_COLORS: Record<MoveType, string> = {
   ground: '#e0c068',
   steel: '#b8b8d0',
   fairy: '#ee99ac',
+  generic: '#8a8a8a',
   item: '#4ade80',
 };
 

@@ -165,10 +165,10 @@ describe('Passive Abilities', () => {
   });
 
   describe('Thick Hide', () => {
-    it('returns 1 for combatants with thick_hide', () => {
+    it('returns 2 for combatants with thick_hide', () => {
       const combatant = createTestCombatant({ passiveIds: ['thick_hide'] });
 
-      expect(checkThickHide(combatant)).toBe(1);
+      expect(checkThickHide(combatant)).toBe(2);
     });
 
     it('returns 0 for combatants without thick_hide', () => {

@@ -197,7 +197,12 @@ export type PassiveId =
   | 'rewind'
   | 'forewarn'
   // Larvitar/Pupitar/Tyranitar line
-  | 'sand_stream';
+  | 'sand_stream'
+  // Defensive expansion passives
+  | 'vanguard'
+  | 'bulwark'
+  | 'iron_barbs'
+  | 'fortify';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -340,7 +345,7 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   // Tauros (shared with Nido lines)
   thick_hide: {
     name: 'Thick Hide',
-    description: 'Take 1 less damage from all attacks.',
+    description: 'Take 2 less damage from all attacks.',
   },
   anger_point: {
     name: 'Anger Point',
@@ -808,6 +813,23 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
     name: 'Sand Stream',
     description: 'At round end, deal damage equal to your Strength to all enemies.',
   },
+  // Defensive expansion passives
+  vanguard: {
+    name: 'Vanguard',
+    description: 'Start battle with 12 Block.',
+  },
+  bulwark: {
+    name: 'Bulwark',
+    description: 'Gain 8 Block at the start of each round.',
+  },
+  iron_barbs: {
+    name: 'Iron Barbs',
+    description: 'When hit by a front-row attack, gain 2 Thorns and 3 Block.',
+  },
+  fortify: {
+    name: 'Fortify',
+    description: 'When playing a card that grants Block, gain +3 bonus Block.',
+  },
 };
 
 // Charmander progression tree
@@ -907,9 +929,9 @@ export const SQUIRTLE_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Wartortle',
-      description: 'Evolve to Wartortle (+10 HP). Add Bubble Beam. Gain Pressure Hull.',
+      description: 'Evolve to Wartortle (+10 HP). Add Bubble Beam. Gain Vanguard.',
       evolvesTo: 'wartortle',
-      passiveId: 'pressure_hull',
+      passiveId: 'vanguard',
       hpBoost: 0,  // HP increase comes from Wartortle's base stats
       cardsToAdd: ['bubble-beam'],
     },
@@ -1109,8 +1131,8 @@ export const TAUROS_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Tauros',
-      description: 'Gain Anger Point.',
-      passiveId: 'anger_point',
+      description: 'Gain Iron Barbs.',
+      passiveId: 'iron_barbs',
       hpBoost: 5,
       cardsToAdd: [],
     },
@@ -1140,8 +1162,8 @@ export const SNORLAX_PROGRESSION: ProgressionTree = {
     {
       level: 1,
       name: 'Snorlax',
-      description: 'Starting form with Immunity passive.',
-      passiveId: 'immunity',
+      description: 'Starting form with Fortify passive.',
+      passiveId: 'fortify',
       hpBoost: 0,
       cardsToAdd: [],
     },
@@ -1187,8 +1209,8 @@ export const KANGASKHAN_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Kangaskhan',
-      description: 'Add Body Slam. Gain Protective Instinct.',
-      passiveId: 'protective_instinct',
+      description: 'Add Body Slam. Gain Bulwark.',
+      passiveId: 'bulwark',
       hpBoost: 5,
       cardsToAdd: ['body-slam'],
     },
@@ -1300,8 +1322,8 @@ export const RHYHORN_PROGRESSION: ProgressionTree = {
     {
       level: 1,
       name: 'Rhyhorn',
-      description: 'Starting form with Thick Hide passive.',
-      passiveId: 'thick_hide',
+      description: 'Starting form with Vanguard passive.',
+      passiveId: 'vanguard',
       hpBoost: 0,
       cardsToAdd: [],
     },
@@ -1620,16 +1642,16 @@ export const LAPRAS_PROGRESSION: ProgressionTree = {
     {
       level: 1,
       name: 'Lapras',
-      description: 'Starting form with Water Absorb passive.',
-      passiveId: 'water_absorb',
+      description: 'Starting form with Pressure Hull passive.',
+      passiveId: 'pressure_hull',
       hpBoost: 0,
       cardsToAdd: [],
     },
     {
       level: 2,
       name: 'Lapras',
-      description: '+5 HP. Add Surf. Gain Pressure Hull.',
-      passiveId: 'pressure_hull',
+      description: '+5 HP. Add Surf. Gain Water Absorb.',
+      passiveId: 'water_absorb',
       hpBoost: 5,
       cardsToAdd: ['surf'],
     },
@@ -1918,8 +1940,8 @@ export const CLEFAIRY_PROGRESSION: ProgressionTree = {
     {
       level: 3,
       name: 'Clefable',
-      description: 'Gain Friend Guard.',
-      passiveId: 'friend_guard',
+      description: 'Gain Fortify.',
+      passiveId: 'fortify',
       hpBoost: 0,
       cardsToAdd: [],
     },
@@ -2111,9 +2133,9 @@ export const JIGGLYPUFF_PROGRESSION: ProgressionTree = {
     {
       level: 2,
       name: 'Wigglytuff',
-      description: 'Evolve to Wigglytuff (+36 HP). Add Body Slam. Gain Friend Guard.',
+      description: 'Evolve to Wigglytuff (+36 HP). Add Body Slam. Gain Bulwark.',
       evolvesTo: 'wigglytuff',
-      passiveId: 'friend_guard',
+      passiveId: 'bulwark',
       hpBoost: 0,
       cardsToAdd: ['body-slam'],
     },

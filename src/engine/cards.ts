@@ -392,6 +392,54 @@ export function playCard(
     }
   }
 
+  // Wide Guard: Row allies gain 3 Block
+  const baseCardIdForWideGuard = cardId.replace('__parental', '');
+  if (baseCardIdForWideGuard === 'wide-guard') {
+    const rowAllies = state.combatants.filter(c =>
+      c.alive && c.side === combatant.side && c.id !== combatant.id &&
+      c.position.row === combatant.position.row
+    );
+    for (const ally of rowAllies) {
+      ally.block += 3;
+      logs.push({
+        round: state.round,
+        combatantId: ally.id,
+        message: `Wide Guard: ${ally.name} gains 3 Block.`,
+      });
+    }
+  }
+
+  // Aurora Veil: All allies gain 4 Block
+  if (baseCardIdForWideGuard === 'aurora-veil') {
+    const allies = state.combatants.filter(c =>
+      c.alive && c.side === combatant.side && c.id !== combatant.id
+    );
+    for (const ally of allies) {
+      ally.block += 4;
+      logs.push({
+        round: state.round,
+        combatantId: ally.id,
+        message: `Aurora Veil: ${ally.name} gains 4 Block.`,
+      });
+    }
+  }
+
+  // Crafty Shield: Column ally gains 3 Block
+  if (baseCardIdForWideGuard === 'crafty-shield') {
+    const columnAlly = state.combatants.find(c =>
+      c.alive && c.side === combatant.side && c.id !== combatant.id &&
+      c.position.column === combatant.position.column
+    );
+    if (columnAlly) {
+      columnAlly.block += 3;
+      logs.push({
+        round: state.round,
+        combatantId: columnAlly.id,
+        message: `Crafty Shield: ${columnAlly.name} gains 3 Block.`,
+      });
+    }
+  }
+
   // Vanish or discard
   if (didVanish) {
     // Card is removed from the game — track in vanished pile
@@ -1277,6 +1325,11 @@ function resolveEffects(
           }
         }
 
+        // Block-scaling: damage = source's current Block (e.g. Body Press)
+        if (effect.blockScaling) {
+          damageValue = source.block;
+        }
+
         const sashBefore = target.focusSashUsed;
         const r = applyCardDamage(source, target, damageValue, card.type, mods);
 
@@ -1743,11 +1796,20 @@ function resolveEffects(
 
       case 'block': {
         const blockRecipient = card.range === 'any_ally' ? target : source;
-        blockRecipient.block += effect.value;
+        // Front-row bonus: use higher value if recipient is in front row
+        let blockValue = effect.value;
+        if (effect.frontRowBonus && blockRecipient.position.row === 'front') {
+          blockValue = effect.frontRowBonus;
+        }
+        // Fortify: +3 bonus Block when playing a card that grants Block
+        if (source.passiveIds.includes('fortify')) {
+          blockValue += 3;
+        }
+        blockRecipient.block += blockValue;
         logs.push({
           round: state.round,
           combatantId: blockRecipient.id,
-          message: `${blockRecipient.name} gains ${effect.value} Block. (Block: ${blockRecipient.block})`,
+          message: `${blockRecipient.name} gains ${blockValue} Block. (Block: ${blockRecipient.block})`,
         });
         break;
       }
@@ -1807,6 +1869,16 @@ function resolveEffects(
             message: `${immunitySource} makes ${target.name} immune to ${effect.status}!`,
           });
         }
+        break;
+      }
+      case 'guard_status': {
+        // Set guard flag: when hit this turn, apply status to attacker
+        source.turnFlags.guardStatus = { statusType: effect.statusType, stacks: effect.stacks };
+        logs.push({
+          round: state.round,
+          combatantId: source.id,
+          message: `${source.name} raises a guard! (${effect.statusType} ${effect.stacks})`,
+        });
         break;
       }
     }

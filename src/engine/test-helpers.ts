@@ -76,6 +76,7 @@ export function createTestCombatant(options: TestCombatantOptions = {}): Combata
       playedWaterAttack: false,
       playedDragonAttack: false,
       tyrantsTantrumUsedThisTurn: false,
+      guardStatus: undefined,
     },
     costModifiers: {},
     itemState: {},

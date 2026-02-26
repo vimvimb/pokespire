@@ -981,6 +981,82 @@ function renderIcon(id: string) {
         </g>
       );
 
+    /* ─── DEFENSIVE EXPANSION ─────────────────────────────────── */
+
+    case 'armor_fossil':
+      // Fossil shell — gray-brown armored plate with ridge lines
+      return (
+        <g>
+          {/* Shell outline */}
+          <path d="M8 22 Q8 10 16 8 Q24 10 24 22 Z" fill="#92400e" opacity={0.15} stroke="#a8763e" strokeWidth="1.2" />
+          {/* Ridge lines */}
+          <path d="M12 20 Q14 14 16 12 Q18 14 20 20" stroke="#a8763e" strokeWidth="0.8" fill="none" opacity={0.35} />
+          <path d="M10 21 Q13 16 16 14 Q19 16 22 21" stroke="#a8763e" strokeWidth="0.6" fill="none" opacity={0.25} />
+          {/* Central bump */}
+          <circle cx="16" cy="14" r="2" fill="#a8763e" opacity={0.2} />
+          {sparkle(7, 12, '#a8763e', 0.3)}
+          {sparkle(25, 14, '#a8763e', 0.25)}
+        </g>
+      );
+
+    case 'sail_fossil':
+      // Sail fin fossil — blue-gray sail shape with vein lines
+      return (
+        <g>
+          {/* Sail shape */}
+          <path d="M10 24 L16 6 L22 24 Z" fill="#64748b" opacity={0.15} stroke="#94a3b8" strokeWidth="1.2" />
+          {/* Central vein */}
+          <line x1="16" y1="8" x2="16" y2="23" stroke="#94a3b8" strokeWidth="0.8" opacity={0.35} />
+          {/* Side veins */}
+          <line x1="16" y1="12" x2="12" y2="18" stroke="#94a3b8" strokeWidth="0.6" opacity={0.25} />
+          <line x1="16" y1="12" x2="20" y2="18" stroke="#94a3b8" strokeWidth="0.6" opacity={0.25} />
+          <line x1="16" y1="16" x2="13" y2="21" stroke="#94a3b8" strokeWidth="0.5" opacity={0.2} />
+          <line x1="16" y1="16" x2="19" y2="21" stroke="#94a3b8" strokeWidth="0.5" opacity={0.2} />
+          {sparkle(7, 10, '#94a3b8', 0.3)}
+          {sparkle(25, 12, '#94a3b8', 0.25)}
+        </g>
+      );
+
+    case 'shuckle_shell':
+      // Round shell — red/yellow Shuckle-colored dome with openings
+      return (
+        <g>
+          {/* Shell body */}
+          <circle cx="16" cy="16" r="10" fill="#dc2626" opacity={0.15} stroke="#ef4444" strokeWidth="1.2" />
+          {/* Yellow accent band */}
+          <path d="M8 18 Q12 14 16 14 Q20 14 24 18" stroke="#fbbf24" strokeWidth="1" fill="none" opacity={0.35} />
+          {/* Shell openings */}
+          <circle cx="11" cy="20" r="2" fill="#fbbf24" opacity={0.15} stroke="#fbbf24" strokeWidth="0.7" />
+          <circle cx="21" cy="20" r="2" fill="#fbbf24" opacity={0.15} stroke="#fbbf24" strokeWidth="0.7" />
+          <circle cx="16" cy="11" r="1.5" fill="#fbbf24" opacity={0.15} stroke="#fbbf24" strokeWidth="0.7" />
+          {/* Shell segments */}
+          <line x1="16" y1="6" x2="16" y2="14" stroke="#ef4444" strokeWidth="0.6" opacity={0.25} />
+          <line x1="8" y1="18" x2="16" y2="14" stroke="#ef4444" strokeWidth="0.6" opacity={0.2} />
+          <line x1="24" y1="18" x2="16" y2="14" stroke="#ef4444" strokeWidth="0.6" opacity={0.2} />
+          {sparkle(6, 8, '#fbbf24', 0.35)}
+          {sparkle(26, 8, '#fbbf24', 0.3)}
+        </g>
+      );
+
+    case 'champions_cape':
+      // Cape/mantle — gold and purple flowing shape
+      return (
+        <g>
+          {/* Cape body */}
+          <path d="M10 8 L16 6 L22 8 L24 24 Q16 28 8 24 Z" fill="#7c3aed" opacity={0.15} stroke="#a78bfa" strokeWidth="1.2" />
+          {/* Collar/clasp */}
+          <path d="M11 9 L16 7 L21 9" stroke="#fbbf24" strokeWidth="1.2" fill="none" opacity={0.5} />
+          <circle cx="16" cy="7" r="1.5" fill="#fbbf24" opacity={0.35} stroke="#fbbf24" strokeWidth="0.7" />
+          {/* Cape folds */}
+          <path d="M12 12 Q14 16 12 22" stroke="#a78bfa" strokeWidth="0.7" fill="none" opacity={0.25} />
+          <path d="M20 12 Q18 16 20 22" stroke="#a78bfa" strokeWidth="0.7" fill="none" opacity={0.25} />
+          {/* Gold trim at bottom */}
+          <path d="M9 23 Q16 27 23 23" stroke="#fbbf24" strokeWidth="0.8" fill="none" opacity={0.35} />
+          {sparkle(6, 14, '#fbbf24', 0.35)}
+          {sparkle(26, 14, '#fbbf24', 0.3)}
+        </g>
+      );
+
     /* ─── fallback ───────────────────────────────────────────────── */
 
     default:

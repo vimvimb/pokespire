@@ -143,6 +143,11 @@ export function calculateDamagePreview(
     baseDamage += Math.max(0, attackerSpeed - targetSpeed);
   }
 
+  // Block-scaling: damage = source's current Block (e.g. Body Press)
+  if (damageEffect.type === 'damage' && damageEffect.blockScaling) {
+    baseDamage = source.block;
+  }
+
   // Calculate all modifiers (mirroring buildDamageModifiers logic)
   const strength = getStatusStacks(source, 'strength');
   const enfeeble = getStatusStacks(source, 'enfeeble');

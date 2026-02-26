@@ -870,7 +870,7 @@ Design new playable Pokemon lines for Pokespire. For each line, provide:
 | Base | ? | ? | Why these numbers? |
 | Evolved | ? | ? | How do they change? |
 
-**Stat guidelines:** HP ranges from 18 (Caterpie) to 100 (Snorlax). Speed ranges from 2 (Snorlax/Rhyhorn) to 10 (Electrode). Most Pokemon are 4-7 speed, 30-65 HP.
+**Stat guidelines:** HP ranges from 18 (Caterpie) to 100 (Snorlax). Speed ranges from 1 (Wobbuffet) to 25 (Electrode). Most Pokemon are 10-18 speed, 30-65 HP.
 
 ### 3. Progression Tree (4 Levels)
 For each level:

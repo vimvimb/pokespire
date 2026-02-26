@@ -175,18 +175,18 @@ export const POKEDEX_NUMBERS: Record<string, number> = {
  */
 export const POKEMON_WEIGHTS: Record<string, number> = {
   // Starters
-  bulbasaur: 6.9,
+  bulbasaur: 5, // Adjusted -10% sprite size
   ivysaur: 13,
   venusaur: 70, // Real: 100kg, adjusted -30% for sprite scaling
-  charmander: 8.5,
+  charmander: 6.2, // Adjusted -10% sprite size
   charmeleon: 19,
   charizard: 90.5,
-  squirtle: 9,
+  squirtle: 6.6, // Adjusted -10% sprite size
   wartortle: 9.5, // Real: 22.5, adjusted -25% for sprite scaling
   blastoise: 29.3, // Real: 85.5, adjusted -30% for sprite scaling
 
   // Others
-  pikachu: 11, // Real: 6kg, increased 20% for sprite scaling
+  pikachu: 8, // Adjusted -10% sprite size (real: 6kg)
   raichu: 30,
   rattata: 3.5,
   raticate: 18.5,
@@ -290,7 +290,7 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   vileplume: 19, // Real: 18.6kg
 
   // Meowth line
-  meowth: 7, // Real: 4.2kg, increased for visual balance
+  meowth: 9.3, // Adjusted +10% sprite size (real: 4.2kg)
 
   // Zubat line
   zubat: 7.5, // Real: 7.5kg
