@@ -1,6 +1,5 @@
 export type Screen =
   | "main_menu"
-  | "tutorial_select"
   | "select"
   | "map"
   | "rest"

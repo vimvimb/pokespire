@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useLayoutEffect, useCallback, memo } from 'react';
+import { createPortal } from 'react-dom';
 import type { CombatState, Combatant } from '../../engine/types';
 import { getCombatant } from '../../engine/combat';
 import { getEffectiveSpeed } from '../../engine/status';
@@ -217,7 +218,7 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
         Round {state.round}
       </span>
       <span style={{ color: THEME.border.bright, marginRight: 8, fontSize: 14, position: 'relative', zIndex: 1, padding: '4px 0' }}>·</span>
-      {state.turnOrder.map((entry, idx) => {
+      {(() => { let intentsTagged = false; return state.turnOrder.map((entry, idx) => {
         const c = getCombatant(state, entry.combatantId);
         const isCurrent = idx === state.currentTurnIndex;
         const hasActed = entry.hasActed;
@@ -227,6 +228,9 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
         // still render for layout stability since we're using cached intents
         const hasIntents = !isPhantom && intents && intents.length > 0 && c.side === 'enemy' &&
           (intentsVisible ? !hasActed : true);
+        // Tag only the first enemy's intent bracket for tutorial targeting
+        const tagIntents = hasIntents && !intentsTagged;
+        if (tagIntents) intentsTagged = true;
 
         return (
           <div
@@ -309,15 +313,18 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
                     background: THEME.text.tertiary + '66',
                   }} />
                   {/* Intent chips row */}
-                  <div style={{
-                    display: 'flex',
-                    gap: 2,
-                    padding: '2px 3px',
-                    borderRadius: 4,
-                    background: 'rgba(0, 0, 0, 0.65)',
-                    border: `1px solid ${THEME.border.subtle}`,
-                    whiteSpace: 'nowrap',
-                  }}>
+                  <div
+                    data-tutorial-id={tagIntents ? "intents" : undefined}
+                    style={{
+                      display: 'flex',
+                      gap: 2,
+                      padding: '2px 3px',
+                      borderRadius: 4,
+                      background: 'rgba(0, 0, 0, 0.65)',
+                      border: `1px solid ${THEME.border.subtle}`,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     {intents.map((intent) => (
                       <IntentChip
                         key={intent.sequenceNumber}
@@ -331,7 +338,7 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
             )}
           </div>
         );
-      })}
+      }); })()}
     </div>
   );
 }
@@ -343,13 +350,19 @@ function SwitchIntentChip({
   intent: EnemyIntent;
   combatantMap: Map<string, Combatant>;
 }) {
+  const chipRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState(false);
   const [popoverReady, setPopoverReady] = useState(false);
+  const [chipRect, setChipRect] = useState<DOMRect | null>(null);
 
   useEffect(() => {
     if (!hovered) {
       setPopoverReady(false);
+      setChipRect(null);
       return;
+    }
+    if (chipRef.current) {
+      setChipRect(chipRef.current.getBoundingClientRect());
     }
     const id = requestAnimationFrame(() => {
       requestAnimationFrame(() => setPopoverReady(true));
@@ -364,6 +377,7 @@ function SwitchIntentChip({
 
   return (
     <div
+      ref={chipRef}
       title={!hovered ? 'Switch' : undefined}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -399,18 +413,17 @@ function SwitchIntentChip({
         />
       )}
 
-      {/* Hover popover — switch preview */}
-      {hovered && (
+      {/* Hover popover — portaled to body to escape transform containing block */}
+      {hovered && chipRect && createPortal(
         <div style={{
-          position: 'absolute',
-          top: '100%',
-          left: '50%',
+          position: 'fixed',
+          top: chipRect.bottom + 4,
+          left: chipRect.left + chipRect.width / 2,
           transform: `translateX(-50%) scaleY(${popoverReady ? 1 : 0})`,
           transformOrigin: 'top center',
           transition: 'transform 150ms ease-out, opacity 150ms ease-out',
           opacity: popoverReady ? 1 : 0,
-          zIndex: 100,
-          marginTop: 4,
+          zIndex: 10000,
           pointerEvents: 'none',
         }}>
           <div style={{
@@ -487,7 +500,8 @@ function SwitchIntentChip({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
@@ -508,14 +522,20 @@ function IntentChip({
   }
 
   const typeColor = MOVE_TYPE_COLORS[intent.moveType] || MOVE_TYPE_COLORS.normal;
+  const chipRef = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState(false);
   const [popoverReady, setPopoverReady] = useState(false);
+  const [chipRect, setChipRect] = useState<DOMRect | null>(null);
 
   // Fold-out animation: mount at scaleY(0), flip to scaleY(1) via rAF
   useEffect(() => {
     if (!hovered) {
       setPopoverReady(false);
+      setChipRect(null);
       return;
+    }
+    if (chipRef.current) {
+      setChipRect(chipRef.current.getBoundingClientRect());
     }
     const id = requestAnimationFrame(() => {
       requestAnimationFrame(() => setPopoverReady(true));
@@ -540,6 +560,7 @@ function IntentChip({
 
   return (
     <div
+      ref={chipRef}
       title={!hovered ? intent.cardName : undefined}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -623,20 +644,19 @@ function IntentChip({
         </span>
       ) : null}
 
-      {/* Hover popover — card preview(s) */}
-      {hovered && (
+      {/* Hover popover — portaled to body to escape transform containing block */}
+      {hovered && chipRect && createPortal(
         <div style={{
-          position: 'absolute',
-          top: '100%',
-          left: '50%',
+          position: 'fixed',
+          top: chipRect.bottom + 4,
+          left: chipRect.left + chipRect.width / 2,
           transform: `translateX(-50%) scaleY(${popoverReady ? 1 : 0})`,
           transformOrigin: 'top center',
           transition: 'transform 150ms ease-out, opacity 150ms ease-out',
           opacity: popoverReady ? 1 : 0,
-          zIndex: 100,
+          zIndex: 10000,
           display: 'flex',
           gap: 4,
-          marginTop: 4,
           pointerEvents: 'none',
         }}>
           {getPreviewTargets().map(target => (
@@ -647,7 +667,8 @@ function IntentChip({
               damagePreview={intent.damageByTarget[target.id]}
             />
           ))}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

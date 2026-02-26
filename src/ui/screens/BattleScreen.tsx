@@ -2198,6 +2198,7 @@ export function BattleScreen({
                     const accent = enabled ? teal : tealDim;
                     return (
                       <button
+                        data-tutorial-id="switch_button"
                         onClick={handleSwitchButtonClick}
                         disabled={!enabled}
                         title={

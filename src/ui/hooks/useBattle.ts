@@ -41,6 +41,7 @@ export interface BattleHook {
     playerPositions: Position[],
     enemyPositions: Position[],
     enemyPassives?: Map<number, string[]>,
+    hpOverrides?: Record<string, number>,
   ) => void;
   playCard: (cardIndex: number, targetId?: string) => void;
   switchPosition: (targetPosition: Position) => void;
@@ -494,6 +495,7 @@ export function useBattle(): BattleHook {
     playerPositions: Position[],
     enemyPositions: Position[],
     enemyPassives?: Map<number, string[]>,
+    hpOverrides?: Record<string, number>,
   ) => {
     const s = createCombatState(players, enemies, playerPositions, enemyPositions, undefined, true);
     if (enemyPassives) {
@@ -504,6 +506,19 @@ export function useBattle(): BattleHook {
           combatant.passiveIds = [...combatant.passiveIds, ...passiveIds];
         }
       });
+    }
+    // Apply HP overrides before initialization so first intent calculation sees correct HP
+    if (hpOverrides) {
+      for (const [key, targetHp] of Object.entries(hpOverrides)) {
+        const [side, slotStr] = key.split("-");
+        const slotIndex = Number(slotStr);
+        const combatant = s.combatants.find(
+          (c) => c.side === side && c.slotIndex === slotIndex,
+        );
+        if (combatant) {
+          combatant.hp = targetHp;
+        }
+      }
     }
     initializeBattle(s);
   }, [initializeBattle]);

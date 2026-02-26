@@ -8,11 +8,9 @@ import {
 } from "react";
 import type { PokemonData, Position, Combatant } from "./engine/types";
 import { useBattle } from "./ui/hooks/useBattle";
-import { useTutorial } from "./ui/hooks/useTutorial";
 import { PartySelectScreen } from "./ui/screens/PartySelectScreen";
 import { CampaignDraftScreen } from "./ui/screens/CampaignDraftScreen";
 import { CampaignSelectScreen } from "./ui/screens/CampaignSelectScreen";
-import { TutorialStarterScreen } from "./ui/screens/TutorialStarterScreen";
 import { BattleScreen } from "./ui/screens/BattleScreen";
 import type { BattleResult } from "./ui/screens/BattleScreen";
 import { MapScreen } from "./ui/screens/MapScreen";
@@ -72,6 +70,14 @@ import {
   setTutorialComplete,
   resetTutorial,
 } from "./ui/utils/tutorialPersistence";
+import { useTutorialPrologue } from "./ui/hooks/useTutorialPrologue";
+import type { PrologueNodeId } from "./data/tutorialPrologue";
+import {
+  PROLOGUE_NODES,
+  buildProloguePlayerData,
+  buildPrologueEnemyData,
+} from "./data/tutorialPrologue";
+import { HandlerDialogue } from "./ui/components/HandlerDialogue";
 import {
   unlockPokemon,
   resetProfile,
@@ -229,22 +235,17 @@ export default function App() {
     useState<ItemDefinition | null>(null);
   const [pendingPostItemScreen, setPendingPostItemScreen] =
     useState<Screen | null>(null);
-  const [isTutorialMode, setIsTutorialMode] = useState(false);
   const [selectedCampaignId, setSelectedCampaignId] =
     useState<string>("rocket_tower");
   const [draftResults, setDraftResults] = useState<{
     pokemon: PokemonData[];
     gold: number;
   } | null>(null);
-  const [tutorialStarterName, setTutorialStarterName] = useState("");
   const battle = useBattle();
-  const tutorialOnComplete = useCallback(() => {
-    // Overlay dismissed; battle continues
-  }, []);
-  const tutorial = useTutorial({
-    starterName: tutorialStarterName,
-    onComplete: tutorialOnComplete,
-  });
+
+  // Tutorial Prologue state
+  const [isPrologueMode, setIsPrologueMode] = useState(false);
+  const prologue = useTutorialPrologue();
 
   const latestSaveRef = useRef({ screen, runState });
 
@@ -316,28 +317,6 @@ export default function App() {
   );
 
   // Tutorial: start practice battle (1 starter vs Magikarp with Splash-only deck)
-  const handleTutorialStart = useCallback(
-    (starter: PokemonData) => {
-      setTutorialStarterName(starter.name);
-      setIsTutorialMode(true);
-      const magikarp = getPokemon("magikarp");
-      const tutorialMagikarp: PokemonData = {
-        ...magikarp,
-        deck: Array(10).fill("splash"),
-      };
-      const playerPositions: Position[] = [{ row: "front", column: 1 }];
-      const enemyPositions: Position[] = [{ row: "front", column: 1 }];
-      battle.startTutorialBattle(
-        [starter],
-        [tutorialMagikarp],
-        playerPositions,
-        enemyPositions,
-      );
-      setScreen("battle");
-    },
-    [battle],
-  );
-
   // Campaign select: pick a campaign then advance to draft/tutorial
   const handleCampaignSelect = useCallback((campaignId: string) => {
     // Guard: don't proceed if locked (CampaignSelectScreen also disables the button,
@@ -345,17 +324,74 @@ export default function App() {
     if (getCampaignStatus(campaignId) === "locked") return;
     setSelectedCampaignId(campaignId);
     if (campaignId === "rocket_tower" && !isTutorialComplete()) {
-      setScreen("tutorial_select");
+      // New players get the prologue tutorial before their first campaign
+      prologue.reset();
+      setIsPrologueMode(true);
     } else {
       setScreen("campaign_draft");
     }
-  }, []);
+  }, [prologue]);
 
-  // Tutorial: skip and go to campaign draft
-  const handleTutorialSkip = useCallback(() => {
-    setTutorialComplete();
-    setScreen("campaign_draft");
-  }, []);
+  // Tutorial Prologue: launch from debugging menu
+  const handleStartPrologue = useCallback(() => {
+    prologue.reset();
+    setIsPrologueMode(true);
+    // Don't set screen — the prologue rendering block takes over when isPrologueMode is true
+  }, [prologue]);
+
+  // Tutorial Prologue: start battle for the current node
+  const startPrologueBattle = useCallback(
+    (nodeId: PrologueNodeId) => {
+      const nodeDef = PROLOGUE_NODES.find((n) => n.id === nodeId);
+      if (!nodeDef) return;
+
+      const players = buildProloguePlayerData(nodeDef);
+      const enemies = buildPrologueEnemyData(nodeDef);
+
+      // Build enemy passives map if any
+      const enemyPassives = nodeDef.enemyPassives
+        ? new Map(
+            Object.entries(nodeDef.enemyPassives).map(([k, v]) => [
+              Number(k),
+              v,
+            ]),
+          )
+        : undefined;
+
+      battle.startTutorialBattle(
+        players,
+        enemies,
+        nodeDef.playerPositions,
+        nodeDef.enemyPositions,
+        enemyPassives,
+        nodeDef.hpOverrides,
+      );
+    },
+    [battle],
+  );
+
+  // Start prologue battle when dialogue ends and phase transitions to "battle"
+  const prologueBattleStartedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isPrologueMode || prologue.phase !== "battle") {
+      prologueBattleStartedRef.current = null;
+      return;
+    }
+    // Avoid re-starting same node's battle
+    if (prologueBattleStartedRef.current === prologue.nodeId) return;
+    prologueBattleStartedRef.current = prologue.nodeId;
+    startPrologueBattle(prologue.nodeId);
+    setScreen("battle"); // Set screen for music/save system
+  }, [isPrologueMode, prologue.phase, prologue.nodeId, startPrologueBattle]);
+
+  // Exit prologue mode when complete
+  useEffect(() => {
+    if (isPrologueMode && !prologue.isActive) {
+      setIsPrologueMode(false);
+      setTutorialComplete();
+      setScreen("campaign_select");
+    }
+  }, [isPrologueMode, prologue.isActive]);
 
   // Handle node selection on the map
   const handleSelectNode = useCallback(
@@ -477,19 +513,18 @@ export default function App() {
     [pendingPostLevelUpScreen],
   );
 
-  // Detect enemy turn done for tutorial (phase: enemy_turn -> player_turn)
+  // Detect enemy turn done for tutorial / prologue (phase: enemy_turn -> player_turn)
   const prevPhaseRef = useRef<string | null>(null);
   useEffect(() => {
     const now = battle.phase;
     if (
-      isTutorialMode &&
       prevPhaseRef.current === "enemy_turn" &&
       now === "player_turn"
     ) {
-      tutorial.notifyEnemyTurnDone();
+      if (isPrologueMode) prologue.notifyEnemyTurnDone();
     }
     prevPhaseRef.current = now;
-  }, [battle.phase, isTutorialMode, tutorial]);
+  }, [battle.phase, isPrologueMode, prologue]);
 
   // Handle battle end
   const handleBattleEnd = useCallback(
@@ -498,15 +533,13 @@ export default function App() {
       combatants: Combatant[],
       combatGoldEarned?: number,
     ) => {
-      // Tutorial battle: victory -> party select, defeat -> main menu
-      if (isTutorialMode) {
-        setIsTutorialMode(false);
-        setTutorialStarterName("");
+      // Tutorial Prologue battle: victory -> next node dialogue, defeat -> retry
+      if (isPrologueMode) {
         if (result === "victory") {
-          setTutorialComplete();
-          setScreen("campaign_draft");
+          prologue.onBattleVictory();
+          // Phase transitions to "dialogue" — the render loop will show HandlerDialogue
         } else {
-          setScreen("main_menu");
+          prologue.onBattleDefeat();
         }
         return;
       }
@@ -665,7 +698,8 @@ export default function App() {
       isRecruitBattle,
       recruitFighterIndex,
       pendingBattleNodeId,
-      isTutorialMode,
+      isPrologueMode,
+      prologue,
     ],
   );
 
@@ -690,10 +724,10 @@ export default function App() {
           : null;
         const moveId = combatant?.hand[battle.pendingCardIndex];
         battle.playCard(battle.pendingCardIndex, targetId || undefined);
-        if (isTutorialMode && moveId) tutorial.notifyCardPlayed(moveId);
+        if (isPrologueMode && moveId) prologue.notifyCardPlayed(moveId);
       }
     },
-    [battle, isTutorialMode, tutorial],
+    [battle, isPrologueMode, prologue],
   );
 
   // Handle direct card play (for drag-and-drop, bypasses two-step selection)
@@ -702,16 +736,16 @@ export default function App() {
       const combatant = battle.state ? getCurrentCombatant(battle.state) : null;
       const moveId = combatant?.hand[cardIndex];
       battle.playCard(cardIndex, targetId);
-      if (isTutorialMode && moveId) tutorial.notifyCardPlayed(moveId);
+      if (isPrologueMode && moveId) prologue.notifyCardPlayed(moveId);
     },
-    [battle, isTutorialMode, tutorial],
+    [battle, isPrologueMode, prologue],
   );
 
   // Handle end turn (with tutorial notification)
   const handleEndTurn = useCallback(() => {
-    if (isTutorialMode) tutorial.notifyTurnEnded();
+    if (isPrologueMode) prologue.notifyTurnEnded();
     battle.endPlayerTurn();
-  }, [battle, isTutorialMode, tutorial]);
+  }, [battle, isPrologueMode, prologue]);
 
   // Handle level-up from map screen
   const handleLevelUp = useCallback(
@@ -990,7 +1024,6 @@ export default function App() {
 
   // Go to sandbox configuration screen
   const handleGoToSandbox = useCallback(() => {
-    setIsTutorialMode(false);
     setScreen("sandbox_config");
   }, []);
 
@@ -1197,7 +1230,6 @@ export default function App() {
         playerItems,
       );
       setIsSandboxBattle(true);
-      setIsTutorialMode(false);
       setScreen("battle");
     },
     [battle],
@@ -1217,6 +1249,44 @@ export default function App() {
     },
     [],
   );
+
+  // Tutorial Prologue: takes over entire render when active (independent of screen)
+  if (isPrologueMode && prologue.isActive) {
+    // Dialogue phase: show handler dialogue over ambient background
+    if (prologue.phase === "dialogue" && prologue.currentDialogue) {
+      return (
+        <ScreenShell>
+          <HandlerDialogue
+            text={prologue.currentDialogue.text}
+            onAdvance={prologue.advanceDialogue}
+          />
+        </ScreenShell>
+      );
+    }
+
+    // Battle phase: show battle screen if battle state exists
+    if (prologue.phase === "battle" && battle.state) {
+      return (
+        <BattleScreen
+          state={battle.state}
+          phase={battle.phase}
+          logs={battle.logs}
+          pendingCardIndex={battle.pendingCardIndex}
+          onSelectCard={handleSelectCard}
+          onSelectTarget={handleSelectTarget}
+          onPlayCard={handlePlayCard}
+          onEndTurn={handleEndTurn}
+          onSwitchPosition={battle.switchPosition}
+          onRestart={handleStartPrologue}
+          onBattleEnd={handleBattleEnd}
+          tutorial={prologue.tutorialConfig}
+        />
+      );
+    }
+
+    // Transitioning between phases (e.g. dialogue just ended, battle effect hasn't fired yet)
+    return <ScreenShell><div /></ScreenShell>;
+  }
 
   // Render based on current screen
   if (screen === "main_menu") {
@@ -1885,6 +1955,9 @@ export default function App() {
           >
             Other
           </div>
+          <button onClick={handleStartPrologue} style={devBtnStyle}>
+            Tutorial Prologue
+          </button>
           <button onClick={handleTestLevelUp} style={devBtnStyle}>
             Test Level Up
           </button>
@@ -2177,15 +2250,6 @@ export default function App() {
     );
   }
 
-  if (screen === "tutorial_select") {
-    return (
-      <TutorialStarterScreen
-        onStart={handleTutorialStart}
-        onSkip={handleTutorialSkip}
-      />
-    );
-  }
-
   if (screen === "starter_items" && runState) {
     return (
       <StarterItemScreen
@@ -2380,20 +2444,7 @@ export default function App() {
         onBackToSandboxConfig={
           isSandboxBattle ? handleBackToSandboxConfig : undefined
         }
-        tutorial={
-          isTutorialMode && tutorial.isActive
-            ? {
-                isActive: tutorial.isActive,
-                highlightTarget: tutorial.highlightTarget,
-                stepText: tutorial.stepText,
-                advance: tutorial.advance,
-                skip: tutorial.skip,
-                canSkip: tutorial.canSkip,
-                allowInteraction: tutorial.allowInteraction,
-                zone: tutorial.currentStep?.zone ?? "bottom",
-              }
-            : undefined
-        }
+        tutorial={undefined}
       />
     );
   }
