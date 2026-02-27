@@ -56,12 +56,14 @@ const SPECIES_BASE_POWER: Record<string, number> = {
   jigglypuff: 1, oddish: 1, paras: 1, zubat: 1, venonat: 1, clefairy: 1,
 
   // 2 — Moderate basics / starters
+  geodude: 2,
   ekans: 2, meowth: 2, spearow: 2, growlithe: 2, vulpix: 2,
   drowzee: 2, machop: 2, sandshrew: 2, 'nidoran-m': 2, 'nidoran-f': 2,
   gastly: 2, voltorb: 2, dratini: 2, porygon: 2, magmar: 2, electabuzz: 2,
   bulbasaur: 2, charmander: 2, squirtle: 2, pikachu: 2,
 
   // 3 — Mid evolutions
+  graveler: 3,
   raticate: 3, pidgeotto: 3, arbok: 3, nidorino: 3, nidorina: 3,
   golbat: 3, haunter: 3, machoke: 3, persian: 3, electrode: 3,
   sandslash: 3, butterfree: 3, beedrill: 3, charmeleon: 3, wartortle: 3,
@@ -69,6 +71,7 @@ const SPECIES_BASE_POWER: Record<string, number> = {
   gloom: 3, raichu: 3, dragonair: 3, porygon2: 3,
 
   // 4 — Strong evolved
+  golem: 4,
   pidgeot: 4, tauros: 4, kangaskhan: 4, snorlax: 4, hypno: 4,
   arcanine: 4, nidoking: 4, nidoqueen: 4, rhydon: 4, lapras: 4,
   fearow: 4, machamp: 4, ninetales: 4, vileplume: 4, crobat: 4,

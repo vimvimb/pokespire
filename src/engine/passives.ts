@@ -272,6 +272,7 @@ export function onTurnStart(
   combatant.turnFlags.playedDragonAttack = false;
   combatant.turnFlags.tyrantsTantrumUsedThisTurn = false;
   combatant.turnFlags.guardStatus = undefined;
+  combatant.turnFlags.landslideUsedThisTurn = false;
   combatant.itemState['guerillaFront'] = 0;
 
   // Inferno Momentum: Reduce highest-cost FIRE card's cost by 3
@@ -1009,6 +1010,27 @@ export function onTurnEnd(
         round: state.round,
         combatantId: combatant.id,
         message: `Forewarn: ${ally.name} gains 5 Evasion!`,
+      });
+    }
+  }
+
+  // Landslide: Remove unplayed echo copies from hand at end of turn
+  if (combatant.passiveIds.includes('landslide') && combatant.alive) {
+    const echoIndices: number[] = [];
+    for (let i = combatant.hand.length - 1; i >= 0; i--) {
+      if (combatant.hand[i].endsWith('__parental')) {
+        echoIndices.push(i);
+      }
+    }
+    if (echoIndices.length > 0) {
+      for (const idx of echoIndices) {
+        const removedId = combatant.hand.splice(idx, 1)[0];
+        combatant.vanishedPile.push(removedId);
+      }
+      logs.push({
+        round: state.round,
+        combatantId: combatant.id,
+        message: `Landslide: ${echoIndices.length} unplayed echo${echoIndices.length > 1 ? 'es' : ''} vanished!`,
       });
     }
   }

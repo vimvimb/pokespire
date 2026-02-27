@@ -83,6 +83,7 @@ function createCombatant(
       playedDragonAttack: false,
       tyrantsTantrumUsedThisTurn: false,
       guardStatus: undefined,
+      landslideUsedThisTurn: false,
     },
     costModifiers: {},
     itemState: {},

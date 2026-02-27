@@ -163,6 +163,10 @@ export const POKEDEX_NUMBERS: Record<string, number> = {
   electivire: 466,
   magmortar: 467,
   "porygon-z": 474,
+  // Geodude line
+  geodude: 74,
+  graveler: 75,
+  golem: 76,
   // Test-only (e2e)
   arceus: 493,
 };
@@ -403,6 +407,11 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   raikou: 85, // Real 178kg → 193px (adjusted; large electric cat)
   entei: 90, // Real 198kg → 197px (adjusted; large fire hound)
   suicune: 85, // Real 187kg → 193px (adjusted; large water beast)
+
+  // Geodude line
+  geodude: 20, // Real 20kg → 114px
+  graveler: 36, // Real 105kg, reduced 30% sprite size
+  golem: 51, // Real 300kg, reduced 50% total sprite size
 
   // Test-only (e2e)
   arceus: 100, // Real 320kg → 200px (adjusted; large God Pokemon)

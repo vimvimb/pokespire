@@ -59,13 +59,14 @@ export type CardEffectType =
   | 'copy_enemy_card'
   | 'discard_intent'
   | 'free_next_switch'
-  | 'guard_status';
+  | 'guard_status'
+  | 'shuffle_to_draw';
 
 export interface DamageEffect {
   type: 'damage';
   value: number;
   bonusValue?: number;           // extra damage if condition met
-  bonusCondition?: 'user_below_half_hp' | 'target_below_half_hp' | 'target_debuff_stacks' | 'target_burn_stacks' | 'target_poison_stacks' | 'target_buff_stacks' | 'user_vanished_cards' | 'user_no_held_items';  // condition type
+  bonusCondition?: 'user_below_half_hp' | 'target_below_half_hp' | 'target_debuff_stacks' | 'target_burn_stacks' | 'target_poison_stacks' | 'target_buff_stacks' | 'user_vanished_cards' | 'user_no_held_items' | 'rollout_plays';  // condition type
   hpScaling?: boolean;           // if true, multiply base damage by user's currentHP / maxHP (e.g. Eruption)
   weightScaling?: boolean;       // if true, multiply base damage by user's weight / target's weight (e.g. Heat Crash)
   inverseWeightScaling?: boolean; // if true, multiply base damage by target's weight / user's weight (e.g. Grass Knot)
@@ -196,6 +197,11 @@ export interface FreeNextSwitchEffect {
   type: 'free_next_switch';
 }
 
+/** Shuffle this card back into the user's draw pile after playing (e.g. Rollout) */
+export interface ShuffleToDrawEffect {
+  type: 'shuffle_to_draw';
+}
+
 export type CardEffect =
   | DamageEffect
   | BlockEffect
@@ -217,7 +223,8 @@ export type CardEffect =
   | CopyEnemyCardEffect
   | DiscardIntentEffect
   | FreeNextSwitchEffect
-  | GuardStatusEffect;
+  | GuardStatusEffect
+  | ShuffleToDrawEffect;
 
 // --- Move Types (elemental) ---
 
@@ -345,6 +352,7 @@ export interface CombatantTurnFlags {
   playedDragonAttack: boolean;              // Perfect Cycle: played a Dragon attack this turn
   tyrantsTantrumUsedThisTurn: boolean;      // Tyrant's Tantrum: first attack per turn only
   guardStatus?: { statusType: StatusType; stacks: number }; // Guard: apply status to attacker when hit this turn
+  landslideUsedThisTurn: boolean;  // Landslide: first ≤2 cost card echoes (Golem line)
 }
 
 export interface Combatant {

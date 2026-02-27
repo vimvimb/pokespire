@@ -4319,6 +4319,30 @@
     "description": "Deal 8 damage. (Back row only).",
     "contact": false
   },
+  "rollout": {
+    "name": "Rollout",
+    "cost": 2,
+    "type": "rock",
+    "range": "front_row",
+    "vanish": false,
+    "effects": [
+      {
+        "type": "damage",
+        "value": 5,
+        "bonusValue": 3,
+        "bonusCondition": "rollout_plays"
+      },
+      {
+        "type": "shuffle_to_draw"
+      }
+    ],
+    "rarity": "uncommon",
+    "pools": [
+      "rock"
+    ],
+    "description": "Deal 5 damage to front row. +3 per previous Rollout this battle. Shuffle a copy into your draw pile.",
+    "contact": true
+  },
   "rock-slide": {
     "name": "Rock Slide",
     "cost": 2,

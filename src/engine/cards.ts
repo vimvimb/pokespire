@@ -305,6 +305,25 @@ export function playCard(
     });
   }
 
+  // Rollout: Increment per-battle counter after playing any Rollout (including echoes)
+  const baseCardIdForRollout = cardId.replace('__parental', '');
+  if (baseCardIdForRollout === 'rollout') {
+    combatant.costModifiers['rolloutPlays'] = (combatant.costModifiers['rolloutPlays'] ?? 0) + 1;
+  }
+
+  // Landslide: First card with cost ≤ 2 each turn creates a 0-cost echo in hand
+  if (combatant.passiveIds.includes('landslide') && card.cost <= 2 && !isAlreadyCopy && !combatant.turnFlags.landslideUsedThisTurn) {
+    combatant.turnFlags.landslideUsedThisTurn = true;
+    const landslideBaseId = cardId.replace('__parental', '');
+    const landslideEchoId = `${landslideBaseId}__parental`;
+    combatant.hand.push(landslideEchoId);
+    logs.push({
+      round: state.round,
+      combatantId: combatant.id,
+      message: `Landslide: ${card.name} (Echo) added to hand!`,
+    });
+  }
+
   // Power Nap: When you play Rest, also gain 3 Strength
   const baseCardIdForRest = cardId.replace('__parental', '');
   if (baseCardIdForRest === 'rest' && combatant.passiveIds.includes('power_nap')) {
@@ -1286,6 +1305,8 @@ function resolveEffects(
             damageValue += effect.bonusValue * source.vanishedPile.length;
           } else if (effect.bonusCondition === 'user_no_held_items' && source.heldItemIds.length === 0) {
             damageValue += effect.bonusValue;
+          } else if (effect.bonusCondition === 'rollout_plays') {
+            damageValue += effect.bonusValue * (source.costModifiers['rolloutPlays'] ?? 0);
           }
         }
 
@@ -1790,6 +1811,19 @@ function resolveEffects(
           round: state.round,
           combatantId: source.id,
           message: `${source.name}'s next switch this turn is free!`,
+        });
+        break;
+      }
+
+      case 'shuffle_to_draw': {
+        // Shuffle a copy of this card into the user's draw pile
+        const baseId = card.id.replace('__parental', '');
+        source.drawPile.push(baseId);
+        shuffle(source.drawPile);
+        logs.push({
+          round: state.round,
+          combatantId: source.id,
+          message: `${card.name}: A copy is shuffled into the draw pile!`,
         });
         break;
       }

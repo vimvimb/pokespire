@@ -98,6 +98,8 @@ export function calculateDamagePreview(
           baseDamage += damageEffect.bonusValue * source.vanishedPile.length;
         } else if (damageEffect.bonusCondition === 'user_no_held_items' && source.heldItemIds.length === 0) {
           baseDamage += damageEffect.bonusValue;
+        } else if (damageEffect.bonusCondition === 'rollout_plays') {
+          baseDamage += damageEffect.bonusValue * (source.costModifiers['rolloutPlays'] ?? 0);
         }
       }
       break;
@@ -328,6 +330,14 @@ export function calculateHandPreview(
   if (verdantWrathBonus > 0) tags.push(`+${verdantWrathBonus} Verdant Wrath`);
   if (maulBonus > 0) tags.push(`+${maulBonus} Maul`);
 
+  // Rollout: +bonusValue per play this battle
+  let rolloutBonus = 0;
+  const rolloutEffect = card.effects.find(e => e.type === 'damage' && 'bonusCondition' in e && e.bonusCondition === 'rollout_plays');
+  if (rolloutEffect && rolloutEffect.type === 'damage' && rolloutEffect.bonusValue) {
+    rolloutBonus = rolloutEffect.bonusValue * (source.costModifiers['rolloutPlays'] ?? 0);
+  }
+  if (rolloutBonus > 0) tags.push(`+${rolloutBonus} Rollout`);
+
   // Item damage bonus (source-only, no target info)
   const itemBonus = getItemDamageBonusSourceOnly(source, card);
   if (itemBonus > 0) tags.push(`+${itemBonus} Item`);
@@ -335,7 +345,7 @@ export function calculateHandPreview(
   const additive = strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus +
     proletariatBonus + scrappyBonus + poisonBarbBonus + adaptabilityBonus +
     sharpBeakBonus + nightAssassinBonus + relentlessBonus + verdantWrathBonus + maulBonus +
-    itemBonus - enfeeble;
+    rolloutBonus + itemBonus - enfeeble;
 
   // Multipliers (source-only, inlined where CombatState was only used for logs)
   const blazeStrikeActive = source.passiveIds.includes('blaze_strike') &&

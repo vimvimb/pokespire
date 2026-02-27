@@ -3974,6 +3974,84 @@
     "abilities": [],
     "description": "The legendary beast of the north wind — purifies any water it touches and cannot be outrun."
   },
+  "geodude": {
+    "name": "Geodude",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "maxHp": 42,
+    "baseSpeed": 6,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "rock-throw",
+      "rock-throw",
+      "rock-throw",
+      "defend",
+      "defend",
+      "defense-curl",
+      "defense-curl",
+      "harden",
+      "sand-attack",
+      "tackle"
+    ],
+    "abilities": [],
+    "description": "A tanky frontliner that builds momentum with Rollout and retains Block."
+  },
+  "graveler": {
+    "name": "Graveler",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "maxHp": 55,
+    "baseSpeed": 7,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "rock-throw",
+      "rock-throw",
+      "rock-throw",
+      "defend",
+      "defend",
+      "defense-curl",
+      "defense-curl",
+      "harden",
+      "sand-attack",
+      "tackle"
+    ],
+    "abilities": [],
+    "description": "A tanky frontliner that builds momentum with Rollout and retains Block."
+  },
+  "golem": {
+    "name": "Golem",
+    "types": [
+      "rock",
+      "ground"
+    ],
+    "maxHp": 70,
+    "baseSpeed": 8,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "rock-throw",
+      "rock-throw",
+      "rock-throw",
+      "defend",
+      "defend",
+      "defense-curl",
+      "defense-curl",
+      "harden",
+      "sand-attack",
+      "tackle"
+    ],
+    "abilities": [],
+    "description": "A tanky frontliner that builds momentum with Rollout and retains Block."
+  },
   "arceus": {
     "name": "Arceus",
     "types": [

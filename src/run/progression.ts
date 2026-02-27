@@ -202,7 +202,9 @@ export type PassiveId =
   | 'vanguard'
   | 'bulwark'
   | 'iron_barbs'
-  | 'fortify';
+  | 'fortify'
+  // Geodude line
+  | 'landslide';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -829,6 +831,11 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   fortify: {
     name: 'Fortify',
     description: 'When playing a card that grants Block, gain +3 bonus Block.',
+  },
+  // Geodude line
+  landslide: {
+    name: 'Landslide',
+    description: 'The first card with cost 2 or less you play each turn creates a 0-cost Echo in your hand. Unplayed echoes vanish at end of turn.',
   },
 };
 
@@ -3012,6 +3019,47 @@ export const SUICUNE_PROGRESSION: ProgressionTree = {
 };
 
 
+// Geodude progression tree - tanky frontliner with Rollout snowball
+export const GEODUDE_PROGRESSION: ProgressionTree = {
+  baseFormId: 'geodude',
+  rungs: [
+    {
+      level: 1,
+      name: 'Geodude',
+      description: 'Starting form with Bulwark passive.',
+      passiveId: 'bulwark',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+    {
+      level: 2,
+      name: 'Graveler',
+      description: 'Evolve to Graveler. Add Rollout. Gain Pressure Hull.',
+      evolvesTo: 'graveler',
+      passiveId: 'pressure_hull',
+      hpBoost: 0,
+      cardsToAdd: ['rollout'],
+    },
+    {
+      level: 3,
+      name: 'Golem',
+      description: 'Evolve to Golem. Add Earthquake. Gain Fortify.',
+      evolvesTo: 'golem',
+      passiveId: 'fortify',
+      hpBoost: 0,
+      cardsToAdd: ['earthquake'],
+    },
+    {
+      level: 4,
+      name: 'Golem (Mastered)',
+      description: 'Gain Landslide.',
+      passiveId: 'landslide',
+      hpBoost: 0,
+      cardsToAdd: [],
+    },
+  ],
+};
+
 // ── Test-only ─────────────────────────────────────────────────────────────────
 // ARCEUS is a test fixture used by Playwright e2e tests. It must never appear in
 // normal gameplay (no campaigns, no draft pools, no Pokedex).
@@ -3118,6 +3166,8 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   raikou: RAIKOU_PROGRESSION,
   entei: ENTEI_PROGRESSION,
   suicune: SUICUNE_PROGRESSION,
+  // Gen 1 — Defensive expansion
+  geodude: GEODUDE_PROGRESSION,
   // Test-only (e2e)
   arceus: ARCEUS_PROGRESSION,
 };
@@ -3262,6 +3312,7 @@ export function getProgressionTree(pokemonId: string): ProgressionTree | null {
   if (pokemonId === 'lanturn') return CHINCHOU_PROGRESSION;
   if (pokemonId === 'scizor') return SCYTHER_PROGRESSION;
   if (pokemonId === 'seadra' || pokemonId === 'kingdra') return HORSEA_PROGRESSION;
+  if (pokemonId === 'graveler' || pokemonId === 'golem') return GEODUDE_PROGRESSION;
   return null;
 }
 
@@ -3399,6 +3450,7 @@ export function getBaseFormId(pokemonId: string): string {
   if (pokemonId === 'lanturn') return 'chinchou';
   if (pokemonId === 'scizor') return 'scyther';
   if (pokemonId === 'seadra' || pokemonId === 'kingdra') return 'horsea';
+  if (pokemonId === 'graveler' || pokemonId === 'golem') return 'geodude';
   return pokemonId;
 }
 

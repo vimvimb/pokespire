@@ -133,6 +133,7 @@ export const STARTER_POKEMON: Record<string, PokemonData> = {
   zubat: POKEMON.zubat,
   venonat: POKEMON.venonat,
   porygon: POKEMON.porygon,
+  geodude: POKEMON.geodude,
 };
 
 /** Enemy Pokemon */
@@ -162,7 +163,8 @@ export function getMove(id: string): MoveDefinition {
           effect.type !== "add_echo_to_hand" &&
           effect.type !== "apply_status_self" &&
           effect.type !== "copy_enemy_card" &&
-          effect.type !== "discard_intent",
+          effect.type !== "discard_intent" &&
+          effect.type !== "shuffle_to_draw",
       )
       .map((effect) => {
         // Halve all damage-dealing effects
