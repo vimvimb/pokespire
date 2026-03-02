@@ -204,7 +204,10 @@ export type PassiveId =
   | 'iron_barbs'
   | 'fortify'
   // Geodude line
-  | 'landslide';
+  | 'landslide'
+  // Stantler
+  | 'hypnotic_antlers'
+  | 'stalwart';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -836,6 +839,15 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   landslide: {
     name: 'Landslide',
     description: 'The first card with cost 2 or less you play each turn creates a 0-cost Echo in your hand. Unplayed echoes vanish at end of turn.',
+  },
+  // Stantler
+  hypnotic_antlers: {
+    name: 'Hypnotic Antlers',
+    description: 'Your Psychic attacks apply Provoke 1 to the target.',
+  },
+  stalwart: {
+    name: 'Stalwart',
+    description: 'Gain 3 Block when you take unblocked damage from a Provoked enemy.',
   },
 };
 
@@ -2666,10 +2678,10 @@ export const CELEBI_PROGRESSION: ProgressionTree = {
 export const STANTLER_PROGRESSION: ProgressionTree = {
   baseFormId: 'stantler',
   rungs: [
-    { level: 1, name: 'Stantler', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
-    { level: 2, name: 'Stantler', description: 'Add Stomp.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['stomp'] },
-    { level: 3, name: 'Stantler', description: 'Add Body Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
-    { level: 4, name: 'Stantler (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+    { level: 1, name: 'Stantler', description: 'Gain Hypnotic Antlers.', passiveId: 'hypnotic_antlers', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Stantler', description: 'Gain Mysticism. Add Hypnosis.', passiveId: 'mysticism', hpBoost: 5, cardsToAdd: ['hypnosis'] },
+    { level: 3, name: 'Stantler', description: 'Gain Stalwart. Add Psychic.', passiveId: 'stalwart', hpBoost: 5, cardsToAdd: ['psychic'] },
+    { level: 4, name: 'Stantler (Mastered)', description: 'Gain Intimidate.', passiveId: 'intimidate', hpBoost: 5, cardsToAdd: [] },
   ],
 };
 

@@ -686,6 +686,16 @@ export function onDamageDealt(
     });
   }
 
+  // Hypnotic Antlers: Psychic attacks apply Provoke 1 to the target
+  if (attacker.passiveIds.includes('hypnotic_antlers') && card.type === 'psychic' && damageDealt > 0 && target.alive) {
+    applyStatus(state, target, 'provoke', 1, attacker.id);
+    logs.push({
+      round: state.round,
+      combatantId: attacker.id,
+      message: `Hypnotic Antlers: Provoke 1 applied to ${target.name}!`,
+    });
+  }
+
   // Spiked Hide: When you deal damage, gain Thorns equal to damage/4 (min 1)
   if (attacker.passiveIds.includes('spiked_hide') && damageDealt > 0) {
     const thornStacks = Math.max(1, Math.floor(damageDealt / 4));
@@ -1266,6 +1276,19 @@ export function onDamageTaken(
       combatantId: target.id,
       message: `Bristling Rampart: ${target.name} gains 3 Block!`,
     });
+  }
+
+  // Stalwart: Gain 3 Block when you take unblocked damage from a Provoked enemy
+  if (target.passiveIds.includes('stalwart') && target.alive) {
+    const provokeStatus = attacker.statuses.find(s => s.type === 'provoke' && s.sourceId === target.id);
+    if (provokeStatus) {
+      target.block += 3;
+      logs.push({
+        round: state.round,
+        combatantId: target.id,
+        message: `Stalwart: ${target.name} gains 3 Block! (${attacker.name} is Provoked)`,
+      });
+    }
   }
 
   // Guard Status: When hit this turn, apply status to attacker

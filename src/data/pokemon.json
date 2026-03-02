@@ -2797,19 +2797,19 @@
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle",
-      "tackle",
+      "confusion",
+      "confusion",
+      "confusion",
       "tackle",
       "stomp",
-      "stomp",
-      "stomp",
-      "body-slam",
-      "body-slam",
-      "slam",
-      "slam"
+      "kinesis",
+      "defend",
+      "defend",
+      "barrier",
+      "tail-whip"
     ],
     "abilities": [],
-    "description": "A proud Normal-type with hypnotic antlers — charges headlong and tramples with practiced force."
+    "description": "A hypnotic deer that enfeebles enemies with Psychic attacks and draws them in with its antlers."
   },
   "marill": {
     "name": "Marill",
