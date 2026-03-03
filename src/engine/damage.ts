@@ -20,6 +20,7 @@ export interface DamageResult {
   finisherMultiplier: number;     // 2 if Finisher triggered, 1 otherwise
   fortifiedCannonsBonus: number;  // Bonus from Fortified Cannons (Water + Block)
   fortifiedSpinesBonus: number;   // Bonus from Fortified Spines (Ground + Block)
+  ionDischargeBonus: number;      // Bonus from Ion Discharge (Electric + Block)
   bloomingCycleReduction: number; // Damage reduction from Blooming Cycle
   counterCurrentBonus: number;    // Bonus from Counter-Current
   staticFieldReduction: number;   // Reduction from Static Field
@@ -69,6 +70,7 @@ export interface DamageModifiers {
   isFinisher?: boolean;
   fortifiedCannonsBonus?: number;
   fortifiedSpinesBonus?: number;
+  ionDischargeBonus?: number;
   bloomingCycleReduction?: number;
   counterCurrentBonus?: number;
   staticFieldReduction?: number;
@@ -122,6 +124,7 @@ export function applyCardDamage(
   const stab = moveType && hasSTAB(source, moveType) ? STAB_BONUS : 0;
   const fortifiedCannonsBonus = mods.fortifiedCannonsBonus ?? 0;
   const fortifiedSpinesBonus = mods.fortifiedSpinesBonus ?? 0;
+  const ionDischargeBonus = mods.ionDischargeBonus ?? 0;
   const counterBonus = mods.counterCurrentBonus ?? 0;
   const keenEyeBonus = mods.keenEyeBonus ?? 0;
   const predatorsPatienceBonus = mods.predatorsPatienceBonus ?? 0;
@@ -138,7 +141,7 @@ export function applyCardDamage(
   const maliceBonus = mods.maliceBonus ?? 0;
   const itemDamageBonus = mods.itemDamageBonus ?? 0;
 
-  let rawDamage = baseDamage + strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + counterBonus + keenEyeBonus + predatorsPatienceBonus + searingFuryBonus + voltFuryBonus + sharpBeakBonus + proletariatBonus + familyFuryBonus + poisonBarbBonus + adaptabilityBonus + nightAssassinBonus + verdantWrathBonus + maulBonus + maliceBonus + itemDamageBonus - enfeeble;
+  let rawDamage = baseDamage + strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + ionDischargeBonus + counterBonus + keenEyeBonus + predatorsPatienceBonus + searingFuryBonus + voltFuryBonus + sharpBeakBonus + proletariatBonus + familyFuryBonus + poisonBarbBonus + adaptabilityBonus + nightAssassinBonus + verdantWrathBonus + maulBonus + maliceBonus + itemDamageBonus - enfeeble;
   rawDamage = Math.max(rawDamage, 1); // floor at 1
 
   // Step 1.5: Apply strike multipliers (Blaze Strike / Swarm Strike / Torrent Strike / Finisher — mutually exclusive)
@@ -244,6 +247,7 @@ export function applyCardDamage(
     finisherMultiplier,
     fortifiedCannonsBonus,
     fortifiedSpinesBonus,
+    ionDischargeBonus,
     bloomingCycleReduction: bloomingReduction,
     counterCurrentBonus: counterBonus,
     staticFieldReduction: staticReduction,

@@ -84,7 +84,7 @@ Use all of the context below to brainstorm new Pokemon lines that fit seamlessly
 | Hook | When It Fires | Examples |
 |------|---------------|---------|
 | `onBattleStart` | Start of battle | Intimidate (Enfeeble all enemies), Scurry (gain Haste) |
-| `onTurnStart` | After drawing hand | Baby Shell (gain Block), Charge (gain Strength), Inferno Momentum (reduce card cost) |
+| `onTurnStart` | After drawing hand | Natural Armor (gain Block), Charge (gain Strength), Inferno Momentum (reduce card cost) |
 | `onDamageDealt` | After dealing unblocked damage | Kindling (apply Burn), Numbing Strike (apply Paralysis), Moxie (gain energy on KO) |
 | `onDamageTaken` | When taking unblocked damage | Raging Bull (gain Strength), Static (apply Paralysis to attacker), Flame Body (Burn attacker) |
 | `onStatusApplied` | When a status is applied | Spreading Flames (Burn spreads), Compound Eyes (gain Evasion), Powder Spread (debuff spreads) |
@@ -159,13 +159,13 @@ Each Pokemon starts with ~10 cards:
 
 | Level | Form | HP | Speed | Passive | Cards Added |
 |-------|------|-----|-------|---------|-------------|
-| 1 | Squirtle | 38 | 4 | **Baby Shell** - Start of turn: gain 3 Block | - |
+| 1 | Squirtle | 38 | 4 | **Natural Armor** - Start of turn: gain 3 Block | - |
 | 2 | Wartortle | 48 | 5 | **Pressure Hull** - Retain 50% of Block at round boundary | Bubble Beam |
 | 3 | Blastoise | 58 | 5 | **Torrent Shield** - First Water attack each turn grants Block equal to damage dealt | Hydro Pump |
 | 4 | Blastoise | 58 | 5 | **Fortified Cannons** - Water attacks deal bonus damage equal to 25% of current Block | - |
 
 **Starter Deck:** Tackle x3, Defend x2, Water Gun x2, Withdraw, Bubble, Tail Whip (vanish)
-**Synergy:** Baby Shell builds Block passively. Pressure Hull keeps it between rounds. Torrent Shield adds more on attack. Fortified Cannons turns your stockpiled Block into bonus damage.
+**Synergy:** Natural Armor builds Block passively. Pressure Hull keeps it between rounds. Torrent Shield adds more on attack. Fortified Cannons turns your stockpiled Block into bonus damage.
 
 ---
 
@@ -519,13 +519,13 @@ Each Pokemon starts with ~10 cards:
 
 | Level | Form | HP | Speed | Passive | Cards Added |
 |-------|------|-----|-------|---------|-------------|
-| 1 | Sandshrew | 34 | 4 | **Baby Shell** - Start of turn: gain 3 Block | - |
+| 1 | Sandshrew | 34 | 4 | **Natural Armor** - Start of turn: gain 3 Block | - |
 | 2 | Sandslash | 54 | 5 | **Spiked Hide** - When hit by a front-row attack, deal 2 damage back | Dig |
 | 3 | Sandslash | 54 | 5 | **Bristling Rampart** - When you take unblocked damage, gain 2 Block | - |
 | 4 | Sandslash | 54 | 5 | **Fortified Spines** - Ground attacks deal bonus damage equal to 25% of current Block | Earthquake |
 
 **Starter Deck:** Scratch x3, Defend x3, Sand Attack x2, Bone Club x2
-**Synergy:** Baby Shell builds Block passively. Spiked Hide punishes melee attackers. Bristling Rampart converts damage taken into more Block. Fortified Spines turns stockpiled Block into Ground attack damage.
+**Synergy:** Natural Armor builds Block passively. Spiked Hide punishes melee attackers. Bristling Rampart converts damage taken into more Block. Fortified Spines turns stockpiled Block into Ground attack damage.
 
 ---
 

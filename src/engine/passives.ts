@@ -239,7 +239,7 @@ export function onBattleStart(state: CombatState): LogEntry[] {
 
 /**
  * Called at the START of a combatant's turn, AFTER drawing hand.
- * Used for: Inferno Momentum, Baby Shell, Shed Skin, Hustle
+ * Used for: Inferno Momentum, Natural Armor, Shed Skin, Hustle
  */
 export function onTurnStart(
   state: CombatState,
@@ -320,13 +320,13 @@ export function onTurnStart(
     }
   }
 
-  // Baby Shell: Gain 3 Block at turn start
-  if (combatant.passiveIds.includes('baby_shell')) {
+  // Natural Armor: Gain 3 Block at turn start
+  if (combatant.passiveIds.includes('natural_armor')) {
     combatant.block += 3;
     logs.push({
       round: state.round,
       combatantId: combatant.id,
-      message: `Baby Shell: Gained 3 Block!`,
+      message: `Natural Armor: Gained 3 Block!`,
     });
   }
 
@@ -1624,6 +1624,32 @@ export function checkFortifiedCannons(
         round: state.round,
         combatantId: attacker.id,
         message: `Fortified Cannons: +${bonus} bonus damage from Block!`,
+      });
+      return { bonusDamage: bonus, logs };
+    }
+  }
+
+  return { bonusDamage: 0, logs };
+}
+
+/**
+ * Check if Ion Discharge should provide bonus damage.
+ * Ion Discharge: Electric attacks deal +25% of current Block as bonus damage.
+ */
+export function checkIonDischarge(
+  state: CombatState,
+  attacker: Combatant,
+  card: MoveDefinition
+): { bonusDamage: number; logs: LogEntry[] } {
+  const logs: LogEntry[] = [];
+
+  if (attacker.passiveIds.includes('ion_discharge') && card.type === 'electric' && attacker.block > 0) {
+    const bonus = Math.floor(attacker.block * 0.25);
+    if (bonus > 0) {
+      logs.push({
+        round: state.round,
+        combatantId: attacker.id,
+        message: `Ion Discharge: +${bonus} bonus damage from Block!`,
       });
       return { bonusDamage: bonus, logs };
     }

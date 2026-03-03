@@ -310,9 +310,9 @@ describe('Passive Abilities', () => {
   // Turn Start Passives
   // ============================================================
 
-  describe('Baby Shell', () => {
+  describe('Natural Armor', () => {
     it('grants 3 Block at turn start', () => {
-      const combatant = createTestCombatant({ passiveIds: ['baby_shell'], block: 0 });
+      const combatant = createTestCombatant({ passiveIds: ['natural_armor'], block: 0 });
       const state = createTestCombatState([combatant]);
 
       onTurnStart(state, combatant, getMove);

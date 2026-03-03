@@ -2860,6 +2860,31 @@
     ],
     "abilities": []
   },
+  "mareep": {
+    "name": "Mareep",
+    "types": [
+      "electric"
+    ],
+    "maxHp": 38,
+    "baseSpeed": 10,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "tackle",
+      "tackle",
+      "tackle",
+      "thunder-shock",
+      "thunder-shock",
+      "thunderbolt",
+      "thunderbolt",
+      "defend",
+      "defend",
+      "swift"
+    ],
+    "abilities": [],
+    "description": "A fluffy Electric-type lamb that builds static charge in its wool."
+  },
   "flaaffy": {
     "name": "Flaaffy",
     "types": [
@@ -2907,7 +2932,8 @@
       "defend",
       "swift"
     ],
-    "abilities": []
+    "abilities": [],
+    "description": "A slow but sturdy Electric-type that builds static in its wool and converts its defenses into devastating discharges."
   },
   "togetic": {
     "name": "Togetic",

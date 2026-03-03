@@ -11,7 +11,7 @@ export type PassiveId =
   | 'blaze_strike'
   | 'inferno_momentum'
   // Squirtle line
-  | 'baby_shell'
+  | 'natural_armor'
   | 'pressure_hull'
   | 'torrent_shield'
   | 'fortified_cannons'
@@ -207,7 +207,9 @@ export type PassiveId =
   | 'landslide'
   // Stantler
   | 'hypnotic_antlers'
-  | 'stalwart';
+  | 'stalwart'
+  // Flaaffy/Ampharos line
+  | 'ion_discharge';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -248,8 +250,8 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
     name: 'Inferno Momentum',
     description: 'At the start of your turn, reduce the cost of your highest-cost card in hand by 3 (min 0).',
   },
-  baby_shell: {
-    name: 'Baby Shell',
+  natural_armor: {
+    name: 'Natural Armor',
     description: 'At the start of your turn, gain 3 Block.',
   },
   pressure_hull: {
@@ -849,6 +851,11 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
     name: 'Stalwart',
     description: 'Gain 3 Block when you take unblocked damage from a Provoked enemy.',
   },
+  // Flaaffy/Ampharos line
+  ion_discharge: {
+    name: 'Ion Discharge',
+    description: 'Your Electric attacks deal bonus damage equal to 25% of your current Block.',
+  },
 };
 
 // Charmander progression tree
@@ -940,8 +947,8 @@ export const SQUIRTLE_PROGRESSION: ProgressionTree = {
     {
       level: 1,
       name: 'Squirtle',
-      description: 'Starting form with Baby Shell passive.',
-      passiveId: 'baby_shell',
+      description: 'Starting form with Natural Armor passive.',
+      passiveId: 'natural_armor',
       hpBoost: 0,
       cardsToAdd: [],
     },
@@ -1861,8 +1868,8 @@ export const SANDSHREW_PROGRESSION: ProgressionTree = {
     {
       level: 1,
       name: 'Sandshrew',
-      description: 'Starting form with Baby Shell passive.',
-      passiveId: 'baby_shell',
+      description: 'Starting form with Natural Armor passive.',
+      passiveId: 'natural_armor',
       hpBoost: 0,
       cardsToAdd: [],
     },
@@ -2695,13 +2702,13 @@ export const MARILL_PROGRESSION: ProgressionTree = {
   ],
 };
 
-export const FLAAFFY_PROGRESSION: ProgressionTree = {
-  baseFormId: 'flaaffy',
+export const MAREEP_PROGRESSION: ProgressionTree = {
+  baseFormId: 'mareep',
   rungs: [
-    { level: 1, name: 'Flaaffy', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
-    { level: 2, name: 'Ampharos', description: 'Evolve to Ampharos. Add Thunderbolt.', evolvesTo: 'ampharos', passiveId: 'none', hpBoost: 0, cardsToAdd: ['thunderbolt'] },
-    { level: 3, name: 'Ampharos', description: 'Add Thunder.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['thunder'] },
-    { level: 4, name: 'Ampharos (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+    { level: 1, name: 'Mareep', description: 'Gain Natural Armor.', passiveId: 'natural_armor', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Flaaffy', description: 'Evolve to Flaaffy. Gain Static. Add Thunderbolt.', evolvesTo: 'flaaffy', passiveId: 'static', hpBoost: 0, cardsToAdd: ['thunderbolt'] },
+    { level: 3, name: 'Ampharos', description: 'Evolve to Ampharos. Gain Fortify. Add Thunder.', evolvesTo: 'ampharos', passiveId: 'fortify', hpBoost: 0, cardsToAdd: ['thunder'] },
+    { level: 4, name: 'Ampharos (Mastered)', description: 'Gain Ion Discharge.', passiveId: 'ion_discharge', hpBoost: 8, cardsToAdd: [] },
   ],
 };
 
@@ -3143,7 +3150,7 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   // Gen 2 — Batch 2 (Past Johto)
   stantler: STANTLER_PROGRESSION,
   marill: MARILL_PROGRESSION,
-  flaaffy: FLAAFFY_PROGRESSION,
+  mareep: MAREEP_PROGRESSION,
   togetic: TOGETIC_PROGRESSION,
   espeon: ESPEON_PROGRESSION,
   umbreon: UMBREON_PROGRESSION,
@@ -3314,7 +3321,8 @@ export function getProgressionTree(pokemonId: string): ProgressionTree | null {
   if (pokemonId === 'sunflora') return SUNKERN_PROGRESSION;
   if (pokemonId === 'quagsire') return WOOPER_PROGRESSION;
   if (pokemonId === 'azumarill') return MARILL_PROGRESSION;
-  if (pokemonId === 'ampharos') return FLAAFFY_PROGRESSION;
+  if (pokemonId === 'flaaffy') return MAREEP_PROGRESSION;
+  if (pokemonId === 'ampharos') return MAREEP_PROGRESSION;
   if (pokemonId === 'houndoom') return HOUNDOUR_PROGRESSION;
   if (pokemonId === 'ursaring') return TEDDIURSA_PROGRESSION;
   if (pokemonId === 'pupitar' || pokemonId === 'tyranitar') return LARVITAR_PROGRESSION;
@@ -3452,7 +3460,8 @@ export function getBaseFormId(pokemonId: string): string {
   if (pokemonId === 'sunflora') return 'sunkern';
   if (pokemonId === 'quagsire') return 'wooper';
   if (pokemonId === 'azumarill') return 'marill';
-  if (pokemonId === 'ampharos') return 'flaaffy';
+  if (pokemonId === 'flaaffy') return 'mareep';
+  if (pokemonId === 'ampharos') return 'mareep';
   if (pokemonId === 'houndoom') return 'houndour';
   if (pokemonId === 'ursaring') return 'teddiursa';
   if (pokemonId === 'pupitar' || pokemonId === 'tyranitar') return 'larvitar';

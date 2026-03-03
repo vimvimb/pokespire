@@ -23,6 +23,7 @@ import {
   checkVerdantWrath,
   checkMaul,
   checkTorrentStrike,
+  checkIonDischarge,
 } from './passives';
 import {
   getItemDamageBonus, getItemDamageReduction, getItemDamageBonusSourceOnly,
@@ -158,7 +159,8 @@ export function calculateDamagePreview(
   // Passive bonuses
   const { bonusDamage: fortifiedCannonsBonus } = checkFortifiedCannons(state, source, card);
   const { bonusDamage: fortifiedSpinesBonus } = checkFortifiedSpines(state, source, card);
-  const fortifiedBonus = fortifiedCannonsBonus + fortifiedSpinesBonus;
+  const { bonusDamage: ionDischargeBonus } = checkIonDischarge(state, source, card);
+  const fortifiedBonus = fortifiedCannonsBonus + fortifiedSpinesBonus + ionDischargeBonus;
   const { bonusDamage: counterBonus } = checkCounterCurrent(state, source, target);
   const keenEyeBonus = checkKeenEye(source, target);
   const predatorsPatienceBonus = checkPredatorsPatience(source, target);
@@ -305,9 +307,12 @@ export function calculateHandPreview(
     ? Math.floor(source.block * 0.25) : 0;
   const fortifiedSpinesBonus = source.passiveIds.includes('fortified_spines')
     ? getStatusStacks(source, 'thorns') : 0;
+  const ionDischargeBonus = (source.passiveIds.includes('ion_discharge') && card.type === 'electric' && source.block > 0)
+    ? Math.floor(source.block * 0.25) : 0;
 
   if (fortifiedCannonsBonus > 0) tags.push(`+${fortifiedCannonsBonus} Fort. Cannons`);
   if (fortifiedSpinesBonus > 0) tags.push(`+${fortifiedSpinesBonus} Fort. Spines`);
+  if (ionDischargeBonus > 0) tags.push(`+${ionDischargeBonus} Ion Discharge`);
 
   const proletariatBonus = checkProletariat(source, card);
   const scrappyBonus = checkScrappy(source, card);
@@ -342,7 +347,7 @@ export function calculateHandPreview(
   const itemBonus = getItemDamageBonusSourceOnly(source, card);
   if (itemBonus > 0) tags.push(`+${itemBonus} Item`);
 
-  const additive = strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus +
+  const additive = strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + ionDischargeBonus +
     proletariatBonus + scrappyBonus + poisonBarbBonus + adaptabilityBonus +
     sharpBeakBonus + nightAssassinBonus + relentlessBonus + verdantWrathBonus + maulBonus +
     rolloutBonus + itemBonus - enfeeble;

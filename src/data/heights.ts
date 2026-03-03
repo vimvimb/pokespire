@@ -100,6 +100,7 @@ export const POKEDEX_NUMBERS: Record<string, number> = {
   chinchou: 170,
   lanturn: 171,
   togetic: 176,
+  mareep: 179,
   flaaffy: 180,
   ampharos: 181,
   marill: 183,
@@ -357,6 +358,7 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   stantler: 38, // Real 71.2kg → 145px (adjusted -47%)
   marill: 6, // Real 8.5kg → 80px (adjusted; small round Pokemon)
   azumarill: 18, // Real 28.5kg → 114px (adjusted -37%)
+  mareep: 8, // Real 7.8kg → 84px
   flaaffy: 13, // Real 13.3kg → 98px ✓
   ampharos: 42, // Real 61.5kg → 150px (adjusted -32%)
   togetic: 8, // Real 3.2kg → 84px (increased for visibility)

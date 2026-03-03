@@ -42,7 +42,8 @@ import {
   checkMaul,
   checkTorrentStrike,
   checkItemDamageBonus,
-  checkItemDamageReduction
+  checkItemDamageReduction,
+  checkIonDischarge
 } from './passives';
 import { shuffle, MAX_HAND_SIZE } from './deck';
 import { processItemPostCard, getItemDamageMultiplier, checkItemPlayRestriction, getItemStatusStacksMultiplier, hasItem } from './itemEffects';
@@ -653,11 +654,13 @@ function buildDamageModifiers(
   const { shouldApply: isTorrentStrike, logs: torrentStrikeLogs } = checkTorrentStrike(state, source, card);
   logs.push(...torrentStrikeLogs);
 
-  // Check for Fortified Cannons / Fortified Spines (block-based bonus damage)
+  // Check for Fortified Cannons / Fortified Spines / Ion Discharge (block-based bonus damage)
   const { bonusDamage: fortifiedCannonsBonus, logs: fortifiedCannonsLogs } = checkFortifiedCannons(state, source, card);
   logs.push(...fortifiedCannonsLogs);
   const { bonusDamage: fortifiedSpinesBonus, logs: fortifiedSpinesLogs } = checkFortifiedSpines(state, source, card);
   logs.push(...fortifiedSpinesLogs);
+  const { bonusDamage: ionDischargeBonus, logs: ionDischargeLogs } = checkIonDischarge(state, source, card);
+  logs.push(...ionDischargeLogs);
 
   // Check for Counter-Current
   const { bonusDamage: counterBonus, logs: counterLogs } = checkCounterCurrent(state, source, target);
@@ -1034,6 +1037,7 @@ function buildDamageModifiers(
     isFinisher,
     fortifiedCannonsBonus: fortifiedCannonsBonus,
     fortifiedSpinesBonus: fortifiedSpinesBonus,
+    ionDischargeBonus: ionDischargeBonus,
     bloomingCycleReduction: getBloomingCycleReduction(state, source),
     counterCurrentBonus: counterBonus,
     staticFieldReduction: staticReduction,
@@ -1077,6 +1081,7 @@ function buildDamageBreakdown(r: ReturnType<typeof applyCardDamage>): string {
   if (r.strength > 0) parts.push(`+${r.strength} Str`);
   if (r.fortifiedCannonsBonus > 0) parts.push(`+${r.fortifiedCannonsBonus} Cannons`);
   if (r.fortifiedSpinesBonus > 0) parts.push(`+${r.fortifiedSpinesBonus} Spines`);
+  if (r.ionDischargeBonus > 0) parts.push(`+${r.ionDischargeBonus} Ion`);
   if (r.counterCurrentBonus > 0) parts.push(`+${r.counterCurrentBonus} Current`);
   if (r.keenEyeBonus > 0) parts.push(`+${r.keenEyeBonus} Keen Eye`);
   if (r.predatorsPatienceBonus > 0) parts.push(`+${r.predatorsPatienceBonus} Predator`);

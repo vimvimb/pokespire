@@ -181,12 +181,12 @@ Each Pokemon has 4 progression levels. Passives **stack** (not replaced) as you 
 
 | Level | Form      | Passive                                                                        | Cards Added |
 | ----- | --------- | ------------------------------------------------------------------------------ | ----------- |
-| 1     | Squirtle  | **Baby Shell** - Start of turn: gain 3 Block                                   | -           |
+| 1     | Squirtle  | **Natural Armor** - Start of turn: gain 3 Block                                   | -           |
 | 2     | Wartortle | **Pressure Hull** - End of turn: retain 50% Block                              | Bubble Beam |
 | 3     | Blastoise | **Fortified Cannons** - Water attacks grant Block equal to half damage dealt   | Hydro Pump  |
 | 4     | Blastoise | **Bastion Barrage** - Water attacks deal +25% of current Block as bonus damage | -           |
 
-**Synergy:** Baby Shell grants Block passively. Pressure Hull keeps it. Fortified Cannons gains more Block on attacks. Bastion Barrage turns all that Block into bonus damage.
+**Synergy:** Natural Armor grants Block passively. Pressure Hull keeps it. Fortified Cannons gains more Block on attacks. Bastion Barrage turns all that Block into bonus damage.
 
 ### Bulbasaur Line - "Overgrowth" (IMPLEMENTED)
 

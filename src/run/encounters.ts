@@ -153,14 +153,14 @@ const BANNED_PASSIVES = new Set([
 
 const PASSIVE_COST_OVERRIDES: Record<string, number> = {
   // Cost 1 — minor / defensive
-  shield_dust: 1, thick_hide: 1, shed_skin: 1, immunity: 1, baby_shell: 1,
+  shield_dust: 1, thick_hide: 1, shed_skin: 1, immunity: 1, natural_armor: 1,
   baby_vines: 1, insomnia: 1, inner_focus: 1, sharp_beak: 1, effect_spore: 1,
   guts: 1, lucky_star: 1, vital_spirit: 1, pickup: 1, download: 1,
   intangible: 1, poison_barb: 1, cute_charm: 1,
 
   // Cost 3 — powerful / game-changing
   sheer_force: 3, multiscale: 3, moxie: 3, adaptability: 3,
-  fortified_cannons: 3, torrent_shield: 3, inferno_momentum: 3,
+  fortified_cannons: 3, ion_discharge: 3, torrent_shield: 3, inferno_momentum: 3,
   night_assassin: 3, magic_guard: 3, finisher: 3, phase_form: 3,
   upload: 3, overclock: 3, surge_momentum: 3, searing_fury: 3,
   volt_fury: 3, fortifying_aria: 3, blooming_cycle: 3,
