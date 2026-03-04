@@ -1685,8 +1685,8 @@ describe('Item Battle Simulations', () => {
       expect(checkItemPlayRestriction(c, getMove('scratch'))).toBe(false);
       // any_enemy attacks allowed
       expect(checkItemPlayRestriction(c, getMove('ember'))).toBe(true);
-      // Non-attack cards allowed
-      expect(checkItemPlayRestriction(c, getMove('growl'))).toBe(true);
+      // Non-attack cards blocked
+      expect(checkItemPlayRestriction(c, getMove('growl'))).toBe(false);
     });
 
     // --- Source-Only Preview (hand preview) ---

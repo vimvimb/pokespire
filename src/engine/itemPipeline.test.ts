@@ -457,9 +457,9 @@ describe('Item Pipeline Integration', () => {
         expect(checkItemPlayRestriction(s.source, getMove('flamethrower'))).toBe(true);  // column
       });
 
-      it('Choice Specs: allows non-attack cards', () => {
+      it('Choice Specs: blocks non-attack cards', () => {
         const s = makeScenario({ sourceTypes: ['fire'], targetTypes: ['normal'], itemId: 'choice_specs' });
-        expect(checkItemPlayRestriction(s.source, getMove('growl'))).toBe(true);
+        expect(checkItemPlayRestriction(s.source, getMove('growl'))).toBe(false);
       });
     });
 
