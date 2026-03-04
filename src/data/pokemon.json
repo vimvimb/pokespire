@@ -2858,7 +2858,8 @@
       "quick-attack",
       "body-slam"
     ],
-    "abilities": []
+    "abilities": [],
+    "description": "A deceptively powerful Water-type that hits far harder than its cute appearance suggests."
   },
   "mareep": {
     "name": "Mareep",

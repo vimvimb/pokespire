@@ -7740,5 +7740,20 @@
     "rarity": "uncommon",
     "pools": ["fairy"],
     "description": "Gain 6 Block. Column ally gains 3 Block."
+  },
+  "belly-drum": {
+    "name": "Belly Drum",
+    "cost": 0,
+    "type": "normal",
+    "range": "self",
+    "vanish": true,
+    "effects": [
+      { "type": "damage_self_percent", "percent": 0.5 },
+      { "type": "apply_status_self", "status": "strength", "stacks": 10 }
+    ],
+    "rarity": "epic",
+    "pools": [],
+    "description": "Lose 50% of max HP. Gain 10 Strength. Vanish.",
+    "contact": false
   }
 }

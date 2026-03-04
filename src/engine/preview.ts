@@ -24,6 +24,7 @@ import {
   checkMaul,
   checkTorrentStrike,
   checkIonDischarge,
+  checkHugePower,
 } from './passives';
 import {
   getItemDamageBonus, getItemDamageReduction, getItemDamageBonusSourceOnly,
@@ -58,6 +59,11 @@ export function calculateDamagePreview(
   target: Combatant,
   card: MoveDefinition
 ): DamagePreview | null {
+  // Sap Sipper: No damage from Grass-type attacks
+  if (target.passiveIds.includes('sap_sipper') && card.type === 'grass') {
+    return null;
+  }
+
   // Water Absorb / Dry Skin: No damage from Water-type attacks (heals instead)
   if ((target.passiveIds.includes('water_absorb') || target.passiveIds.includes('dry_skin')) && card.type === 'water') {
     return null;
@@ -193,8 +199,9 @@ export function calculateDamagePreview(
   const technicianMultiplier = checkTechnician(source, card);
   const aristocratMultiplier = checkAristocrat(source, card);
   const consumingFlameMultiplier = checkConsumingFlame(source, card);
+  const hugePowerMultiplier = checkHugePower(source, card);
   const rudeAwakeningMultiplier = checkRudeAwakening(source, target);
-  const combinedMultiplier = angerPointMultiplier * sheerForceMultiplier * recklessMultiplier * hustleMultiplier * dragonsMajestyMultiplier * technicianMultiplier * aristocratMultiplier * consumingFlameMultiplier * rudeAwakeningMultiplier;
+  const combinedMultiplier = angerPointMultiplier * sheerForceMultiplier * recklessMultiplier * hustleMultiplier * dragonsMajestyMultiplier * technicianMultiplier * aristocratMultiplier * consumingFlameMultiplier * hugePowerMultiplier * rudeAwakeningMultiplier;
 
   // Type effectiveness (with Tinted Lens adjustment)
   let typeEffectiveness = getTypeEffectiveness(card.type, target.types);
@@ -383,10 +390,12 @@ export function calculateHandPreview(
   const technicianMult = checkTechnician(source, card);
   const aristocratMult = checkAristocrat(source, card);
   const consumingFlameMult = checkConsumingFlame(source, card);
+  const hugePowerMult = checkHugePower(source, card);
   const itemDmgMult = getItemDamageMultiplier(source, card);
   if (technicianMult > 1) tags.push(`x${technicianMult} Tech`);
   if (aristocratMult > 1) tags.push(`x${aristocratMult} Aristocrat`);
   if (consumingFlameMult > 1) tags.push(`x${consumingFlameMult} Flame`);
+  if (hugePowerMult > 1) tags.push(`x${hugePowerMult} Huge Power`);
   if (itemDmgMult > 1) tags.push(`x${itemDmgMult} Item`);
   if (itemDmgMult < 1) tags.push(`x${itemDmgMult} Shuriken`);
 
@@ -399,7 +408,7 @@ export function calculateHandPreview(
   const statusStacksMult = getItemStatusStacksMultiplier(source, card);
 
   const multiplier = blazeSwarmMult * angerPointMult * sheerForceMult *
-    recklessMult * hustleMult * dragonsMajestyMult * technicianMult * aristocratMult * consumingFlameMult * itemDmgMult;
+    recklessMult * hustleMult * dragonsMajestyMult * technicianMult * aristocratMult * consumingFlameMult * hugePowerMult * itemDmgMult;
 
   return { additive, multiplier, statusStacksMult, tags };
 }

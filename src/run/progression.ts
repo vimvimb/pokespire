@@ -209,7 +209,10 @@ export type PassiveId =
   | 'hypnotic_antlers'
   | 'stalwart'
   // Flaaffy/Ampharos line
-  | 'ion_discharge';
+  | 'ion_discharge'
+  // Marill/Azumarill line
+  | 'sap_sipper'
+  | 'huge_power';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -855,6 +858,15 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   ion_discharge: {
     name: 'Ion Discharge',
     description: 'Your Electric attacks deal bonus damage equal to 25% of your current Block.',
+  },
+  // Marill/Azumarill line
+  sap_sipper: {
+    name: 'Sap Sipper',
+    description: 'You are immune to Grass attacks. When hit by one, gain 2 Strength instead.',
+  },
+  huge_power: {
+    name: 'Huge Power',
+    description: 'Your front-row attacks deal 1.5x damage.',
   },
 };
 
@@ -2695,10 +2707,10 @@ export const STANTLER_PROGRESSION: ProgressionTree = {
 export const MARILL_PROGRESSION: ProgressionTree = {
   baseFormId: 'marill',
   rungs: [
-    { level: 1, name: 'Marill', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
-    { level: 2, name: 'Azumarill', description: 'Evolve to Azumarill. Add Body Slam.', evolvesTo: 'azumarill', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
-    { level: 3, name: 'Azumarill', description: 'Add Surf.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['surf'] },
-    { level: 4, name: 'Azumarill (Mastered)', description: '+8 max HP.', passiveId: 'none', hpBoost: 8, cardsToAdd: [] },
+    { level: 1, name: 'Marill', description: 'Gain Thick Fat.', passiveId: 'thick_fat', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Azumarill', description: 'Evolve to Azumarill. Gain Sap Sipper. Add Belly Drum.', evolvesTo: 'azumarill', passiveId: 'sap_sipper', hpBoost: 0, cardsToAdd: ['belly-drum'] },
+    { level: 3, name: 'Azumarill', description: 'Gain Huge Power.', passiveId: 'huge_power', hpBoost: 0, cardsToAdd: [] },
+    { level: 4, name: 'Azumarill (Mastered)', description: 'Gain Water Absorb.', passiveId: 'water_absorb', hpBoost: 0, cardsToAdd: [] },
   ],
 };
 

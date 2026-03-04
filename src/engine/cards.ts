@@ -43,7 +43,8 @@ import {
   checkTorrentStrike,
   checkItemDamageBonus,
   checkItemDamageReduction,
-  checkIonDischarge
+  checkIonDischarge,
+  checkHugePower
 } from './passives';
 import { shuffle, MAX_HAND_SIZE } from './deck';
 import { processItemPostCard, getItemDamageMultiplier, checkItemPlayRestriction, getItemStatusStacksMultiplier, hasItem } from './itemEffects';
@@ -954,6 +955,16 @@ function buildDamageModifiers(
     });
   }
 
+  // Huge Power: front-row attacks deal 1.5x damage
+  const hugePowerMultiplier = checkHugePower(source, card);
+  if (hugePowerMultiplier > 1) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Huge Power: x1.5 damage (front-row attack)!`,
+    });
+  }
+
   // Rude Awakening: Double damage to sleeping targets
   const rudeAwakeningMultiplier = checkRudeAwakening(source, target);
   if (rudeAwakeningMultiplier > 1) {
@@ -1056,6 +1067,7 @@ function buildDamageModifiers(
     technicianMultiplier,  // 1.3x for 1-cost cards
     aristocratMultiplier,  // 1.3x for Epic cards
     consumingFlameMultiplier,  // 1.2x for Fire cards (Consuming Flame)
+    hugePowerMultiplier,  // 1.5x for front-row attacks (Huge Power)
     lifeOrbMultiplier,  // 1.3x for Life Orb
     familyFuryBonus: scrappyBonus + relentlessBonus + blindAggressionBonus,  // Combine flat bonuses
     nightAssassinBonus,
@@ -1107,6 +1119,7 @@ function buildDamageBreakdown(r: ReturnType<typeof applyCardDamage>): string {
   if (r.technicianMultiplier > 1) parts.push(`x${r.technicianMultiplier.toFixed(1)} Tech`);
   if (r.aristocratMultiplier > 1) parts.push(`x${r.aristocratMultiplier.toFixed(1)} Aristocrat`);
   if (r.consumingFlameMultiplier > 1) parts.push(`x${r.consumingFlameMultiplier.toFixed(1)} Flame`);
+  if (r.hugePowerMultiplier > 1) parts.push(`x${r.hugePowerMultiplier.toFixed(1)} Huge Power`);
   if (r.lifeOrbMultiplier > 1) parts.push(`x${r.lifeOrbMultiplier.toFixed(1)} Life Orb`);
   if (r.typeEffectiveness !== 1.0) parts.push(`x${r.typeEffectiveness.toFixed(2)} Type`);
   if (r.bloomingCycleReduction > 0) parts.push(`-${r.bloomingCycleReduction} Blooming`);
@@ -1225,6 +1238,17 @@ function resolveEffects(
   const logs: LogEntry[] = [];
   let damageToPoisoned = 0;
 
+  // Sap Sipper: Immune to Grass-type attacks, gain 2 Strength instead
+  if (target.passiveIds.includes('sap_sipper') && card.type === 'grass') {
+    applyStatus(state, target, 'strength', 2, target.id);
+    logs.push({
+      round: state.round,
+      combatantId: target.id,
+      message: `Sap Sipper: ${target.name} is immune to Grass attacks! Gains 2 Strength!`,
+    });
+    return { logs, damageToPoisoned: 0 };
+  }
+
   // Water Absorb: Immune to Water-type attacks, heal for base damage instead
   if (target.passiveIds.includes('water_absorb') && card.type === 'water') {
     let healBasis = 0;
@@ -1282,7 +1306,7 @@ function resolveEffects(
   const targetWasPoisoned = isPoisoned(target);  // Check before any damage
 
   for (const effect of card.effects) {
-    if (!target.alive && effect.type !== 'apply_status_self' && effect.type !== 'draw_cards' && effect.type !== 'gain_energy') break;
+    if (!target.alive && effect.type !== 'apply_status_self' && effect.type !== 'draw_cards' && effect.type !== 'gain_energy' && effect.type !== 'damage_self_percent') break;
 
     switch (effect.type) {
       case 'damage': {
@@ -1829,6 +1853,18 @@ function resolveEffects(
           round: state.round,
           combatantId: source.id,
           message: `${card.name}: A copy is shuffled into the draw pile!`,
+        });
+        break;
+      }
+
+      case 'damage_self_percent': {
+        // Deal percentage of max HP to self (e.g. Belly Drum)
+        const selfDamage = Math.floor(source.maxHp * effect.percent);
+        source.hp = Math.max(source.hp - selfDamage, 1);  // Cannot self-KO
+        logs.push({
+          round: state.round,
+          combatantId: source.id,
+          message: `${source.name} loses ${selfDamage} HP! (HP: ${source.hp}/${source.maxHp})`,
         });
         break;
       }

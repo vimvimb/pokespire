@@ -136,6 +136,11 @@ function estimateOffensiveDamage(
   target: Combatant,
   card: MoveDefinition,
 ): number | null {
+  // Sap Sipper immunity to Grass
+  if (target.passiveIds.includes('sap_sipper') && card.type === 'grass') {
+    return null;
+  }
+
   // Water Absorb / Dry Skin immunity to Water
   if ((target.passiveIds.includes('water_absorb') || target.passiveIds.includes('dry_skin')) && card.type === 'water') {
     return null;

@@ -60,7 +60,8 @@ export type CardEffectType =
   | 'discard_intent'
   | 'free_next_switch'
   | 'guard_status'
-  | 'shuffle_to_draw';
+  | 'shuffle_to_draw'
+  | 'damage_self_percent';
 
 export interface DamageEffect {
   type: 'damage';
@@ -202,6 +203,12 @@ export interface ShuffleToDrawEffect {
   type: 'shuffle_to_draw';
 }
 
+/** Deal percentage of max HP damage to self (e.g. Belly Drum) */
+export interface DamageSelfPercentEffect {
+  type: 'damage_self_percent';
+  percent: number;  // 0.5 = 50% of max HP
+}
+
 export type CardEffect =
   | DamageEffect
   | BlockEffect
@@ -224,7 +231,8 @@ export type CardEffect =
   | DiscardIntentEffect
   | FreeNextSwitchEffect
   | GuardStatusEffect
-  | ShuffleToDrawEffect;
+  | ShuffleToDrawEffect
+  | DamageSelfPercentEffect;
 
 // --- Move Types (elemental) ---
 

@@ -159,7 +159,7 @@ const PASSIVE_COST_OVERRIDES: Record<string, number> = {
   intangible: 1, poison_barb: 1, cute_charm: 1,
 
   // Cost 3 — powerful / game-changing
-  sheer_force: 3, multiscale: 3, moxie: 3, adaptability: 3,
+  sheer_force: 3, multiscale: 3, moxie: 3, adaptability: 3, huge_power: 3,
   fortified_cannons: 3, ion_discharge: 3, torrent_shield: 3, inferno_momentum: 3,
   night_assassin: 3, magic_guard: 3, finisher: 3, phase_form: 3,
   upload: 3, overclock: 3, surge_momentum: 3, searing_fury: 3,

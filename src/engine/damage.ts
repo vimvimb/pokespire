@@ -40,6 +40,7 @@ export interface DamageResult {
   technicianMultiplier: number;   // Multiplier from Technician (1.3x for 1-cost cards)
   aristocratMultiplier: number;   // Multiplier from Aristocrat (1.3x for Epic cards)
   consumingFlameMultiplier: number; // Multiplier from Consuming Flame (1.2x for Fire cards)
+  hugePowerMultiplier: number;     // Multiplier from Huge Power (1.5x for front-row attacks)
   lifeOrbMultiplier: number;       // Multiplier from Life Orb (1.3x for attacks)
   familyFuryBonus: number;        // Bonus from Family Fury (+2 per damaged ally)
   poisonBarbBonus: number;        // Bonus from Poison Barb (+2 for Poison attacks)
@@ -89,6 +90,7 @@ export interface DamageModifiers {
   technicianMultiplier?: number;
   aristocratMultiplier?: number;
   consumingFlameMultiplier?: number;
+  hugePowerMultiplier?: number;
   lifeOrbMultiplier?: number;      // Life Orb 1.3x multiplier
   familyFuryBonus?: number;
   poisonBarbBonus?: number;
@@ -171,7 +173,11 @@ export function applyCardDamage(
   const consumingFlameMultiplier = mods.consumingFlameMultiplier ?? 1.0;
   rawDamage = Math.floor(rawDamage * consumingFlameMultiplier);
 
-  // Step 1.646: Apply Life Orb multiplier (1.3x damage)
+  // Step 1.646: Apply Huge Power multiplier (front-row attacks deal 1.5x damage)
+  const hugePowerMultiplier = mods.hugePowerMultiplier ?? 1.0;
+  rawDamage = Math.floor(rawDamage * hugePowerMultiplier);
+
+  // Step 1.647: Apply Life Orb multiplier (1.3x damage)
   const lifeOrbMultiplier = mods.lifeOrbMultiplier ?? 1.0;
   rawDamage = Math.floor(rawDamage * lifeOrbMultiplier);
 
@@ -266,6 +272,7 @@ export function applyCardDamage(
     technicianMultiplier,
     aristocratMultiplier,
     consumingFlameMultiplier,
+    hugePowerMultiplier,
     lifeOrbMultiplier,
     familyFuryBonus,
     nightAssassinBonus,

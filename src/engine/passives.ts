@@ -1659,6 +1659,20 @@ export function checkIonDischarge(
 }
 
 /**
+ * Check Huge Power multiplier.
+ * Huge Power: front_enemy and front_row attacks deal 1.5x damage.
+ */
+export function checkHugePower(
+  attacker: Combatant,
+  card: MoveDefinition
+): number {
+  if (attacker.passiveIds.includes('huge_power') && (card.range === 'front_enemy' || card.range === 'front_row')) {
+    return 1.5;
+  }
+  return 1.0;
+}
+
+/**
  * Check if Fortified Spines should provide bonus damage.
  * Fortified Spines: ALL attacks deal bonus damage equal to attacker's Thorns stacks.
  */
