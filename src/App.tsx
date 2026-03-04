@@ -1277,7 +1277,7 @@ export default function App() {
           onPlayCard={handlePlayCard}
           onEndTurn={handleEndTurn}
           onSwitchPosition={battle.switchPosition}
-          onRestart={handleStartPrologue}
+          onRestart={() => { setIsPrologueMode(false); setScreen("main_menu"); }}
           onBattleEnd={handleBattleEnd}
           tutorial={prologue.tutorialConfig}
         />

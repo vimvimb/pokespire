@@ -495,6 +495,11 @@ function FormationSlot({
           }}>
             Lv.{pokemon.level}
           </div>
+          {formId && (
+            <div style={{ fontSize: 9, color: THEME.text.secondary, marginTop: 1 }}>
+              HP {getPokemon(formId).maxHp} · Spd {getPokemon(formId).baseSpeed}
+            </div>
+          )}
           {/* HP indicators */}
           <div style={{ display: 'flex', gap: 2, position: 'absolute', top: 3, right: 3 }}>
             {pokemon.has999Hp && (

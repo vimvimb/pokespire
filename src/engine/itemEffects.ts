@@ -894,16 +894,16 @@ export function checkItemPlayRestriction(
       return false;
     }
 
-    // Choice Band: front-row attacks only (front_enemy/front_row), no all_enemies
+    // Choice Band: front-targeting attacks only (front_enemy/front_row)
     if (itemId === 'choice_band') {
       if (!isAttack(card)) return false;
       if (!frontRowRanges.has(card.range)) return false;
-      if (card.range === 'all_enemies') return false;
     }
 
-    // Choice Specs: no front-row attacks, no all_enemies
+    // Choice Specs: non-front-targeting attacks only
     if (itemId === 'choice_specs') {
-      if (isAttack(card) && (frontRowRanges.has(card.range) || card.range === 'all_enemies')) return false;
+      if (!isAttack(card)) return false;
+      if (frontRowRanges.has(card.range)) return false;
     }
 
     // Choice Scarf: max 2 cards per turn

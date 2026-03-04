@@ -409,6 +409,9 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
                         }}>
                           {getPokemon(entry.pokemon.formId).name}
                         </div>
+                        <div style={{ fontSize: 9, color: THEME.text.secondary, marginTop: 1 }}>
+                          HP {getPokemon(entry.pokemon.formId).maxHp} · Spd {getPokemon(entry.pokemon.formId).baseSpeed}
+                        </div>
                       </>
                     ) : (
                       <div style={{
@@ -545,6 +548,9 @@ export function RearrangeModal({ party, bench, onConfirm, onClose }: Props) {
                         marginTop: 2,
                       }}>
                         {getPokemon(entry.pokemon.formId).name}
+                      </div>
+                      <div style={{ fontSize: 8, color: THEME.text.secondary, marginTop: 1 }}>
+                        HP {getPokemon(entry.pokemon.formId).maxHp} · Spd {getPokemon(entry.pokemon.formId).baseSpeed}
                       </div>
                     </div>
                   );

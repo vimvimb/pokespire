@@ -1165,11 +1165,11 @@ describe('Held Item Effects', () => {
       expect(checkItemPlayRestriction(player, thunderShock)).toBe(true);
     });
 
-    it('allows non-attack cards', () => {
+    it('blocks non-attack cards', () => {
       const { player } = makeSimpleState({ playerItem: 'choice_specs' });
       const growl = getMove('growl');
 
-      expect(checkItemPlayRestriction(player, growl)).toBe(true);
+      expect(checkItemPlayRestriction(player, growl)).toBe(false);
     });
   });
 

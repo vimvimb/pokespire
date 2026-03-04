@@ -160,7 +160,7 @@ export const ITEM_DEFS: Record<string, ItemDefinition> = {
   choice_band: {
     id: 'choice_band',
     name: 'Choice Band',
-    description: '+8 damage, front-row attacks only.',
+    description: '+8 damage. Attacks only — Front and Front Row targeting.',
     rarity: 'common',
     icon: '💪',
   },
@@ -330,7 +330,7 @@ export const ITEM_DEFS: Record<string, ItemDefinition> = {
   choice_specs: {
     id: 'choice_specs',
     name: 'Choice Specs',
-    description: '+8 damage, no front-row or AoE attacks.',
+    description: '+8 damage. Attacks only — no Front or Front Row targeting.',
     rarity: 'boss',
     icon: '👓',
   },

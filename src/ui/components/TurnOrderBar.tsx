@@ -14,12 +14,14 @@ interface Props {
   enemyIntents?: Map<string, EnemyIntent[]>;
   allCombatants?: Combatant[];
   intentsVisible?: boolean;
+  linkedHoverId?: string | null;
+  onHoverCombatant?: (id: string | null) => void;
 }
 
 // Duration of the shuffle animation in ms
 const ANIM_DURATION = 400;
 
-function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible = true }: Props) {
+function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible = true, linkedHoverId, onHoverCombatant }: Props) {
   // Track DOM elements by combatantId
   const entryRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   // Previous order snapshot (combatantIds in order)
@@ -232,16 +234,21 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
         const tagIntents = hasIntents && !intentsTagged;
         if (tagIntents) intentsTagged = true;
 
+        const isLinked = !isPhantom && linkedHoverId === entry.combatantId;
+
         return (
           <div
             key={entry.entryId}
             ref={setRef(String(entry.entryId))}
+            onMouseEnter={!isPhantom ? () => onHoverCombatant?.(entry.combatantId) : undefined}
+            onMouseLeave={!isPhantom ? () => onHoverCombatant?.(null) : undefined}
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               position: 'relative',
               zIndex: 1,
+              cursor: !isPhantom ? 'pointer' : undefined,
             }}
           >
             {/* Name pill */}
@@ -253,32 +260,41 @@ function TurnOrderBarInner({ state, enemyIntents, allCombatants, intentsVisible 
                 fontWeight: isCurrent ? 'bold' : 'normal',
                 background: isPhantom
                   ? 'rgba(128, 0, 255, 0.15)'
-                  : isCurrent
-                    ? THEME.accent + '22'
-                    : hasActed
-                      ? THEME.bg.panelDark
-                      : c.side === 'player'
-                        ? THEME.side.player
-                        : THEME.side.enemy,
+                  : isLinked
+                    ? THEME.accent + '30'
+                    : isCurrent
+                      ? THEME.accent + '22'
+                      : hasActed
+                        ? THEME.bg.panelDark
+                        : c.side === 'player'
+                          ? THEME.side.player
+                          : THEME.side.enemy,
                 color: isPhantom
                   ? '#c084fc'
-                  : isCurrent ? THEME.accent : hasActed ? THEME.text.tertiary : THEME.text.primary,
-                opacity: hasActed ? 0.5 : 1,
+                  : isLinked
+                    ? THEME.accent
+                    : isCurrent ? THEME.accent : hasActed ? THEME.text.tertiary : THEME.text.primary,
+                opacity: hasActed && !isLinked ? 0.5 : 1,
                 border: isPhantom
                   ? '1px solid rgba(128, 0, 255, 0.4)'
-                  : isCurrent
+                  : isLinked
                     ? `1px solid ${THEME.accent}`
-                    : hasActed
-                      ? '1px solid transparent'
-                      : c.side === 'player'
-                        ? '1px solid rgba(42,74,110,0.6)'
-                        : '1px solid rgba(110,42,42,0.6)',
+                    : isCurrent
+                      ? `1px solid ${THEME.accent}`
+                      : hasActed
+                        ? '1px solid transparent'
+                        : c.side === 'player'
+                          ? '1px solid rgba(42,74,110,0.6)'
+                          : '1px solid rgba(110,42,42,0.6)',
                 boxShadow: isPhantom
                   ? 'inset 0 0 8px rgba(128, 0, 255, 0.2)'
-                  : isCurrent
-                    ? 'inset 0 0 8px rgba(250,204,21,0.15)'
-                    : 'inset 0 0 4px rgba(0,0,0,0.2)',
+                  : isLinked
+                    ? `inset 0 0 8px ${THEME.accent}30, 0 0 6px ${THEME.accent}40`
+                    : isCurrent
+                      ? 'inset 0 0 8px rgba(250,204,21,0.15)'
+                      : 'inset 0 0 4px rgba(0,0,0,0.2)',
                 whiteSpace: 'nowrap',
+                transition: 'all 0.15s',
               }}
             >
               {isPhantom ? (

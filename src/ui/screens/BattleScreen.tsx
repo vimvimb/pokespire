@@ -104,19 +104,6 @@ const TILT_PX = 36; // isometric horizontal offset per column slot
 const SLOT_GAP = 4; // vertical gap between rows
 const ROW_GAP = 50; // horizontal gap between front and back columns
 
-// Ground grid line geometry — forms a parallelogram following the isometric tilt
-const GRID_W = 2 * CELL_W + ROW_GAP; // full grid width before tilt (450)
-const GRID_H = 3 * CELL_H + 2 * SLOT_GAP; // full grid height (788)
-const MAX_TILT = 2 * TILT_PX; // tilt at the bottom row (72)
-// Row boundary y-positions: top edge, midpoints of gaps, bottom edge
-const GRID_ROW_YS = [
-  0,
-  CELL_H + SLOT_GAP / 2,
-  2 * CELL_H + 1.5 * SLOT_GAP,
-  GRID_H,
-];
-// Column boundary x-positions: left edge, center of column gap, right edge
-const GRID_COL_XS = [0, CELL_W + ROW_GAP / 2, GRID_W];
 
 function BattleGrid({
   combatants,
@@ -137,6 +124,8 @@ function BattleGrid({
   switchTargetPositions,
   onSwitchSelect,
   futureSightColumns,
+  linkedHoverId,
+  onHoverCombatant,
 }: {
   combatants: Combatant[];
   allCombatants: Combatant[];
@@ -156,6 +145,8 @@ function BattleGrid({
   switchTargetPositions?: Position[];
   onSwitchSelect?: (position: Position) => void;
   futureSightColumns?: Set<Column>;
+  linkedHoverId?: string | null;
+  onHoverCombatant?: (id: string | null) => void;
 }) {
   // Position fingerprint so useMemo recomputes after swaps (positions are mutated in place)
   const posKey = combatants
@@ -226,6 +217,23 @@ function BattleGrid({
           height: CELL_H,
         }}
       >
+        {/* Ground marker for empty cells only — occupied cells render their own in PokemonSprite */}
+        {!combatant && !isSwitchTarget && (
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: CELL_H * 0.24,
+              transform: "translateX(-50%)",
+              width: 140,
+              height: 18,
+              borderRadius: "50%",
+              background: "radial-gradient(ellipse, rgba(240, 230, 211, 0.28) 0%, rgba(240, 230, 211, 0.08) 60%, transparent 100%)",
+              border: "1.5px solid rgba(240, 230, 211, 0.28)",
+              pointerEvents: "none",
+            }}
+          />
+        )}
         {combatant ? (
           <div
             onClick={
@@ -233,6 +241,8 @@ function BattleGrid({
                 ? () => onSwitchSelect(cellPosition)
                 : undefined
             }
+            onMouseEnter={() => onHoverCombatant?.(combatant.id)}
+            onMouseLeave={() => onHoverCombatant?.(null)}
             style={{
               cursor: isSwitchTarget ? "pointer" : undefined,
               borderRadius: 8,
@@ -246,6 +256,7 @@ function BattleGrid({
               combatants={allCombatants}
               isCurrentTurn={currentCombatant?.id === combatant.id}
               isTargetable={!isSwitchTarget && targetableIds.has(combatant.id)}
+              isLinkedHover={linkedHoverId === combatant.id}
               onSelect={
                 isSwitchTarget
                   ? () => onSwitchSelect?.(cellPosition)
@@ -313,40 +324,7 @@ function BattleGrid({
 
   return (
     <div style={{ position: "relative" }}>
-      {/* Ground grid lines — SVG parallelogram following the isometric tilt */}
-      <svg
-        style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
-        width={GRID_W + MAX_TILT}
-        height={GRID_H}
-      >
-        {/* Horizontal lines at row boundaries — tilted proportionally */}
-        {GRID_ROW_YS.map((y, i) => {
-          const tx = GRID_H > 0 ? (y / GRID_H) * MAX_TILT : 0;
-          return (
-            <line
-              key={`h${i}`}
-              x1={tx}
-              y1={y}
-              x2={tx + GRID_W}
-              y2={y}
-              stroke="rgba(240, 230, 211, 0.10)"
-              strokeWidth={1}
-            />
-          );
-        })}
-        {/* Diagonal lines at column boundaries — follow the tilt slope */}
-        {GRID_COL_XS.map((x, i) => (
-          <line
-            key={`d${i}`}
-            x1={x}
-            y1={0}
-            x2={x + MAX_TILT}
-            y2={GRID_H}
-            stroke="rgba(240, 230, 211, 0.10)"
-            strokeWidth={1}
-          />
-        ))}
-      </svg>
+      {/* Ground markers are rendered inside each cell via renderCell */}
 
       {/* Grid content */}
       <div
@@ -665,6 +643,9 @@ export function BattleScreen({
 
   // Enemy hand preview state
   const [hoveredEnemyId, setHoveredEnemyId] = useState<string | null>(null);
+
+  // Bidirectional turn order ↔ sprite hover linking
+  const [linkedHoverId, setLinkedHoverId] = useState<string | null>(null);
 
   const handleEnemySpriteEnter = useCallback(
     (combatant: Combatant) => {
@@ -1865,6 +1846,8 @@ export function BattleScreen({
             enemyIntents={intentsForLayout ?? undefined}
             allCombatants={state.combatants}
             intentsVisible={intentsVisible}
+            linkedHoverId={linkedHoverId}
+            onHoverCombatant={setLinkedHoverId}
           />
         </div>
         {onBackToSandboxConfig && (
@@ -2010,6 +1993,8 @@ export function BattleScreen({
               }
               onSwitchSelect={switchMode ? handleSwitchSelect : undefined}
               futureSightColumns={playerFutureSightCols}
+              linkedHoverId={linkedHoverId}
+              onHoverCombatant={setLinkedHoverId}
             />
           </div>
 
@@ -2034,6 +2019,8 @@ export function BattleScreen({
               onMouseEnterSprite={handleEnemySpriteEnter}
               onMouseLeaveSprite={handleEnemySpriteLeave}
               futureSightColumns={enemyFutureSightCols}
+              linkedHoverId={linkedHoverId}
+              onHoverCombatant={setLinkedHoverId}
             />
           </div>
         </div>

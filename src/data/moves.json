@@ -66,17 +66,13 @@
       {
         "type": "damage",
         "value": 2
-      },
-      {
-        "type": "draw_cards",
-        "count": 1
       }
     ],
     "rarity": "basic",
     "pools": [
       "normal"
     ],
-    "description": "Deal 2 damage. Draw 1. (Front row). Vanish.",
+    "description": "Deal 2 damage. (Front row). Vanish.",
     "contact": true
   },
   "extreme-speed": {
@@ -89,17 +85,13 @@
       {
         "type": "damage",
         "value": 6
-      },
-      {
-        "type": "draw_cards",
-        "count": 1
       }
     ],
     "rarity": "epic",
     "pools": [
       "normal"
     ],
-    "description": "Deal 6 damage. Draw 1. (Front row). Vanish.",
+    "description": "Deal 6 damage. (Front row). Vanish.",
     "contact": true
   },
   "double-slap": {
@@ -2071,17 +2063,13 @@
       {
         "type": "damage",
         "value": 2
-      },
-      {
-        "type": "draw_cards",
-        "count": 1
       }
     ],
     "rarity": "basic",
     "pools": [
       "fighting"
     ],
-    "description": "Deal 2 damage. Draw 1. (Front row). Vanish.",
+    "description": "Deal 2 damage. (Front row). Vanish.",
     "contact": true
   },
   "rock-smash": {

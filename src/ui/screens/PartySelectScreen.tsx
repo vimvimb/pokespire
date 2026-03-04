@@ -201,6 +201,9 @@ function FormationSlot({
           <div style={{ fontSize: 13, fontWeight: 'bold', color: THEME.text.primary }}>
             {pokemon.name}
           </div>
+          <div style={{ fontSize: 10, color: THEME.text.secondary }}>
+            HP {pokemon.maxHp} · Spd {pokemon.baseSpeed}
+          </div>
         </>
       ) : (
         <div style={{ fontSize: 26, color: (isDragOver && canDrop) || isClickTarget ? THEME.accent : THEME.border.medium }}>+</div>

@@ -385,6 +385,9 @@ function FormationGrid({ party, assignments, selectedItemId, draggingItemId, onS
                 }}>
                   {data.name}
                 </div>
+                <div style={{ fontSize: 9, color: THEME.text.secondary, marginTop: 1 }}>
+                  HP {data.maxHp} · Spd {data.baseSpeed}
+                </div>
 
                 {/* Item badge or empty indicator */}
                 {item ? (

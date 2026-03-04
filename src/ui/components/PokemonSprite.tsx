@@ -26,12 +26,14 @@ interface Props {
   onMouseLeave?: () => void;
   /** All combatants in combat — threaded to StatusIcons for source name resolution */
   combatants?: Combatant[];
+  /** Highlighted via turn order ↔ sprite hover link */
+  isLinkedHover?: boolean;
 }
 
 /** Death animation duration in ms */
 const FAINT_DURATION = 800;
 
-function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, onInspect, onDragEnter, onDragLeave, onDrop, damagePreview, isDragHovered, spriteScale = 1, onMouseEnter, onMouseLeave, combatants }: Props) {
+function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, onInspect, onDragEnter, onDragLeave, onDrop, damagePreview, isDragHovered, spriteScale = 1, onMouseEnter, onMouseLeave, combatants, isLinkedHover }: Props) {
   const [imgError, setImgError] = useState(false);
   const [blockHovered, setBlockHovered] = useState(false);
   const isEnemy = combatant.side === 'enemy';
@@ -156,7 +158,9 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
           ? 'drop-shadow(0 0 12px rgba(250, 204, 21, 0.8))'
           : isTargetable && combatant.alive
             ? 'drop-shadow(0 0 12px rgba(239, 68, 68, 0.8))'
-            : 'none',
+            : isLinkedHover
+              ? 'drop-shadow(0 0 10px rgba(250, 204, 21, 0.6)) brightness(1.15)'
+              : 'none',
       }}>
         {/* Name + sprite — scoped hover zone for enemy hand preview */}
         <div
@@ -164,8 +168,51 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
           onMouseLeave={onMouseLeave}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}
         >
-          <div style={{ fontSize: 17, fontWeight: 'bold', color: THEME.text.primary, marginBottom: 4 }}>
+          {/* Bouncing chevron — always reserve space, only visible on active turn */}
+          <div
+            className={isCurrentTurn ? 'pks-turn-bounce' : undefined}
+            style={{
+              fontSize: 10,
+              lineHeight: 1,
+              height: 13,
+              color: THEME.accent,
+              opacity: isCurrentTurn ? 0.9 : 0,
+              ...THEME.heading,
+            }}
+          >
+            ▼
+          </div>
+
+          {/* Name — gold-bordered pill when active turn, matching turn order bar style */}
+          <div
+            className={isCurrentTurn ? 'pks-turn-name' : undefined}
+            style={{
+              fontSize: 15,
+              fontWeight: 'bold',
+              color: isCurrentTurn ? THEME.accent : THEME.text.primary,
+              marginBottom: 4,
+              position: 'relative',
+              overflow: 'hidden',
+              padding: '3px 12px',
+              borderRadius: 6,
+              border: isCurrentTurn ? `1.5px solid ${THEME.accent}` : '1.5px solid transparent',
+              background: isCurrentTurn ? `${THEME.accent}18` : 'transparent',
+              boxShadow: isCurrentTurn ? `inset 0 0 8px ${THEME.accent}20` : 'none',
+              ...(isCurrentTurn ? THEME.heading : {}),
+            }}
+          >
             {combatant.name}
+            {/* Sheen sweep on turn start */}
+            {isCurrentTurn && (
+              <div className="pks-turn-sheen" style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+              }} />
+            )}
           </div>
 
           {!imgError ? (
@@ -196,6 +243,23 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
               {isEnemy ? '👾' : '🔮'}
             </div>
           )}
+
+          {/* Ground marker — elliptical shadow at sprite base */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: Math.max(spriteSize * 1.2, 120),
+              height: 20,
+              borderRadius: '50%',
+              background: 'radial-gradient(ellipse, rgba(240, 230, 211, 0.35) 0%, rgba(240, 230, 211, 0.12) 60%, transparent 100%)',
+              border: '1.5px solid rgba(240, 230, 211, 0.35)',
+              pointerEvents: 'none',
+              zIndex: -1,
+            }}
+          />
 
           {/* Death X overlay — only during fainting animation */}
           {isFainting && (
@@ -379,6 +443,28 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
       )}
 
       <style>{`
+        @keyframes pksTurnBounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+        .pks-turn-bounce {
+          animation: pksTurnBounce 1s ease-in-out infinite;
+        }
+        @keyframes pksTurnSheen {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        .pks-turn-sheen {
+          background: linear-gradient(
+            105deg,
+            transparent 30%,
+            rgba(250, 204, 21, 0.35) 45%,
+            rgba(255, 255, 255, 0.25) 50%,
+            rgba(250, 204, 21, 0.35) 55%,
+            transparent 70%
+          );
+          animation: pksTurnSheen 0.5s ease-out forwards;
+        }
         @keyframes pksFaintShake {
           0%, 100% { transform: translateX(0); }
           15% { transform: translateX(-6px) rotate(-2deg); }
