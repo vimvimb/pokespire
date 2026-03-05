@@ -22,6 +22,7 @@ import {
   checkConsumingFlame,
   checkVerdantWrath,
   checkMaul,
+  checkApexPredator,
   checkTorrentStrike,
   checkIonDischarge,
   checkHugePower,
@@ -181,6 +182,7 @@ export function calculateDamagePreview(
   const nightAssassinBonus = checkNightAssassin(source, card);
   const verdantWrathBonus = checkVerdantWrath(source, card);
   const maulBonus = checkMaul(source, card);
+  const apexPredatorBonus = checkApexPredator(source);
   const maliceBonus = checkMalice(source, target);
   const hustleMultiplier = checkHustleMultiplier(source);
   const relentlessBonus = checkRelentless(source);
@@ -228,7 +230,7 @@ export function calculateDamagePreview(
     keenEyeBonus + predatorsPatienceBonus + proletariatBonus +
     scrappyBonus + blindAggressionBonus + poisonBarbBonus + adaptabilityBonus + relentlessBonus +
     searingFuryBonus + voltFuryBonus + sharpBeakBonus + nightAssassinBonus +
-    verdantWrathBonus + maulBonus +
+    verdantWrathBonus + maulBonus + apexPredatorBonus +
     maliceBonus + itemDamageBonus - enfeeble;
   rawDamage = Math.max(rawDamage, 1);
 
@@ -339,8 +341,10 @@ export function calculateHandPreview(
 
   const verdantWrathBonus = checkVerdantWrath(source, card);
   const maulBonus = checkMaul(source, card);
+  const apexPredatorBonus = isAttackCard(card) ? checkApexPredator(source) : 0;
   if (verdantWrathBonus > 0) tags.push(`+${verdantWrathBonus} Verdant Wrath`);
   if (maulBonus > 0) tags.push(`+${maulBonus} Maul`);
+  if (apexPredatorBonus > 0) tags.push(`+${apexPredatorBonus} Apex`);
 
   // Rollout: +bonusValue per play this battle
   let rolloutBonus = 0;
@@ -357,7 +361,7 @@ export function calculateHandPreview(
   const additive = strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + ionDischargeBonus +
     proletariatBonus + scrappyBonus + poisonBarbBonus + adaptabilityBonus +
     sharpBeakBonus + nightAssassinBonus + relentlessBonus + verdantWrathBonus + maulBonus +
-    rolloutBonus + itemBonus - enfeeble;
+    apexPredatorBonus + rolloutBonus + itemBonus - enfeeble;
 
   // Multipliers (source-only, inlined where CombatState was only used for logs)
   const blazeStrikeActive = source.passiveIds.includes('blaze_strike') &&

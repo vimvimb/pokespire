@@ -1205,6 +1205,19 @@ export function onDamageTaken(
     });
   }
 
+  // Territorial: When you take unblocked damage while above 50% HP, gain 1 Strength
+  if (target.passiveIds.includes('territorial') && target.alive) {
+    const preDamageHp = target.hp + hpDamage;
+    if (preDamageHp > target.maxHp * 0.5) {
+      applyStatus(state, target, 'strength', 1, target.id);
+      logs.push({
+        round: state.round,
+        combatantId: target.id,
+        message: `Territorial: ${target.name} gains 1 Strength!`,
+      });
+    }
+  }
+
   // Flash Fire: When hit by a Fire attack, gain 2 Strength
   if (target.passiveIds.includes('flash_fire') && card.type === 'fire' && target.alive) {
     applyStatus(state, target, 'strength', 2, target.id);
@@ -2397,6 +2410,15 @@ export function checkMaul(
   if (!attacker.passiveIds.includes('maul')) return 0;
   if (card.range !== 'front_enemy') return 0;
   return 2;
+}
+
+/**
+ * Check Apex Predator bonus damage.
+ * Apex Predator: Attacks deal bonus damage equal to 10% of current HP.
+ */
+export function checkApexPredator(source: Combatant): number {
+  if (!source.passiveIds.includes('apex_predator')) return 0;
+  return Math.floor(source.hp * 0.1);
 }
 
 /**

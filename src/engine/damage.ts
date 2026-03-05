@@ -47,6 +47,7 @@ export interface DamageResult {
   adaptabilityBonus: number;      // Bonus from Adaptability (+2 extra STAB)
   verdantWrathBonus: number;      // Bonus from Verdant Wrath (Regen stacks, max 20)
   maulBonus: number;              // Bonus from Maul (+2 for front-row attacks)
+  apexPredatorBonus: number;      // Bonus from Apex Predator (10% of current HP)
   torrentStrikeMultiplier: number; // Multiplier from Torrent Strike (1.3x first Water)
   maliceBonus: number;            // Bonus from Malice (target's Burn + Enfeeble stacks)
   itemDamageBonus: number;        // Bonus from held item effects
@@ -98,6 +99,7 @@ export interface DamageModifiers {
   nightAssassinBonus?: number;
   verdantWrathBonus?: number;
   maulBonus?: number;
+  apexPredatorBonus?: number;
   isTorrentStrike?: boolean;
   maliceBonus?: number;
   itemDamageBonus?: number;        // Flat bonus from held item effects
@@ -140,10 +142,11 @@ export function applyCardDamage(
   const nightAssassinBonus = mods.nightAssassinBonus ?? 0;
   const verdantWrathBonus = mods.verdantWrathBonus ?? 0;
   const maulBonus = mods.maulBonus ?? 0;
+  const apexPredatorBonus = mods.apexPredatorBonus ?? 0;
   const maliceBonus = mods.maliceBonus ?? 0;
   const itemDamageBonus = mods.itemDamageBonus ?? 0;
 
-  let rawDamage = baseDamage + strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + ionDischargeBonus + counterBonus + keenEyeBonus + predatorsPatienceBonus + searingFuryBonus + voltFuryBonus + sharpBeakBonus + proletariatBonus + familyFuryBonus + poisonBarbBonus + adaptabilityBonus + nightAssassinBonus + verdantWrathBonus + maulBonus + maliceBonus + itemDamageBonus - enfeeble;
+  let rawDamage = baseDamage + strength + stab + fortifiedCannonsBonus + fortifiedSpinesBonus + ionDischargeBonus + counterBonus + keenEyeBonus + predatorsPatienceBonus + searingFuryBonus + voltFuryBonus + sharpBeakBonus + proletariatBonus + familyFuryBonus + poisonBarbBonus + adaptabilityBonus + nightAssassinBonus + verdantWrathBonus + maulBonus + apexPredatorBonus + maliceBonus + itemDamageBonus - enfeeble;
   rawDamage = Math.max(rawDamage, 1); // floor at 1
 
   // Step 1.5: Apply strike multipliers (Blaze Strike / Swarm Strike / Torrent Strike / Finisher — mutually exclusive)
@@ -278,6 +281,7 @@ export function applyCardDamage(
     nightAssassinBonus,
     verdantWrathBonus,
     maulBonus,
+    apexPredatorBonus,
     torrentStrikeMultiplier,
     poisonBarbBonus,
     adaptabilityBonus,

@@ -3121,24 +3121,23 @@
       "normal"
     ],
     "maxHp": 42,
-    "baseSpeed": 11,
+    "baseSpeed": 10,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle",
-      "tackle",
-      "tackle",
       "scratch",
       "scratch",
-      "slam",
-      "slam",
-      "body-slam",
-      "body-slam",
-      "fury-swipes"
+      "scratch",
+      "rage",
+      "fury-swipes",
+      "slash",
+      "leer",
+      "defend",
+      "defend"
     ],
     "abilities": [],
-    "description": "A deceptively strong Normal-type — looks cuddly, hits like a freight train."
+    "description": "A scrappy bear cub that gets angrier the more you mess with it."
   },
   "ursaring": {
     "name": "Ursaring",
@@ -3146,21 +3145,20 @@
       "normal"
     ],
     "maxHp": 62,
-    "baseSpeed": 12,
+    "baseSpeed": 10,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle",
-      "tackle",
-      "tackle",
       "scratch",
       "scratch",
-      "slam",
-      "slam",
-      "body-slam",
-      "body-slam",
-      "fury-swipes"
+      "scratch",
+      "rage",
+      "fury-swipes",
+      "slash",
+      "leer",
+      "defend",
+      "defend"
     ],
     "abilities": []
   },

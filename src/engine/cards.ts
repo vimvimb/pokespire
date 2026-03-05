@@ -40,6 +40,7 @@ import {
   checkImpactGuard,
   checkVerdantWrath,
   checkMaul,
+  checkApexPredator,
   checkTorrentStrike,
   checkItemDamageBonus,
   checkItemDamageReduction,
@@ -891,6 +892,16 @@ function buildDamageModifiers(
     });
   }
 
+  // Apex Predator: Attacks deal bonus damage equal to 10% of current HP
+  const apexPredatorBonus = checkApexPredator(source);
+  if (apexPredatorBonus > 0) {
+    logs.push({
+      round: state.round,
+      combatantId: source.id,
+      message: `Apex Predator: +${apexPredatorBonus} damage (10% of ${source.hp} HP)!`,
+    });
+  }
+
   // Malice: Attacks deal bonus damage equal to target's Burn + Enfeeble stacks
   const maliceBonus = checkMalice(source, target);
   if (maliceBonus > 0) {
@@ -1073,6 +1084,7 @@ function buildDamageModifiers(
     nightAssassinBonus,
     verdantWrathBonus,
     maulBonus,
+    apexPredatorBonus,
     maliceBonus,
     poisonBarbBonus,
     adaptabilityBonus,
@@ -1103,6 +1115,7 @@ function buildDamageBreakdown(r: ReturnType<typeof applyCardDamage>): string {
   if (r.nightAssassinBonus > 0) parts.push(`+${r.nightAssassinBonus} Assassin`);
   if (r.verdantWrathBonus > 0) parts.push(`+${r.verdantWrathBonus} Verdant`);
   if (r.maulBonus > 0) parts.push(`+${r.maulBonus} Maul`);
+  if (r.apexPredatorBonus > 0) parts.push(`+${r.apexPredatorBonus} Apex`);
   if (r.maliceBonus > 0) parts.push(`+${r.maliceBonus} Malice`);
   if (r.proletariatBonus > 0) parts.push(`+${r.proletariatBonus} Proletariat`);
   if (r.familyFuryBonus > 0) parts.push(`+${r.familyFuryBonus} Fury`);

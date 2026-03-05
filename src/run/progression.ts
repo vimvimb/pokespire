@@ -212,7 +212,12 @@ export type PassiveId =
   | 'ion_discharge'
   // Marill/Azumarill line
   | 'sap_sipper'
-  | 'huge_power';
+  | 'huge_power'
+  // Teddiursa/Ursaring line
+  // guts shared with Machop line
+  // quick_feet shared with Rattata line
+  | 'territorial'
+  | 'apex_predator';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -867,6 +872,15 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   huge_power: {
     name: 'Huge Power',
     description: 'Your front-row attacks deal 1.5x damage.',
+  },
+  // Teddiursa/Ursaring line
+  territorial: {
+    name: 'Territorial',
+    description: 'When you take unblocked damage while above 50% HP, gain 1 Strength.',
+  },
+  apex_predator: {
+    name: 'Apex Predator',
+    description: 'Your attacks deal bonus damage equal to 10% of your current HP.',
   },
 };
 
@@ -2784,13 +2798,16 @@ export const SNEASEL_PROGRESSION: ProgressionTree = {
   ],
 };
 
+// Teddiursa/Ursaring — The Dominant Bear
+// L1 Guts: enemy debuffs → Strength. L2 Quick Feet: first attack costs 1 less.
+// L3 Territorial: unblocked damage while healthy → Strength. L4 Apex Predator: +10% HP as damage.
 export const TEDDIURSA_PROGRESSION: ProgressionTree = {
   baseFormId: 'teddiursa',
   rungs: [
-    { level: 1, name: 'Teddiursa', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
-    { level: 2, name: 'Ursaring', description: 'Evolve to Ursaring. Add Body Slam.', evolvesTo: 'ursaring', passiveId: 'none', hpBoost: 0, cardsToAdd: ['body-slam'] },
-    { level: 3, name: 'Ursaring', description: 'Add Slam.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['slam'] },
-    { level: 4, name: 'Ursaring (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+    { level: 1, name: 'Teddiursa', description: 'Starting form with Guts passive.', passiveId: 'guts', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Ursaring', description: 'Evolve to Ursaring. Add Slam. Gain Quick Feet.', evolvesTo: 'ursaring', passiveId: 'quick_feet', hpBoost: 0, cardsToAdd: ['slam'] },
+    { level: 3, name: 'Ursaring', description: 'Add Thrash. Gain Territorial.', passiveId: 'territorial', hpBoost: 5, cardsToAdd: ['thrash'] },
+    { level: 4, name: 'Ursaring (Mastered)', description: '+5 max HP. Gain Apex Predator.', passiveId: 'apex_predator', hpBoost: 5, cardsToAdd: [] },
   ],
 };
 
