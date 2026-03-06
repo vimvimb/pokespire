@@ -122,6 +122,7 @@ export const POKEDEX_NUMBERS: Record<string, number> = {
   murkrow: 198,
   slowking: 199,
   misdreavus: 200,
+  wynaut: 360,
   wobbuffet: 202,
   girafarig: 203,
   pineco: 204,
@@ -374,6 +375,7 @@ export const POKEMON_WEIGHTS: Record<string, number> = {
   pupitar: 38, // Real 152kg → 145px (adjusted -75%)
   tyranitar: 90, // Real 202kg → 197px (approaches cap intentionally)
   miltank: 45, // Real 75.5kg → 152px (adjusted -40%)
+  wynaut: 14, // Real 14kg
   wobbuffet: 20, // Real 28.5kg → 119px (adjusted -30%)
   blissey: 28, // Real 46.8kg → 128px (adjusted -40%)
   pineco: 7, // Real 7.2kg → 81px ✓

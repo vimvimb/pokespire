@@ -360,6 +360,21 @@ function buildDescription(card: MoveDefinition, combatant: Combatant, isHovered:
           </span>
         );
         break;
+      case 'counter_reflect': {
+        const pool = effect.reflectType === 'front'
+          ? combatant.turnFlags.roundDamageTaken.frontTargeting
+          : combatant.turnFlags.roundDamageTaken.other;
+        const label = effect.reflectType === 'front' ? 'front-targeting' : 'non-melee';
+        parts.push(
+          <span key={parts.length} style={{ color: '#f472b6' }}>
+            Reflect all {label} damage taken this round.
+            {pool > 0 && (
+              <span style={{ color: '#4ade80', fontWeight: 'bold' }}>{' '}({pool})</span>
+            )}
+          </span>
+        );
+        break;
+      }
     }
   }
 

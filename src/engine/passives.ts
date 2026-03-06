@@ -1122,6 +1122,7 @@ export function onRoundEnd(state: CombatState): void {
   // Reset allies damaged this round for all combatants
   for (const c of state.combatants) {
     c.turnFlags.alliesDamagedThisRound = new Set();
+    c.turnFlags.roundDamageTaken = { frontTargeting: 0, other: 0 };
   }
 }
 
@@ -1168,6 +1169,21 @@ export function processRoundStartPassives(state: CombatState): LogEntry[] {
         combatantId: combatant.id,
         message: `Bulwark: ${combatant.name} gains 8 Block!`,
       });
+    }
+
+    // Shadow Tag: Apply 1 Provoke to enemies in your column
+    if (combatant.passiveIds.includes('shadow_tag')) {
+      const enemies = state.combatants.filter(
+        e => e.side !== combatant.side && e.alive && e.position.column === combatant.position.column
+      );
+      for (const enemy of enemies) {
+        applyStatus(state, enemy, 'provoke', 1, combatant.id);
+        logs.push({
+          round: state.round,
+          combatantId: combatant.id,
+          message: `Shadow Tag: ${enemy.name} is provoked by ${combatant.name}!`,
+        });
+      }
     }
 
     // Item round-start effects (Iron Plate, Assault Vest)
@@ -1335,6 +1351,13 @@ export function onDamageTaken(
         message: `${attacker.name} was KO'd by Thorns!`,
       });
     }
+  }
+
+  // Track damage taken this round for Counter/Mirror Coat
+  if (card.range === 'front_enemy') {
+    target.turnFlags.roundDamageTaken.frontTargeting += hpDamage;
+  } else {
+    target.turnFlags.roundDamageTaken.other += hpDamage;
   }
 
   // Track ally damage and trigger Protective Instinct

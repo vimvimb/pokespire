@@ -1914,8 +1914,8 @@
     "description": "Deal 6 damage to all enemies in a column.",
     "contact": true
   },
-  "counter": {
-    "name": "Counter",
+  "endure": {
+    "name": "Endure",
     "cost": 1,
     "type": "fighting",
     "range": "self",
@@ -7742,6 +7742,42 @@
     "rarity": "epic",
     "pools": [],
     "description": "Lose 50% of max HP. Gain 10 Strength. Vanish.",
+    "contact": false
+  },
+  "counter": {
+    "name": "Counter",
+    "cost": 2,
+    "type": "fighting",
+    "range": "front_enemy",
+    "vanish": false,
+    "effects": [{ "type": "counter_reflect", "reflectType": "front" }],
+    "rarity": "rare",
+    "pools": [],
+    "description": "Deal damage equal to all front-targeting damage taken this round.",
+    "contact": false
+  },
+  "mirror-coat": {
+    "name": "Mirror Coat",
+    "cost": 2,
+    "type": "psychic",
+    "range": "any_enemy",
+    "vanish": false,
+    "effects": [{ "type": "counter_reflect", "reflectType": "other" }],
+    "rarity": "rare",
+    "pools": [],
+    "description": "Deal damage equal to all non-melee damage taken this round to target enemy.",
+    "contact": false
+  },
+  "safeguard": {
+    "name": "Safeguard",
+    "cost": 1,
+    "type": "psychic",
+    "range": "self",
+    "vanish": false,
+    "effects": [{ "type": "cleanse", "count": 1 }],
+    "rarity": "common",
+    "pools": [],
+    "description": "Cleanse 1 debuff.",
     "contact": false
   }
 }

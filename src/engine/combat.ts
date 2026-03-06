@@ -84,6 +84,7 @@ function createCombatant(
       tyrantsTantrumUsedThisTurn: false,
       guardStatus: undefined,
       landslideUsedThisTurn: false,
+      roundDamageTaken: { frontTargeting: 0, other: 0 },
     },
     costModifiers: {},
     itemState: {},

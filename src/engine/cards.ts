@@ -1882,6 +1882,56 @@ function resolveEffects(
         break;
       }
 
+      case 'counter_reflect': {
+        const pool = effect.reflectType === 'front'
+          ? source.turnFlags.roundDamageTaken.frontTargeting
+          : source.turnFlags.roundDamageTaken.other;
+        if (pool > 0 && target.alive) {
+          // Apply damage through evasion and block (not bypass)
+          let remaining = pool;
+          const evasion = getStatusStacks(target, 'evasion');
+          const evaded = Math.min(evasion, remaining);
+          remaining -= evaded;
+          if (evaded > 0) {
+            decayEvasionOnHit(target);
+          }
+          const blocked = Math.min(target.block, remaining);
+          target.block -= blocked;
+          remaining -= blocked;
+          const hpDamage = remaining;
+          target.hp -= hpDamage;
+          if (target.hp <= 0) {
+            target.hp = 0;
+            target.alive = false;
+          }
+          logs.push({
+            round: state.round,
+            combatantId: target.id,
+            message: `${card.name}: ${target.name} takes ${hpDamage} reflected damage from ${source.name}!${blocked > 0 ? ` (${blocked} blocked)` : ''}`,
+          });
+          if (!target.alive) {
+            logs.push({
+              round: state.round,
+              combatantId: target.id,
+              message: `${target.name} is defeated!`,
+            });
+          }
+          // Reset pool to prevent double-dipping
+          if (effect.reflectType === 'front') {
+            source.turnFlags.roundDamageTaken.frontTargeting = 0;
+          } else {
+            source.turnFlags.roundDamageTaken.other = 0;
+          }
+        } else {
+          logs.push({
+            round: state.round,
+            combatantId: source.id,
+            message: `${card.name}: No damage to reflect.`,
+          });
+        }
+        break;
+      }
+
       case 'block': {
         const blockRecipient = card.range === 'any_ally' ? target : source;
         // Front-row bonus: use higher value if recipient is in front row

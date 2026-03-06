@@ -70,6 +70,31 @@ export function calculateDamagePreview(
     return null;
   }
 
+  // Counter/Mirror Coat: preview the accumulated damage pool through block/evasion
+  const reflectEffect = card.effects.find(e => e.type === 'counter_reflect');
+  if (reflectEffect && reflectEffect.type === 'counter_reflect') {
+    const pool = reflectEffect.reflectType === 'front'
+      ? source.turnFlags.roundDamageTaken.frontTargeting
+      : source.turnFlags.roundDamageTaken.other;
+    let remaining = pool;
+    const evasion = getStatusStacks(target, 'evasion');
+    const evaded = Math.min(evasion, remaining);
+    remaining -= evaded;
+    const blocked = Math.min(target.block, remaining);
+    remaining -= blocked;
+    return {
+      baseDamage: pool,
+      finalDamage: remaining,
+      typeEffectiveness: 1,
+      effectivenessLabel: null,
+      blockedAmount: blocked,
+      evasionReduction: evaded,
+      isMultiHit: false,
+      hits: 1,
+      totalDamage: remaining,
+    };
+  }
+
   // Find the first damage-dealing effect
   const damageEffect = card.effects.find(e =>
     e.type === 'damage' || e.type === 'multi_hit' || e.type === 'heal_on_hit' ||

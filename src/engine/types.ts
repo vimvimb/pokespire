@@ -61,7 +61,8 @@ export type CardEffectType =
   | 'free_next_switch'
   | 'guard_status'
   | 'shuffle_to_draw'
-  | 'damage_self_percent';
+  | 'damage_self_percent'
+  | 'counter_reflect';
 
 export interface DamageEffect {
   type: 'damage';
@@ -209,6 +210,12 @@ export interface DamageSelfPercentEffect {
   percent: number;  // 0.5 = 50% of max HP
 }
 
+/** Reflect accumulated damage back at an enemy (Counter / Mirror Coat) */
+export interface CounterReflectEffect {
+  type: 'counter_reflect';
+  reflectType: 'front' | 'other';
+}
+
 export type CardEffect =
   | DamageEffect
   | BlockEffect
@@ -232,7 +239,8 @@ export type CardEffect =
   | FreeNextSwitchEffect
   | GuardStatusEffect
   | ShuffleToDrawEffect
-  | DamageSelfPercentEffect;
+  | DamageSelfPercentEffect
+  | CounterReflectEffect;
 
 // --- Move Types (elemental) ---
 
@@ -361,6 +369,7 @@ export interface CombatantTurnFlags {
   tyrantsTantrumUsedThisTurn: boolean;      // Tyrant's Tantrum: first attack per turn only
   guardStatus?: { statusType: StatusType; stacks: number }; // Guard: apply status to attacker when hit this turn
   landslideUsedThisTurn: boolean;  // Landslide: first ≤2 cost card echoes (Golem line)
+  roundDamageTaken: { frontTargeting: number; other: number };  // Damage taken this round for Counter/Mirror Coat
 }
 
 export interface Combatant {

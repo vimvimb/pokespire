@@ -66,22 +66,22 @@
     "L4": ["quick-attack", "spark", "charge-beam", "thunder-punch", "thunderbolt", "discharge", "thunder", "double-team", "defend", "substitute"]
   },
   "nidoran-f": {
-    "L1": ["scratch", "counter", "defend", "defend", "poison-sting", "poison-sting", "smog", "bite", "tail-whip", "acid"],
-    "L2": ["scratch", "poison-sting", "poison-sting", "acid", "acid", "bite", "counter", "leer", "defend", "defend"],
-    "L3": ["scratch", "poison-sting", "acid", "sludge", "body-slam", "bite", "toxic", "counter", "defend", "defend"],
-    "L4": ["sludge-bomb", "body-slam", "bite", "toxic", "counter", "ice-beam", "swords-dance", "acid", "defend", "substitute"]
+    "L1": ["scratch", "endure", "defend", "defend", "poison-sting", "poison-sting", "smog", "bite", "tail-whip", "acid"],
+    "L2": ["scratch", "poison-sting", "poison-sting", "acid", "acid", "bite", "endure", "leer", "defend", "defend"],
+    "L3": ["scratch", "poison-sting", "acid", "sludge", "body-slam", "bite", "toxic", "endure", "defend", "defend"],
+    "L4": ["sludge-bomb", "body-slam", "bite", "toxic", "endure", "ice-beam", "swords-dance", "acid", "defend", "substitute"]
   },
   "nidorina": {
-    "L1": ["scratch", "counter", "defend", "defend", "poison-sting", "poison-sting", "smog", "bite", "tail-whip", "acid"],
-    "L2": ["scratch", "poison-sting", "acid", "acid", "sludge", "bite", "counter", "leer", "defend", "defend"],
-    "L3": ["scratch", "acid", "sludge", "sludge-bomb", "body-slam", "bite", "counter", "toxic", "defend", "defend"],
-    "L4": ["sludge-bomb", "body-slam", "bite", "toxic", "counter", "ice-beam", "swords-dance", "acid", "defend", "substitute"]
+    "L1": ["scratch", "endure", "defend", "defend", "poison-sting", "poison-sting", "smog", "bite", "tail-whip", "acid"],
+    "L2": ["scratch", "poison-sting", "acid", "acid", "sludge", "bite", "endure", "leer", "defend", "defend"],
+    "L3": ["scratch", "acid", "sludge", "sludge-bomb", "body-slam", "bite", "endure", "toxic", "defend", "defend"],
+    "L4": ["sludge-bomb", "body-slam", "bite", "toxic", "endure", "ice-beam", "swords-dance", "acid", "defend", "substitute"]
   },
   "nidoqueen": {
-    "L1": ["scratch", "counter", "defend", "defend", "poison-sting", "poison-sting", "smog", "bite", "tail-whip", "acid"],
-    "L2": ["scratch", "counter", "acid", "acid", "sludge", "poison-sting", "bite", "leer", "defend", "defend"],
-    "L3": ["counter", "acid", "sludge-bomb", "body-slam", "earthquake", "bite", "toxic", "leer", "defend", "defend"],
-    "L4": ["sludge-bomb", "earthquake", "body-slam", "toxic", "ice-beam", "fire-blast", "counter", "swords-dance", "defend", "substitute"]
+    "L1": ["scratch", "endure", "defend", "defend", "poison-sting", "poison-sting", "smog", "bite", "tail-whip", "acid"],
+    "L2": ["scratch", "endure", "acid", "acid", "sludge", "poison-sting", "bite", "leer", "defend", "defend"],
+    "L3": ["endure", "acid", "sludge-bomb", "body-slam", "earthquake", "bite", "toxic", "leer", "defend", "defend"],
+    "L4": ["sludge-bomb", "earthquake", "body-slam", "toxic", "ice-beam", "fire-blast", "endure", "swords-dance", "defend", "substitute"]
   },
   "nidoran-m": {
     "L1": ["peck", "peck", "defend", "defend", "poison-sting", "poison-sting", "smog", "horn-attack", "leer", "acid"],
@@ -198,22 +198,22 @@
     "L4": ["bite", "gust", "leech-life", "sludge-bomb", "toxic", "confuse-ray", "fly", "sky-attack", "defend", "substitute"]
   },
   "machop": {
-    "L1": ["karate-chop", "karate-chop", "karate-chop", "defend", "defend", "low-kick", "low-kick", "double-kick", "counter", "rolling-kick"],
-    "L2": ["karate-chop", "karate-chop", "low-kick", "low-kick", "double-kick", "counter", "rolling-kick", "bulk-up", "defend", "defend"],
-    "L3": ["karate-chop", "low-kick", "double-kick", "counter", "rolling-kick", "bulk-up", "cross-chop", "seismic-toss", "defend", "defend"],
-    "L4": ["double-kick", "counter", "bulk-up", "cross-chop", "seismic-toss", "jump-kick", "submission", "focus-energy", "defend", "defend"]
+    "L1": ["karate-chop", "karate-chop", "karate-chop", "defend", "defend", "low-kick", "low-kick", "double-kick", "endure", "rolling-kick"],
+    "L2": ["karate-chop", "karate-chop", "low-kick", "low-kick", "double-kick", "endure", "rolling-kick", "bulk-up", "defend", "defend"],
+    "L3": ["karate-chop", "low-kick", "double-kick", "endure", "rolling-kick", "bulk-up", "cross-chop", "seismic-toss", "defend", "defend"],
+    "L4": ["double-kick", "endure", "bulk-up", "cross-chop", "seismic-toss", "jump-kick", "submission", "focus-energy", "defend", "defend"]
   },
   "machoke": {
-    "L1": ["karate-chop", "karate-chop", "karate-chop", "defend", "defend", "low-kick", "low-kick", "double-kick", "counter", "rolling-kick"],
-    "L2": ["karate-chop", "karate-chop", "low-kick", "double-kick", "counter", "rolling-kick", "bulk-up", "focus-energy", "defend", "defend"],
-    "L3": ["karate-chop", "low-kick", "double-kick", "counter", "bulk-up", "cross-chop", "seismic-toss", "focus-energy", "defend", "defend"],
-    "L4": ["double-kick", "counter", "bulk-up", "cross-chop", "seismic-toss", "jump-kick", "submission", "focus-energy", "defend", "substitute"]
+    "L1": ["karate-chop", "karate-chop", "karate-chop", "defend", "defend", "low-kick", "low-kick", "double-kick", "endure", "rolling-kick"],
+    "L2": ["karate-chop", "karate-chop", "low-kick", "double-kick", "endure", "rolling-kick", "bulk-up", "focus-energy", "defend", "defend"],
+    "L3": ["karate-chop", "low-kick", "double-kick", "endure", "bulk-up", "cross-chop", "seismic-toss", "focus-energy", "defend", "defend"],
+    "L4": ["double-kick", "endure", "bulk-up", "cross-chop", "seismic-toss", "jump-kick", "submission", "focus-energy", "defend", "substitute"]
   },
   "machamp": {
-    "L1": ["karate-chop", "karate-chop", "karate-chop", "defend", "defend", "low-kick", "low-kick", "double-kick", "counter", "rolling-kick"],
-    "L2": ["karate-chop", "low-kick", "low-kick", "double-kick", "counter", "rolling-kick", "bulk-up", "focus-energy", "defend", "defend"],
-    "L3": ["karate-chop", "double-kick", "counter", "bulk-up", "cross-chop", "seismic-toss", "jump-kick", "focus-energy", "defend", "defend"],
-    "L4": ["double-kick", "counter", "bulk-up", "cross-chop", "high-jump-kick", "seismic-toss", "jump-kick", "swords-dance", "defend", "substitute"]
+    "L1": ["karate-chop", "karate-chop", "karate-chop", "defend", "defend", "low-kick", "low-kick", "double-kick", "endure", "rolling-kick"],
+    "L2": ["karate-chop", "low-kick", "low-kick", "double-kick", "endure", "rolling-kick", "bulk-up", "focus-energy", "defend", "defend"],
+    "L3": ["karate-chop", "double-kick", "endure", "bulk-up", "cross-chop", "seismic-toss", "jump-kick", "focus-energy", "defend", "defend"],
+    "L4": ["double-kick", "endure", "bulk-up", "cross-chop", "high-jump-kick", "seismic-toss", "jump-kick", "swords-dance", "defend", "substitute"]
   },
   "clefairy": {
     "L1": ["pound", "pound", "pound", "defend", "defend", "disarming-voice", "disarming-voice", "fairy-wind", "charm", "moonlight"],
@@ -378,7 +378,7 @@
     "L4": ["take-down", "thrash", "double-edge", "mega-kick", "horn-attack", "body-slam", "focus-energy", "swords-dance", "defend", "defend"]
   },
   "kangaskhan": {
-    "L1": ["comet-punch", "comet-punch", "mega-punch", "dizzy-punch", "bite", "bite", "counter", "rage", "defend", "defend"],
+    "L1": ["comet-punch", "comet-punch", "mega-punch", "dizzy-punch", "bite", "bite", "endure", "rage", "defend", "defend"],
     "L2": ["comet-punch", "mega-punch", "dizzy-punch", "bite", "bite", "stomp", "rage", "focus-energy", "defend", "defend"],
     "L3": ["comet-punch", "mega-punch", "dizzy-punch", "bite", "stomp", "thrash", "focus-energy", "swords-dance", "defend", "defend"],
     "L4": ["comet-punch", "mega-punch", "dizzy-punch", "bite", "thrash", "mega-kick", "focus-energy", "swords-dance", "defend", "substitute"]
@@ -481,8 +481,8 @@
   },
   "ursaring": {
     "L1": ["tackle", "tackle", "tackle", "scratch", "scratch", "slam", "slam", "body-slam", "body-slam", "defend"],
-    "L2": ["tackle", "tackle", "scratch", "slam", "slam", "body-slam", "body-slam", "counter", "counter", "defend"],
-    "L3": ["tackle", "slash", "slam", "body-slam", "body-slam", "counter", "counter", "swords-dance", "defend", "defend"]
+    "L2": ["tackle", "tackle", "scratch", "slam", "slam", "body-slam", "body-slam", "endure", "endure", "defend"],
+    "L3": ["tackle", "slash", "slam", "body-slam", "body-slam", "endure", "endure", "swords-dance", "defend", "defend"]
   },
   "celebi": {
     "L1": ["leech-seed", "leech-seed", "ancient-power", "ancient-power", "recover", "recover", "vine-whip", "vine-whip", "magical-leaf", "magical-leaf"],

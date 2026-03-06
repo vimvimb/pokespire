@@ -512,7 +512,7 @@
       "dizzy-punch",
       "bite",
       "bite",
-      "counter",
+      "endure",
       "brace",
       "defend",
       "defend"
@@ -655,7 +655,7 @@
     "handSize": 5,
     "deck": [
       "scratch",
-      "counter",
+      "endure",
       "defend",
       "defend",
       "poison-sting",
@@ -680,7 +680,7 @@
     "handSize": 5,
     "deck": [
       "scratch",
-      "counter",
+      "endure",
       "defend",
       "defend",
       "poison-sting",
@@ -705,7 +705,7 @@
     "handSize": 5,
     "deck": [
       "scratch",
-      "counter",
+      "endure",
       "defend",
       "defend",
       "poison-sting",
@@ -1513,7 +1513,7 @@
       "low-kick",
       "low-kick",
       "double-kick",
-      "counter",
+      "endure",
       "rolling-kick"
     ],
     "abilities": [],
@@ -1538,7 +1538,7 @@
       "low-kick",
       "low-kick",
       "double-kick",
-      "counter",
+      "endure",
       "rolling-kick"
     ],
     "abilities": [],
@@ -1563,7 +1563,7 @@
       "low-kick",
       "low-kick",
       "double-kick",
-      "counter",
+      "endure",
       "rolling-kick"
     ],
     "abilities": [],
@@ -3263,30 +3263,53 @@
     "abilities": [],
     "description": "A famously tenacious Normal-type — absurdly durable and capable of rolling right over the opposition."
   },
-  "wobbuffet": {
-    "name": "Wobbuffet",
+  "wynaut": {
+    "name": "Wynaut",
     "types": [
       "psychic"
     ],
-    "maxHp": 78,
+    "maxHp": 60,
     "baseSpeed": 1,
     "energyPerTurn": 3,
     "energyCap": 10,
     "handSize": 5,
     "deck": [
-      "tackle",
-      "tackle",
+      "endure",
+      "endure",
+      "endure",
+      "charm",
+      "charm",
+      "safeguard",
       "counter",
       "counter",
-      "counter",
-      "confuse-ray",
-      "confuse-ray",
-      "defend",
-      "defend",
-      "slam"
+      "amnesia"
     ],
     "abilities": [],
-    "description": "An enigmatic Psychic-type with massive HP — it does almost nothing, and yet it always wins."
+    "description": "A patient little Psychic-type that bides its time and reflects everything thrown at it."
+  },
+  "wobbuffet": {
+    "name": "Wobbuffet",
+    "types": [
+      "psychic"
+    ],
+    "maxHp": 95,
+    "baseSpeed": 1,
+    "energyPerTurn": 3,
+    "energyCap": 10,
+    "handSize": 5,
+    "deck": [
+      "endure",
+      "endure",
+      "endure",
+      "charm",
+      "charm",
+      "safeguard",
+      "counter",
+      "counter",
+      "amnesia"
+    ],
+    "abilities": [],
+    "description": "An enigmatic Psychic-type with massive HP — it does nothing but reflect everything thrown at it."
   },
   "blissey": {
     "name": "Blissey",

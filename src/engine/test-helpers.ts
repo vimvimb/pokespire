@@ -78,6 +78,7 @@ export function createTestCombatant(options: TestCombatantOptions = {}): Combata
       tyrantsTantrumUsedThisTurn: false,
       guardStatus: undefined,
       landslideUsedThisTurn: false,
+      roundDamageTaken: { frontTargeting: 0, other: 0 },
     },
     costModifiers: {},
     itemState: {},

@@ -217,7 +217,9 @@ export type PassiveId =
   // guts shared with Machop line
   // quick_feet shared with Rattata line
   | 'territorial'
-  | 'apex_predator';
+  | 'apex_predator'
+  // Wynaut/Wobbuffet line
+  | 'shadow_tag';
 
 // A single rung in the progression ladder
 export interface ProgressionRung {
@@ -881,6 +883,10 @@ export const PASSIVE_DEFINITIONS: Record<PassiveId, { name: string; description:
   apex_predator: {
     name: 'Apex Predator',
     description: 'Your attacks deal bonus damage equal to 10% of your current HP.',
+  },
+  shadow_tag: {
+    name: 'Shadow Tag',
+    description: 'At the start of each round, apply 1 Provoke to enemies in your column.',
   },
 };
 
@@ -2834,13 +2840,16 @@ export const MILTANK_PROGRESSION: ProgressionTree = {
   ],
 };
 
-export const WOBBUFFET_PROGRESSION: ProgressionTree = {
-  baseFormId: 'wobbuffet',
+// Wynaut/Wobbuffet — The Reactive Punching Bag
+// L1 Shadow Tag: provoke column enemies each round.
+// L2-L4: Pure HP investment (+15 each).
+export const WYNAUT_PROGRESSION: ProgressionTree = {
+  baseFormId: 'wynaut',
   rungs: [
-    { level: 1, name: 'Wobbuffet', description: 'Starting form.', passiveId: 'none', hpBoost: 0, cardsToAdd: [] },
-    { level: 2, name: 'Wobbuffet', description: 'Add Counter.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['counter'] },
-    { level: 3, name: 'Wobbuffet', description: 'Add Confuse Ray.', passiveId: 'none', hpBoost: 0, cardsToAdd: ['confuse-ray'] },
-    { level: 4, name: 'Wobbuffet (Mastered)', description: '+10 max HP.', passiveId: 'none', hpBoost: 10, cardsToAdd: [] },
+    { level: 1, name: 'Wynaut', description: 'Starting form with Shadow Tag.', passiveId: 'shadow_tag', hpBoost: 0, cardsToAdd: [] },
+    { level: 2, name: 'Wobbuffet', description: 'Evolve to Wobbuffet. Add Mirror Coat. +15 HP.', evolvesTo: 'wobbuffet', passiveId: 'none', hpBoost: 15, cardsToAdd: ['mirror-coat'] },
+    { level: 3, name: 'Wobbuffet', description: '+15 max HP.', passiveId: 'none', hpBoost: 15, cardsToAdd: [] },
+    { level: 4, name: 'Wobbuffet (Mastered)', description: '+15 max HP.', passiveId: 'none', hpBoost: 15, cardsToAdd: [] },
   ],
 };
 
@@ -3189,7 +3198,7 @@ export const PROGRESSION_TREES: Record<string, ProgressionTree> = {
   teddiursa: TEDDIURSA_PROGRESSION,
   larvitar: LARVITAR_PROGRESSION,
   miltank: MILTANK_PROGRESSION,
-  wobbuffet: WOBBUFFET_PROGRESSION,
+  wynaut: WYNAUT_PROGRESSION,
   blissey: BLISSEY_PROGRESSION,
   pineco: PINECO_PROGRESSION,
   steelix: STEELIX_PROGRESSION,
@@ -3354,6 +3363,7 @@ export function getProgressionTree(pokemonId: string): ProgressionTree | null {
   if (pokemonId === 'ampharos') return MAREEP_PROGRESSION;
   if (pokemonId === 'houndoom') return HOUNDOUR_PROGRESSION;
   if (pokemonId === 'ursaring') return TEDDIURSA_PROGRESSION;
+  if (pokemonId === 'wobbuffet') return WYNAUT_PROGRESSION;
   if (pokemonId === 'pupitar' || pokemonId === 'tyranitar') return LARVITAR_PROGRESSION;
   if (pokemonId === 'forretress') return PINECO_PROGRESSION;
   if (pokemonId === 'magcargo') return SLUGMA_PROGRESSION;
@@ -3493,6 +3503,7 @@ export function getBaseFormId(pokemonId: string): string {
   if (pokemonId === 'ampharos') return 'mareep';
   if (pokemonId === 'houndoom') return 'houndour';
   if (pokemonId === 'ursaring') return 'teddiursa';
+  if (pokemonId === 'wobbuffet') return 'wynaut';
   if (pokemonId === 'pupitar' || pokemonId === 'tyranitar') return 'larvitar';
   if (pokemonId === 'forretress') return 'pineco';
   if (pokemonId === 'magcargo') return 'slugma';
