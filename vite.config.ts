@@ -34,13 +34,31 @@ export default defineConfig({
         // index.html and emits a content-hashed version (e.g. Kreon-VariableFont_wght-HASH.ttf)
         // at the root of assets/ — that hashed copy IS precached. The public/ copies in
         // assets/Fonts/** are dead duplicates (wrong path, wrong filename) that waste cache space.
-        globIgnores: ['assets/Fonts/**'],
+        globIgnores: [
+          'assets/Fonts/**',
+          // Exclude large campaign background images (~30 MB total) from precache.
+          // They are runtime-cached on first view instead (see runtimeCaching below).
+          // Without this, the ~43 MB atomic precache regularly fails on mobile.
+          'assets/*map_background*',
+          'assets/*combat_background*',
+          'assets/*rocket_lab*',
+        ],
         // Explicitly set navigation fallback for SPA offline support
         navigateFallback: 'index.html',
+        navigateFallbackAllowlist: [/^\/pokespire\//],
         // Cache audio files at runtime with range request support.
         // Range requests (HTTP 206) are required for HTML <audio> elements to
         // seek/buffer audio, even when served from the service worker cache.
         runtimeCaching: [
+          {
+            urlPattern: /\.(png|jpe?g)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'image-cache',
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: { maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 },
+            },
+          },
           {
             urlPattern: /\.mp3$/i,
             handler: 'CacheFirst',
