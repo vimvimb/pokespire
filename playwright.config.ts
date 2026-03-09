@@ -5,9 +5,11 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
   retries: 0,
+  // Per-test timeout (the full campaign test overrides this to 120s via test.setTimeout)
+  timeout: 30_000,
   reporter: [['html'], ['list']],
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:4173',
     // Uncomment to see the browser during test runs:
     // headless: false,
   },
@@ -18,15 +20,13 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // VITE_E2E_FAST=1 collapses battle victory animation delays to 0ms so the
-    // full-campaign test runs in ~15s instead of ~50s.  This env var is never
-    // set in normal development or production builds.
-    command: 'VITE_E2E_FAST=1 npm run dev',
-    url: 'http://localhost:5173/pokespire/',
-    // reuseExistingServer: if a dev server is already running locally it is
-    // reused (potentially without VITE_E2E_FAST, so the test takes longer but
-    // still passes).  In CI a fresh server always starts with the flag set.
+    // Build the production bundle with VITE_E2E_FAST=1 (collapses battle victory
+    // animation delays to 0ms) then serve it with vite preview (port 4173).
+    // This tests the real production build rather than the dev server.
+    command: 'VITE_E2E_FAST=1 npm run build && npm run preview',
+    url: 'http://localhost:4173/pokespire/',
     reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
+    // Build + asset compression takes longer than dev server startup
+    timeout: 120_000,
   },
 });

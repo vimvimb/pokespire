@@ -49,3 +49,6 @@ export const ACT_MAP_CONFIGS: Record<number, ActMapConfig> = {
 export function getActMapConfig(act: number): ActMapConfig {
   return ACT_MAP_CONFIGS[act] ?? ACT_MAP_CONFIGS[1];
 }
+
+/** All Campaign 1 map background URLs (for offline caching). */
+export const CAMPAIGN_1_MAP_BG_URLS: string[] = [act1Bg, act2Bg, act3Bg];
