@@ -50,7 +50,7 @@ import type { EnemyIntent } from "../../engine/intentPreview";
 import { THEME } from "../theme";
 import { HeldItemsSidebar } from "../components/HeldItemsSidebar";
 import { checkItemPlayRestriction } from "../../engine/itemEffects";
-import battleBgAct1 from "../../../assets/backgrounds/rocket_lab_act_1_v4.png";
+import battleBgAct1 from "../../../assets/backgrounds/rocket_lab_act_1_v4.jpg";
 import { getRunActMapConfig } from "../../data/campaigns";
 import { playSound, type SoundEffect } from "../utils/sound";
 
@@ -1802,12 +1802,12 @@ export function BattleScreen({
       return;
     }
     if (act === 2) {
-      import("../../../assets/backgrounds/rocket_lab_act_2.png").then((m) =>
+      import("../../../assets/backgrounds/rocket_lab_act_2.jpg").then((m) =>
         setBattleBackground(m.default),
       );
       return;
     }
-    import("../../../assets/backgrounds/rocket_lab_act_3.png").then((m) =>
+    import("../../../assets/backgrounds/rocket_lab_act_3.jpg").then((m) =>
       setBattleBackground(m.default),
     );
   }, [act, runState]);

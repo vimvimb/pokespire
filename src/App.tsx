@@ -26,7 +26,7 @@ import { CardRemovalScreen } from "./ui/screens/CardRemovalScreen";
 import { Flourish } from "./ui/components/Flourish";
 import { AmbientBackground } from "./ui/components/AmbientBackground";
 import { OfflineCacheModal } from "./ui/components/OfflineCacheModal";
-import { getAudioCacheStatus } from "./ui/utils/offlineCache";
+import { getOfflineCacheStatus } from "./ui/utils/offlineCache";
 import { playSound } from "./ui/utils/sound";
 import { playMusic, getMusicForScreen } from "./ui/utils/music";
 import { ScreenShell } from "./ui/components/ScreenShell";
@@ -274,7 +274,9 @@ export default function App() {
   // Refresh offline audio cache count whenever the main menu is shown
   useEffect(() => {
     if (screen === "main_menu") {
-      getAudioCacheStatus().then(({ cached }) => setOfflineCachedCount(cached));
+      getOfflineCacheStatus().then(({ cached }) =>
+        setOfflineCachedCount(cached),
+      );
     }
   }, [screen]);
 
@@ -318,19 +320,22 @@ export default function App() {
 
   // Tutorial: start practice battle (1 starter vs Magikarp with Splash-only deck)
   // Campaign select: pick a campaign then advance to draft/tutorial
-  const handleCampaignSelect = useCallback((campaignId: string) => {
-    // Guard: don't proceed if locked (CampaignSelectScreen also disables the button,
-    // but this is a second line of defence)
-    if (getCampaignStatus(campaignId) === "locked") return;
-    setSelectedCampaignId(campaignId);
-    if (campaignId === "rocket_tower" && !isTutorialComplete()) {
-      // New players get the prologue tutorial before their first campaign
-      prologue.reset();
-      setIsPrologueMode(true);
-    } else {
-      setScreen("campaign_draft");
-    }
-  }, [prologue]);
+  const handleCampaignSelect = useCallback(
+    (campaignId: string) => {
+      // Guard: don't proceed if locked (CampaignSelectScreen also disables the button,
+      // but this is a second line of defence)
+      if (getCampaignStatus(campaignId) === "locked") return;
+      setSelectedCampaignId(campaignId);
+      if (campaignId === "rocket_tower" && !isTutorialComplete()) {
+        // New players get the prologue tutorial before their first campaign
+        prologue.reset();
+        setIsPrologueMode(true);
+      } else {
+        setScreen("campaign_draft");
+      }
+    },
+    [prologue],
+  );
 
   // Tutorial Prologue: launch from debugging menu
   const handleStartPrologue = useCallback(() => {
@@ -372,6 +377,11 @@ export default function App() {
 
   // Start prologue battle when dialogue ends and phase transitions to "battle"
   const prologueBattleStartedRef = useRef<string | null>(null);
+  // Sync screen to "battle" when prologue enters battle phase (render-time adjustment)
+  if (isPrologueMode && prologue.phase === "battle" && screen !== "battle") {
+    setScreen("battle");
+  }
+
   useEffect(() => {
     if (!isPrologueMode || prologue.phase !== "battle") {
       prologueBattleStartedRef.current = null;
@@ -381,17 +391,16 @@ export default function App() {
     if (prologueBattleStartedRef.current === prologue.nodeId) return;
     prologueBattleStartedRef.current = prologue.nodeId;
     startPrologueBattle(prologue.nodeId);
-    setScreen("battle"); // Set screen for music/save system
   }, [isPrologueMode, prologue.phase, prologue.nodeId, startPrologueBattle]);
 
-  // Exit prologue mode when complete
-  useEffect(() => {
-    if (isPrologueMode && !prologue.isActive) {
-      setIsPrologueMode(false);
-      setTutorialComplete();
-      setScreen("campaign_select");
-    }
-  }, [isPrologueMode, prologue.isActive]);
+  // Exit prologue mode when complete (render-time state adjustment —
+  // React re-renders immediately with the updated state without finishing
+  // the current render, avoiding the cascading effect anti-pattern).
+  if (isPrologueMode && !prologue.isActive) {
+    setIsPrologueMode(false);
+    setScreen("campaign_select");
+    setTutorialComplete(); // idempotent localStorage write
+  }
 
   // Handle node selection on the map
   const handleSelectNode = useCallback(
@@ -517,10 +526,7 @@ export default function App() {
   const prevPhaseRef = useRef<string | null>(null);
   useEffect(() => {
     const now = battle.phase;
-    if (
-      prevPhaseRef.current === "enemy_turn" &&
-      now === "player_turn"
-    ) {
+    if (prevPhaseRef.current === "enemy_turn" && now === "player_turn") {
       if (isPrologueMode) prologue.notifyEnemyTurnDone();
     }
     prevPhaseRef.current = now;
@@ -911,9 +917,10 @@ export default function App() {
       // syncBattleResults maps back to the correct party member
       const fighter = runState.party[partyIndex];
       const fighterData = getRunPokemonData(fighter);
-      const fighterItems = fighter.heldItemIds.length > 0
-        ? new Map([[partyIndex, [...fighter.heldItemIds]]])
-        : undefined;
+      const fighterItems =
+        fighter.heldItemIds.length > 0
+          ? new Map([[partyIndex, [...fighter.heldItemIds]]])
+          : undefined;
       battle.startConfiguredBattle(
         [fighterData],
         [enemyWithHp],
@@ -1277,7 +1284,10 @@ export default function App() {
           onPlayCard={handlePlayCard}
           onEndTurn={handleEndTurn}
           onSwitchPosition={battle.switchPosition}
-          onRestart={() => { setIsPrologueMode(false); setScreen("main_menu"); }}
+          onRestart={() => {
+            setIsPrologueMode(false);
+            setScreen("main_menu");
+          }}
           onBattleEnd={handleBattleEnd}
           tutorial={prologue.tutorialConfig}
         />
@@ -1285,7 +1295,11 @@ export default function App() {
     }
 
     // Transitioning between phases (e.g. dialogue just ended, battle effect hasn't fired yet)
-    return <ScreenShell><div /></ScreenShell>;
+    return (
+      <ScreenShell>
+        <div />
+      </ScreenShell>
+    );
   }
 
   // Render based on current screen
@@ -1490,7 +1504,7 @@ export default function App() {
               border: "none",
               background: "transparent",
               color:
-                offlineCachedCount !== null && offlineCachedCount >= 25
+                offlineCachedCount !== null && offlineCachedCount >= 39
                   ? "#4ade80"
                   : THEME.text.secondary,
               cursor: "pointer",
@@ -1499,9 +1513,9 @@ export default function App() {
               animationDelay: `${menuIdx++ * 50 + 250}ms`,
             }}
           >
-            {offlineCachedCount !== null && offlineCachedCount >= 25
-              ? "✓ Audio Cached"
-              : "↓ Cache Audio"}
+            {offlineCachedCount !== null && offlineCachedCount >= 39
+              ? "✓ Offline Ready"
+              : "↓ Enable Offline"}
           </button>
 
           <button
@@ -1549,7 +1563,7 @@ export default function App() {
             onClose={() => {
               setShowOfflineModal(false);
               // Refresh the button label after the modal closes
-              getAudioCacheStatus().then(({ cached }) =>
+              getOfflineCacheStatus().then(({ cached }) =>
                 setOfflineCachedCount(cached),
               );
             }}

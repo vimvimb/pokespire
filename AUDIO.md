@@ -1,72 +1,53 @@
-# Audio
+# Audio & Media Asset Pipeline
 
-## Background Music Normalization
+## Overview
 
-Background music tracks in `assets/music/` should be loudness-normalized so they play at consistent volume relative to each other. Use ffmpeg's EBU R128 loudnorm filter for perceptual loudness normalization (LUFS).
+Raw/original assets live in `assets-src/`. A build script compresses them into production-ready files in `assets/` (backgrounds, music, sounds). The generated `assets/` directories are gitignored — only `assets-src/` is committed.
 
-### Batch: Normalize All Music Tracks
-
-Run from the project root:
+## Running the Pipeline
 
 ```bash
-ffmpeg -i assets/music/early_boss_rocket_battle_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/early_boss_rocket_battle_remix_normalized.mp3
-ffmpeg -i assets/music/early_dungeon_hazy_pass_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/early_dungeon_hazy_pass_remix_normalized.mp3
-ffmpeg -i assets/music/final_boss_mewtwo_battle_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/final_boss_mewtwo_battle_remix_normalized.mp3
-ffmpeg -i assets/music/final_dungeon_rocket_hideout_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/final_dungeon_rocket_hideout_remix_normalized.mp3
-ffmpeg -i assets/music/regular_battle_johto_trainer_battle_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/regular_battle_johto_trainer_battle_remix_normalized.mp3
+npm run build:assets
 ```
 
-Then replace the originals with the normalized versions:
+This is also run automatically as part of `npm run build`. Requires **ffmpeg** on PATH.
 
-```bash
-mv assets/music/early_boss_rocket_battle_remix_normalized.mp3 assets/music/early_boss_rocket_battle_remix.mp3
-mv assets/music/early_dungeon_hazy_pass_remix_normalized.mp3 assets/music/early_dungeon_hazy_pass_remix.mp3
-mv assets/music/final_boss_mewtwo_battle_remix_normalized.mp3 assets/music/final_boss_mewtwo_battle_remix.mp3
-mv assets/music/final_dungeon_rocket_hideout_remix_normalized.mp3 assets/music/final_dungeon_rocket_hideout_remix.mp3
-mv assets/music/regular_battle_johto_trainer_battle_remix_normalized.mp3 assets/music/regular_battle_johto_trainer_battle_remix.mp3
-```
+The script is **idempotent** — it skips files whose output is already newer than the source.
 
-### Batch: Campaign 2 — Threads of Time
+## What It Does
 
-Run from the project root:
+### Backgrounds (`assets-src/backgrounds/` → `assets/backgrounds/`)
+- PNG → JPEG at quality ~85 (`-q:v 3`)
+- JPG → copied as-is
+- Reduces ~28 MB of PNGs to ~4 MB of JPEGs
 
-```bash
-ffmpeg -i assets/music/celebi_dungeon_lush_forest_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/celebi_dungeon_lush_forest_remix_normalized.mp3
-ffmpeg -i assets/music/past_dungeon_ecruteak_city_remix.wav -ar 44100 -ac 2 -b:a 192k -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/past_dungeon_ecruteak_city_remix.mp3
-ffmpeg -i assets/music/hooh_dungeon_tin_tower_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/hooh_dungeon_tin_tower_remix_normalized.mp3
-ffmpeg -i assets/music/lugia_dungeon_burned_tower_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/lugia_dungeon_burned_tower_remix_normalized.mp3
-ffmpeg -i assets/music/regular_battle_johto_gym_leader_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/regular_battle_johto_gym_leader_remix_normalized.mp3
-ffmpeg -i assets/music/celebi_boss_time_gear_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/celebi_boss_time_gear_remix_normalized.mp3
-ffmpeg -i assets/music/gold_silver_boss_johto_rival_battle_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/gold_silver_boss_johto_rival_battle_remix_normalized.mp3
-ffmpeg -i assets/music/recruitable_boss_legendary_beast_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/recruitable_boss_legendary_beast_remix_normalized.mp3
-ffmpeg -i assets/music/hooh_lugia_boss_johto_boss_remix.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/hooh_lugia_boss_johto_boss_remix_normalized.mp3
-```
+### Music (`assets-src/music/` → `assets/music/`)
+- EBU R128 loudness normalization + mono downmix + 64 kbps MP3
+- Single ffmpeg pass: `-ac 1 -b:a 64k -af loudnorm=I=-16:TP=-1.5:LRA=11`
+- Reduces ~62 MB to ~37 MB
 
-Then replace the originals with the normalized versions:
+### Sounds (`assets-src/sounds/` → `assets/sounds/`)
+- Copied as-is (already small, ~1 MB total)
 
-```bash
-mv assets/music/celebi_dungeon_lush_forest_remix_normalized.mp3 assets/music/celebi_dungeon_lush_forest_remix.mp3
-# past_dungeon_ecruteak_city_remix: WAV → MP3 conversion is part of the ffmpeg command above (no mv needed)
-mv assets/music/hooh_dungeon_tin_tower_remix_normalized.mp3 assets/music/hooh_dungeon_tin_tower_remix.mp3
-mv assets/music/lugia_dungeon_burned_tower_remix_normalized.mp3 assets/music/lugia_dungeon_burned_tower_remix.mp3
-mv assets/music/regular_battle_johto_gym_leader_remix_normalized.mp3 assets/music/regular_battle_johto_gym_leader_remix.mp3
-mv assets/music/celebi_boss_time_gear_remix_normalized.mp3 assets/music/celebi_boss_time_gear_remix.mp3
-mv assets/music/gold_silver_boss_johto_rival_battle_remix_normalized.mp3 assets/music/gold_silver_boss_johto_rival_battle_remix.mp3
-mv assets/music/recruitable_boss_legendary_beast_remix_normalized.mp3 assets/music/recruitable_boss_legendary_beast_remix.mp3
-mv assets/music/hooh_lugia_boss_johto_boss_remix_normalized.mp3 assets/music/hooh_lugia_boss_johto_boss_remix.mp3
-```
+## Normalization Parameters
 
-### Single File: Future Tracks
+| Parameter | Value | Purpose |
+|-----------|-------|---------|
+| `I=-16` | -16 LUFS | Integrated loudness target (streaming/YouTube standard) |
+| `TP=-1.5` | -1.5 dBFS | True peak limit — prevents clipping |
+| `LRA=11` | 11 LU | Loudness range — controls dynamic range |
+| `-ac 1` | Mono | Phone speakers don't benefit from stereo |
+| `-b:a 64k` | 64 kbps | Sufficient quality for game background music |
 
-For a new track `assets/music/example_track.mp3`:
+## Adding New Tracks
 
-```bash
-ffmpeg -i assets/music/example_track.mp3 -af loudnorm=I=-16:TP=-1.5:LRA=11 -y assets/music/example_track_normalized.mp3
-mv assets/music/example_track_normalized.mp3 assets/music/example_track.mp3
-```
+1. Place the source file in `assets-src/music/` (MP3 or WAV)
+2. Run `npm run build:assets`
+3. Import the output from `assets/music/` in your TypeScript code
+4. Add the track to `MUSIC_URLS` in `src/ui/utils/music.ts`
 
-### Parameters
+## Adding New Backgrounds
 
-- `I=-16`: Integrated loudness target (LUFS). -16 LUFS is a common target for streaming/YouTube.
-- `TP=-1.5`: True peak limit (dBFS). Prevents clipping.
-- `LRA=11`: Loudness range. Controls dynamic range.
+1. Place the source PNG/JPG in `assets-src/backgrounds/`
+2. Run `npm run build:assets`
+3. Import the output `.jpg` from `assets/backgrounds/` in your TypeScript code

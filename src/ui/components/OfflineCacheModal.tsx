@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { getAudioCacheStatus, cacheAllAudio } from "../utils/offlineCache";
+import { getOfflineCacheStatus, cacheAllOfflineAssets } from "../utils/offlineCache";
 import { THEME } from "../theme";
 
 interface Props {
@@ -11,21 +11,19 @@ type Phase = "checking" | "idle" | "downloading" | "done";
 export function OfflineCacheModal({ onClose }: Props) {
   const [phase, setPhase] = useState<Phase>("checking");
   const [cached, setCached] = useState(0);
-  const [total, setTotal] = useState(25);
+  const [total, setTotal] = useState(0);
   const cancelledRef = useRef(false);
 
-  // Cancel any in-progress download when the component unmounts
   useEffect(() => {
     return () => {
       cancelledRef.current = true;
     };
   }, []);
 
-  // Check current cache status on open
   useEffect(() => {
-    getAudioCacheStatus().then(({ cached, total }) => {
-      setCached(cached);
-      setTotal(total);
+    getOfflineCacheStatus().then((status) => {
+      setCached(status.cached);
+      setTotal(status.total);
       setPhase("idle");
     });
   }, []);
@@ -33,7 +31,7 @@ export function OfflineCacheModal({ onClose }: Props) {
   async function handleDownload() {
     cancelledRef.current = false;
     setPhase("downloading");
-    await cacheAllAudio((done, total) => {
+    await cacheAllOfflineAssets((done, total) => {
       setCached(done);
       setTotal(total);
     }, cancelledRef);
@@ -44,7 +42,6 @@ export function OfflineCacheModal({ onClose }: Props) {
   const allCached = cached >= total && total > 0;
 
   return (
-    // Backdrop
     <div
       onClick={(e) => {
         if (e.target === e.currentTarget && phase !== "downloading") onClose();
@@ -60,7 +57,6 @@ export function OfflineCacheModal({ onClose }: Props) {
         padding: 24,
       }}
     >
-      {/* Card */}
       <div
         style={{
           width: "100%",
@@ -83,40 +79,24 @@ export function OfflineCacheModal({ onClose }: Props) {
             ...THEME.heading,
           }}
         >
-          {phase === "done" ? "✓ Audio Cached" : "↓ Cache Audio for Offline"}
+          {phase === "done" || (phase === "idle" && allCached)
+            ? "Offline Ready"
+            : "Enable Offline Play"}
         </div>
 
-        {/* Body text */}
         {phase === "checking" && (
-          <p
-            style={{
-              margin: 0,
-              color: THEME.text.secondary,
-              fontSize: 14,
-              lineHeight: 1.6,
-            }}
-          >
-            Checking cache…
+          <p style={{ margin: 0, color: THEME.text.secondary, fontSize: 14, lineHeight: 1.6 }}>
+            Checking cache...
           </p>
         )}
 
         {phase === "idle" && !allCached && (
-          <p
-            style={{
-              margin: 0,
-              color: THEME.text.secondary,
-              fontSize: 14,
-              lineHeight: 1.6,
-            }}
-          >
-            The game already works offline — sprites, UI, and all game data are
-            cached automatically after your first visit.
-            <span
-              style={{ display: "block", marginTop: 8 }}
-            >
-              Music and sound effects are only cached as they're played.
-              Download all {total} audio files now (~17 MB) so music and SFX
-              work offline too.
+          <p style={{ margin: 0, color: THEME.text.secondary, fontSize: 14, lineHeight: 1.6 }}>
+            Sprites and game data are cached automatically after your first
+            visit.
+            <span style={{ display: "block", marginTop: 8 }}>
+              Download all backgrounds, music, and sound effects (~33 MB) so
+              every part of the game works offline.
             </span>
             {cached > 0 && (
               <span
@@ -133,25 +113,16 @@ export function OfflineCacheModal({ onClose }: Props) {
         )}
 
         {phase === "idle" && allCached && (
-          <p
-            style={{
-              margin: 0,
-              color: "#4ade80",
-              fontSize: 14,
-              lineHeight: 1.6,
-            }}
-          >
-            All {total} audio files are cached. Music and sound effects will
-            work fully offline.
+          <p style={{ margin: 0, color: "#4ade80", fontSize: 14, lineHeight: 1.6 }}>
+            All {total} files are cached. The game is fully playable offline.
           </p>
         )}
 
         {phase === "downloading" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <p style={{ margin: 0, color: THEME.text.secondary, fontSize: 14 }}>
-              Downloading… {cached} / {total} files
+              Downloading... {cached} / {total} files
             </p>
-            {/* Progress bar */}
             <div
               style={{
                 height: 8,
@@ -174,16 +145,9 @@ export function OfflineCacheModal({ onClose }: Props) {
         )}
 
         {phase === "done" && (
-          <p
-            style={{
-              margin: 0,
-              color: "#4ade80",
-              fontSize: 14,
-              lineHeight: 1.6,
-            }}
-          >
-            All {total} audio files are now cached. Music and sound effects will
-            work fully offline.
+          <p style={{ margin: 0, color: "#4ade80", fontSize: 14, lineHeight: 1.6 }}>
+            All {total} files are now cached. The game is fully playable
+            offline.
           </p>
         )}
 

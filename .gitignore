@@ -24,6 +24,11 @@ dist-ssr
 *.sln
 *.sw?
 
+# Generated compressed assets (built from assets-src/ by scripts/build-assets.mjs)
+assets/backgrounds/
+assets/music/
+assets/sounds/
+
 # Build
 pokespire/**
 
