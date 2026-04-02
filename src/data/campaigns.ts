@@ -6,15 +6,15 @@ import {
 } from "../ui/components/map/mapConfig";
 
 // Campaign 2 — map backgrounds
-import c2Act1MapBg from "../../assets/backgrounds/campaign_2_act_1_map_background.jpg";
-import c2Act2MapBg from "../../assets/backgrounds/campaign_2_act_2_map_background.jpg";
-import c2Act3AMapBg from "../../assets/backgrounds/campaign_2_act_3a_map_background.jpg";
-import c2Act3BMapBg from "../../assets/backgrounds/campaign_2_act_3b_map_background.jpg";
+import c2Act1MapBg from "../../assets/backgrounds/campaign_2_act_1_map_background.png";
+import c2Act2MapBg from "../../assets/backgrounds/campaign_2_act_2_map_background.png";
+import c2Act3AMapBg from "../../assets/backgrounds/campaign_2_act_3a_map_background.png";
+import c2Act3BMapBg from "../../assets/backgrounds/campaign_2_act_3b_map_background.png";
 // Campaign 2 — combat backgrounds
-import c2Act1CombatBg from "../../assets/backgrounds/campaign_2_act_1_combat_background.jpg";
-import c2Act2CombatBg from "../../assets/backgrounds/campaign_2_act_2_combat_background.jpg";
-import c2Act3ACombatBg from "../../assets/backgrounds/campaign_2_act_3a_combat_background.jpg";
-import c2Act3BCombatBg from "../../assets/backgrounds/campaign_2_act_3b_combat_background.jpg";
+import c2Act1CombatBg from "../../assets/backgrounds/campaign_2_act_1_combat_background.png";
+import c2Act2CombatBg from "../../assets/backgrounds/campaign_2_act_2_combat_background.png";
+import c2Act3ACombatBg from "../../assets/backgrounds/campaign_2_act_3a_combat_background.png";
+import c2Act3BCombatBg from "../../assets/backgrounds/campaign_2_act_3b_combat_background.png";
 
 /** All Campaign 2 background URLs — map + combat (for offline caching). */
 export const CAMPAIGN_2_BG_URLS: string[] = [
