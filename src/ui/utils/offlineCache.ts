@@ -4,9 +4,9 @@ import { CAMPAIGN_1_MAP_BG_URLS } from '../components/map/mapConfig';
 import { CAMPAIGN_2_BG_URLS } from '../../data/campaigns';
 
 // Campaign 1 combat backgrounds (imported directly to avoid coupling with BattleScreen)
-import c1CombatBg1 from '../../../assets/backgrounds/rocket_lab_act_1_v4.jpg';
-import c1CombatBg2 from '../../../assets/backgrounds/rocket_lab_act_2.jpg';
-import c1CombatBg3 from '../../../assets/backgrounds/rocket_lab_act_3.jpg';
+import c1CombatBg1 from '../../../assets/backgrounds/rocket_lab_act_1_v4.png';
+import c1CombatBg2 from '../../../assets/backgrounds/rocket_lab_act_2.png';
+import c1CombatBg3 from '../../../assets/backgrounds/rocket_lab_act_3.png';
 
 /** Workbox runtime cache names (must match vite.config.ts). */
 const AUDIO_CACHE_NAME = 'audio-cache';

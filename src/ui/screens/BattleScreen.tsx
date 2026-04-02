@@ -50,7 +50,7 @@ import type { EnemyIntent } from "../../engine/intentPreview";
 import { THEME } from "../theme";
 import { HeldItemsSidebar } from "../components/HeldItemsSidebar";
 import { checkItemPlayRestriction } from "../../engine/itemEffects";
-import battleBgAct1 from "../../../assets/backgrounds/rocket_lab_act_1_v4.jpg";
+import battleBgAct1 from "../../../assets/backgrounds/rocket_lab_act_1_v4.png";
 import { getRunActMapConfig } from "../../data/campaigns";
 import { playSound, type SoundEffect } from "../utils/sound";
 
@@ -608,15 +608,17 @@ export function BattleScreen({
   // (shared by capture flow, victory flow, and defeat flow)
   const battleEndCalledRef = useRef(false);
 
-  // Is capture available right now?
+  // Is capture available right now? Show whenever enemy is below threshold
+  // and battle is ongoing — not gated to player_turn so it appears immediately
+  // after the card that drops the enemy below 40% (even if turn auto-ends).
   const captureAvailable = useMemo(() => {
     if (!isRecruitBattle) return false;
     if (capturePhase !== 'idle') return false;
-    if (phase !== 'player_turn') return false;
+    if (state.phase !== 'ongoing') return false;
     const enemy = enemies.find(c => c.alive);
     if (!enemy) return false;
     return enemy.hp / enemy.maxHp < 0.4;
-  }, [isRecruitBattle, capturePhase, phase, enemies]);
+  }, [isRecruitBattle, capturePhase, state.phase, enemies]);
 
   // Find the first alive enemy's sprite element position (for button placement)
   const captureTargetId = useMemo(() => {
@@ -1896,12 +1898,12 @@ export function BattleScreen({
       return;
     }
     if (act === 2) {
-      import("../../../assets/backgrounds/rocket_lab_act_2.jpg").then((m) =>
+      import("../../../assets/backgrounds/rocket_lab_act_2.png").then((m) =>
         setBattleBackground(m.default),
       );
       return;
     }
-    import("../../../assets/backgrounds/rocket_lab_act_3.jpg").then((m) =>
+    import("../../../assets/backgrounds/rocket_lab_act_3.png").then((m) =>
       setBattleBackground(m.default),
     );
   }, [act, runState]);
