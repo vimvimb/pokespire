@@ -2228,6 +2228,7 @@ export function BattleScreen({
                 onClick={handleCapture}
                 className="pks-capture-btn-entrance pks-capture-pulse"
                 style={{
+                  ...THEME.heading,
                   position: 'fixed',
                   left: pos.x,
                   top: pos.y - 90,
@@ -2247,7 +2248,6 @@ export function BattleScreen({
                   borderRadius: 14,
                   cursor: 'pointer',
                   fontFamily: 'inherit',
-                  ...THEME.heading,
                 }}
               >
                 {/* Pokeball SVG icon */}
