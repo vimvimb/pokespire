@@ -28,12 +28,14 @@ interface Props {
   combatants?: Combatant[];
   /** Highlighted via turn order ↔ sprite hover link */
   isLinkedHover?: boolean;
+  /** Capture threshold for recruit battles (0-1). Renders a marker on the HP bar. */
+  captureThresholdPercent?: number;
 }
 
 /** Death animation duration in ms */
 const FAINT_DURATION = 800;
 
-function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, onInspect, onDragEnter, onDragLeave, onDrop, damagePreview, isDragHovered, spriteScale = 1, onMouseEnter, onMouseLeave, combatants, isLinkedHover }: Props) {
+function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, onInspect, onDragEnter, onDragLeave, onDrop, damagePreview, isDragHovered, spriteScale = 1, onMouseEnter, onMouseLeave, combatants, isLinkedHover, captureThresholdPercent }: Props) {
   const [imgError, setImgError] = useState(false);
   const [blockHovered, setBlockHovered] = useState(false);
   const isEnemy = combatant.side === 'enemy';
@@ -300,7 +302,7 @@ function PokemonSpriteInner({ combatant, isCurrentTurn, isTargetable, onSelect, 
 
       {/* Health bar with block shield on the right (where HP depletes from) */}
       <div style={{ width: '100%', maxWidth: 120, position: 'relative' }}>
-        <HealthBar current={combatant.hp} max={combatant.maxHp} skewAngle={isEnemy ? 11 : -11} />
+        <HealthBar current={combatant.hp} max={combatant.maxHp} skewAngle={isEnemy ? 11 : -11} captureThreshold={captureThresholdPercent} />
         {combatant.block > 0 && (
           <div
             onMouseEnter={() => setBlockHovered(true)}

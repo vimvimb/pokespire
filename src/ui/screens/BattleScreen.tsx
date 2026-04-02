@@ -82,6 +82,8 @@ interface Props {
   ) => void;
   runState?: RunState;
   onBackToSandboxConfig?: () => void; // Only present in sandbox mode
+  /** Whether this is a recruit battle (enables capture mechanic) */
+  isRecruitBattle?: boolean;
   /** Tutorial overlay config when in tutorial battle */
   tutorial?: {
     isActive: boolean;
@@ -126,6 +128,7 @@ function BattleGrid({
   futureSightColumns,
   linkedHoverId,
   onHoverCombatant,
+  captureThresholdPercent,
 }: {
   combatants: Combatant[];
   allCombatants: Combatant[];
@@ -147,6 +150,7 @@ function BattleGrid({
   futureSightColumns?: Set<Column>;
   linkedHoverId?: string | null;
   onHoverCombatant?: (id: string | null) => void;
+  captureThresholdPercent?: number;
 }) {
   // Position fingerprint so useMemo recomputes after swaps (positions are mutated in place)
   const posKey = combatants
@@ -287,6 +291,7 @@ function BattleGrid({
                   : undefined
               }
               onMouseLeave={onMouseLeaveSprite}
+              captureThresholdPercent={captureThresholdPercent}
             />
           </div>
         ) : isSwitchTarget && onSwitchSelect ? (
@@ -528,6 +533,7 @@ export function BattleScreen({
   runState,
   onBackToSandboxConfig,
   tutorial: tutorialConfig,
+  isRecruitBattle,
 }: Props) {
   const isPlayerTurn = phase === "player_turn";
   const currentCombatant =
@@ -594,6 +600,97 @@ export function BattleScreen({
   }
   const intentsForLayout = enemyIntents ?? cachedIntentsRef.current;
   const intentsVisible = phase === "player_turn";
+
+  // ── Capture mechanic (recruit battles) ──────────────────────────────
+  const [capturePhase, setCapturePhase] = useState<'idle' | 'animating' | 'done'>('idle');
+  const captureGlowRef = useRef<HTMLDivElement>(null);
+  // Track if we've already called onBattleEnd for this game over state
+  // (shared by capture flow, victory flow, and defeat flow)
+  const battleEndCalledRef = useRef(false);
+
+  // Is capture available right now?
+  const captureAvailable = useMemo(() => {
+    if (!isRecruitBattle) return false;
+    if (capturePhase !== 'idle') return false;
+    if (phase !== 'player_turn') return false;
+    const enemy = enemies.find(c => c.alive);
+    if (!enemy) return false;
+    return enemy.hp / enemy.maxHp < 0.4;
+  }, [isRecruitBattle, capturePhase, phase, enemies]);
+
+  // Find the first alive enemy's sprite element position (for button placement)
+  const captureTargetId = useMemo(() => {
+    if (!isRecruitBattle) return null;
+    const enemy = enemies.find(c => c.alive);
+    return enemy?.id ?? null;
+  }, [isRecruitBattle, enemies]);
+
+  const handleCapture = useCallback(() => {
+    if (!captureAvailable) return;
+    setCapturePhase('animating');
+    playSound('win_battle');
+  }, [captureAvailable]);
+
+  // Capture animation: brighten → shrink → fire onBattleEnd
+  useEffect(() => {
+    if (capturePhase !== 'animating' || !captureTargetId) return;
+
+    const spriteEl = document.querySelector(
+      `[data-sprite-id="${captureTargetId}"]`,
+    ) as HTMLElement | null;
+
+    let rafId: number;
+    const start = performance.now();
+    const duration = makeDelay(1500) || 1; // avoid /0 in E2E
+
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / duration);
+
+      if (spriteEl) {
+        if (t < 0.6) {
+          // Phase 1: brighten + slight scale up
+          const brightness = 1 + (t / 0.6) * 3;
+          const scale = 1 + (t / 0.6) * 0.05;
+          spriteEl.style.filter = `brightness(${brightness})`;
+          spriteEl.style.transform = `scale(${scale})`;
+          spriteEl.style.opacity = '1';
+        } else {
+          // Phase 2: shrink + fade out, brightness eases back
+          const p = (t - 0.6) / 0.4;
+          const brightness = 4 - p * 2;
+          const scale = 1.05 * (1 - p);
+          const opacity = 1 - p;
+          spriteEl.style.filter = `brightness(${brightness})`;
+          spriteEl.style.transform = `scale(${scale})`;
+          spriteEl.style.opacity = `${opacity}`;
+        }
+      }
+
+      if (t < 1) {
+        rafId = requestAnimationFrame(animate);
+      } else {
+        // Animation complete — trigger victory
+        setCapturePhase('done');
+        if (onBattleEnd && !battleEndCalledRef.current) {
+          battleEndCalledRef.current = true;
+          onBattleEnd('victory', state.combatants, state.goldEarned);
+        }
+      }
+    };
+
+    rafId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      // Reset sprite styles on cleanup
+      if (spriteEl) {
+        spriteEl.style.filter = '';
+        spriteEl.style.transform = '';
+        spriteEl.style.opacity = '';
+      }
+    };
+  }, [capturePhase, captureTargetId, onBattleEnd, state.combatants, state.goldEarned]);
 
   // Compute global sprite scale: if any Pokemon exceeds the cap, ALL scale down proportionally
   const spriteScale = useMemo(
@@ -1729,9 +1826,6 @@ export function BattleScreen({
     "celebrating" | "draft_message" | "transitioning" | null
   >(null);
 
-  // Track if we've already called onBattleEnd for this game over state
-  const battleEndCalledRef = useRef(false);
-
   // Sync victory stage with phase during render (no effect; React allows setState when adjusting to prop/state change)
   if (phase === "victory" && victoryStage === null) {
     setVictoryStage("celebrating");
@@ -2021,6 +2115,7 @@ export function BattleScreen({
               futureSightColumns={enemyFutureSightCols}
               linkedHoverId={linkedHoverId}
               onHoverCombatant={setLinkedHoverId}
+              captureThresholdPercent={isRecruitBattle ? 0.4 : undefined}
             />
           </div>
         </div>
@@ -2058,6 +2153,116 @@ export function BattleScreen({
         onRewindComplete={battleEffects.removeRewindEvent}
         onSandStreamComplete={battleEffects.removeSandStreamEvent}
       />
+
+      {/* Capture button + glow overlay (recruit battles) */}
+      {isRecruitBattle && captureTargetId && (captureAvailable || capturePhase === 'animating') && (() => {
+        const pos = getPositionForCombatant(captureTargetId);
+        if (!pos) return null;
+        return (
+          <>
+            {/* Capture glow overlay behind sprite during animation */}
+            {capturePhase === 'animating' && (
+              <div
+                ref={captureGlowRef}
+                className="pks-capture-glow"
+                style={{
+                  position: 'fixed',
+                  left: pos.x,
+                  top: pos.y,
+                  width: 300,
+                  height: 300,
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(250,204,21,0.6) 0%, rgba(249,115,22,0.3) 40%, transparent 70%)',
+                  pointerEvents: 'none',
+                  zIndex: 160,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              />
+            )}
+
+            {/* Converging light dots during animation */}
+            {capturePhase === 'animating' && (
+              <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 161 }}>
+                {Array.from({ length: 8 }).map((_, i) => {
+                  const angle = (i / 8) * Math.PI * 2;
+                  const startRadius = 120;
+                  const startX = pos.x + Math.cos(angle) * startRadius;
+                  const startY = pos.y + Math.sin(angle) * startRadius;
+                  return (
+                    <div
+                      key={i}
+                      className="pks-capture-dot"
+                      style={{
+                        position: 'absolute',
+                        left: startX,
+                        top: startY,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        background: 'rgba(250, 204, 21, 0.9)',
+                        boxShadow: '0 0 12px rgba(250, 204, 21, 0.8)',
+                        transform: 'translate(-50%, -50%)',
+                        // CSS transition drives convergence to center
+                        transition: `left 1.2s ease-in ${i * 50}ms, top 1.2s ease-in ${i * 50}ms, opacity 0.3s ease ${1.0}s`,
+                      }}
+                      ref={(el) => {
+                        // Trigger convergence on next frame
+                        if (el) {
+                          requestAnimationFrame(() => {
+                            el.style.left = `${pos.x}px`;
+                            el.style.top = `${pos.y}px`;
+                          });
+                          // Fade out near end
+                          setTimeout(() => { el.style.opacity = '0'; }, makeDelay(1100));
+                        }
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            )}
+
+            {/* CAPTURE button above enemy sprite */}
+            {captureAvailable && capturePhase === 'idle' && (
+              <button
+                onClick={handleCapture}
+                className="pks-capture-btn-entrance pks-capture-pulse"
+                style={{
+                  position: 'fixed',
+                  left: pos.x,
+                  top: pos.y - 90,
+                  transform: 'translate(-50%, -100%)',
+                  zIndex: 170,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '14px 28px',
+                  fontSize: 20,
+                  fontWeight: 'bold',
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase' as const,
+                  color: '#fff',
+                  background: 'linear-gradient(135deg, #f97316, #ef4444)',
+                  border: '2px solid rgba(250, 204, 21, 0.7)',
+                  borderRadius: 14,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  ...THEME.heading,
+                }}
+              >
+                {/* Pokeball SVG icon */}
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                  <circle cx="14" cy="14" r="12" stroke="#fff" strokeWidth="2" fill="none" />
+                  <line x1="2" y1="14" x2="26" y2="14" stroke="#fff" strokeWidth="2" />
+                  <circle cx="14" cy="14" r="4" stroke="#fff" strokeWidth="2" fill="none" />
+                  <circle cx="14" cy="14" r="2" fill="#fff" />
+                </svg>
+                CAPTURE
+              </button>
+            )}
+          </>
+        );
+      })()}
 
       {/* Battle log - left side column */}
       <div
@@ -2113,7 +2318,7 @@ export function BattleScreen({
         )}
 
         {/* Flow layout: Deck → Hand → Energy+EndTurn → Discard → Vanished */}
-        {isPlayerTurn && currentCombatant && (
+        {isPlayerTurn && currentCombatant && capturePhase === 'idle' && (
           <div
             style={{
               display: "flex",
@@ -2573,8 +2778,8 @@ export function BattleScreen({
           />
         ))}
 
-      {/* Victory celebration overlay - root level for full-screen coverage */}
-      {phase === "victory" && victoryStage && (
+      {/* Victory celebration overlay - root level for full-screen coverage (skipped for capture wins) */}
+      {phase === "victory" && victoryStage && capturePhase !== 'done' && (
         <div
           style={{
             position: "absolute",
@@ -2778,6 +2983,33 @@ export function BattleScreen({
           zone={tutorialConfig.zone}
         />
       )}
+
+      {/* Capture mechanic CSS keyframes */}
+      <style>{`
+        @keyframes pksCaptureEntrance {
+          0% { transform: translate(-50%, -100%) scale(0.3); opacity: 0; }
+          60% { transform: translate(-50%, -100%) scale(1.1); opacity: 1; }
+          100% { transform: translate(-50%, -100%) scale(1); opacity: 1; }
+        }
+        .pks-capture-btn-entrance {
+          animation: pksCaptureEntrance 0.4s ease-out forwards;
+        }
+        @keyframes pksCapturePulse {
+          0%, 100% { box-shadow: 0 0 24px rgba(249,115,22,0.5); }
+          50% { box-shadow: 0 0 32px rgba(249,115,22,0.7), 0 0 64px rgba(249,115,22,0.3); }
+        }
+        .pks-capture-pulse {
+          animation: pksCapturePulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pksCaptureGlow {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+          40% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(2.5); }
+        }
+        .pks-capture-glow {
+          animation: pksCaptureGlow 1.5s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }

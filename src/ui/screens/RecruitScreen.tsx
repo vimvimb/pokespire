@@ -111,7 +111,7 @@ export function RecruitScreen({ run, node, battleResult, onStartFight, onRecruit
             <p style={{ color: THEME.text.secondary, margin: 0, textAlign: 'center', maxWidth: 450 }}>
               {isLegendaryBeast
                 ? `A legendary ${wildPokemon.name} awaits. Your entire party will face it — only a full team can challenge a beast of this power.`
-                : `A wild ${wildPokemon.name} appears! Choose one of your Pokemon to fight it 1-on-1. Win to recruit it to your bench.`
+                : `A wild ${wildPokemon.name} appears! Choose a Pokemon to weaken it in a 1-on-1 fight. Get it below 40% HP to capture it!`
               }
             </p>
 

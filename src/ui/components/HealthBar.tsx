@@ -5,9 +5,11 @@ interface Props {
   max: number;
   /** Skew angle for parallelogram shape (default 0, use ±11 to match status badges) */
   skewAngle?: number;
+  /** Optional capture threshold (0-1). Shows a marker on the bar at this HP percentage. */
+  captureThreshold?: number;
 }
 
-export function HealthBar({ current, max, skewAngle = 0 }: Props) {
+export function HealthBar({ current, max, skewAngle = 0, captureThreshold }: Props) {
   const pct = Math.max(0, (current / max) * 100);
   const counterSkew = -skewAngle;
 
@@ -19,10 +21,12 @@ export function HealthBar({ current, max, skewAngle = 0 }: Props) {
       : 'linear-gradient(to right, #8a2828, #a83030, #8a2828)';
 
   const accentColor = pct > 50 ? '#237a55' : pct > 25 ? '#c49520' : '#a83030';
+  const thresholdActive = captureThreshold !== undefined && pct > captureThreshold * 100;
 
   return (
     <div style={{
       transform: skewAngle ? `skewX(${skewAngle}deg)` : undefined,
+      position: 'relative',
     }}>
       <div style={{
         width: '100%',
@@ -74,6 +78,42 @@ export function HealthBar({ current, max, skewAngle = 0 }: Props) {
           {current}/{max}
         </span>
       </div>
+
+      {/* Capture threshold marker — rendered outside overflow:hidden container */}
+      {captureThreshold !== undefined && (
+        <>
+          {/* Vertical line at threshold */}
+          <div style={{
+            position: 'absolute',
+            left: `${captureThreshold * 100}%`,
+            top: 0,
+            bottom: 0,
+            width: 2,
+            background: thresholdActive
+              ? 'rgba(249, 115, 22, 0.8)'
+              : 'rgba(249, 115, 22, 0.35)',
+            zIndex: 3,
+            pointerEvents: 'none',
+            transform: 'translateX(-1px)',
+            transition: 'background 0.3s ease',
+          }} />
+          {/* Small downward-pointing triangle notch above the bar */}
+          <div style={{
+            position: 'absolute',
+            left: `${captureThreshold * 100}%`,
+            top: -6,
+            transform: 'translateX(-4px)',
+            width: 0,
+            height: 0,
+            borderLeft: '4px solid transparent',
+            borderRight: '4px solid transparent',
+            borderTop: `5px solid ${thresholdActive ? 'rgba(249,115,22,0.8)' : 'rgba(249,115,22,0.35)'}`,
+            zIndex: 3,
+            pointerEvents: 'none',
+            transition: 'border-top-color 0.3s ease',
+          }} />
+        </>
+      )}
     </div>
   );
 }

@@ -260,8 +260,8 @@ function getDifficultyForStage(act: number, stage: number): DifficultyLevel {
 /** Stage-based HP scaling per act */
 function getStageHpMultiplier(act: number, stage: number): number {
   if (act === 1) {
-    if (stage >= 4) return 1.4;
-    if (stage >= 2) return 1.2;
+    if (stage >= 4) return 1.2;
+    if (stage >= 2) return 1.1;
     return 1.0;
   }
   if (act === 2) {
@@ -277,7 +277,7 @@ function getStageHpMultiplier(act: number, stage: number): number {
 
 /** Formation-based HP scaling — fewer enemies = tankier each */
 function getFormationHpMultiplier(enemyCount: number): number {
-  if (enemyCount <= 1) return 2.0;
+  if (enemyCount <= 1) return 1.75;
   if (enemyCount <= 2) return 1.4;
   if (enemyCount <= 3) return 1.15;
   return 1.0;

@@ -89,6 +89,7 @@ import { SHOP_ITEMS, CARD_FORGET_COST } from "./data/shop";
 import {
   createRunState,
   createAct1BossTestState,
+  createRecruitTestState,
   createAct2TestState,
   createAct3TestState,
   createAct2BossTestState,
@@ -933,7 +934,7 @@ export default function App() {
             `player-${partyIndex}`,
             {
               maxHp: fighter.maxHp,
-              startPercent: fighter.currentHp / fighter.maxHp,
+              startPercent: 1.0, // Full heal for recruit 1v1
             },
           ],
         ]),
@@ -1051,6 +1052,13 @@ export default function App() {
   }, []);
 
   // Boss test shortcuts (map-based — drop before boss node)
+  const handleTestRecruit = useCallback(() => {
+    clearSave();
+    const run = createRecruitTestState();
+    setRunState(run);
+    setScreen("map");
+  }, []);
+
   const handleTestAct1Boss = useCallback(() => {
     clearSave();
     const run = createAct1BossTestState();
@@ -1840,6 +1848,9 @@ export default function App() {
           <button onClick={handleTestAct3} style={devBtnStyle}>
             Test Act 3
           </button>
+          <button onClick={handleTestRecruit} style={devBtnStyle}>
+            Test Recruit
+          </button>
           <button onClick={handleTestAct1Boss} style={devBtnStyle}>
             Test Act 1 Boss
           </button>
@@ -2459,6 +2470,7 @@ export default function App() {
           isSandboxBattle ? handleBackToSandboxConfig : undefined
         }
         tutorial={undefined}
+        isRecruitBattle={isRecruitBattle}
       />
     );
   }

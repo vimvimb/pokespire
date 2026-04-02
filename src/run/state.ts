@@ -303,6 +303,20 @@ function advanceToBossNode(run: RunState, restNodeId: string, throughStage: numb
   return { ...run, nodes, currentNodeId: restNodeId, visitedNodeIds: visitedIds };
 }
 
+/** Test shortcut: drop right before first recruit node in Act 1. */
+export function createRecruitTestState(): RunState {
+  const run = createTestPartyRun(100);
+  // Mark spawn + the rattata battle (1b) as completed so the player
+  // is at 1d (connects to recruit node 1e). Mark 1d completed too
+  // so the recruit node is directly accessible.
+  const nodes = run.nodes.map(n => ({
+    ...n,
+    completed: ['1a', '1b', '1d'].includes(n.id) ? true : n.completed,
+  }));
+  const visitedIds = nodes.filter(n => n.completed).map(n => n.id);
+  return { ...run, nodes, currentNodeId: '1d', visitedNodeIds: visitedIds };
+}
+
 /** Test shortcut: drop right before Act 1 boss (Ariana). */
 export function createAct1BossTestState(): RunState {
   const run = createTestPartyRun(300);
