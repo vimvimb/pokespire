@@ -608,24 +608,19 @@ export function BattleScreen({
   // (shared by capture flow, victory flow, and defeat flow)
   const battleEndCalledRef = useRef(false);
 
-  // Is capture available right now? Show whenever enemy is below threshold
-  // and battle is ongoing — not gated to player_turn so it appears immediately
-  // after the card that drops the enemy below 40% (even if turn auto-ends).
-  const captureAvailable = useMemo(() => {
-    if (!isRecruitBattle) return false;
-    if (capturePhase !== 'idle') return false;
-    if (state.phase !== 'ongoing') return false;
-    const enemy = enemies.find(c => c.alive);
-    if (!enemy) return false;
-    return enemy.hp / enemy.maxHp < 0.4;
-  }, [isRecruitBattle, capturePhase, state.phase, enemies]);
-
-  // Find the first alive enemy's sprite element position (for button placement)
-  const captureTargetId = useMemo(() => {
-    if (!isRecruitBattle) return null;
-    const enemy = enemies.find(c => c.alive);
-    return enemy?.id ?? null;
-  }, [isRecruitBattle, enemies]);
+  // Capture availability — computed every render (not memoized) because the
+  // engine mutates combatant HP in place, so memo deps like `enemies` don't
+  // change reference and would produce stale results.
+  const captureEnemy = isRecruitBattle
+    ? state.combatants.find(c => c.side === 'enemy' && c.alive)
+    : null;
+  const captureAvailable =
+    isRecruitBattle &&
+    capturePhase === 'idle' &&
+    state.phase === 'ongoing' &&
+    !!captureEnemy &&
+    captureEnemy.hp / captureEnemy.maxHp < 0.4;
+  const captureTargetId = captureEnemy?.id ?? null;
 
   const handleCapture = useCallback(() => {
     if (!captureAvailable) return;
@@ -1858,9 +1853,11 @@ export function BattleScreen({
       !battleEndCalledRef.current
     ) {
       battleEndCalledRef.current = true;
-      onBattleEnd("victory", state.combatants, state.goldEarned);
+      // In recruit battles, KO = defeat (pokemon fled). Only capture counts.
+      const result = isRecruitBattle ? "defeat" : "victory";
+      onBattleEnd(result, state.combatants, state.goldEarned);
     }
-  }, [victoryStage, onBattleEnd, state.combatants, state.goldEarned]);
+  }, [victoryStage, onBattleEnd, state.combatants, state.goldEarned, isRecruitBattle]);
 
   // Handle defeat immediately (no celebration needed)
   useEffect(() => {
